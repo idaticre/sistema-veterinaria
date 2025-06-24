@@ -1,0 +1,220 @@
+#cabecera {
+  width: 100%;
+  color: white;
+  padding: 5px 5vw;
+  height: auto;
+  box-sizing: border-box;
+}
+
+#contenedor_cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: auto;
+}
+
+#logo {
+  display: block;
+  width: 13%;
+  position: relative;
+}
+
+#logo img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#enlaces {
+  display: flex;
+  align-items: center;
+}
+
+.menu-navegacion{
+    margin-left: 45px;
+}
+
+#paginas {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+}
+
+#paginas li {
+  position: relative;;
+}
+
+#paginas li a {
+  color: rgb(1, 1, 1);
+  text-decoration: none;
+  font-weight: bold;
+  border: black 3px solid;
+  background-color: #feb200;
+  border-radius: 15px;
+  padding: 10px;
+  font-size: 1.5vw;
+}
+
+#paginas li a:hover {
+  background-color: #fbd273;
+}
+
+#indice {
+  position: absolute;
+  top: 120%; 
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 10px;
+  padding: 10px 15px;
+  z-index: 10;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  list-style: none;
+}
+
+#indice li {
+  padding: 5px 10px;
+}
+
+#indice li a {
+  text-decoration: none;
+  color: #333;
+  border: none;
+  background-color: transparent;
+  font-size: 1.2vw;
+  white-space: nowrap;
+  text-decoration: underline;
+}
+
+#indice li a:hover {
+  color: #646cff;
+  background-color: transparent;
+}
+
+#sign_in, #login {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 1.1vw;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-weight: bold;
+}
+
+#sign_in:hover, #login:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+#sign_in a, #login a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+#btn_menu {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  margin-left: 10px;
+  color: black;
+}
+
+.panel-lateral {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 280px;
+  height: 100vh;
+  background-color: white;
+  padding: 60px 20px 20px 20px;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-lateral.activo {
+  right: 0;
+}
+
+.panel-lateral .cerrar {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: black;
+}
+
+#paginas-lateral {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#paginas-lateral li a {
+  text-decoration: none;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: transparent; 
+  border: none;                  
+  padding: 5px 0;                
+  border-radius: 0;              
+}
+
+#paginas-lateral li a:hover {
+  background-color: #fbd273;
+}
+
+#paginas-lateral ul {
+  padding-left: 15px;
+  margin-top: 10px;
+}
+
+#paginas-lateral ul li a {
+  background-color: transparent;
+  font-size: 0.95rem;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+@media screen and (max-width: 1200px) {
+  #sign_in, #login {
+    padding: 10px 20px;
+    font-size: 1rem; 
+  }
+
+  #sign_in a, #login a {
+    font-size: 1rem;
+  }
+  
+  .menu-navegacion {
+    display: none;
+  }
+
+  #btn_menu {
+    display: block;
+  }
+  
+  #logo {
+  display: block;
+  width: 9rem;
+  position: relative;
+}
+}
