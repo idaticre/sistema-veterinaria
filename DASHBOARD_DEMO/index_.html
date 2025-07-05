@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veterinaria Woof - Módulos</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+
+<body>
+
+  <header>
+    <h1>Veterinaria Woof</h1>
+    <p>Prototipo modular interactivo</p>
+  </header>
+
+  <main class="tablero">
+    <div class="modulo" onclick="toggle(this)">
+      <h2>Clientes</h2>
+      <div class="contenido">
+        <ul>
+          <li>Gestión de Clientes CRUD</li>
+          <li>Postventa a Clientes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modulo" onclick="toggle(this)">
+      <h2>Mascotas</h2>
+      <div class="contenido">
+        <ul>
+          <li>Gestión CRUD</li>
+          <li>Solicitudes / Reservas</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modulo" onclick="toggle(this)">
+      <h2>Historia Clínica</h2>
+      <div class="contenido">
+        <ul>
+          <li>Visitas (Ingresos)</li>
+          <li>Baño Peluquería y SPA</li>
+          <li>Guardería - Groomers</li>
+          <li>Hospedaje</li>
+          <li>Vacunación</li>
+          <li>Desparasitación</li>
+          <li>Exámenes Médicos</li>
+          <li>Hospitalización</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modulo" onclick="toggle(this)">
+      <h2>Agenda y Organización</h2>
+      <div class="contenido">
+        <ul>
+          <li>Agenda General</li>
+          <li>Tiempo estimado</li>
+          <li>Recordatorios</li>
+          <li>Sala de Espera</li>
+        </ul>
+      </div>
+    </div>
+
+
+
+    <div class="modulo" onclick="toggle(this)">
+      <h2>Ventas y Facturación</h2>
+      <div class="contenido">
+        <ul>
+          <li>Gestión de Ventas</li>
+          <li>Facturación electrónica</li>
+          <li>Notas de Crédito</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modulo" onclick="toggle(this)">
+      <h2>Distribución / Stock</h2>
+      <div class="contenido">
+        <ul>
+          <li>Inventarios</li>
+          <li>Órdenes de Compra</li>
+          <li>Proveedores</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modulo" onclick="toggle(this)">
+      <h2>Reportes e Informes</h2>
+      <div class="contenido">
+        <ul>
+          <li>Ventas</li>
+          <li>Financieros</li>
+          <li>Inventarios</li>
+          <li>Clientes</li>
+          <li>Proveedores</li>
+          <li>Caja General</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modulo" onclick="toggle(this)">
+      <h2>Administración</h2>
+      <div class="contenido">
+        <ul>
+          <li>Gestión de colaboradores</li>
+          <li>Nómina</li>
+          <li>Horarios</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modulo" onclick="toggle(this)">
+      <h2>Seguridad y Mantenimiento</h2>
+      <div class="contenido">
+        <ul>
+          <li>Usuarios de sistema</li>
+          <li>Roles y permisos</li>
+          <li>Back up / Copia de seguridad</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Veterinaria Woof
+  </footer>
+
+  <script>
+    function toggle(element) {
+      element.classList.toggle("activo");
+    }
+  </script>
+
+</body>
+
+</html>
