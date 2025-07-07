@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${mascota.id == null} ? '➕ Nueva Mascota' : '✏️ Editar Mascota'"></title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .form-container {
+            max-width: 600px;
+            background-color: #ffffff;
+            margin: auto;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 26px;
+            color: #2c3e50;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 15px;
+        }
+
+        .botones {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .botones button,
+        .botones a {
+            text-decoration: none;
+            padding: 12px 22px;
+            font-size: 15px;
+            border: none;
+            border-radius: 12px;
+            margin: 0 8px;
+            cursor: pointer;
+        }
+
+        .btn-guardar {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-cancelar {
+            background-color: #bdc3c7;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2 th:text="${mascota.id == null} ? '➕ Nueva Mascota' : '✏️ Editar Mascota'"></h2>
+
+    <form th:action="@{${mascota.id == null} ? '/mascotas/guardar' : '/mascotas/guardar'}"
+          th:object="${mascota}" method="post">
+
+        <input type="hidden" th:if="${mascota.id != null}" th:field="*{id}" />
+
+        <label>🐶 Nombre</label>
+        <input type="text" th:field="*{nombre}" placeholder="Nombre de la mascota" required />
+
+        <label>🐾 Raza</label>
+        <input type="text" th:field="*{raza}" placeholder="Raza de la mascota" required />
+
+        <label>📋 Especie</label>
+        <select th:field="*{especie}" required>
+            <option value="">-- Selecciona --</option>
+            <option value="Perro">Perro 🐶</option>
+            <option value="Gato">Gato 🐱</option>
+            <option value="Otro">Otro 🐾</option>
+        </select>
+
+        <label>🎂 Edad</label>
+        <input type="number" th:field="*{edad}" min="0" required />
+
+        <label>👤 Cliente</label>
+        <select th:field="*{cliente.id}" required>
+            <option value="">-- Selecciona un cliente --</option>
+            <option th:each="cli : ${clientes}"
+                    th:value="${cli.id}"
+                    th:text="${cli.nombre + ' ' + cli.apellido}"
+                    th:selected="${mascota.cliente != null and mascota.cliente.id == cli.id}">
+            </option>
+        </select>
+
+        <div class="botones">
+            <button type="submit" class="btn-guardar">💾 Guardar</button>
+            <a th:href="@{/}" class="btn-cancelar">↩️ Cancelar</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
+

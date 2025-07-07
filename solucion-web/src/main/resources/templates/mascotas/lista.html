@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>🐾 Lista de Mascotas</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .titulo {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tabla {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .tabla th, .tabla td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .tabla th {
+            background-color: #ecf0f1;
+            color: #34495e;
+        }
+
+        .tabla tr:hover {
+            background-color: #f2f6f9;
+        }
+
+        .acciones button,
+        .acciones a {
+            margin-right: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .acciones a {
+            text-decoration: none;
+        }
+
+        .btn-nuevo {
+            padding: 10px 18px;
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .search-container {
+            margin-top: 10px;
+        }
+
+        .search-container input {
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        @media(max-width: 768px) {
+            .tabla, .tabla th, .tabla td {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="titulo">
+        <span>🐾 Lista de Mascotas</span>
+        <a href="/mascotas/nueva" class="btn-nuevo">➕ Nueva Mascota</a>
+    </div>
+
+    <!-- Filtro por nombre (opcional si deseas activar JS) -->
+    <!--
+    <div class="search-container">
+        <input type="text" id="busqueda" placeholder="🔍 Buscar por nombre..." onkeyup="filtrarTabla()">
+    </div>
+    -->
+
+    <table class="tabla" id="tablaMascotas">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre 🐶</th>
+                <th>Raza 🧬</th>
+                <th>Especie 🐾</th>
+                <th>Cliente 👤</th>
+                <th>Acciones ⚙️</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="m : ${mascotas}">
+                <td th:text="${m.id}"></td>
+                <td th:text="${m.nombre}"></td>
+                <td th:text="${m.raza}"></td>
+                <td th:text="${m.especie}"></td>
+                <td th:text="${m.cliente.nombre + ' ' + m.cliente.apellido}"></td>
+                <td class="acciones">
+                    <a th:href="@{'/mascotas/editar/' + ${m.id}}" title="Editar">✏️</a>
+                    <a th:href="@{'/mascotas/eliminar/' + ${m.id}}" title="Eliminar"
+                       onclick="return confirm('¿Estás seguro de eliminar esta mascota?')">🗑</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Script para filtro (si decides activarlo) -->
+    <!--
+    <script>
+        function filtrarTabla() {
+            let filtro = document.getElementById("busqueda").value.toLowerCase();
+            let filas = document.querySelectorAll("#tablaMascotas tbody tr");
+
+            filas.forEach(fila => {
+                let nombre = fila.cells[1].textContent.toLowerCase();
+                fila.style.display = nombre.includes(filtro) ? "" : "none";
+            });
+        }
+    </script>
+    -->
+</body>
+</html>

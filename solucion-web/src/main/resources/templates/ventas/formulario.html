@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>🧾 Nueva Venta</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        form {
+            margin-top: 30px;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .acciones {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .acciones button,
+        .acciones a {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .btn-guardar {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-cancelar {
+            background-color: #bdc3c7;
+            color: black;
+        }
+
+        .btn-agregar {
+            background-color: #2980b9;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+
+        .btn-eliminar {
+            color: white;
+            background-color: #e74c3c;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🧾 Nueva Venta</h2>
+
+    <form th:action="@{/ventas/guardar}" th:object="${ventaDTO}" method="post">
+        <label>📅 Fecha</label>
+        <input type="date" th:field="*{fechaFactura}" required/>
+
+        <label>👤 Cliente</label>
+        <select th:field="*{idCliente}" required>
+            <option value="">-- Selecciona --</option>
+            <option th:each="cliente : ${clientes}"
+                    th:value="${cliente.id}"
+                    th:text="${cliente.nombre}">Cliente</option>
+        </select>
+
+        <label>💳 Medio de Pago</label>
+        <select th:field="*{idMedioPago}" required>
+            <option value="">-- Selecciona --</option>
+            <option th:each="medio : ${mediosPago}"
+                    th:value="${medio.id}"
+                    th:text="${medio.nombre}">Medio</option>
+        </select>
+
+        <h3>🛍️ Detalle de Venta</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>🧾 Producto / Servicio</th>
+                <th>🔢 Cantidad</th>
+                <th>💲 Precio Unitario</th>
+                <th>💵 Subtotal</th>
+                <th>🗑️</th>
+            </tr>
+            </thead>
+            <tbody id="detalleTabla">
+            <tr th:each="item, iterStat : *{detalles}">
+                <td>
+                    <select th:field="*{detalles[__${iterStat.index}__].idProducto}">
+                        <option value="">-- Producto/Servicio --</option>
+                        <option th:each="prod : ${productos}"
+                                th:value="${prod.id}"
+                                th:text="${prod.nombre}"></option>
+                    </select>
+                </td>
+                <td><input type="number" th:field="*{detalles[__${iterStat.index}__].cantidad}" required/></td>
+                <td><input type="number" step="0.01" th:field="*{detalles[__${iterStat.index}__].precioUnitario}" required/></td>
+                <td th:text="${item.cantidad * item.precioUnitario}">0.00</td>
+                <td><a href="#" class="btn-eliminar" onclick="eliminarFila(this)">Eliminar</a></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="acciones">
+            <button type="button" class="btn-agregar" onclick="agregarFila()">➕ Agregar Ítem</button>
+        </div>
+
+        <label>📝 Observaciones</label>
+        <textarea th:field="*{observaciones}" rows="2"></textarea>
+
+        <div class="acciones">
+            <button type="submit" class="btn-guardar">💾 Guardar Venta</button>
+            <a th:href="@{ / }" class="btn-cancelar">↩️ Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function agregarFila() {
+        const tabla = document.querySelector("#detalleTabla");
+        const fila = tabla.querySelector("tr").cloneNode(true);
+        fila.querySelectorAll("input, select").forEach(el => {
+            el.name = el.name.replace(/\[(\d+)\]/, `[${tabla.rows.length}]`);
+            el.value = "";
+        });
+        tabla.appendChild(fila);
+    }
+
+    function eliminarFila(btn) {
+        const row = btn.closest("tr");
+        const tabla = document.querySelector("#detalleTabla");
+        if (tabla.rows.length > 1) {
+            row.remove();
+        }
+    }
+</script>
+</body>
+</html>
