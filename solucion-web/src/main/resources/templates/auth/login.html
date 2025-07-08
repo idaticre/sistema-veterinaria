@@ -20,7 +20,6 @@
             padding: 40px;
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            width: 100%;
             max-width: 400px;
             box-sizing: border-box;
         }
@@ -40,7 +39,7 @@
         }
 
         input {
-            width: 100%;
+            width: 90%;
             padding: 12px;
             margin-top: 6px;
             border: 1px solid #ccc;
@@ -72,28 +71,28 @@
     </style>
 </head>
 <body>
-<div class="login-container">
-    <h1>🔐 Iniciar Sesión</h1>
+    <div class="login-container">
+        <h1>🔐 Iniciar Sesión</h1>
 
-    <form method="post" action="/login">
-        <label>👤 Usuario
-            <input type="text" name="username" required />
-        </label>
+        <form method="post" action="/login">
+            <label>👤 Usuario
+                <input type="text" name="username" required />
+            </label>
 
-        <label>🔑 Contraseña
-            <input type="password" name="password" required />
-        </label>
+            <label>🔑 Contraseña
+                <input type="password" name="password" required />
+            </label>
 
-        <button type="submit">➡️ Entrar</button>
-    </form>
+            <button type="submit">➡️ Entrar</button>
+        </form>
 
-    <div th:if="${param.error}" class="mensaje-error">
-        ❌ Credenciales incorrectas. Intenta nuevamente.
+        <div th:if="${param.error}" class="mensaje-error">
+            ❌ Credenciales incorrectas. Intenta nuevamente.
+        </div>
+
+        <div th:if="${param.logout}" class="mensaje-error" style="color:green;">
+            ✅ Has cerrado sesión exitosamente.
+        </div>
     </div>
-
-    <div th:if="${param.logout}" class="mensaje-error" style="color:green;">
-        ✅ Has cerrado sesión exitosamente.
-    </div>
-</div>
 </body>
 </html>
