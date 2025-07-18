@@ -1,39 +1,27 @@
 package com.veterinariawoof.models;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Entity
-@Table(name = "agenda")
 public class Agenda {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private LocalDateTime fechaHora;
+    private String motivo;
+    private String estado;
+    private String sala;
+
     @ManyToOne
-    @JoinColumn(name = "id_cliente")
+    @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
     @ManyToOne
-    @JoinColumn(name = "id_mascota")
+    @JoinColumn(name = "mascota_id")
     private Mascota mascota;
-
-    @ManyToOne
-    @JoinColumn(name = "id_servicio")
-    private TipoServicio servicio;
-
-    private LocalDate fecha;
-    private LocalTime hora;
-    private Integer duracionEstimada;
-
-    @Enumerated(EnumType.STRING)
-    private EstadoCita estado;
-
-    private String observaciones;
-
-    private LocalDateTime fechaRegistro;
 
     // Getters y Setters
     public Long getId() {
@@ -42,6 +30,38 @@ public class Agenda {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public LocalDateTime getFechaHora() {
+        return fechaHora;
+    }
+
+    public void setFechaHora(LocalDateTime fechaHora) {
+        this.fechaHora = fechaHora;
+    }
+
+    public String getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getSala() {
+        return sala;
+    }
+
+    public void setSala(String sala) {
+        this.sala = sala;
     }
 
     public Cliente getCliente() {
@@ -58,61 +78,5 @@ public class Agenda {
 
     public void setMascota(Mascota mascota) {
         this.mascota = mascota;
-    }
-
-    public TipoServicio getServicio() {
-        return servicio;
-    }
-
-    public void setServicio(TipoServicio servicio) {
-        this.servicio = servicio;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public LocalTime getHora() {
-        return hora;
-    }
-
-    public void setHora(LocalTime hora) {
-        this.hora = hora;
-    }
-
-    public Integer getDuracionEstimada() {
-        return duracionEstimada;
-    }
-
-    public void setDuracionEstimada(Integer duracionEstimada) {
-        this.duracionEstimada = duracionEstimada;
-    }
-
-    public EstadoCita getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoCita estado) {
-        this.estado = estado;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
-
-    public LocalDateTime getFechaRegistro() {
-        return fechaRegistro;
-    }
-
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
     }
 }

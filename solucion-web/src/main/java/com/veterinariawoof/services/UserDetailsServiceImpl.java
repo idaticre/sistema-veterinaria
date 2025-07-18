@@ -3,32 +3,33 @@ package com.veterinariawoof.services;
 import com.veterinariawoof.models.Usuario;
 import com.veterinariawoof.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
+
+import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UsuarioRepository usuarioRepository;
-
     @Autowired
-    public UserDetailsServiceImpl(@Lazy UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
+    private UsuarioRepository usuarioRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        return User.builder()
-                .username(usuario.getUsername())
-                .password(usuario.getPasswordHash())
-                .roles("ADMIN") // Puedes mejorarlo si tienes roles en la base de datos
-                .build();
+        return new User(
+            usuario.getUsername(),
+            usuario.getPassword(),
+            usuario.isActivo(),
+            true,
+            true,
+            true,
+            usuario.getRoles().stream()
+                .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getNombre()))
+                .collect(Collectors.toList())
+        );
     }
 }

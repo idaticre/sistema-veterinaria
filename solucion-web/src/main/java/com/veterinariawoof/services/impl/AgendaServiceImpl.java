@@ -12,25 +12,25 @@ import java.util.List;
 public class AgendaServiceImpl implements AgendaService {
 
     @Autowired
-    private AgendaRepository repo;
+    private AgendaRepository agendaRepository;
 
     @Override
-    public List<Agenda> listarTodas() {
-        return repo.findAll();
-    }
-
-    @Override
-    public void guardar(Agenda agenda) {
-        repo.save(agenda);
+    public List<Agenda> obtenerTodas() {
+        return agendaRepository.findAll();
     }
 
     @Override
     public Agenda obtenerPorId(Long id) {
-        return repo.findById(id).orElse(null);
+        return agendaRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Agenda guardar(Agenda agenda) {
+        return agendaRepository.save(agenda);
     }
 
     @Override
     public void eliminar(Long id) {
-        repo.deleteById(id);
+        agendaRepository.deleteById(id);
     }
 }

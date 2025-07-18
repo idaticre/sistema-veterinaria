@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo Mensaje</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 700px;
+            margin: auto;
+        }
+        .form-container h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 0.7rem;
+            margin-top: 0.3rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        button {
+            padding: 0.7rem 2rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 0.5rem;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .cancel-button {
+            background-color: #f44336;
+        }
+        .cancel-button:hover {
+            background-color: #d32f2f;
+        }
+        .button-group {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>📨 Nuevo Mensaje</h2>
+    
+    <form th:action="@{/mensajeria/guardar}" th:object="${mensaje}" method="post">
+        
+        <label for="asunto">📝 Asunto:</label>
+        <input type="text" id="asunto" th:field="*{asunto}" required />
+
+        <label for="contenido">💬 Contenido:</label>
+        <textarea id="contenido" th:field="*{contenido}" rows="4" required></textarea>
+
+        <label for="estado">📌 Estado:</label>
+        <select id="estado" th:field="*{estado}" required>
+            <option th:value="ENVIADO">Enviado</option>
+            <option th:value="PENDIENTE">Pendiente</option>
+            <option th:value="LEIDO">Leído</option>
+        </select>
+
+        <label for="observaciones">🗒️ Observaciones:</label>
+        <input type="text" id="observaciones" th:field="*{observaciones}" />
+
+        <label for="fecha">📅 Fecha:</label>
+        <input type="date" id="fecha" th:field="*{fecha}" required />
+
+        <label for="cliente">👤 Cliente:</label>
+        <select id="cliente" th:field="*{cliente.id}" required>
+            <option disabled selected value="">-- Selecciona un cliente --</option>
+            <option th:each="cliente : ${clientes}" 
+                    th:value="${cliente.id}" 
+                    th:text="${cliente.nombre}">
+            </option>
+        </select>
+
+        <label for="canalComunicacion">📢 Canal de Comunicación:</label>
+        <select id="canalComunicacion" th:field="*{canalComunicacion.id}" required>
+            <option disabled selected value="">-- Selecciona un canal --</option>
+            <option th:each="canal : ${canales}" 
+                    th:value="${canal.id}" 
+                    th:text="${canal.nombre}">
+            </option>
+        </select>
+
+        <div class="button-group">
+            <button type="submit">💾 Guardar Mensaje</button>
+            <a th:href="@{/mensajeria}">
+                <button type="button" class="cancel-button">❌ Cancelar</button>
+            </a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

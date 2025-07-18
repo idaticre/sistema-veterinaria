@@ -1,18 +1,13 @@
 package com.veterinariawoof.dto;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 public class CitaDTO {
     private Long idCliente;
     private Long idMascota;
-    private Long idServicio;
-    private LocalDate fecha;
-    private LocalTime hora;
-    private Integer duracionEstimada;
-    private String observaciones;
+    private String fecha;
+    private String hora;
+    private String motivo;
 
-    // Getters y setters
     public Long getIdCliente() {
         return idCliente;
     }
@@ -29,43 +24,27 @@ public class CitaDTO {
         this.idMascota = idMascota;
     }
 
-    public Long getIdServicio() {
-        return idServicio;
-    }
-
-    public void setIdServicio(Long idServicio) {
-        this.idServicio = idServicio;
-    }
-
-    public LocalDate getFecha() {
+    public String getFecha() {
         return fecha;
     }
 
-    public void setFecha(LocalDate fecha) {
+    public void setFecha(String fecha) {
         this.fecha = fecha;
     }
 
-    public LocalTime getHora() {
+    public String getHora() {
         return hora;
     }
 
-    public void setHora(LocalTime hora) {
+    public void setHora(String hora) {
         this.hora = hora;
     }
 
-    public Integer getDuracionEstimada() {
-        return duracionEstimada;
+    public String getMotivo() {
+        return motivo;
     }
 
-    public void setDuracionEstimada(Integer duracionEstimada) {
-        this.duracionEstimada = duracionEstimada;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
     }
 }
