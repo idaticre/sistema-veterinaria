@@ -114,6 +114,7 @@ CREATE TABLE IF NOT EXISTS medicamentos (
     tipo ENUM('Antibiótico', 'Antiinflamatorio', 'Desparasitante', 'Antifúngico', 'Analgésico', 'Otro') DEFAULT 'Otro',
     descripcion TEXT
 );
+
 -- PRODUCTOS E INVENTARIO
 CREATE TABLE IF NOT EXISTS categorias_productos (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -401,17 +402,19 @@ CREATE TABLE IF NOT EXISTS historia_clinica_archivos (
 ALTER TABLE historia_clinica_archivos
     ADD CONSTRAINT fk_archivo_historia FOREIGN KEY (id_historia_clinica) REFERENCES historia_clinica(id);
 
-
 -- FACTURA
 CREATE TABLE IF NOT EXISTS factura_cabecera (
     id INT PRIMARY KEY AUTO_INCREMENT,
     fecha_factura DATE,
     id_cliente INT NOT NULL,
     id_medio_pago INT NOT NULL,
+    total_pagado DECIMAL(10,2) DEFAULT 0,
     subtotal DECIMAL(10,2),
     impuestos DECIMAL(10,2),
     descuentos DECIMAL(10,2),
-    total DECIMAL(10,2),
+    saldo_pendiente DECIMAL(10,2) GENERATED ALWAYS AS (total_factura - total_pagado) STORED,
+    estado_pago ENUM('PENDIENTE', 'PARCIAL', 'PAGADO') DEFAULT 'PENDIENTE',
+    total_factura DECIMAL(10,2),
     observaciones TEXT,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -419,6 +422,7 @@ CREATE TABLE IF NOT EXISTS factura_cabecera (
 ALTER TABLE factura_cabecera
     ADD CONSTRAINT fk_factura_cliente FOREIGN KEY (id_cliente) REFERENCES clientes(id),
     ADD CONSTRAINT fk_factura_pago FOREIGN KEY (id_medio_pago) REFERENCES medios_pago(id);
+
 
 -- DETALLE FACTURA
 CREATE TABLE IF NOT EXISTS detalle_factura (
@@ -437,6 +441,71 @@ ALTER TABLE detalle_factura
     ADD CONSTRAINT fk_detalle_producto FOREIGN KEY (id_producto) REFERENCES productos(id),
     ADD CONSTRAINT fk_detalle_ingreso FOREIGN KEY (id_ingreso) REFERENCES ingresos_servicios(id);
 
+-- CAJA GENERAL
+CREATE TABLE IF NOT EXISTS caja_general (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    fecha DATE NOT NULL,
+    tipo_movimiento ENUM('INGRESO', 'EGRESO') NOT NULL,
+    descripcion VARCHAR(128),
+    monto DECIMAL(10,2) NOT NULL,
+    saldo_inicial DECIMAL(10,2),
+    saldo_final DECIMAL(10,2),
+    id_colaborador INT,
+    observaciones TEXT
+);
+
+ALTER TABLE caja_general
+    ADD CONSTRAINT fk_caja_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id);
+
+-- Índice para optimizar consultas por fecha
+CREATE INDEX idx_fecha_caja ON caja_general(fecha);
+
+-- ABONO POR PARTE DE CLIENTES
+CREATE TABLE pagos_clientes (
+    id_pago INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    id_caja_general INT NOT NULL,
+    monto DECIMAL(10,2) NOT NULL,
+    medio_pago VARCHAR(50), -- o id_medio_pago si es una FK
+    fecha_pago DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    observacion TEXT,
+    fue_asociado_factura BOOLEAN DEFAULT FALSE,
+    
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id),
+    FOREIGN KEY (id_caja_general) REFERENCES caja_general(id)
+);
+-- ARQUEO DIARIO
+CREATE TABLE IF NOT EXISTS arqueo_caja (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    fecha DATE NOT NULL,
+    id_colaborador INT NOT NULL,
+    saldo_apertura DECIMAL(10,2),         -- Saldo con el que empezó el día
+    total_ingresos DECIMAL(10,2),         -- Suma de ingresos registrados en caja_general
+    total_egresos DECIMAL(10,2),          -- Suma de egresos registrados en caja_general
+    saldo_calculado DECIMAL(10,2),        -- apertura + ingresos - egresos
+    saldo_declarado DECIMAL(10,2),        -- Lo contado físicamente por el colaborador
+    diferencia DECIMAL(10,2),             -- declarada - calculada
+    tipo_movimiento ENUM('INGRESO', 'EGRESO') DEFAULT 'INGRESO',
+    referencia_pago_cliente INT,
+    observaciones TEXT
+);
+
+ALTER TABLE arqueo_caja
+    ADD CONSTRAINT fk_arqueo_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id),
+    ADD CONSTRAINT fk_referencia_pago_cliente FOREIGN KEY (referencia_pago_cliente) REFERENCES pagos_clientes(id_pago);
+
+
+-- DETALLE DE PAGO DE FACTURA (LOS ABONOS)
+CREATE TABLE detalle_pagos_factura (
+    id_detalle_pago INT AUTO_INCREMENT PRIMARY KEY,
+    id_factura INT NOT NULL,
+    id_pago INT NOT NULL,
+    monto_asignado DECIMAL(10,2) NOT NULL,
+
+    FOREIGN KEY (id_factura) REFERENCES factura_cabecera(id),
+    FOREIGN KEY (id_pago) REFERENCES pagos_clientes(id_pago)
+);
+
 -- NOTA CREDITO
 CREATE TABLE IF NOT EXISTS nota_credito (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -449,6 +518,8 @@ CREATE TABLE IF NOT EXISTS nota_credito (
 
 ALTER TABLE nota_credito
     ADD CONSTRAINT fk_nota_factura FOREIGN KEY (id_factura) REFERENCES factura_cabecera(id);
+
+
 
 -- TABLA: canales_comunicacion
 CREATE TABLE IF NOT EXISTS canales_comunicacion (
@@ -474,41 +545,6 @@ ALTER TABLE mensajes_cliente
     ADD CONSTRAINT fk_mensaje_canal FOREIGN KEY (canal_id) REFERENCES canales_comunicacion(id),
     ADD CONSTRAINT fk_mensaje_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id);
 
--- CAJA GENERAL
-CREATE TABLE IF NOT EXISTS caja_general (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    fecha DATE NOT NULL,
-    tipo_movimiento ENUM('INGRESO', 'EGRESO') NOT NULL,
-    descripcion VARCHAR(128),
-    monto DECIMAL(10,2) NOT NULL,
-    saldo_inicial DECIMAL(10,2),
-    saldo_final DECIMAL(10,2),
-    id_colaborador INT,
-    observaciones TEXT
-);
-
-ALTER TABLE caja_general
-    ADD CONSTRAINT fk_caja_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id);
-
--- Índice para optimizar consultas por fecha
-CREATE INDEX idx_fecha_caja ON caja_general(fecha);
-
--- ARQUEO DIARIO
-CREATE TABLE IF NOT EXISTS arqueo_caja (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    fecha DATE NOT NULL,
-    id_colaborador INT NOT NULL,
-    saldo_apertura DECIMAL(10,2),         -- Saldo con el que empezó el día
-    total_ingresos DECIMAL(10,2),         -- Suma de ingresos registrados en caja_general
-    total_egresos DECIMAL(10,2),          -- Suma de egresos registrados en caja_general
-    saldo_calculado DECIMAL(10,2),        -- apertura + ingresos - egresos
-    saldo_declarado DECIMAL(10,2),        -- Lo contado físicamente por el colaborador
-    diferencia DECIMAL(10,2),             -- declarada - calculada
-    observaciones TEXT
-);
-
-ALTER TABLE arqueo_caja
-    ADD CONSTRAINT fk_arqueo_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id);
 
 
 -- HORARIO DE TRABAJO
