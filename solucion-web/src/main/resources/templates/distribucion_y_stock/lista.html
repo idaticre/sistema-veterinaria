@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>📦 Distribución y stock</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f8f9fa;
+            padding: 30px;
+        }
+
+        .titulo-completo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .titulo-centro {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 26px;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .boton {
+            padding: 10px 18px;
+            background-color: #2980b9;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .boton:hover {
+            background-color: #1f618d;
+        }
+
+        .boton-izquierdo {
+            background-color: #8e44ad;
+        }
+
+        .boton-derecho {
+            background-color: #27ae60;
+        }
+
+        .tabla {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .tabla th, .tabla td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .tabla th {
+            background-color: #ecf0f1;
+        }
+
+        .acciones a {
+            margin-right: 8px;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .acciones a:hover {
+            opacity: 0.8;
+        }
+
+        .dos-tablas {
+            display: flex;
+            min-height: 100px;
+            flex-wrap: wrap;
+        }
+
+        .dos-tablas-parte {
+            width: 45%;
+            background-color: red;
+            border: 1px solid black;
+        }
+
+        .parte-top {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="titulo-completo">
+        <a href="/" class="boton boton-izquierdo">🏠 Volver</a>
+        <h2 class="titulo-centro">📦 Distribución y stock</h2>
+        <a href="/distribucion_y_stock/formulario" class="boton boton-derecho">➕ Registrar stock</a>
+    </div>
+
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Stock</th>
+                <th>Stock minimo</th>
+                <th>Fecha de actualización</th>
+                <th>Lote</th>
+                <th>Fecha de vencimiento</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="inv : ${inventarios}">
+                <td th:text="${inv.producto.nombre}"></td>
+                <td th:text="${inv.stockActual}"></td>
+                <td th:text="${inv.stockMinimo}"></td>
+                <td th:text="${inv.fechaActualizacion}"></td>
+                <td th:text="${inv.lote}"></td>
+                <td th:text="${inv.fechaVencimiento}"></td>
+                <td class="acciones">
+                    <a th:href="@{'/inventario/editar/' + ${inventario.id}}" title="Editar">✏️</a>
+                    <a th:href="@{'/inventario/eliminar/' + ${inventario.id}}" title="Eliminar">🗑️</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    
+    <!-- El panel de productos y los proveedores lado a lado pero ambos debajo del stock -->
+    
+
+    <div class="dos-tablas">
+        <div class="dos-tablas-parte">
+            <div class="parte-top">
+                <button>Boton</button>
+                <h2>Titulo h2</h2>
+            </div>
+            
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td class="acciones">
+                            <a th:href="@{'/inventario/editar/' + ${inventario.id}}" title="Editar">✏️</a>
+                            <a th:href="@{'/inventario/eliminar/' + ${inventario.id}}" title="Eliminar">🗑️</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+        </div>
+        
+        <div class="dos-tablas-parte">
+            <!--
+            <table class="tabla" style="width: 100px;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td class="acciones">
+                            <a th:href="@{'/inventario/editar/' + ${inventario.id}}" title="Editar">✏️</a>
+                            <a th:href="@{'/inventario/eliminar/' + ${inventario.id}}" title="Eliminar">🗑️</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            -->
+        </div>
+        
+    </div>
+</body>
+</html>

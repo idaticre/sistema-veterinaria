@@ -52,11 +52,14 @@ com\veterinariawoof\dto\ServicioDTO.class
 com\veterinariawoof\repositories\HistoriaClinicaRepository.class
 com\veterinariawoof\models\Agenda.class
 com\veterinariawoof\repositories\MascotaRepository.class
+com\veterinariawoof\services\InventarioService.class
 com\veterinariawoof\services\AgendaService.class
 com\veterinariawoof\controllers\CanalComunicacionController.class
 com\veterinariawoof\services\impl\ClienteServiceImpl.class
 com\veterinariawoof\services\IngresoServicioService.class
+com\veterinariawoof\repositories\InventarioRepository.class
 com\veterinariawoof\dto\MensajeDTO.class
 com\veterinariawoof\models\Mensaje.class
 com\veterinariawoof\services\UserDetailsServiceImpl.class
+com\veterinariawoof\services\impl\InventarioServiceImpl.class
 com\veterinariawoof\dto\MascotaDTO.class
