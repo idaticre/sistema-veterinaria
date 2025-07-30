@@ -1,0 +1,124 @@
+#especies_razas{
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+.contenedor_especie {
+  flex: 1;
+  padding: 1rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.contenedor_especie h2 {
+  box-shadow: rgba(0, 0, 0, 0.542) 0 0.1rem 0 0;
+  color: #4a148c;
+  font-weight: 600;
+  font-size: 2rem ;
+  color: black;
+  font-family:'Times New Roman', Times, serif ;
+  padding: 0 0.5rem;
+  margin: 0 1.5rem 1rem ;
+}
+
+#añadir_ER{
+  display: flex;
+  justify-content: center;
+  font-weight: 600;
+  text-decoration: none;
+  color: black;
+  margin-left: 1.5rem;
+  background-color: #626ef5a0;
+  padding: 0.5rem;
+  border-radius: 15px;
+  width: 7rem;
+  border: 2px black;
+  border-style:groove;
+}
+
+#añadir_ER:hover{
+  background-color: #b39ddb;
+}
+
+.lst_ER{
+  display: flex;
+  border-radius: 10px;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+  background-color: rgba(149, 184, 254, 0.919);
+  padding: 10px;
+  margin: 1.2rem;
+}
+
+.especie {
+  width: 45%;
+  margin-bottom: 20px;
+  min-width: 20rem;
+}
+
+.despliegue_razas {
+  display: flex;
+  width: 100%;
+  height: 2.5rem;
+  font-weight: bold;
+  background-color: #e1bee7;
+  border-radius: 10px 10px 0 0;
+  cursor: pointer;
+  color: black;
+  margin-bottom: 5px;
+  
+}
+
+.data_ER{
+  width: 100%;
+  font-size: 1.5rem;
+  display: flex;
+  transition: background-color 0.3s;
+  justify-content: center;
+  align-items: center;
+  padding-left: 0.5rem;
+  gap: 0.5rem;
+}
+
+.name_ER{
+  flex: 1;
+}
+
+.opciones_ER{
+  display: flex;
+  font-size: 1.2rem;
+}
+
+.opciones_ER a{
+  text-decoration: none;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opciones_ER a:hover{
+  background-color: #9d69ffe1;
+}
+
+.data_ER:hover {
+  background-color: #ce93d8;
+}
+
+.tabla-razas {
+  margin-top: -4px ;
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #f3e5f5;
+}
+
+.tabla-razas th,
+.tabla-razas td {
+  border: 1px solid #b39ddb;
+  padding: 8px;
+  text-align: left;
+}
+
+.tabla-razas th {
+  background-color: #d1c4e9;
+}

@@ -213,8 +213,8 @@
   }
   
   #logo {
-  display: block;
-  width: 9rem;
-  position: relative;
-}
+    display: block;
+    width: 9rem;
+    position: relative;
+  }
 }

@@ -30,7 +30,7 @@
   width: 100px;
   height: 5px;
   background-color: #db241b;
-  margin: 20px auto;
+  margin: 0px auto;
 }
 .swiper {
   width: 100%;
@@ -104,12 +104,12 @@
     max-width: 100%;
   }
 
-  .slider-txt h1 {
+  #content h2 {
     font-size: 2rem;
   }
 
-  .slider-txt p {
-    font-size: 1rem;
+  #content p {
+    font-size: 1.1rem;
   }
 
   .botones {
@@ -123,3 +123,23 @@
   }
 }
 
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  cursor: zoom-out;
+}
+
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #fff;
+}

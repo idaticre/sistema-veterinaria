@@ -1,3 +1,7 @@
+.home{
+  margin: 10px;
+}
+
 #promo {
   display: flex;
   flex-wrap: wrap;

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './encabezado.css';
+import { Link } from 'react-router-dom';
 
 function Encabezado() {
   const [mostrarIndice, setMostrarIndice] = useState(false);
@@ -8,7 +9,7 @@ function Encabezado() {
   return (
     <header id="cabecera">
       <div id="contenedor_cab">
-        <a href="index.html" id="logo"><img src="/logo.png" alt="logo" /></a>
+        <a href="/" id="logo"><img src="/logo.png" alt="logo" /></a>
 
         <nav className="menu-navegacion">
           <ul id="paginas">
@@ -27,13 +28,13 @@ function Encabezado() {
               )}
             </li>
             <li><a href="">PRODUCTOS</a></li>
-            <li><a href="">CONTACTO</a></li>
+            <li><Link to="">CONTACTO</Link></li>
           </ul>
         </nav>
 
         <div id="enlaces">
           <button id="sign_in"><a href="">Sign in</a></button>
-          <button id="login">Login</button>
+          <Link to="/administracion/home"><button id="login">Login</button></Link>
           <button id="btn_menu" onClick={() => setMenuAbierto(true)}>☰</button>
         </div>
       </div>
@@ -51,7 +52,7 @@ function Encabezado() {
             </ul>
           </li>
           <li><a href="">PRODUCTOS</a></li>
-          <li><a href="">CONTACTO</a></li>
+          <li><a href="/clientes">CONTACTO</a></li>
         </ul>
       </div>
     </header>
