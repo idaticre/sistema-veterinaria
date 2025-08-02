@@ -43,6 +43,17 @@ CREATE TABLE IF NOT EXISTS tipo_documento (
 );
 
 -- ========================================
+-- TABLA: tipo_persona_juridica
+-- Clasifica la naturaleza legal de la entidad: NATURAL o JURÍDICA.
+-- ========================================
+CREATE TABLE tipo_persona_juridica (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(32) NOT NULL UNIQUE, -- Ej: 'NATURAL', 'JURIDICA'
+    descripcion VARCHAR(64),
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+
+-- ========================================
 -- TABLA: usuarios
 -- Guarda las credenciales de acceso al sistema para cada persona autorizada.
 -- Ejemplo: username = “admin01”, password_hash = “$2a$10$JHdY...”
@@ -105,13 +116,15 @@ CREATE TABLE tipo_entidad (
 -- ========================================
 CREATE TABLE IF NOT EXISTS entidades (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    id_tipo_entidad INT NOT NULL,
+    id_tipo_entidad INT NOT NULL,					-- cliente, colaborador, proveedor
+	id_tipo_persona_juridica INT NOT NULL,			-- natural o juridica
     nombre VARCHAR(128) NOT NULL,
     sexo VARCHAR(1),
     documento VARCHAR(20) NOT NULL UNIQUE,
     id_tipo_documento INT NOT NULL,
 	telefono VARCHAR(15) CHECK (telefono REGEXP '^[0-9+ ]{6,15}$'),
 	correo VARCHAR(64) UNIQUE,												-- la verificacion queda para el frontend
+    direccion VARCHAR(128),
     ciudad VARCHAR(64) NOT NULL,
     distrito VARCHAR(64) NOT NULL,
     representante VARCHAR(64) NULL,								-- Deberá ser en tal caso el mismo nombre
@@ -120,7 +133,8 @@ CREATE TABLE IF NOT EXISTS entidades (
 );
 ALTER TABLE entidades
 	ADD CONSTRAINT fk_entidad_tipo FOREIGN KEY (id_tipo_entidad) REFERENCES tipo_entidad(id),
-    ADD CONSTRAINT fk_entidad_tipo_doc FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documento(id)
+    ADD CONSTRAINT fk_entidad_tipo_doc FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documento(id),
+    ADD CONSTRAINT fk_entidad_persona_juridica FOREIGN KEY (id_tipo_persona_juridica) REFERENCES tipo_persona_juridica(id)
     ON DELETE RESTRICT;
 
 -- Índice para búsquedas rápidas de entidades según su tipo

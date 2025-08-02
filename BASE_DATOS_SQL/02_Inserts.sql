@@ -24,6 +24,14 @@ INSERT INTO tipo_documento (descripcion) VALUES
 ('OTROS');
 
 -- ========================================
+-- TIPO DE NATURALEZA LEGAL DE LA ENTIDAD
+-- Clasifica si la entidad es de tipo NATURAL (persona física) o JURÍDICA (empresa o institución con RUC propio).
+-- ========================================
+INSERT INTO tipo_persona_juridica (nombre, descripcion) VALUES
+('NATURAL', 'Persona natural que representa una entidad individual'),
+('JURIDICA', 'Entidad jurídica con existencia legal y RUC propio');
+
+-- ========================================
 -- ROLES DEL SISTEMA
 -- ========================================
 INSERT INTO roles (nombre, descripcion, activo) VALUES
@@ -36,8 +44,9 @@ INSERT INTO roles (nombre, descripcion, activo) VALUES
 -- TIPO DE ENTIDAD
 -- ========================================
 INSERT INTO tipo_entidad (nombre) VALUES 
-('NATURAL'),
-('JURIDICA');
+('CLIENTE'),         -- Persona o empresa que recibe servicios veterinarios.
+('PROVEEDOR'),       -- Entidad que suministra productos o servicios a la veterinaria.
+('COLABORADOR');     -- Personal interno que trabaja en la organización (incluye veterinarios).
 
 -- ========================================
 -- ESPECIALIDADES VETERINARIAS
