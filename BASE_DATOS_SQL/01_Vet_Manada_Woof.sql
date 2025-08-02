@@ -1525,3 +1525,5 @@ CREATE INDEX idx_mensajes_cliente_colaborador ON mensajes_cliente(id_colaborador
 
 -- Índice: facilita listados por fecha de envío
 CREATE INDEX idx_mensajes_cliente_fecha ON mensajes_cliente(fecha_envio);
+
+show tables;
