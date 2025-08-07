@@ -141,6 +141,17 @@ ALTER TABLE entidades
 -- (clientes, proveedores, colaboradores).
 CREATE INDEX idx_entidades_tipo ON entidades(id_tipo_entidad);
 
+-- Índice para acelerar las búsquedas de entidades por documento 
+-- (útil en login, validaciones, formularios).
+CREATE UNIQUE INDEX idx_entidades_documento ON entidades(documento);
+
+-- Índice para acelerar la validación y búsqueda por correo 
+-- (por ejemplo, recuperación de cuenta o contacto).
+CREATE UNIQUE INDEX idx_entidades_correo ON entidades(correo);
+
+-- Índice para consultas filtradas por tipo de documento (DNI, RUC...).
+CREATE INDEX idx_entidades_tipo_documento ON entidades(id_tipo_documento);
+
 -- ========================================
 -- TABLA: colaboradores
 -- Registra a los trabajadores vinculados a la veterinaria (personal interno).
@@ -162,6 +173,12 @@ ALTER TABLE colaboradores
 -- Índice para acelerar las consultas que vinculan colaboradores con sus entidades.
 CREATE INDEX idx_colaboradores_entidad ON colaboradores(id_entidad);
 
+-- Índice para búsquedas cruzadas entre colaborador y usuario (útil para sesiones o perfil).
+CREATE INDEX idx_colaboradores_usuario ON colaboradores(id_usuario);
+
+-- Índice para mejorar filtros por estado en colaboradores.
+CREATE INDEX idx_colaboradores_activo ON colaboradores(activo);
+
 -- ========================================
 -- TABLA: proveedores
 -- Representa a las personas o empresas que suministran productos o servicios.
@@ -179,6 +196,9 @@ ALTER TABLE proveedores
 -- Índice para consultas rápidas que relacionan proveedores con sus entidades.
 CREATE INDEX idx_proveedores_entidad ON proveedores(id_entidad);
 
+-- Índice para mejorar filtros por estado en proveedores.
+CREATE INDEX idx_proveedores_activo ON proveedores(activo);
+
 -- ========================================
 -- TABLA: clientes
 -- Representa a las personas o empresas que reciben servicios de la veterinaria.
@@ -194,6 +214,9 @@ ALTER TABLE clientes
 
 -- Índice para consultas rápidas que relacionan clientes con sus entidades.
 CREATE INDEX idx_clientes_entidad ON clientes(id_entidad);
+
+-- Índice para mejorar filtros por estado en clientes.
+CREATE INDEX idx_clientes_activo ON clientes(activo);
 
 -- ========================================
 -- TABLA: especialidades
@@ -227,6 +250,9 @@ ALTER TABLE veterinarios
 
 -- Índice para búsquedas rápidas de veterinarios asociados a un colaborador.
 CREATE INDEX idx_veterinarios_colaborador ON veterinarios(id_colaborador);
+
+-- Índice para facilitar consultas por especialidad (ej: veterinarios de dermatología).
+CREATE INDEX idx_veterinarios_especialidad ON veterinarios(id_especialidad);
 
 -- ========================================
 -- TABLA: dias_semana
@@ -274,6 +300,9 @@ ALTER TABLE horarios_trabajo
 -- (útil para generar la grilla semanal de turnos).
 CREATE INDEX idx_horarios_colaborador ON horarios_trabajo(id_colaborador);
 
+-- Índice para facilitar búsquedas por tipo de día en horarios laborales.
+CREATE INDEX idx_horarios_tipo_dia ON horarios_trabajo(id_tipo_dia);
+
 -- ========================================
 -- TABLA: registro_asistencia
 -- Controla los registros de asistencia diarios del personal.
@@ -295,6 +324,9 @@ ALTER TABLE registro_asistencia
 -- permite buscar registros de asistencia de un colaborador en una fecha específica
 -- o en un rango de fechas.
 CREATE INDEX idx_asistencia_colaborador_fecha ON registro_asistencia(id_colaborador, fecha);
+
+-- Índice para búsquedas generales por fecha en asistencia.
+CREATE INDEX idx_asistencia_fecha ON registro_asistencia(fecha);
 
 -- ========================================
 -- BLOQUE: mascotas y salud veterinaria
@@ -329,6 +361,9 @@ ALTER TABLE razas
 	ADD CONSTRAINT fk_raza_especie FOREIGN KEY (id_especie) REFERENCES especies(id)
 	ON DELETE RESTRICT
 	ON UPDATE CASCADE;
+
+-- Índice para búsquedas de razas según la especie seleccionada (útil en formularios o filtros).
+CREATE INDEX idx_razas_especie ON razas(id_especie);
 
 -- ========================================
 -- TABLA: tamanos
@@ -482,6 +517,21 @@ CREATE INDEX idx_mascotas_cliente ON mascotas(id_cliente);
 -- (útil en reportes, listados filtrados o análisis clínico).
 CREATE INDEX idx_mascotas_estado ON mascotas(id_estado);
 
+-- Índice para mejorar las búsquedas de mascotas por raza.
+CREATE INDEX idx_mascotas_raza ON mascotas(id_raza);
+
+-- Índice para mejorar las búsquedas de mascotas por especie.
+CREATE INDEX idx_mascotas_especie ON mascotas(id_especie);
+
+-- Índice para búsquedas de mascotas por tamaño (útil en reportes o filtros).
+CREATE INDEX idx_mascotas_tamano ON mascotas(id_tamano);
+
+-- Índice para facilitar búsquedas de mascotas por etapa de vida (cachorro, adulto, etc.).
+CREATE INDEX idx_mascotas_etapa ON mascotas(id_etapa);
+
+-- Índice para ordenar o filtrar mascotas por fecha de registro.
+CREATE INDEX idx_mascotas_fecha_registro ON mascotas(fecha_registro);
+
 
 -- ========================================
 -- TABLA: medicamentos_mascota
@@ -515,6 +565,16 @@ ALTER TABLE medicamentos_mascota
 -- Índice para consultas rápidas del historial de medicamentos
 -- aplicados a una mascota específica.
 CREATE INDEX idx_medicamentos_mascota_mascota ON medicamentos_mascota(id_mascota);
+
+-- Índice para búsquedas por colaborador en historial de medicamentos.
+CREATE INDEX idx_med_mascota_colaborador ON medicamentos_mascota(id_colaborador);
+
+-- Índice para búsquedas por veterinario en historial de medicamentos.
+CREATE INDEX idx_med_mascota_veterinario ON medicamentos_mascota(id_veterinario);
+
+-- Índice para reportes históricos de aplicación de medicamentos.
+CREATE INDEX idx_med_mascota_fecha ON medicamentos_mascota(fecha_aplicacion);
+
 
 -- ========================================
 -- TABLA: vacunas_mascota
@@ -550,6 +610,18 @@ ALTER TABLE vacunas_mascota
 -- Índice para consultas rápidas del historial de vacunas
 -- aplicadas a una mascota específica.
 CREATE INDEX idx_vacunas_mascota_mascota ON vacunas_mascota(id_mascota);
+
+-- Índice para búsquedas por colaborador en historial de vacunas.
+CREATE INDEX idx_vacuna_mascota_colaborador ON vacunas_mascota(id_colaborador);
+
+-- Índice para búsquedas por veterinario en historial de vacunas.
+CREATE INDEX idx_vacuna_mascota_veterinario ON vacunas_mascota(id_veterinario);
+
+-- Índice para consultar rápidamente las próximas dosis programadas.
+CREATE INDEX idx_vacuna_mascota_proxima_dosis ON vacunas_mascota(proxima_dosis);
+
+-- Índice para reportes históricos de vacunación.
+CREATE INDEX idx_vacuna_mascota_fecha ON vacunas_mascota(fecha_aplicacion);
 
 -- ========================================
 -- BLOQUE: agenda y servicios
@@ -723,6 +795,10 @@ CREATE INDEX idx_agenda_estado ON agenda(id_estado);
 -- en un rango de fechas (consultas comunes en reportes y agenda).
 CREATE INDEX idx_agenda_cliente_fecha ON agenda (id_cliente, fecha);
 
+-- Índice para consultas directas por fecha de cita (cuando no filtra por cliente, sino por calendario).
+CREATE INDEX idx_agenda_fecha ON agenda(fecha);
+
+
 -- ========================================
 -- TABLA: visitas_ingresos
 -- Controla ingresos físicos de mascotas por hospitalización o servicios extendidos.
@@ -764,6 +840,10 @@ CREATE INDEX idx_visitas_estado ON visitas_ingresos(id_estado);
 -- (muy útil en listados de hospitalizaciones activas por mascota).
 CREATE INDEX idx_visitas_mascota_estado ON visitas_ingresos (id_mascota, id_estado);
 
+-- Índice para reportes o búsquedas de ingresos por fecha
+-- (muy útil para filtrar visitas del día, semana o mes actual).
+CREATE INDEX idx_visitas_fecha_ingreso ON visitas_ingresos(fecha_ingreso);
+
 -- ========================================
 -- TABLA: recordatorios_agenda
 -- Registra recordatorios automáticos relacionados a citas de la agenda.
@@ -789,9 +869,16 @@ ALTER TABLE recordatorios_agenda
 	ADD CONSTRAINT fk_recordatorio_canal FOREIGN KEY (id_canal_comunicacion) REFERENCES canales_comunicacion(id)
 		ON DELETE SET NULL ON UPDATE CASCADE;
 
--- Índice para búsquedas rápidas de recordatorios
--- asociados a una cita específica.
+-- Índice para búsquedas rápidas de recordatorios asociados a una cita específica.
 CREATE INDEX idx_recordatorio_agenda ON recordatorios_agenda(id_agenda);
+
+-- Índice para buscar recordatorios programados para hoy o próximos días
+--  (por ejemplo, los que el sistema debe enviar mañana).
+CREATE INDEX idx_recordatorio_fecha ON recordatorios_agenda(fecha_recordatorio);
+
+-- Índice para filtrar recordatorios aún no enviados
+-- (en combinación con fecha_recordatorio, si se requiere).
+CREATE INDEX idx_recordatorio_enviado ON recordatorios_agenda(enviado);
 
 -- ========================================
 -- BLOQUE: HISTORIA CLÍNICA Y ARCHIVOS ASOCIADOS
@@ -862,6 +949,10 @@ ALTER TABLE historia_clinica
 -- (útil para listar todo el historial médico de una mascota específica).
 CREATE INDEX idx_historia_clinica_mascota ON historia_clinica(id_mascota);
 
+-- Índice para consultas que agrupan o filtran por veterinario responsable.
+-- Muy útil si se generan reportes de actividades por veterinario.
+CREATE INDEX idx_historia_clinica_veterinario ON historia_clinica(id_veterinario);
+
 -- Índice para búsquedas rápidas de historias clínicas por visita
 -- (facilita obtener todos los registros asociados a una hospitalización).
 CREATE INDEX idx_historia_clinica_visita ON historia_clinica(id_visita);
@@ -870,6 +961,15 @@ CREATE INDEX idx_historia_clinica_visita ON historia_clinica(id_visita);
 -- (permite ordenar o filtrar historias clínicas por fecha de atención,
 -- útil en listados por rango de fechas o reportes médicos).
 CREATE INDEX idx_historia_clinica_fecha ON historia_clinica(fecha);
+
+-- Índice para consultas que buscan historias clínicas por colaborador que registró la atención.
+-- Útil para filtros del tipo: "atenciones realizadas por el colaborador X".
+CREATE INDEX idx_historia_clinica_colaborador ON historia_clinica(id_colaborador);
+
+-- Índice para facilitar filtros por estado clínico
+-- (por ejemplo: mostrar solo historias abiertas o en revisión).
+CREATE INDEX idx_historia_clinica_estado ON historia_clinica(id_estado);
+
 
 -- ========================================
 -- TABLA: historia_clinica_archivos
@@ -895,6 +995,10 @@ ALTER TABLE historia_clinica_archivos
 -- Índice para búsquedas rápidas de archivos clínicos por historia clínica
 -- (permite listar rápidamente todos los archivos asociados a un registro médico).
 CREATE INDEX idx_historia_archivos_historia ON historia_clinica_archivos(id_historia_clinica);
+
+-- Índice para listar archivos según tipo (ej. ver solo radiografías o solo análisis).
+-- Útil para vistas o filtros en la interfaz de archivos clínicos.
+CREATE INDEX idx_archivo_tipo ON historia_clinica_archivos(id_t_archivo);
 
 -- ========================================
 -- BLOQUE: productos e inventario
@@ -1026,6 +1130,10 @@ ALTER TABLE productos
 -- (útil al listar productos filtrados por tipo).
 CREATE INDEX idx_productos_categoria ON productos(id_categoria_producto);
 
+-- Índice para búsquedas rápidas de productos por nombre
+-- (útil para filtros, autocompletado o búsqueda parcial de productos).
+CREATE INDEX idx_productos_nombre ON productos(nombre);
+
 -- Índice para búsquedas rápidas de productos por marca
 -- (permite filtrar inventarios por fabricante).
 CREATE INDEX idx_productos_marca ON productos(id_marca);
@@ -1033,6 +1141,8 @@ CREATE INDEX idx_productos_marca ON productos(id_marca);
 -- Índice para búsquedas rápidas de productos que son medicamentos
 -- (permite separar insumos médicos de otros productos).
 CREATE INDEX idx_productos_medicamento ON productos(id_medicamento);
+
+
 
 -- ========================================
 -- TABLA: facturas_compras
@@ -1065,6 +1175,10 @@ CREATE INDEX idx_facturas_compras_proveedor ON facturas_compras(id_proveedor);
 -- Índice para búsquedas de facturas por usuario (quién registró)
 CREATE INDEX idx_facturas_compras_usuario ON facturas_compras(id_usuario);
 
+-- Índice para consultas eficientes por fecha de emisión de factura
+-- (muy útil en reportes de compras por rango de fechas).
+CREATE INDEX idx_facturas_compras_fec_fac ON facturas_compras(fecha_factura);
+
 -- ========================================
 -- TABLA: detalle_factura_compra
 -- Detalla los productos y cantidades contenidos en una factura de compra.
@@ -1085,7 +1199,11 @@ ALTER TABLE detalle_factura_compra
         ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- Índice para obtener rápidamente los detalles de una factura
-CREATE INDEX idx_detalle_factura_factura ON detalle_factura_compra(id_factura);
+CREATE INDEX idx_detalle_fact_compra_factura ON detalle_factura_compra(id_factura);
+
+-- Índice para consultas de facturas por producto
+-- (permite conocer en qué facturas se ha comprado un producto específico).
+CREATE INDEX idx_detalle_fact_compra_producto ON detalle_factura_compra(id_producto);
 
 -- ========================================
 -- TABLA: inventarios
@@ -1152,6 +1270,14 @@ CREATE INDEX idx_movimientos_tipo ON movimientos_inventario(id_tipo_movimiento);
 
 -- Índice compuesto para consultas de movimientos asociados a facturas de compra
 CREATE INDEX idx_movimientos_factura ON movimientos_inventario(id_factura_compra);
+
+-- Índice para consultas cronológicas de movimientos de inventario
+-- (útil en reportes históricos o análisis por fechas).
+CREATE INDEX idx_movimientos_fecha ON movimientos_inventario(fecha_movimiento);
+
+-- Índice compuesto para auditorías por usuario y fecha de movimiento
+-- (acelera consultas para saber qué hizo un usuario en un periodo determinado).
+CREATE INDEX idx_movimientos_usuario_fecha ON movimientos_inventario(id_usuario, fecha_movimiento);
 
 -- ========================================
 -- BLOQUE: ventas y caja
@@ -1339,6 +1465,9 @@ CREATE INDEX idx_arqueo_fecha ON arqueo_caja(fecha);
 -- Índice: optimiza búsquedas filtradas por usuario
 CREATE INDEX idx_arqueo_usuario ON arqueo_caja(id_usuario);
 
+-- Índice: agiliza consultas por estado de caja (ej. abiertos o cerrados)
+CREATE INDEX idx_arqueo_estado ON arqueo_caja(id_estado_caja);
+
 -- ========================================
 -- TABLA: facturas_venta
 -- Registra facturas emitidas a clientes por productos o servicios.
@@ -1410,7 +1539,11 @@ ALTER TABLE detalle_factura
         ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- Índice: recupera rápidamente todos los ítems de una factura
-CREATE INDEX idx_detalle_factura_factura ON detalle_factura(id_factura);
+CREATE INDEX idx_detalle_fact_vta_factura ON detalle_factura(id_factura);
+
+-- Índice: permite consultar en qué facturas se vendió un producto específico
+CREATE INDEX idx_detalle_fact_vta_producto ON detalle_factura(id_producto);
+
 
 -- ========================================
 -- TABLA: detalle_pagos_factura
@@ -1466,6 +1599,9 @@ CREATE INDEX idx_nota_factura ON nota_credito(id_factura);
 
 -- Índice: permite listar notas emitidas por usuario
 CREATE INDEX idx_nota_usuario ON nota_credito(id_usuario);
+
+-- Índice: mejora reportes y listados por fecha de emisión de la nota de crédito
+CREATE INDEX idx_nota_fecha ON nota_credito(fecha);
 
 -- ========================================
 -- BLOQUE: comunicación con clientes
