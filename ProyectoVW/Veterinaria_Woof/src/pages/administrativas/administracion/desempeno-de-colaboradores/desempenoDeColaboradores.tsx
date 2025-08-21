@@ -1,8 +1,8 @@
 function desempenoDeColaboradores() {
     return (
-        
-
-
+        <>
+            <span>Texo de ejemplo!!!</span>
+        </>
     )
 }
 
