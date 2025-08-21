@@ -203,12 +203,12 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={adminRef} className="submenu">
-                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestionar colaboradores</Link></li>
-                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Turnos y horarios</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Asistencia de colaboradores</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Pagos a colaboradores</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Parámetros y promociones</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Desempeño de colaboradores</Link></li>
+                                    <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestionar colaboradores</Link></li>
+                                    <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Turnos y horarios</Link></li>
+                                    <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
+                                    <li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos a colaboradores</Link></li>
+                                    <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
+                                    <li><Link to="/administracion/administracion/desempeno_de_colaboradores" className="sub_opcion">Desempeño de colaboradores</Link></li>
                                 </ul>
                             </li>
 

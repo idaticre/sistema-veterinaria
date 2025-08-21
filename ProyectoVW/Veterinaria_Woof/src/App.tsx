@@ -61,7 +61,7 @@ function App() {
       <Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}/>
       <Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>
       <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>
-      <Route path='/administracion/administracion/parametros_y_promocinoes' element={<Parametros_y_promociones/>}/>
+      <Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>
       <Route path='/administracion/administracion/desempeno_de_colaboradores' element={<Desempeno_de_colaboradores/>}/>      
 
       {/* Seguridad y mantenimiento */}
