@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Br_administrativa from "../../components/barra_administrativa/Br_administrativa";
+import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import "./Admin_index.css"
 
