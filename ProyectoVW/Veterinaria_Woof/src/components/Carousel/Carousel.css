@@ -1,0 +1,161 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
+
+/* Contenedor principal */
+.header-content {
+  margin-top: 200px;
+  padding-bottom: 50px;
+  font-family: "Poppins", sans-serif;
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+}
+
+.slider-txt {
+  margin-left: 85px;
+  width: 50%;
+}
+
+.slider-txt h1 {
+  font-size: 70px;
+  color: #ff9831;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.slider-txt p {
+  font-size: 18px;
+  color: #7e5106;
+}
+
+.botones {
+  margin-top: 50px;
+}
+
+.btn-1 {
+  display: inline-block;
+  padding: 15px 35px;
+  color: #7e5106;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-right: 20px;
+  border-radius: 50px;
+  background-color: #ffffff;
+}
+
+.btn-1:hover {
+  background-color: #7e5106;
+  color: #ffffff;
+}
+
+.slider-img {
+  width: 50%;
+}
+
+.slider-img img {
+  margin-right: 225px;
+  width: 550px;
+}
+
+/* Carrusel */
+.custom-carousel {
+  position: relative;
+  overflow: hidden;
+  margin-top: 30px;
+}
+
+.carousel-slide {
+  position: relative;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #7e5106;
+  color: white;
+  border: none;
+  padding: 9px 15px;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 10;
+  transition: background-color 0.3s ease;
+}
+
+.prev-btn {
+  left: 20px;
+}
+
+.next-btn {
+  right: 20px;
+}
+
+.carousel-btn:hover {
+  background-color: #ff9831;
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.dot {
+  height: 12px;
+  width: 12px;
+  margin: 0 6px;
+  background-color: #d3d2d2;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dot.active {
+  background-color: #7e5106;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .header-content {
+    padding: 30px;
+    margin-top: 100px;
+  }
+  
+  .slider {
+    flex-direction: column;
+  }
+  
+  .slider-txt {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  
+  .slider-txt h1 {
+    font-size: 50px;
+  }
+  
+  .slider-txt p {
+    font-size: 16px;
+  }
+  
+  .btn-1 {
+    padding: 10px 25px;
+    font-size: 14px;
+  }
+  
+  .slider-img {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .slider-img img {
+    margin-right: 0;
+    width: 300px;
+  }
+}
