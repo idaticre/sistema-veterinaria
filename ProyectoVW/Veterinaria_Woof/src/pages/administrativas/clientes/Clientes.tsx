@@ -30,7 +30,7 @@ function Lst_clientes() {
   const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  /*const [dueños, setDueños] = useState<dueño[]>([]);*
+  /*const [dueños, setDueños] = useState<dueño[]>([]);*/
   
   /*useEffect(() => {
     axios.get("http://localhost:8080/clientes")
