@@ -4,6 +4,7 @@
 -- y las tablas principales relacionadas al núcleo (empresa),
 -- seguridad (usuarios, roles), entidades (clientes, proveedores, colaboradores)
 -- y gestión de personal (veterinarios, horarios, asistencia).
+-- Al final del script podrá hacer un show tables para revisar mejor.
 -- =========================================================
 
 -- ========================================
@@ -12,6 +13,11 @@
 DROP DATABASE IF EXISTS vet_manada_woof;
 CREATE DATABASE vet_manada_woof;
 USE vet_manada_woof;
+
+-- ========================================
+-- BLOQUE 01: Administracion inicial
+-- gestiona la información de entidades, colaboradores, entre otros
+-- ========================================
 
 -- ========================================
 -- TABLA: empresa
@@ -32,12 +38,28 @@ CREATE TABLE IF NOT EXISTS empresa (
 );
 
 -- ========================================
+-- EMPRESA 
+-- Al ser información real se hace el insert y posterior hay un sp para visualizar y actualizar
+-- ========================================
+INSERT INTO empresa(razon_social, ruc, direccion, ciudad, distrito, telefono, correo, representante) VALUES 
+('Manada Woof.S.A.C.S ', 
+'20613366998', 
+'Jiron Arequipa 238', 
+'Lima', 
+'Magdalena del Mar', 
+'917 233 145', 
+'manadawoof.vet@gmail.com', 
+'Sandra Alexis Laguna De La Rosa'
+);
+
+-- ========================================
 -- TABLA: tipo_documento
 -- Contiene los diferentes tipos de documentos permitidos para identificar entidades.
 -- Ejemplo: “DNI”, “RUC”, “PASAPORTE”
 -- ========================================
 CREATE TABLE IF NOT EXISTS tipo_documento (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     descripcion VARCHAR(32) NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -48,6 +70,7 @@ CREATE TABLE IF NOT EXISTS tipo_documento (
 -- ========================================
 CREATE TABLE tipo_persona_juridica (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE, -- Ej: 'NATURAL', 'JURIDICA'
     descripcion VARCHAR(64),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -60,6 +83,7 @@ CREATE TABLE tipo_persona_juridica (
 -- ========================================
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     username VARCHAR(32) UNIQUE NOT NULL,
     password_hash VARCHAR(128) NOT NULL,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1)),
@@ -74,6 +98,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 -- ========================================
 CREATE TABLE IF NOT EXISTS roles (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128) DEFAULT NULL,
 	activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -106,6 +131,7 @@ CREATE INDEX idx_usuarios_roles_usuario ON usuarios_roles(id_usuario);
 -- ========================================
 CREATE TABLE tipo_entidad (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) UNIQUE NOT NULL,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -116,6 +142,7 @@ CREATE TABLE tipo_entidad (
 -- ========================================
 CREATE TABLE IF NOT EXISTS entidades (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_tipo_entidad INT NOT NULL,					-- cliente, colaborador, proveedor
 	id_tipo_persona_juridica INT NOT NULL,			-- natural o juridica
     nombre VARCHAR(128) NOT NULL,
@@ -158,6 +185,7 @@ CREATE INDEX idx_entidades_tipo_documento ON entidades(id_tipo_documento);
 -- ========================================
 CREATE TABLE IF NOT EXISTS colaboradores (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_entidad INT NOT NULL UNIQUE,
     fecha_ingreso DATE,
     id_usuario INT NOT NULL,
@@ -186,6 +214,7 @@ CREATE INDEX idx_colaboradores_activo ON colaboradores(activo);
 -- ========================================
 CREATE TABLE IF NOT EXISTS proveedores (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_entidad INT NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -205,6 +234,7 @@ CREATE INDEX idx_proveedores_activo ON proveedores(activo);
 -- ========================================
 CREATE TABLE IF NOT EXISTS clientes (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_entidad INT NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -225,6 +255,7 @@ CREATE INDEX idx_clientes_activo ON clientes(activo);
 -- ========================================
 CREATE TABLE IF NOT EXISTS especialidades (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(64) NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -235,6 +266,7 @@ CREATE TABLE IF NOT EXISTS especialidades (
 -- ========================================
 CREATE TABLE IF NOT EXISTS veterinarios (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_colaborador INT NOT NULL UNIQUE,
     id_especialidad INT NOT NULL,
     cmp VARCHAR(32) UNIQUE NULL,
@@ -270,6 +302,7 @@ CREATE TABLE dias_semana (
 -- ========================================
 CREATE TABLE tipos_dia (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(20) UNIQUE NOT NULL
 );
 
@@ -281,6 +314,7 @@ CREATE TABLE tipos_dia (
 -- Validar en la lógica de aplicación con una consulta
 CREATE TABLE IF NOT EXISTS horarios_trabajo (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_colaborador INT NOT NULL,
     id_dia_semana INT NOT NULL,
     id_tipo_dia INT DEFAULT NULL,
@@ -309,6 +343,7 @@ CREATE INDEX idx_horarios_tipo_dia ON horarios_trabajo(id_tipo_dia);
 -- ========================================
 CREATE TABLE IF NOT EXISTS registro_asistencia (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_colaborador INT NOT NULL,
     fecha DATE NOT NULL,
     hora_entrada TIME,
@@ -329,7 +364,7 @@ CREATE INDEX idx_asistencia_colaborador_fecha ON registro_asistencia(id_colabora
 CREATE INDEX idx_asistencia_fecha ON registro_asistencia(fecha);
 
 -- ========================================
--- BLOQUE: mascotas y salud veterinaria
+-- BLOQUE 02: mascotas y salud veterinaria
 -- gestiona la información de mascotas, su clasificación,
 -- vacunas, medicamentos e historial clínico.
 -- ========================================
@@ -341,6 +376,7 @@ CREATE INDEX idx_asistencia_fecha ON registro_asistencia(fecha);
 -- ========================================
 CREATE TABLE IF NOT EXISTS especies (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	nombre VARCHAR(32) NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -352,6 +388,7 @@ CREATE TABLE IF NOT EXISTS especies (
 -- ========================================
 CREATE TABLE IF NOT EXISTS razas (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	id_especie INT,
 	nombre VARCHAR(32) NOT NULL,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -372,6 +409,7 @@ CREATE INDEX idx_razas_especie ON razas(id_especie);
 -- ========================================
 CREATE TABLE IF NOT EXISTS tamanos (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	talla_equivalente VARCHAR(8) NOT NULL UNIQUE,
 	descripcion VARCHAR(16) NOT NULL,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -384,6 +422,7 @@ CREATE TABLE IF NOT EXISTS tamanos (
 -- ========================================
 CREATE TABLE IF NOT EXISTS etapas_vida (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	descripcion VARCHAR(16) NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -395,6 +434,7 @@ CREATE TABLE IF NOT EXISTS etapas_vida (
 -- ========================================
 CREATE TABLE IF NOT EXISTS vacunas (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	nombre VARCHAR(64) NOT NULL,
 	id_especie INT NOT NULL,
     descripcion VARCHAR(64),
@@ -417,6 +457,7 @@ CREATE INDEX idx_vacunas_especie ON vacunas(id_especie);
 -- ========================================
 CREATE TABLE IF NOT EXISTS medicamento_tipo (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -429,6 +470,7 @@ CREATE TABLE IF NOT EXISTS medicamento_tipo (
 -- ========================================
 CREATE TABLE IF NOT EXISTS vias_aplicacion (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	nombre VARCHAR(32) UNIQUE NOT NULL,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -440,6 +482,7 @@ CREATE TABLE IF NOT EXISTS vias_aplicacion (
 -- ========================================
 CREATE TABLE IF NOT EXISTS medicamentos (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	nombre VARCHAR(64) NOT NULL,
 	id_tipo INT NOT NULL,
     descripcion VARCHAR(128),
@@ -462,6 +505,7 @@ CREATE INDEX idx_medicamentos_tipo ON medicamentos(id_tipo);
 -- ========================================
 CREATE TABLE estado_mascota (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -474,12 +518,15 @@ CREATE TABLE estado_mascota (
 -- ========================================
 CREATE TABLE IF NOT EXISTS mascotas (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	nombre VARCHAR(64) NOT NULL,
     sexo VARCHAR(1),
 	id_cliente INT NOT NULL,
 	id_raza INT NULL,
 	id_especie INT NOT NULL,
     id_estado INT NOT NULL,
+    id_colaborador INT NULL,
+    id_veterinario INT NULL,
 	fecha_nacimiento DATE NOT NULL,
 	pelaje VARCHAR(16),
 	id_tamano INT NOT NULL,
@@ -493,10 +540,14 @@ CREATE TABLE IF NOT EXISTS mascotas (
 	agresividad TINYINT NOT NULL DEFAULT 0 CHECK (agresividad IN (0,1)),
 	foto VARCHAR(255),
 	fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ALTER TABLE mascotas
 	ADD CONSTRAINT fk_mascota_cliente FOREIGN KEY (id_cliente) REFERENCES clientes(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_mascota_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_mascota_veterinario FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_mascota_estado FOREIGN KEY (id_estado) REFERENCES estado_mascota(id)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -540,6 +591,7 @@ CREATE INDEX idx_mascotas_fecha_registro ON mascotas(fecha_registro);
 -- ========================================
 CREATE TABLE IF NOT EXISTS medicamentos_mascota (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	id_mascota INT NOT NULL,
 	id_medicamento INT NOT NULL,
 	id_via INT NOT NULL,
@@ -583,6 +635,7 @@ CREATE INDEX idx_med_mascota_fecha ON medicamentos_mascota(fecha_aplicacion);
 -- ========================================
 CREATE TABLE IF NOT EXISTS vacunas_mascota (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
 	id_vacuna INT NOT NULL,
 	id_mascota INT NOT NULL,
 	id_via INT NOT NULL,
@@ -624,7 +677,7 @@ CREATE INDEX idx_vacuna_mascota_proxima_dosis ON vacunas_mascota(proxima_dosis);
 CREATE INDEX idx_vacuna_mascota_fecha ON vacunas_mascota(fecha_aplicacion);
 
 -- ========================================
--- BLOQUE: agenda y servicios
+-- BLOQUE 03: agenda y servicios
 -- gestiona los tipos de servicios, su registro,
 -- citas programadas, visitas y recordatorios.
 -- ========================================
@@ -646,6 +699,7 @@ CREATE TABLE IF NOT EXISTS canales_comunicacion (
 -- ========================================
 CREATE TABLE IF NOT EXISTS medios_pago (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -658,6 +712,7 @@ CREATE TABLE IF NOT EXISTS medios_pago (
 -- ========================================
 CREATE TABLE IF NOT EXISTS estado_agenda (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -670,6 +725,7 @@ CREATE TABLE IF NOT EXISTS estado_agenda (
 -- ========================================
 CREATE TABLE tipo_recordatorio (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(64) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -682,6 +738,7 @@ CREATE TABLE tipo_recordatorio (
 -- ========================================
 CREATE TABLE IF NOT EXISTS medio_solicitud (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -694,6 +751,7 @@ CREATE TABLE IF NOT EXISTS medio_solicitud (
 -- ========================================
 CREATE TABLE IF NOT EXISTS estado_visita (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -706,6 +764,7 @@ CREATE TABLE IF NOT EXISTS estado_visita (
 -- ========================================
 CREATE TABLE IF NOT EXISTS tipo_servicios (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -718,6 +777,7 @@ CREATE TABLE IF NOT EXISTS tipo_servicios (
 -- ========================================
 CREATE TABLE IF NOT EXISTS ingresos_servicios (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_servicio INT NOT NULL,
     id_colaborador INT,
     id_veterinario INT,
@@ -761,6 +821,7 @@ CREATE INDEX idx_ingresos_servicios_colab_fecha ON ingresos_servicios (id_colabo
 -- ========================================
 CREATE TABLE IF NOT EXISTS agenda (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_cliente INT NOT NULL,
     id_mascota INT NOT NULL,
     id_tipo_servicio INT NOT NULL,
@@ -806,6 +867,7 @@ CREATE INDEX idx_agenda_fecha ON agenda(fecha);
 -- ========================================
 CREATE TABLE IF NOT EXISTS visitas_ingresos (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_agenda INT NULL,
     fecha_ingreso TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
     id_mascota INT NOT NULL,
@@ -852,6 +914,7 @@ CREATE INDEX idx_visitas_fecha_ingreso ON visitas_ingresos(fecha_ingreso);
 -- ========================================
 CREATE TABLE IF NOT EXISTS recordatorios_agenda (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_agenda INT NOT NULL,
     id_tipo_recordatorio INT NOT NULL DEFAULT 1,				-- 'AGENDA GENERAL'
     fecha_recordatorio DATE NOT NULL,
@@ -881,7 +944,7 @@ CREATE INDEX idx_recordatorio_fecha ON recordatorios_agenda(fecha_recordatorio);
 CREATE INDEX idx_recordatorio_enviado ON recordatorios_agenda(enviado);
 
 -- ========================================
--- BLOQUE: HISTORIA CLÍNICA Y ARCHIVOS ASOCIADOS
+-- BLOQUE 04: HISTORIA CLÍNICA Y ARCHIVOS ASOCIADOS
 -- Gestiona el registro de atenciones médicas de cada mascota,
 -- vinculando la información clínica con los ingresos/visitas
 -- y permitiendo almacenar archivos relacionados.
@@ -894,6 +957,7 @@ CREATE INDEX idx_recordatorio_enviado ON recordatorios_agenda(enviado);
 -- ========================================
 CREATE TABLE estado_historia_clinica (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -906,6 +970,7 @@ CREATE TABLE estado_historia_clinica (
 -- ========================================
 CREATE TABLE IF NOT EXISTS tipos_archivo_clinico (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) UNIQUE NOT NULL,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -918,6 +983,7 @@ CREATE TABLE IF NOT EXISTS tipos_archivo_clinico (
 -- ========================================
 CREATE TABLE IF NOT EXISTS historia_clinica (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_mascota INT NOT NULL,
     id_colaborador INT NULL,
     id_veterinario INT NULL,
@@ -979,6 +1045,7 @@ CREATE INDEX idx_historia_clinica_estado ON historia_clinica(id_estado);
 -- ========================================
 CREATE TABLE IF NOT EXISTS historia_clinica_archivos (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_historia_clinica INT NOT NULL,
     id_t_archivo INT NULL,
     nombre_archivo VARCHAR(128) NOT NULL,
@@ -1001,7 +1068,7 @@ CREATE INDEX idx_historia_archivos_historia ON historia_clinica_archivos(id_hist
 CREATE INDEX idx_archivo_tipo ON historia_clinica_archivos(id_t_archivo);
 
 -- ========================================
--- BLOQUE: productos e inventario
+-- BLOQUE 05: productos e inventario
 -- gestiona las marcas, categorías, productos,
 -- control de stock, movimientos e integración
 -- con facturas de compra.
@@ -1015,6 +1082,7 @@ CREATE INDEX idx_archivo_tipo ON historia_clinica_archivos(id_t_archivo);
 -- ========================================
 CREATE TABLE IF NOT EXISTS tipo_operacion (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(16) NOT NULL UNIQUE, 					-- ENTRADA, SALIDA, AJUSTE
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1027,6 +1095,7 @@ CREATE TABLE IF NOT EXISTS tipo_operacion (
 -- ========================================
 CREATE TABLE IF NOT EXISTS tipo_movimiento (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     id_tipo_operacion INT NOT NULL,
@@ -1043,6 +1112,7 @@ ADD CONSTRAINT fk_tipo_operacion FOREIGN KEY (id_tipo_operacion) REFERENCES tipo
 -- ========================================
 CREATE TABLE IF NOT EXISTS estado_factura_compra (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
 	activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1055,6 +1125,7 @@ CREATE TABLE IF NOT EXISTS estado_factura_compra (
 -- ========================================
 CREATE TABLE IF NOT EXISTS almacenes (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(64) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
 	activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1066,6 +1137,7 @@ CREATE TABLE IF NOT EXISTS almacenes (
 -- ========================================
 CREATE TABLE IF NOT EXISTS marcas (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(64) NOT NULL UNIQUE,
     descripcion TEXT,
 	activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1078,6 +1150,7 @@ CREATE TABLE IF NOT EXISTS marcas (
 -- ========================================
 CREATE TABLE IF NOT EXISTS presentaciones (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(64) NOT NULL UNIQUE,
     descripcion TEXT,
 	activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1090,6 +1163,7 @@ CREATE TABLE IF NOT EXISTS presentaciones (
 -- ========================================
 CREATE TABLE IF NOT EXISTS categorias_productos (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion TEXT,
 	activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1101,6 +1175,7 @@ CREATE TABLE IF NOT EXISTS categorias_productos (
 -- ========================================
 CREATE TABLE IF NOT EXISTS productos (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(64) NOT NULL,
     descripcion VARCHAR(64),
     referencia VARCHAR(64),
@@ -1150,6 +1225,7 @@ CREATE INDEX idx_productos_medicamento ON productos(id_medicamento);
 -- ========================================
 CREATE TABLE IF NOT EXISTS facturas_compras (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_proveedor INT NOT NULL,
     id_usuario INT NOT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1186,6 +1262,7 @@ CREATE INDEX idx_facturas_compras_fec_fac ON facturas_compras(fecha_factura);
 -- ========================================
 CREATE TABLE IF NOT EXISTS detalle_factura_compra (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_factura INT NOT NULL,
     id_producto INT NOT NULL,
     cantidad INT NOT NULL CHECK (cantidad >= 0),
@@ -1211,6 +1288,7 @@ CREATE INDEX idx_detalle_fact_compra_producto ON detalle_factura_compra(id_produ
 -- ========================================
 CREATE TABLE IF NOT EXISTS inventarios (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_producto INT NOT NULL,
     id_almacen INT NOT NULL,
     stock_actual INT CHECK (stock_actual >= 0) NOT NULL,
@@ -1240,6 +1318,7 @@ CREATE INDEX idx_inventarios_producto_almacen ON inventarios(id_producto, id_alm
 -- ========================================
 CREATE TABLE IF NOT EXISTS movimientos_inventario (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_producto INT NOT NULL,
     id_usuario INT NOT NULL,
     id_tipo_movimiento INT NOT NULL,
@@ -1280,7 +1359,7 @@ CREATE INDEX idx_movimientos_fecha ON movimientos_inventario(fecha_movimiento);
 CREATE INDEX idx_movimientos_usuario_fecha ON movimientos_inventario(id_usuario, fecha_movimiento);
 
 -- ========================================
--- BLOQUE: ventas y caja
+-- BLOQUE 06: ventas y caja
 -- gestiona facturación, medios de pago, control de caja,
 -- arqueos, pagos de clientes y notas de crédito.
 -- ========================================
@@ -1292,6 +1371,7 @@ CREATE INDEX idx_movimientos_usuario_fecha ON movimientos_inventario(id_usuario,
 -- ========================================
 CREATE TABLE IF NOT EXISTS tipo_documento_venta (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(64) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1304,6 +1384,7 @@ CREATE TABLE IF NOT EXISTS tipo_documento_venta (
 -- ========================================
 CREATE TABLE tipo_item_factura (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) UNIQUE NOT NULL,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1316,6 +1397,7 @@ CREATE TABLE tipo_item_factura (
 -- ========================================
 CREATE TABLE estado_nota_credito (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1328,6 +1410,7 @@ CREATE TABLE estado_nota_credito (
 -- ========================================
 CREATE TABLE tipo_nota_credito (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1340,6 +1423,7 @@ CREATE TABLE tipo_nota_credito (
 -- ========================================
 CREATE TABLE IF NOT EXISTS tipo_movimiento_caja (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -1351,6 +1435,7 @@ CREATE TABLE IF NOT EXISTS tipo_movimiento_caja (
 -- ========================================
 CREATE TABLE IF NOT EXISTS estado_factura_venta (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1363,6 +1448,7 @@ CREATE TABLE IF NOT EXISTS estado_factura_venta (
 -- ========================================
 CREATE TABLE IF NOT EXISTS estado_caja (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -1374,6 +1460,7 @@ CREATE TABLE IF NOT EXISTS estado_caja (
 -- ========================================
 CREATE TABLE IF NOT EXISTS caja_general (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     fecha DATE NOT NULL,
     tipo_movimiento INT NOT NULL,
     descripcion VARCHAR(128),
@@ -1402,6 +1489,7 @@ CREATE INDEX idx_caja_usuario ON caja_general(id_usuario);
 -- ========================================
 CREATE TABLE IF NOT EXISTS pagos_clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_usuario INT NOT NULL,
     id_cliente INT NOT NULL,
     id_visita_ingreso INT NULL,
@@ -1438,6 +1526,7 @@ CREATE INDEX idx_pagos_fecha ON pagos_clientes(fecha_pago);
 -- ========================================
 CREATE TABLE IF NOT EXISTS arqueo_caja (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     fecha DATE NOT NULL,
     id_usuario INT NOT NULL,
     saldo_apertura DECIMAL(10,2),
@@ -1474,6 +1563,7 @@ CREATE INDEX idx_arqueo_estado ON arqueo_caja(id_estado_caja);
 -- ========================================
 CREATE TABLE IF NOT EXISTS facturas_venta (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_tipo_documento INT NOT NULL,
     fecha_factura DATE NOT NULL,
     id_usuario INT NOT NULL,
@@ -1519,6 +1609,7 @@ CREATE INDEX idx_facturas_fecha ON facturas_venta(fecha_factura);
 -- ========================================
 CREATE TABLE IF NOT EXISTS detalle_factura (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_factura INT NOT NULL,
     id_tipo_item INT NOT NULL,
     id_producto INT,
@@ -1552,6 +1643,7 @@ CREATE INDEX idx_detalle_fact_vta_producto ON detalle_factura(id_producto);
 -- ========================================
 CREATE TABLE IF NOT EXISTS detalle_pagos_factura (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_factura INT NOT NULL,
     id_pago INT NOT NULL,
     monto_asignado DECIMAL(10,2) NOT NULL CHECK (monto_asignado > 0)
@@ -1575,6 +1667,7 @@ CREATE INDEX idx_detalle_pago_pago ON detalle_pagos_factura(id_pago);
 -- ========================================
 CREATE TABLE IF NOT EXISTS nota_credito (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_usuario INT NOT NULL,
     id_factura INT NOT NULL,
     id_estado INT NOT NULL DEFAULT 1,
@@ -1604,7 +1697,7 @@ CREATE INDEX idx_nota_usuario ON nota_credito(id_usuario);
 CREATE INDEX idx_nota_fecha ON nota_credito(fecha);
 
 -- ========================================
--- BLOQUE: comunicación con clientes
+-- BLOQUE 07: comunicación con clientes
 -- Gestiona los canales de contacto y los mensajes enviados
 -- a clientes, incluyendo su estado y trazabilidad.
 -- ========================================
@@ -1615,6 +1708,7 @@ CREATE INDEX idx_nota_fecha ON nota_credito(fecha);
 -- ========================================
 CREATE TABLE IF NOT EXISTS estado_mensaje_cliente (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
@@ -1626,6 +1720,7 @@ CREATE TABLE IF NOT EXISTS estado_mensaje_cliente (
 -- ========================================
 CREATE TABLE IF NOT EXISTS mensajes_cliente (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
     id_cliente INT NOT NULL,
     id_canal INT NOT NULL,
     fecha_envio DATETIME DEFAULT CURRENT_TIMESTAMP,

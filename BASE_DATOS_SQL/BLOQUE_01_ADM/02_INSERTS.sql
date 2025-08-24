@@ -1,8 +1,7 @@
 -- PARTE DE INSERTS
 -- BLOQUE 01 ADM
--- Estos insert son muestras, lo ideal es mediante la programaciÓn ingresar esta informaciÓn,
+-- Estos insert son muestras, lo ideal es mediante la programación ingresar esta información,
 -- es decir llamar a los respectivos procedimientos
-
 -- ========================================
 -- TIPO DE DOCUMENTO
 -- ========================================
