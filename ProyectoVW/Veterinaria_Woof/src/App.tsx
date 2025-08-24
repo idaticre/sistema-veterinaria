@@ -23,6 +23,7 @@ import Asistencia_de_colaboradores from './pages/administrativas/administracion/
 import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-a-colaboradores/pagosAcolaboradores'
 import Parametros_y_promociones from './pages/administrativas/administracion/parametros-y-promociones/parametrosYpromociones'
 import Desempeno_de_colaboradores from './pages/administrativas/administracion/desempeno-de-colaboradores/desempenoDeColaboradores'
+import Tienda from './pages/publicas/Tienda';
 
 
 function App() {
@@ -30,6 +31,9 @@ function App() {
     <Routes>
       {/* Inicio web */}
       <Route path='/' element={<Home/>}/>
+
+      {/* Tienda */}
+      <Route path='/tienda' element={<Tienda/>}/>
 
       {/* Inicio de administración */}
       <Route path='/administracion/home' element={<Admin_index/>}/>
