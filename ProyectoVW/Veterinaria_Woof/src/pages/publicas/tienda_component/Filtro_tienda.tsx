@@ -21,8 +21,9 @@ type especie = {
   nombre: string;
 };
 
+
 function Filtro_tienda({ onPrecioChange, precioMaximo, categoriaSeleccionada, onMarcasChange, onEspeciesChange }: FiltroTiendaProps) {
-  const min = 0;
+  const min = 0; 
   const [values, setValues] = useState<number[]>([min, precioMaximo]);
   const [marcasSeleccionadas, setMarcasSeleccionadas] = useState<string[]>([]);
   const [especiesSeleccionadas, setEspeciesSeleccionadas] = useState<number[]>([]);

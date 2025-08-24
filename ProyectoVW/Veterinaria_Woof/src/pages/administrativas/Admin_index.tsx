@@ -133,7 +133,7 @@ function Admin_index() {
                                     <XAxis dataKey="name" stroke="black"/>
                                     <YAxis stroke="black" />
                                     <Tooltip />
-                                    <Bar dataKey="cantidad" fill="#5047f5ff" />
+                                    <Bar dataKey="cantidad" fill="#f7d850ff" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>

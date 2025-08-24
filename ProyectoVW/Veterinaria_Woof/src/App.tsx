@@ -21,7 +21,7 @@ function App() {
       <Route path='/tienda' element={<Tienda/>}/>
 
       {/* inicio de administracion */}
-      <Route path='/administracion/home' element={<Admin_index/> }/>
+      <Route path='/administracion/home' element={<Admin_index/>}/>
 
       {/* cliente o dueño */}
       <Route path='/administracion/cliente/lista' element={<Lst_clientes/>}/>
