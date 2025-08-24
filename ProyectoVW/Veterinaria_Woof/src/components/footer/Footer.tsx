@@ -3,7 +3,7 @@ import "./Footer.css";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="app-footer container">
+    <footer className="app-footer">
       <img className="footer-logo" src="/src/pages/home/images/logo.png" alt="Logo" />
 
       {/* Contacto */}

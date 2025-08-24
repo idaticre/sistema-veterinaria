@@ -1,10 +1,12 @@
-/*.app-footer {
+.app-footer {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   padding: 50px 20px;
   width: 100%;
   box-sizing: border-box;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .footer-logo {
@@ -54,6 +56,7 @@
   color: #7e5106;
 }
 
+/* Redes sociales alineadas con el título */
 .footer-socials {
   display: flex;
   align-items: center;
@@ -80,6 +83,7 @@
   width: 20px;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .app-footer {
     flex-direction: column;
@@ -94,4 +98,4 @@
   .footer-socials {
     justify-content: center;
   }
-}*/
+}

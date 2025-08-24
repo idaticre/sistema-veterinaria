@@ -9,16 +9,16 @@ function Encabezado() {
   return (
     <header id="cabecera">
       <div id="contenedor_cab">
-        <a href="/" id="logo"><img src="/logo.png" alt="logo" /></a>
+        <a href="/" id="logo"><img src="/src/pages/home/images/logo.png" alt="logo" /></a>
 
         <nav className="menu-navegacion">
           <ul id="paginas">
-            <li><a href="">INICIO</a></li>
+            <li><a href="">Home</a></li>
             <li
               onMouseEnter={() => setMostrarIndice(true)}
               onMouseLeave={() => setMostrarIndice(false)}
             >
-              <a href="">SERVICIOS</a>
+              <a href="#servicios">Servicios</a>
               {mostrarIndice && (
                 <ul id="indice">
                   <li><a href="">Consulta veterinaria</a></li>
@@ -27,8 +27,8 @@ function Encabezado() {
                 </ul>
               )}
             </li>
-            <li><Link to="/tienda">PRODUCTOS</Link></li>
-            <li><Link to="">CONTACTO</Link></li>
+            <li><Link to="/tienda">Pet-Shop</Link></li>
+            <li><a href="#huellitas">Huellitas</a></li>
           </ul>
         </nav>
 
@@ -42,17 +42,17 @@ function Encabezado() {
       <div className={`panel-lateral ${menuAbierto ? 'activo' : ''}`}>
         <button className="cerrar" onClick={() => setMenuAbierto(false)}>×</button>
         <ul id="paginas-lateral">
-          <li><a href="">INICIO</a></li>
+          <li><a href="">home</a></li>
           <li>
-            <a href="">SERVICIOS</a>
+            <a href="#servicios">Servicios</a>
             <ul id="indice">
               <li><a href="">Consulta veterinaria</a></li>
               <li><a href="">Cirugía</a></li>
               <li><a href="">Baño y peluquería</a></li>
             </ul>
           </li>
-          <li><a href="">PRODUCTOS</a></li>
-          <li><a href="/clientes">CONTACTO</a></li>
+          <li><Link to="/tienda">Pet-Shop</Link></li>
+          <li><a href="#huellitas">Huellitas</a></li>
         </ul>
       </div>
     </header>

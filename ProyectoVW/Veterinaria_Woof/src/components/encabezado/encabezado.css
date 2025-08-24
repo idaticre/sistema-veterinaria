@@ -1,3 +1,10 @@
+#huellitas {
+  scroll-margin-top: 250px; /* Espacio antes de que empiece el div */
+}
+#servicios {
+  scroll-margin-top: 60px; /* Espacio antes de que empiece el div */
+}
+
 #cabecera {
   width: 100%;
   color: white;
@@ -46,18 +53,18 @@
 }
 
 #paginas li a {
-  color: rgb(1, 1, 1);
+  color: #7e5106;
   text-decoration: none;
   font-weight: bold;
-  border: black 3px solid;
-  background-color: #feb200;
-  border-radius: 15px;
+  background-color: #ffffff;
+  border-radius: 20px;
   padding: 10px;
-  font-size: 1.5vw;
+  font-size: 20px;
 }
 
 #paginas li a:hover {
-  background-color: #fbd273;
+  background-color: #7e5106;
+  color: white;
 }
 
 #indice {
@@ -79,17 +86,12 @@
 }
 
 #indice li a {
-  text-decoration: none;
-  color: #333;
-  border: none;
   background-color: transparent;
-  font-size: 1.2vw;
   white-space: nowrap;
-  text-decoration: underline;
 }
 
 #indice li a:hover {
-  color: #646cff;
+  color: #ffffff;
   background-color: transparent;
 }
 
@@ -134,7 +136,7 @@
   right: -100%;
   width: 280px;
   height: 100vh;
-  background-color: white;
+  background-color: #d2a679;
   padding: 60px 20px 20px 20px;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
   transition: right 0.3s ease;
@@ -169,7 +171,7 @@
 
 #paginas-lateral li a {
   text-decoration: none;
-  color: #333;
+  color: #f8b470;
   font-size: 1.2rem;
   font-weight: bold;
   background-color: transparent; 
@@ -179,7 +181,7 @@
 }
 
 #paginas-lateral li a:hover {
-  background-color: #fbd273;
+  color: #ff8000;
 }
 
 #paginas-lateral ul {
@@ -195,9 +197,12 @@
 }
 
 @media screen and (max-width: 1200px) {
-  #sign_in, #login {
-    padding: 10px 20px;
-    font-size: 1rem; 
+
+  #huellitas {
+    scroll-margin-top: 60px; /* Espacio antes de que empiece el div */
+  }
+  #servicios {
+    scroll-margin-top: 7px; /* Espacio antes de que empiece el div */
   }
 
   #sign_in a, #login a {
