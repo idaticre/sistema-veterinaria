@@ -221,7 +221,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <span>Seguridad y mantenimiento</span>
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
-                                <ul ref={seguridadRef   } className="submenu">
+                                <ul ref={seguridadRef} className="submenu">
                                     <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Usuarios de sistema</Link></li>
                                     <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Roles y permisos</Link></li>
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Copia de seguridad</Link></li>

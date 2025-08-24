@@ -5,7 +5,7 @@ import "./Admin_index.css"
 
 function Admin_index() {
     const [minimizado, setMinimizado] = useState(false);
-    const COLORS = ['#6c08beff', '#b34d16ff', '#17a832ff']; 
+    const COLORS = ['#6c08beff', '#b34d16ff', '#ffffffff']; 
 
     const data = [
         { name: 'Canino', cantidad: 10 },
