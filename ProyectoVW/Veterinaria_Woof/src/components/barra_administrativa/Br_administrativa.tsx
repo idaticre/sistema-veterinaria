@@ -71,21 +71,18 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                             <i className="fa-solid fa-chevron-left"></i>
                         </div>
                         <div id="cabezera">
-                            <img src="/perro 2.png" alt="" />
+                            <Link to="/"><img src="/perro 2.png" alt="" /></Link>
                             <span>Manada Woof</span>
                         </div>
                     </div>
                     <div id="menu">
                         <ul id="opciones">
-                            {/* Botón inicio de la barra lateral */}
                             <li className="opcion opcion_simple">
                                 <Link to="/administracion/home" className="enlace_opcion">
                                     <i className="fa-solid fa-house"></i>
                                     <span>Inicio</span>
                                 </Link>
                             </li>
-
-                            {/* Botón "clientes" de la barra lateral */}
                             <li className={`opcion opcion_desplegable ${openMenu === "cliente"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("cliente")}
                             >
@@ -99,8 +96,6 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <li><Link to="/administracion/cliente/registro" className="sub_opcion">Añadir cliente</Link></li>
                                 </ul>
                             </li>
-
-                            {/* Botón "mascotas" de la barra lateral */}
                             <li className={`opcion opcion_desplegable ${openMenu === "mascotas"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("mascotas")}
                             >
@@ -116,16 +111,12 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <li><Link to="/administracion/mascotas/vacunas" className="sub_opcion">Vacunas disponibles</Link></li>
                                 </ul>
                             </li>
-
-                            {/* Botón "historial médico" de la barra lateral */}
                             <li className="opcion opcion_simple">
                                 <Link to="#" className="enlace_opcion">
                                     <i className="fa-solid fa-folder"></i>
                                     <span>Hist Médico</span>
                                 </Link>
                             </li>
-
-                            {/* Botón "agenda" de la barra lateral */}
                             <li className={`opcion opcion_desplegable ${openMenu === "agenda"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("agenda")}
                             >
@@ -141,8 +132,6 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Sala de espera</Link></li>
                                 </ul>
                             </li>
-
-                            {/* Botón "distribución" de la barra lateral */}
                             <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("distribucion")}
                             >
@@ -157,8 +146,6 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Proveedores</Link></li>
                                 </ul>
                             </li>
-
-                            {/* Botón "ventas" de la barra lateral */}
                             <li className={`opcion opcion_desplegable ${openMenu === "venta"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("venta")}
                             >
@@ -173,14 +160,12 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">notas de credito</Link></li>
                                 </ul>
                             </li>
-
-                            {/* Botón "reportes e informes" de la barra lateral */}
                             <li className={`opcion opcion_desplegable ${openMenu === "informe"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("informe")}
                             >
                                 <Link to="" className="enlace_opcion"> 
                                     <i className="fa-solid fa-file"></i>
-                                    <span>Reportes e informes</span>
+                                    <span>Reportes/Informes</span>
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={informRef} className="submenu">
@@ -192,8 +177,6 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Caja general</Link></li>
                                 </ul>
                             </li>
-
-                            {/* Botón "administración" de la barra lateral */}
                             <li className={`opcion opcion_desplegable ${openMenu === "administracion"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("administracion")}
                             >
@@ -203,22 +186,17 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={adminRef} className="submenu">
-                                    <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestionar colaboradores</Link></li>
-                                    <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Turnos y horarios</Link></li>
-                                    <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
-                                    <li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos a colaboradores</Link></li>
-                                    <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
-                                    <li><Link to="/administracion/administracion/desempeno_de_colaboradores" className="sub_opcion">Desempeño de colaboradores</Link></li>
+                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestión de colaboradores</Link></li>
+                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Nomina</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Horarios</Link></li>
                                 </ul>
                             </li>
-
-                            {/* Botón "seguridad y mantenimiento" de la barra lateral */}
                             <li className={`opcion opcion_desplegable ${openMenu === "seguridad"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("seguridad")}
                             >
                                 <Link to="" className="enlace_opcion"> 
                                     <i className="fa-solid fa-shield-halved"></i>
-                                    <span>Seguridad y mantenimiento</span>
+                                    <span>Seguridad y Mantenimiento</span>
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={seguridadRef   } className="submenu">
@@ -229,8 +207,6 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                             </li>
                         </ul>
                     </div>
-
-                    {/* Botón "anuncios" de la barra lateral */}
                     <div id="br_footer">
                         <ul id="opciones">
                             <li className="opcion opcion_simple">

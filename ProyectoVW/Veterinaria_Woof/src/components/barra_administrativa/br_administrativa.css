@@ -81,7 +81,7 @@
     height: 100%;
     flex-direction: column;
     align-items: center;
-    /*overflow-y: auto; quitar si no se desea xd*/
+    overflow-y: auto; /*quitar si no se desea xd*/
 }
 
 #opciones{

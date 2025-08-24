@@ -27,7 +27,7 @@ function Encabezado() {
                 </ul>
               )}
             </li>
-            <li><a href="">PRODUCTOS</a></li>
+            <li><Link to="/tienda">PRODUCTOS</Link></li>
             <li><Link to="">CONTACTO</Link></li>
           </ul>
         </nav>

@@ -33,7 +33,7 @@ function Lst_mascotas() {
 
   useEffect(() => {
     // esto tambien xd
-  const datos = [
+    const datos = [
       { id: 1, nombre: "Pancho", id_cliente: 2 },
       { id: 2, nombre: "yuko", id_cliente: 3 },
       { id: 3, nombre: "chocolate", id_cliente: 1 },
