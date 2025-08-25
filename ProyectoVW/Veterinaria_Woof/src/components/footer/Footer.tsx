@@ -6,7 +6,6 @@ const Footer: React.FC = () => {
     <footer className="app-footer">
       <img className="footer-logo" src="/src/pages/home/images/logo.png" alt="Logo" />
 
-      {/* Contacto */}
       <div className="footer-links">
         <h4>
           Contacto
@@ -34,7 +33,6 @@ const Footer: React.FC = () => {
         </ul>
       </div>
 
-      {/* Mapa del sitio */}
       <div className="footer-links">
         <h4>
           Mapa del sitio
@@ -52,7 +50,6 @@ const Footer: React.FC = () => {
         </ul>
       </div>
 
-      {/* Información */}
       <div className="footer-links">
         <h4>
           Información
@@ -64,7 +61,6 @@ const Footer: React.FC = () => {
         </ul>
       </div>
 
-      {/* Síguenos */}
       <div className="footer-links">
         <h4>
           Síguenos
@@ -76,11 +72,7 @@ const Footer: React.FC = () => {
               <img src="/src/pages/home/images/s1.svg" alt="Facebook" />
             </div>
           </a>
-          {/* <a href="#">
-            <div className="footer-social">
-              <img src="/images/s2.svg" alt="Twitter" />
-            </div>
-          </a> */}
+
           <a href="#">
             <div className="footer-social">
               <img src="/src/pages/home/images/s3.svg" alt="Instagram" />
