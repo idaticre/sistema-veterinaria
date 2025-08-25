@@ -69,6 +69,27 @@
     justify-content: space-evenly;
 }
 
+.carrito_dets_btns button{
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 10px;  
+    background: #f1f1f1;    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+    font-size: 1rem;           
+}
+
+.carrito_dets_btns button:hover{
+    filter: brightness(1.2); 
+    transform: scale(1.1); 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
 .carrito_footer {
   border-top: 1px solid #eee;
   padding-top: 1rem;
