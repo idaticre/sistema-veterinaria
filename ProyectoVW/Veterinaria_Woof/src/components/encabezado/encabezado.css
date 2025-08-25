@@ -1,8 +1,8 @@
 #huellitas {
-  scroll-margin-top: 250px; /* Espacio antes de que empiece el div */
+  scroll-margin-top: 250px; 
 }
 #servicios {
-  scroll-margin-top: 60px; /* Espacio antes de que empiece el div */
+  scroll-margin-top: 60px; 
 }
 
 #cabecera {
@@ -199,10 +199,10 @@
 @media screen and (max-width: 1200px) {
 
   #huellitas {
-    scroll-margin-top: 60px; /* Espacio antes de que empiece el div */
+    scroll-margin-top: 60px; 
   }
   #servicios {
-    scroll-margin-top: 7px; /* Espacio antes de que empiece el div */
+    scroll-margin-top: 7px; 
   }
 
   #sign_in a, #login a {
