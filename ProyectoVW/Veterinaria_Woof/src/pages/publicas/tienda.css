@@ -4,6 +4,22 @@
     /*min-height: 100vh;*/
 }
 
+.opciones_categorias .swiper {
+  width: 100%;
+  padding: 10px 20px 20px;
+  box-sizing: border-box;
+}
+
+.opciones_categorias .swiper-wrapper {
+  display: flex;
+}
+
+.opciones_categorias .swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .opciones_categorias span{
   background-color: #96beda;
   font-size: 1rem;
