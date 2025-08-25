@@ -1,4 +1,4 @@
-import React, { useState, /* useEffect */ } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Carousel.css';
 
 const slides = [
@@ -50,13 +50,13 @@ const Carousel: React.FC = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  /* useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       nextSlide();
-    }, 3000); // Cambia cada 3 segundos
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, []); */
+  }, []);
 
   return (
     <section className="crsl-header ">
@@ -87,7 +87,6 @@ const Carousel: React.FC = () => {
             </div>
           </div>
 
-          {/* Flechas */}
           <button className="crsl-arrow crsl-prev" onClick={prevSlide}>
             ⟨
           </button>
@@ -96,7 +95,6 @@ const Carousel: React.FC = () => {
           </button>
         </div>
 
-        {/* Puntos */}
         <div className="crsl-dots">
           {slides.map((_, idx) => (
             <span
