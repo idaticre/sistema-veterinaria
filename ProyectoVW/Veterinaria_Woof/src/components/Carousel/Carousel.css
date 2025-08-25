@@ -1,13 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
 
-/* Contenedor principal */
 .crsl-header {
   font-family: "Poppins", sans-serif;
 }
 
 .crsl-wrapper {
-  padding: 2rem 10rem;/* 
-  background-color: #ffe0ac; */
+  padding: 2rem 10rem;
 }
 
 .crsl-content {
@@ -64,7 +62,6 @@
   width: 550px;
 }
 
-/* Carrusel */
 .crsl-wrapper {
   position: relative;
   overflow: hidden;
@@ -123,7 +120,6 @@
   background-color: #7e5106;
 }
 
-/* Responsive */
 @media (max-width: 991px) {
   
   .crsl-arrow {
