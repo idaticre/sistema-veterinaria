@@ -15,7 +15,7 @@ function gestionarColaboradores() {
     return (
         <>
             <div id="colaboradores">
-                <Br_administrativa onMinimizeChange={setMinimizado}/>
+                <Br_administrativa/>
                 {/* yadda yadda ya */}
             </div>
         </>

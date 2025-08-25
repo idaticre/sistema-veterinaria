@@ -187,8 +187,12 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 </Link>
                                 <ul ref={adminRef} className="submenu">
                                     <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestión de colaboradores</Link></li>
-                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Nomina</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Horarios</Link></li>
+                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Turnos y horarios</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Asistencia de colaboradores</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Pagos de colaboradores</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Parámetros y promociones</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Desempeño de los colaboradores</Link></li>
+
                                 </ul>
                             </li>
                             <li className={`opcion opcion_desplegable ${openMenu === "seguridad"?"toggle_submenu":""}`} 
