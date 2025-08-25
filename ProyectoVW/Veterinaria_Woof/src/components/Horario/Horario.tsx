@@ -37,11 +37,7 @@ const Horario: React.FC = () => {
                   <img src="/src/pages/home/images/s1.svg" alt="Facebook" />
                 </div>
               </a>
-              {/* <a href="#">
-                <div className="horario-social">
-                  <img src="/images/s2.svg" alt="Twitter" />
-                </div>
-              </a> */}
+
               <a href="#">
                 <div className="horario-social">
                   <img src="/src/pages/home/images/s3.svg" alt="Instagram" />
