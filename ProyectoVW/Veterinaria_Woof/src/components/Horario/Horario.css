@@ -42,10 +42,9 @@
   margin-bottom: 15px;
 }
 
-/* Redes sociales */
 .horario-socials {
   display: flex;
-  align-items: center; /* Centra con el título */
+  align-items: center;
   gap: 10px;
 }
 
@@ -68,7 +67,6 @@
   width: 20px;
 }
 
-/* Responsive */
 @media (max-width: 991px) {
   .horario {
     padding: 30px;
