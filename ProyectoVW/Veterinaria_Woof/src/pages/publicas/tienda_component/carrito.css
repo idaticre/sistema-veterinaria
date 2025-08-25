@@ -1,0 +1,103 @@
+.carrito_fondo {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  background: black;
+  z-index: 20;
+}
+
+.carrito_panel {
+  position: fixed;
+  top: 0; 
+  right: 0;
+  width: 400px;
+  height: 100%;
+  background: white;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.carrito_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.cerrar_carrito {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.carrito_lista {
+  flex: 1;
+  margin: 1rem 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.carrito_producto{
+    display: flex;
+    justify-content: space-between;
+}
+
+.carrito_producto img{
+    width: 30%;
+}
+
+.carrito_dets_produc{
+    display: flex;
+    flex-direction: column;
+    width: 55%;
+}
+
+.carrito_dets_btns{
+    width: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.carrito_footer {
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+.carrito-footer-botones{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.carrito-footer-botones button{
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    width: 10rem;
+    cursor: pointer;
+}
+
+.btn_vaciar{
+    background-color: rgb(251, 116, 116);
+    transition: all ease 0.3s;
+}
+
+.btn_comprar{
+    background-color: rgb(95, 237, 90);
+    transition: all ease 0.3s;
+}
+
+.carrito-footer-botones button:hover{
+   filter: saturate(1.7);
+}

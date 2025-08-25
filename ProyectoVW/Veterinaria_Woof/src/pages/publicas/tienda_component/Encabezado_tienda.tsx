@@ -2,11 +2,12 @@ import { Link } from 'react-router-dom'
 import "./encabezado_tienda.css"
 
 type tiendaProps = {
-    onEnviarWhatsApp: () => void;
     cantidadCarrito: number;
+    onAbrirCarrito: () => void;
 }
 
-function Encabezado_tienda({onEnviarWhatsApp, cantidadCarrito}: tiendaProps) {
+function Encabezado_tienda({cantidadCarrito, onAbrirCarrito}: tiendaProps) {
+    
   return (
     <>
         <div className='encabezado_tienda'>
@@ -17,7 +18,7 @@ function Encabezado_tienda({onEnviarWhatsApp, cantidadCarrito}: tiendaProps) {
                 <input type="text" placeholder="ingrese el producto a buscar"/>
             </div>
             <div className='carrito_btn'>
-                <Link to="" onClick={onEnviarWhatsApp}>
+                <Link to="" onClick={onAbrirCarrito}>
                     🛒 
                     {cantidadCarrito > 0 && (
                         <span className="carrito_cantidad">{cantidadCarrito}</span>

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import { FreeMode } from "swiper/modules";
+import Carrito from "./tienda_component/carrito";
 
 
 type ArticuloData = {
@@ -29,6 +30,7 @@ function tienda() {
   const [carrito, setCarrito] = useState<{ id: number; titulo: string; precio: number; cantidad: number; }[]>([]);
   const [filtroMarcas, setFiltroMarcas] = useState<string[]>([]);
   const [filtroEspecies, setFiltroEspecies] = useState<number[]>([]);
+  const [abrirCarrito, setAbrirCarrito] = useState(false);
 
   const categorias: categoria[] = [
     {id: 0, nombre: 'Destacado',},
@@ -66,7 +68,7 @@ function tienda() {
       id: 3,
       titulo: 'WHISKAS',
       precio: 36.69,
-      marca: 'WHISKAS',
+      marca: 'Whiskas',
       kilo: '1.5 Kg',
       descripcion: '####.',
       categoriaID: 1,
@@ -166,7 +168,7 @@ function tienda() {
       return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const trajeta_produc = (producto: ArticuloData) => (
+  const tarjeta_produc = (producto: ArticuloData) => (
     <div className="card" key={producto.id}>
       <img src={`/${producto.id}.jpeg`} alt={producto.titulo} className="card-img" />
       <h3 className="card-title">{producto.titulo}</h3>
@@ -177,21 +179,21 @@ function tienda() {
         <button className="btn" onClick={() => setMostrarInfo(producto.id)}>Info</button>
       </div>
       {mostrarInfo === producto.id && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-content">
-              <div className="modal-info">
+        <div className="ventanaInf_producto">
+          <div className="ventanaInf">
+            <div className="ventanaInf_producto_contenido">
+              <div className="ventanaInf_producto_inf">
                 <h2>{producto.titulo}</h2>
                 <p><strong>Marca:</strong> {producto.marca}</p>
                 <p><strong>Peso:</strong> {producto.kilo}</p>
                 <p><strong>Precio:</strong> S/. {producto.precio.toFixed(2)}</p>
                 <p><strong>Descripción:</strong> <br/>{producto.descripcion}</p>
               </div>
-              <div className="modal-img">
+              <div className="ventanaInf_producto_img">
                 <img src={`/${producto.id}.jpeg`} alt={producto.titulo} />
               </div>
             </div>
-            <div className="modal-footer">
+            <div className="ventanaInf_producto_footer">
               <button className="btn cerrar-btn" onClick={() => setMostrarInfo(null)}>Cerrar</button>
             </div>
           </div>
@@ -199,6 +201,18 @@ function tienda() {
       )}
     </div>
   );
+
+  const eliminarUnidadCarrito = (id: number) => {
+    setCarrito(prevCarrito =>
+      prevCarrito
+        .map(item =>
+          item.id === id
+            ? { ...item, cantidad: item.cantidad - 1 }
+            : item
+        )
+        .filter(item => item.cantidad > 0)
+    );
+  };
 
   const enviarPorWhatsApp = () => {
     let mensaje = "Mucho gusto, quiero comprar:\n";
@@ -216,8 +230,8 @@ function tienda() {
   return (
     <>
         <Encabezado_tienda 
-          onEnviarWhatsApp={enviarPorWhatsApp}
           cantidadCarrito={carrito.reduce((acc, item) => acc + (item.cantidad || 0), 0)}
+          onAbrirCarrito={() => setAbrirCarrito(true)}
         />
         <div className="opciones_categorias">
           <Swiper
@@ -263,7 +277,7 @@ function tienda() {
                         producto.precio <= rangoPrecio[1]
                     )
                     .slice(0, 4)
-                    .map(trajeta_produc)}
+                    .map(tarjeta_produc)}
                 </div>
                   <div className="T_categoraDesta">
                     <h2>Jueguetes</h2>
@@ -277,7 +291,7 @@ function tienda() {
                         producto.precio <= rangoPrecio[1]
                     )
                     .slice(0, 4)
-                    .map(trajeta_produc)}
+                    .map(tarjeta_produc)}
                 </div>
                 <div className="T_categoraDesta">
                   <h2>Medicina</h2>
@@ -291,18 +305,29 @@ function tienda() {
                         producto.precio <= rangoPrecio[1]
                     )
                     .slice(0, 4)
-                    .map(trajeta_produc)}
+                    .map(tarjeta_produc)}
                 </div>
               </div>
             </>
           ):(
             <>
               <div className="articulos-grid">
-                {productosFiltrados.map(trajeta_produc)}
+                {productosFiltrados.map(tarjeta_produc)}
               </div>
             </>
           )}
         </div>
+        {abrirCarrito && (
+          <Carrito
+            desplegado={abrirCarrito}
+            items={carrito}
+            onEliminar={(id) => setCarrito(prev => prev.filter(p => p.id !== id))}
+            onDisminuir = {eliminarUnidadCarrito}
+            onVaciar={() => setCarrito([])}
+            onCerrar={() => setAbrirCarrito(false)}
+            onEnviarWhatsApp={enviarPorWhatsApp}
+          />
+        )}
     </>
   )
 }
