@@ -76,25 +76,25 @@
 @media (max-width: 1000px) {
   #promo {
     flex-direction: column;
-    padding: 20px 10px; /* AQUÍ: Reducido top/bottom en móviles también */
-    gap: 30px; /* AQUÍ: Gap fijo para móviles en lugar de 5vw */
+    padding: 20px 10px; 
+    gap: 30px; 
   }
   
   #contenido {
     flex-direction: column;
-    gap: 15px; /* AQUÍ: Menor separación entre elementos del contenido */
+    gap: 15px;
   }
   
   .contenedor h2 {
-    font-size: 35px; /* AQUÍ: Título más pequeño para móviles */
+    font-size: 35px; 
   }
   
   .contenedor img {
-    width: 40vw; /* AQUÍ: Imagen un poco más grande en móviles */
+    width: 40vw; 
     max-width: 180px;
   }
   
   #mapa iframe {
-    height: 300px; /* AQUÍ: Mapa más compacto en móviles */
+    height: 300px;
   }
 }
