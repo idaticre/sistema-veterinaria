@@ -4,9 +4,10 @@ import "./encabezado_tienda.css"
 type tiendaProps = {
     cantidadCarrito: number;
     onAbrirCarrito: () => void;
+    onBusquedaChange: (valor: string) => void;
 }
 
-function Encabezado_tienda({cantidadCarrito, onAbrirCarrito}: tiendaProps) {
+function Encabezado_tienda({cantidadCarrito, onAbrirCarrito, onBusquedaChange}: tiendaProps) {
     
   return (
     <>
@@ -15,7 +16,11 @@ function Encabezado_tienda({cantidadCarrito, onAbrirCarrito}: tiendaProps) {
                 <img src="./logo.png" alt="" />
             </Link>
             <div id='buscador_tienda'>
-                <input type="text" placeholder="ingrese el producto a buscar"/>
+                <input 
+                    type="text" 
+                    placeholder="ingrese el producto a buscar"
+                    onChange={(e) => onBusquedaChange(e.target.value)}
+                />
             </div>
             <div className='carrito_btn'>
                 <Link to="" onClick={onAbrirCarrito}>

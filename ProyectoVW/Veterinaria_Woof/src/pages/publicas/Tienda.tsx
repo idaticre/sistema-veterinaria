@@ -31,6 +31,7 @@ function tienda() {
   const [filtroMarcas, setFiltroMarcas] = useState<string[]>([]);
   const [filtroEspecies, setFiltroEspecies] = useState<number[]>([]);
   const [abrirCarrito, setAbrirCarrito] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
 
   const categorias: categoria[] = [
     {id: 0, nombre: 'Destacado',},
@@ -134,12 +135,18 @@ function tienda() {
   const [rangoPrecio, setRangoPrecio] = useState<number[]>([precioMin, precioMax]);
 
   const productosFiltrados  = categoriaSeleccionada === 0 ? [] :
-  productos.filter(
+    productos.filter(
+      (producto) =>
+        producto.categoriaID === categoriaSeleccionada &&
+        producto.precio >= rangoPrecio[0] && producto.precio <= rangoPrecio[1] &&
+        (filtroMarcas.length === 0 || filtroMarcas.includes(producto.marca)) &&
+        (filtroEspecies.length === 0 || filtroEspecies.includes(producto.idEspecie))
+  );
+
+  const productosBusqueda = productos.filter(
     (producto) =>
-      producto.categoriaID === categoriaSeleccionada &&
-      producto.precio >= rangoPrecio[0] && producto.precio <= rangoPrecio[1] &&
-      (filtroMarcas.length === 0 || filtroMarcas.includes(producto.marca)) &&
-      (filtroEspecies.length === 0 || filtroEspecies.includes(producto.idEspecie))
+      producto.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
+      producto.marca.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   const agregarAlCarrito = (producto: ArticuloData) => {
@@ -232,88 +239,103 @@ function tienda() {
         <Encabezado_tienda 
           cantidadCarrito={carrito.reduce((acc, item) => acc + (item.cantidad || 0), 0)}
           onAbrirCarrito={() => setAbrirCarrito(true)}
+          onBusquedaChange={setBusqueda}
         />
-        <div className="opciones_categorias">
-          <Swiper
-            slidesPerView="auto"
-            spaceBetween={30}
-            freeMode={true}
-            modules={[FreeMode]}
-          >
-            {categorias.map(categoria =>(
-              <SwiperSlide
-                key={categoria.id}
-                style={{ width: 'auto' }}
-              >
-                <span onClick={() => setCategoriaSeleccionada(categoria.id)}
-                  className={`${categoriaSeleccionada == categoria.id ?"Cat_select":""}`}
+        {!busqueda && (
+          <div className="opciones_categorias">
+            <Swiper
+              slidesPerView="auto"
+              spaceBetween={30}
+              freeMode={true}
+              modules={[FreeMode]}
+            >
+              {categorias.map(categoria =>(
+                <SwiperSlide
+                  key={categoria.id}
+                  style={{ width: 'auto' }}
                 >
-                  {categoria.nombre}
-                </span>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
+                  <span onClick={() => setCategoriaSeleccionada(categoria.id)}
+                    className={`${categoriaSeleccionada == categoria.id ?"Cat_select":""}`}
+                  >
+                    {categoria.nombre}
+                  </span>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        )}
         <div className="tienda">
-          <Filtro_tienda
-            precioMaximo={precioMax}
-            onPrecioChange={setRangoPrecio}
-            categoriaSeleccionada={categoriaSeleccionada}
-            onMarcasChange={setFiltroMarcas}
-            onEspeciesChange={setFiltroEspecies}
-          />
-          {categoriaSeleccionada === 0 ? (
+          {busqueda ? (
+            <div className="articulos-grid">
+              {productosBusqueda.length > 0 ? (
+                productosBusqueda.map(tarjeta_produc)
+              ) : (
+                <p>No se encontraron productos</p>
+              )}
+            </div>
+          ) : (
             <>
-              <div className="destacados">
-                <div className="T_categoraDesta">
-                  <h2>Alimento</h2>
-                </div>
-                <div className="articulos-grid">
-                  {productos
-                    .filter(
-                      (producto) =>
-                        producto.categoriaID === 1 &&
-                        producto.precio >= rangoPrecio[0] &&
-                        producto.precio <= rangoPrecio[1]
-                    )
-                    .slice(0, 4)
-                    .map(tarjeta_produc)}
-                </div>
-                  <div className="T_categoraDesta">
-                    <h2>Jueguetes</h2>
+              <Filtro_tienda
+                precioMaximo={precioMax}
+                onPrecioChange={setRangoPrecio}
+                categoriaSeleccionada={categoriaSeleccionada}
+                onMarcasChange={setFiltroMarcas}
+                onEspeciesChange={setFiltroEspecies}
+              />
+              {categoriaSeleccionada === 0 ? (
+                <>
+                  <div className="destacados">
+                    <div className="T_categoraDesta">
+                      <h2>Alimento</h2>
+                    </div>
+                    <div className="articulos-grid">
+                      {productos
+                        .filter(
+                          (producto) =>
+                            producto.categoriaID === 1 &&
+                            producto.precio >= rangoPrecio[0] &&
+                            producto.precio <= rangoPrecio[1]
+                        )
+                        .slice(0, 4)
+                        .map(tarjeta_produc)}
+                    </div>
+                      <div className="T_categoraDesta">
+                        <h2>Jueguetes</h2>
+                      </div>
+                      <div className="articulos-grid">
+                      {productos
+                        .filter(
+                          (producto) =>
+                            producto.categoriaID === 2 &&
+                            producto.precio >= rangoPrecio[0] &&
+                            producto.precio <= rangoPrecio[1]
+                        )
+                        .slice(0, 4)
+                        .map(tarjeta_produc)}
+                    </div>
+                    <div className="T_categoraDesta">
+                      <h2>Medicina</h2>
+                    </div>
+                    <div className="articulos-grid">
+                      {productos
+                        .filter(
+                          (producto) =>
+                            producto.categoriaID === 1 &&
+                            producto.precio >= rangoPrecio[0] &&
+                            producto.precio <= rangoPrecio[1]
+                        )
+                        .slice(0, 4)
+                        .map(tarjeta_produc)}
+                    </div>
                   </div>
+                </>
+              ):(
+                <>
                   <div className="articulos-grid">
-                  {productos
-                    .filter(
-                      (producto) =>
-                        producto.categoriaID === 2 &&
-                        producto.precio >= rangoPrecio[0] &&
-                        producto.precio <= rangoPrecio[1]
-                    )
-                    .slice(0, 4)
-                    .map(tarjeta_produc)}
-                </div>
-                <div className="T_categoraDesta">
-                  <h2>Medicina</h2>
-                </div>
-                <div className="articulos-grid">
-                  {productos
-                    .filter(
-                      (producto) =>
-                        producto.categoriaID === 1 &&
-                        producto.precio >= rangoPrecio[0] &&
-                        producto.precio <= rangoPrecio[1]
-                    )
-                    .slice(0, 4)
-                    .map(tarjeta_produc)}
-                </div>
-              </div>
-            </>
-          ):(
-            <>
-              <div className="articulos-grid">
-                {productosFiltrados.map(tarjeta_produc)}
-              </div>
+                    {productosFiltrados.map(tarjeta_produc)}
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>

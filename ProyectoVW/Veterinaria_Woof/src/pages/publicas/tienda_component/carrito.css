@@ -30,11 +30,16 @@
   padding-bottom: 0.5rem;
 }
 
-.cerrar_carrito {
+.carrito_header h2{
+  margin: 0;
+}
+
+.carrito_header .cerrar_carrito {
   background: transparent;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
+  align-items: center;
 }
 
 .carrito_lista {
@@ -47,18 +52,18 @@
 }
 
 .carrito_producto{
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 
 .carrito_producto img{
-    width: 30%;
+  width: 30%;
 }
 
 .carrito_dets_produc{
-    display: flex;
-    flex-direction: column;
-    width: 55%;
+  display: flex;
+  flex-direction: column;
+  width: 55%;
 }
 
 .carrito_dets_btns{
