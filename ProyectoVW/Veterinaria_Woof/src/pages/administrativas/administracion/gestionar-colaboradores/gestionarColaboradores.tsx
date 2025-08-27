@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
-import "./gestionarColaboradores.css"
+import "./styles.css"
+import { Link } from "react-router-dom";
 
 interface Colaborador {
     ID: number,
@@ -88,19 +89,21 @@ function gestionarColaboradores() {
     }
 
     return (
-        <div id="colaboradores">
+        <div id="cuerpo-main">
             <Br_administrativa onMinimizeChange={setMinimizado}/>
             <main className={minimizado ? "minimize" : ""}>
-                <section id="listar_colaboradores">
+                <section id="listar-registros">
                     <div className="encabezado"><h2>Lista de colaboradores</h2></div>
-                    <div className="buscador">
-                        <div className="barra_buscador"><input type="text" placeholder="Ingrese nombre de colaborador" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
-                        <button onClick={() => { setMostrarModal(true); setEdicion(null); }}>Registrar colaborador</button>
+                    <div className="goated">
+                        <div className="barra-buscador"><input type="text" placeholder="Ingrese nombre de colaborador" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
+                        <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_usuarios">Gestionar usuarios</Link>
+                        <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_entidades">Gestionar entidades</Link>
+                        <button className="boton-goated anadir-a-goated animacion-goated" onClick={() => { setMostrarModal(true); setEdicion(null); }}>Registrar colaborador</button>
                     </div>
 
-                    <div className="listar-colaboradores">
+                    <div className="listar-registros">
                         {filtrado.map((registro) => (
-                            <div className="registro-colaborador" key={registro.ID}>
+                            <div className="mostrar-registros" key={registro.ID}>
                                 <span className="texto-de-registro">{registro.CODIGO}</span>
                                 <span className="texto-de-registro">{registro.ENTIDAD}</span>
                                 <span className="texto-de-registro">{registro.NOMBRE}</span>
@@ -132,9 +135,9 @@ function gestionarColaboradores() {
                         <input type="text" placeholder="Nombre de usuario" value={edicion?.USUARIO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USUARIO: nuevoValor.target.value } : null)}/>
                         <select value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value) } : null)}>
                             <option value="">-- Selecciona estado --</option>
-                            <option value="0">Inctivo</option>
-                            <option value="1">Activo</option>
-                            <option value="2">Suspendido</option>
+                            <option value="1">Inactivo</option>
+                            <option value="2">Activo</option>
+                            <option value="3">Suspendido</option>
                         </select>
                         <div className="acciones-de-registro">
                             <button onClick={guardarColaborador}>Guardar</button>
