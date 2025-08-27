@@ -95,7 +95,7 @@ function gestionarColaboradores() {
                 <section id="listar-registros">
                     <div className="encabezado"><h2>Lista de colaboradores</h2></div>
                     <div className="goated">
-                        <div className="barra-buscador"><input type="text" placeholder="Ingrese nombre de colaborador" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
+                        <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del colaborador que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
                         <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_usuarios">Gestionar usuarios</Link>
                         <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_entidades">Gestionar entidades</Link>
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={() => { setMostrarModal(true); setEdicion(null); }}>Registrar colaborador</button>
@@ -107,7 +107,7 @@ function gestionarColaboradores() {
                                 <span className="texto-de-registro">{registro.CODIGO}</span>
                                 <span className="texto-de-registro">{registro.ENTIDAD}</span>
                                 <span className="texto-de-registro">{registro.NOMBRE}</span>
-                                <span className="texto-de-registro">{registro.ACTIVO ? "Activo" : "Inactivo"}</span>                                
+                                <span className="texto-de-registro">{{1: "Inactivo", 2: "Activo", 3: "Suspendido"}[registro.ACTIVO] || "Desconocido"}</span>                             
                                 <span className="texto-de-registro">{registro.USUARIO}</span>
                                 <span className="texto-de-registro">📅{registro.FECHA_INGRESO}</span>
                                 <div className="listar-opciones-contenedor">
@@ -149,5 +149,5 @@ function gestionarColaboradores() {
         </div>
     )
 }
-
+/* Se requiere solucionar la adicion de nuevos registros */
 export default gestionarColaboradores
