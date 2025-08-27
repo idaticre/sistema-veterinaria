@@ -465,7 +465,7 @@ CREATE PROCEDURE registrar_entidad_base (
     OUT p_codigo_entidad VARCHAR(16),
     OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc_main: BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -480,14 +480,14 @@ BEGIN
     IF p_nombre IS NULL OR p_documento IS NULL THEN
         SET p_mensaje = 'ERROR: Nombre y documento son obligatorios.';
         ROLLBACK;
-        LEAVE proc_end;
+        LEAVE proc_main;
     END IF;
 
     -- Validación documento duplicado
     IF EXISTS (SELECT 1 FROM entidades WHERE documento = p_documento) THEN
         SET p_mensaje = 'ERROR: Documento ya registrado.';
         ROLLBACK;
-        LEAVE proc_end;
+        LEAVE proc_main;
     END IF;
 
     -- Insertar en entidades
@@ -514,10 +514,10 @@ BEGIN
     SET p_mensaje = CONCAT('Entidad registrada con código: ', p_codigo_entidad);
 
     COMMIT;
-    proc_end: 
-    BEGIN END;
 END$$
+
 DELIMITER ;
+
 
 -- ========================================
 -- SP: ACTUALIZAR_ENTIDAD_BASE
@@ -526,6 +526,7 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS actualizar_entidad_base;
 DELIMITER $$
+
 CREATE PROCEDURE actualizar_entidad_base (
     IN p_id_entidad INT,
     IN p_id_tipo_persona_juridica INT,
@@ -542,21 +543,22 @@ CREATE PROCEDURE actualizar_entidad_base (
     IN p_activo TINYINT,
     OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc_main: BEGIN
     -- Validar existencia de entidad
     IF NOT EXISTS (SELECT 1 FROM entidades WHERE id = p_id_entidad) THEN
         SET p_mensaje = 'ERROR: La entidad especificada no existe.';
-        LEAVE actualizar_entidad_base;
+        LEAVE proc_main;
     END IF;
 
     -- Validar documento duplicado en otra entidad
     IF EXISTS (SELECT 1 FROM entidades WHERE documento = p_documento AND id <> p_id_entidad) THEN
         SET p_mensaje = 'ERROR: Ya existe otra entidad con ese número de documento.';
-        LEAVE actualizar_entidad_base;
+        LEAVE proc_main;
     END IF;
 
     -- Actualizar datos generales de la entidad
-    UPDATE entidades SET
+    UPDATE entidades 
+    SET
         id_tipo_persona_juridica = p_id_tipo_persona_juridica,
         nombre = p_nombre,
         sexo = p_sexo,
@@ -571,10 +573,10 @@ BEGIN
         activo = p_activo
     WHERE id = p_id_entidad;
 
+    -- Mensaje de confirmación
     SET p_mensaje = CONCAT('Entidad actualizada: ', (SELECT codigo FROM entidades WHERE id = p_id_entidad));
 END$$
 DELIMITER ;
-
 
 -- ========================================
 -- SP: REGISTRAR_CLIENTE
@@ -586,6 +588,7 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS registrar_cliente;
 DELIMITER $$
+
 CREATE PROCEDURE registrar_cliente (
     IN p_id_tipo_persona_juridica INT,
     IN p_nombre VARCHAR(128),
@@ -601,16 +604,20 @@ CREATE PROCEDURE registrar_cliente (
     OUT p_codigo_cliente VARCHAR(20),
     OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc_main: BEGIN
     DECLARE v_id_tipo_entidad INT DEFAULT NULL;
     DECLARE v_id_entidad INT DEFAULT NULL;
     DECLARE v_id_cliente INT DEFAULT NULL;
 
     -- Obtener id de tipo entidad CLIENTE
-    SELECT id INTO v_id_tipo_entidad FROM tipo_entidad WHERE nombre = 'CLIENTE' LIMIT 1;
+    SELECT id INTO v_id_tipo_entidad 
+    FROM tipo_entidad 
+    WHERE nombre = 'CLIENTE' 
+    LIMIT 1;
+
     IF v_id_tipo_entidad IS NULL THEN
         SET p_mensaje = 'ERROR: Tipo entidad CLIENTE no encontrado.';
-        LEAVE registrar_cliente;
+        LEAVE proc_main;
     END IF;
 
     -- Llamar a registrar_entidad_base para crear la entidad en tabla 'entidades'
@@ -632,13 +639,14 @@ BEGIN
         @p_mensaje
     );
 
+    -- Recuperar resultados del procedimiento base
     SELECT @p_id_entidad INTO v_id_entidad;
     SELECT @p_codigo_entidad INTO p_codigo_entidad;
     SELECT @p_mensaje INTO p_mensaje;
 
+    -- Validar si hubo error en registrar_entidad_base
     IF v_id_entidad IS NULL THEN
-        -- Si hubo error en registrar_entidad_base, mensaje ya fue seteado
-        LEAVE registrar_cliente;
+        LEAVE proc_main;
     END IF;
 
     -- Insertar en clientes con id_entidad obtenido
@@ -647,13 +655,17 @@ BEGIN
     SET v_id_cliente = LAST_INSERT_ID();
 
     -- Actualizar código en clientes con prefijo 'CLI' y 6 dígitos rellenos con ceros
-    UPDATE clientes SET codigo = CONCAT('CLI', LPAD(v_id_cliente, 6, '0')) WHERE id = v_id_cliente;
+    UPDATE clientes 
+    SET codigo = CONCAT('CLI', LPAD(v_id_cliente, 6, '0')) 
+    WHERE id = v_id_cliente;
 
     SET p_codigo_cliente = CONCAT('CLI', LPAD(v_id_cliente, 6, '0'));
 
     SET p_mensaje = CONCAT('Cliente registrado correctamente. Código Cliente: ', p_codigo_cliente);
 END$$
+
 DELIMITER ;
+
 
 -- ========================================
 -- SP: ACTUALIZAR_CLIENTE
@@ -661,6 +673,7 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS actualizar_cliente;
 DELIMITER $$
+
 CREATE PROCEDURE actualizar_cliente (
     IN p_id_entidad INT,
     IN p_id_tipo_persona_juridica INT,
@@ -676,7 +689,7 @@ CREATE PROCEDURE actualizar_cliente (
     IN p_activo TINYINT,
     OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc_main: BEGIN
     DECLARE v_mensaje_entidad VARCHAR(255);
     DECLARE v_id_cliente INT;
     DECLARE v_codigo_cliente VARCHAR(20);
@@ -699,25 +712,34 @@ BEGIN
         v_mensaje_entidad
     );
 
+    -- Validar respuesta de la actualización base
     IF v_mensaje_entidad LIKE 'ERROR:%' THEN
         SET p_mensaje = v_mensaje_entidad;
-        LEAVE actualizar_cliente;
+        LEAVE proc_main;
     END IF;
 
-    -- Obtener cliente y código
-    SELECT id, codigo INTO v_id_cliente, v_codigo_cliente FROM clientes WHERE id_entidad = p_id_entidad;
+    -- Obtener cliente y código asociado a la entidad
+    SELECT id, codigo 
+    INTO v_id_cliente, v_codigo_cliente 
+    FROM clientes 
+    WHERE id_entidad = p_id_entidad
+    LIMIT 1;
 
     IF v_id_cliente IS NULL THEN
         SET p_mensaje = 'ERROR: No existe un cliente asociado a esa entidad.';
-        LEAVE actualizar_cliente;
+        LEAVE proc_main;
     END IF;
 
     -- Actualizar estado activo (eliminación lógica)
-    UPDATE clientes SET activo = p_activo WHERE id = v_id_cliente;
+    UPDATE clientes 
+    SET activo = p_activo 
+    WHERE id = v_id_cliente;
 
+    -- Mensaje final
     SET p_mensaje = CONCAT('Cliente actualizado correctamente. Código Cliente: ', v_codigo_cliente);
 END$$
 DELIMITER ;
+
 
 
 -- ========================================
@@ -730,6 +752,7 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS registrar_proveedor;
 DELIMITER $$
+
 CREATE PROCEDURE registrar_proveedor (
     IN p_id_tipo_persona_juridica INT,
     IN p_nombre VARCHAR(128),
@@ -746,16 +769,21 @@ CREATE PROCEDURE registrar_proveedor (
     OUT p_codigo_proveedor VARCHAR(20),
     OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc_main: BEGIN
     DECLARE v_id_tipo_entidad INT DEFAULT NULL;
     DECLARE v_id_entidad INT DEFAULT NULL;
     DECLARE v_id_proveedor INT DEFAULT NULL;
 
     -- Obtener id de tipo entidad PROVEEDOR
-    SELECT id INTO v_id_tipo_entidad FROM tipo_entidad WHERE nombre = 'PROVEEDOR' LIMIT 1;
+    SELECT id 
+    INTO v_id_tipo_entidad 
+    FROM tipo_entidad 
+    WHERE nombre = 'PROVEEDOR' 
+    LIMIT 1;
+
     IF v_id_tipo_entidad IS NULL THEN
         SET p_mensaje = 'ERROR: Tipo entidad PROVEEDOR no encontrado.';
-        LEAVE registrar_proveedor;
+        LEAVE proc_main;
     END IF;
 
     -- Llamar a registrar_entidad_base para crear la entidad
@@ -782,16 +810,19 @@ BEGIN
     SELECT @p_mensaje INTO p_mensaje;
 
     IF v_id_entidad IS NULL THEN
-        LEAVE registrar_proveedor;
+        LEAVE proc_main;
     END IF;
 
     -- Insertar en proveedores con id_entidad obtenido
-    INSERT INTO proveedores (id_entidad, codigo) VALUES (v_id_entidad, NULL);
+    INSERT INTO proveedores (id_entidad, codigo) 
+    VALUES (v_id_entidad, NULL);
 
     SET v_id_proveedor = LAST_INSERT_ID();
 
-    -- Actualizar código en proveedores con prefijo 'PRO' y 6 dígitos rellenos con ceros
-    UPDATE proveedores SET codigo = CONCAT('PRV', LPAD(v_id_proveedor, 6, '0')) WHERE id = v_id_proveedor;
+    -- Actualizar código en proveedores con prefijo 'PRV' y 6 dígitos
+    UPDATE proveedores 
+    SET codigo = CONCAT('PRV', LPAD(v_id_proveedor, 6, '0')) 
+    WHERE id = v_id_proveedor;
 
     SET p_codigo_proveedor = CONCAT('PRV', LPAD(v_id_proveedor, 6, '0'));
 
@@ -821,7 +852,7 @@ CREATE PROCEDURE actualizar_proveedor (
     IN p_activo TINYINT,
     OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc_main: BEGIN
     DECLARE v_mensaje_entidad VARCHAR(255);
     DECLARE v_id_proveedor INT;
     DECLARE v_codigo_proveedor VARCHAR(20);
@@ -844,22 +875,30 @@ BEGIN
         v_mensaje_entidad
     );
 
+    -- Si hubo error en entidad, salir
     IF v_mensaje_entidad LIKE 'ERROR:%' THEN
         SET p_mensaje = v_mensaje_entidad;
-        LEAVE actualizar_proveedor;
+        LEAVE proc_main;
     END IF;
 
-    -- Obtener proveedor y código
-    SELECT id, codigo INTO v_id_proveedor, v_codigo_proveedor FROM proveedores WHERE id_entidad = p_id_entidad;
+    -- Verificar si existe proveedor asociado a la entidad
+    SELECT id, codigo 
+    INTO v_id_proveedor, v_codigo_proveedor 
+    FROM proveedores 
+    WHERE id_entidad = p_id_entidad
+    LIMIT 1;
 
     IF v_id_proveedor IS NULL THEN
         SET p_mensaje = 'ERROR: No existe un proveedor asociado a esa entidad.';
-        LEAVE actualizar_proveedor;
+        LEAVE proc_main;
     END IF;
 
     -- Actualizar estado activo (eliminación lógica)
-    UPDATE proveedores SET activo = p_activo WHERE id = v_id_proveedor;
+    UPDATE proveedores 
+    SET activo = p_activo 
+    WHERE id = v_id_proveedor;
 
+    -- Mensaje de éxito
     SET p_mensaje = CONCAT('Proveedor actualizado correctamente. Código Proveedor: ', v_codigo_proveedor);
 END$$
 DELIMITER ;
@@ -874,6 +913,7 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS registrar_colaborador;
 DELIMITER $$
+
 CREATE PROCEDURE registrar_colaborador (
     IN p_id_tipo_persona_juridica INT,
     IN p_nombre VARCHAR(128),
@@ -892,16 +932,21 @@ CREATE PROCEDURE registrar_colaborador (
     OUT p_codigo_colaborador VARCHAR(20),
     OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc_main: BEGIN
     DECLARE v_id_tipo_entidad INT DEFAULT NULL;
     DECLARE v_id_entidad INT DEFAULT NULL;
     DECLARE v_id_colaborador INT DEFAULT NULL;
 
     -- Obtener id de tipo entidad COLABORADOR
-    SELECT id INTO v_id_tipo_entidad FROM tipo_entidad WHERE nombre = 'COLABORADOR' LIMIT 1;
+    SELECT id 
+    INTO v_id_tipo_entidad 
+    FROM tipo_entidad 
+    WHERE nombre = 'COLABORADOR' 
+    LIMIT 1;
+
     IF v_id_tipo_entidad IS NULL THEN
         SET p_mensaje = 'ERROR: Tipo entidad COLABORADOR no encontrado.';
-        LEAVE registrar_colaborador;
+        LEAVE proc_main;
     END IF;
 
     -- Llamar a registrar_entidad_base para crear la entidad
@@ -923,28 +968,34 @@ BEGIN
         @p_mensaje
     );
 
+    -- Recuperar valores de salida
     SELECT @p_id_entidad INTO v_id_entidad;
     SELECT @p_codigo_entidad INTO p_codigo_entidad;
     SELECT @p_mensaje INTO p_mensaje;
 
     IF v_id_entidad IS NULL THEN
-        LEAVE registrar_colaborador;
+        -- Aquí ya tienes un mensaje de error en p_mensaje que viene de registrar_entidad_base
+        LEAVE proc_main;
     END IF;
 
-    -- Insertar en colaboradores con id_entidad obtenido
+    -- Insertar en colaboradores
     INSERT INTO colaboradores (id_entidad, fecha_ingreso, id_usuario, foto, activo, codigo) 
     VALUES (v_id_entidad, p_fecha_ingreso, p_id_usuario, p_foto, 1, NULL);
 
     SET v_id_colaborador = LAST_INSERT_ID();
 
-    -- Actualizar código en colaboradores con prefijo 'COL' y 6 dígitos rellenos con ceros
-    UPDATE colaboradores SET codigo = CONCAT('COL', LPAD(v_id_colaborador, 6, '0')) WHERE id = v_id_colaborador;
+    -- Generar código COL + 6 dígitos
+    UPDATE colaboradores 
+    SET codigo = CONCAT('COL', LPAD(v_id_colaborador, 6, '0')) 
+    WHERE id = v_id_colaborador;
 
     SET p_codigo_colaborador = CONCAT('COL', LPAD(v_id_colaborador, 6, '0'));
 
     SET p_mensaje = CONCAT('Colaborador registrado correctamente. Código Colaborador: ', p_codigo_colaborador);
 END$$
+
 DELIMITER ;
+
 
 -- ========================================
 -- SP: ACTUALIZAR_COLABORADOR
@@ -971,7 +1022,7 @@ CREATE PROCEDURE actualizar_colaborador (
     IN p_activo TINYINT,
     OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc: BEGIN
     DECLARE v_mensaje_entidad VARCHAR(255);
     DECLARE v_id_colaborador INT;
     DECLARE v_codigo_colaborador VARCHAR(20);
@@ -996,15 +1047,17 @@ BEGIN
 
     IF v_mensaje_entidad LIKE 'ERROR:%' THEN
         SET p_mensaje = v_mensaje_entidad;
-        LEAVE actualizar_colaborador;
+        LEAVE proc;
     END IF;
 
     -- Obtener colaborador y código
-    SELECT id, codigo INTO v_id_colaborador, v_codigo_colaborador FROM colaboradores WHERE id_entidad = p_id_entidad;
+    SELECT id, codigo INTO v_id_colaborador, v_codigo_colaborador
+    FROM colaboradores
+    WHERE id_entidad = p_id_entidad;
 
     IF v_id_colaborador IS NULL THEN
         SET p_mensaje = 'ERROR: No existe un colaborador asociado a esa entidad.';
-        LEAVE actualizar_colaborador;
+        LEAVE proc;
     END IF;
 
     -- Actualizar datos específicos y estado lógico
@@ -1018,6 +1071,7 @@ BEGIN
     SET p_mensaje = CONCAT('Colaborador actualizado correctamente. Código Colaborador: ', v_codigo_colaborador);
 END$$
 DELIMITER ;
+
 
 -- ========================================
 -- SP: REGISTRAR_VETERINARIO
