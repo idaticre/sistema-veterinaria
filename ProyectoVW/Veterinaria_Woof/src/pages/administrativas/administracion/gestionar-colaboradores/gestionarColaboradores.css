@@ -77,7 +77,6 @@
     border-radius: 12px;
     align-items: center;
     transition: transform 0.2s, box-shadow 0.2s;
-    cursor: pointer;
 }
 
 .registro-colaborador:hover {
@@ -101,6 +100,7 @@
 
 .listar-registro-opciones {
     display: flex;
+    cursor: pointer;
 }
 
 .menu-opciones {
@@ -120,6 +120,7 @@
 }
 
 .menu-opciones button {
+    z-index: 99;
     color: black;
     background: none;
     border: none;
@@ -130,12 +131,8 @@
     font-size: 0.9rem;
 }
 
-.menu-opciones button:hover {
-    background-color: #ff0000;
-}
-
-/* Modal */
-.modal-overlay {
+/* Modal (ventana) */
+.ventana-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -148,7 +145,7 @@
     z-index: 2000;
 }
 
-.modal-content {
+.contenido-ventana {
   background: white;
   padding: 2rem;
   border-radius: 12px;
@@ -158,12 +155,13 @@
   gap: 0.8rem;
 }
 
-.modal-content h3 {
+.contenido-ventana h3 {
   margin: 0 0 1rem 0;
   text-align: center;
 }
 
-.modal-content input {
+.contenido-ventana input,
+select {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 6px;

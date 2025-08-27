@@ -28,6 +28,7 @@ function gestionarColaboradores() {
         const ejemplo = [
             {ID: 1, CODIGO: "ZXC", ENTIDAD: "ENTIDAD", NOMBRE: "PLZ", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 1, FOTO: "url/ay.jpg"},
             {ID: 2, CODIGO: "JKL", ENTIDAD: "ENTIDAD", NOMBRE: "PIO", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 1, FOTO: "url/ay.jpg"},
+            {ID: 3, CODIGO: "QWE", ENTIDAD: "ENTIDAD", NOMBRE: "AYA", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 0, FOTO: "url/ay.jpg"},
         ];
         setColaborador(ejemplo);
         setFiltrado(ejemplo);
@@ -103,7 +104,7 @@ function gestionarColaboradores() {
                                 <span className="texto-de-registro">{registro.CODIGO}</span>
                                 <span className="texto-de-registro">{registro.ENTIDAD}</span>
                                 <span className="texto-de-registro">{registro.NOMBRE}</span>
-                                <span className="texto-de-registro">{registro.ACTIVO}</span>                                
+                                <span className="texto-de-registro">{registro.ACTIVO ? "Activo" : "Inactivo"}</span>                                
                                 <span className="texto-de-registro">{registro.USUARIO}</span>
                                 <span className="texto-de-registro">📅{registro.FECHA_INGRESO}</span>
                                 <div className="listar-opciones-contenedor">
@@ -122,17 +123,22 @@ function gestionarColaboradores() {
             </main>
             
             {mostrarModal && (
-                <div className="model-overlay">
-                    <div className="model-content">
+                <div className="ventana-overlay">
+                    <div className="contenido-ventana">
                         <h3>{edicion ? "Editar colaborador" : "Registrar colaborador"}</h3>
                         <input type="text" placeholder="Seleccione tipo de entidad" value={edicion?.ENTIDAD || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ENTIDAD: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Nombre de colaborador" value={edicion?.NOMBRE || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, NOMBRE: nuevoValor.target.value } : null)}/>
                         <input type="date" value={edicion?.FECHA_INGRESO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, FECHA_INGRESO: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Nombre de usuario" value={edicion?.USUARIO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USUARIO: nuevoValor.target.value } : null)}/>
-                        <input type="number" placeholder="Activo" value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value)} : null)}/>
+                        <select value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value) } : null)}>
+                            <option value="">-- Selecciona estado --</option>
+                            <option value="0">Inctivo</option>
+                            <option value="1">Activo</option>
+                            <option value="2">Suspendido</option>
+                        </select>
                         <div className="acciones-de-registro">
                             <button onClick={guardarColaborador}>Guardar</button>
-                            <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Editar</button>
+                            <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
                         </div>
                     </div>
                 </div>
