@@ -5,18 +5,18 @@ import "./gestionarColaboradores.css"
 interface Colaborador {
     ID: number,
     CODIGO: string,
-    ID_ENTIDAD: number,
+    ENTIDAD: string,
     NOMBRE: string,
     FECHA_INGRESO: string,
-    ID_USUARIO: number,
-    ACTIVITY: number,
+    USUARIO: string,
+    ACTIVO: number,
     FOTO?: string
 }
 
 function gestionarColaboradores() {
     const [minimizado, setMinimizado] = useState(false);
     const [busqueda, setBusqueda] = useState("");
-    const [colaborador, setColaborador] = useState<Colaborador[]>([]);
+    const [colaboradores, setColaborador] = useState<Colaborador[]>([]);
     const [filtrado, setFiltrado] = useState<Colaborador[]>([]);
     const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
     const [mostrarModal, setMostrarModal] = useState(false);
@@ -26,8 +26,8 @@ function gestionarColaboradores() {
     // Mete datos de ejemplo
     useEffect(() => {
         const ejemplo = [
-            {ID: 1, CODIGO: "ZXC", ID_ENTIDAD: 1, NOMBRE: "PLZ", FECHA_INGRESO: "12-12-12", ID_USUARIO: 1, ACTIVITY: 1, FOTO: "url/ay.jpg"},
-            {ID: 2, CODIGO: "JKL", ID_ENTIDAD: 2, NOMBRE: "PIO", FECHA_INGRESO: "12-12-12", ID_USUARIO: 2, ACTIVITY: 1, FOTO: "url/ay.jpg"},
+            {ID: 1, CODIGO: "ZXC", ENTIDAD: "ENTIDAD", NOMBRE: "PLZ", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 1, FOTO: "url/ay.jpg"},
+            {ID: 2, CODIGO: "JKL", ENTIDAD: "ENTIDAD", NOMBRE: "PIO", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 1, FOTO: "url/ay.jpg"},
         ];
         setColaborador(ejemplo);
         setFiltrado(ejemplo);
@@ -35,38 +35,79 @@ function gestionarColaboradores() {
 
     // Filtra por búsqueda
     useEffect(() => {
-        const lista = colaborador.filter(value => value.NOMBRE.toLowerCase().includes(busqueda.toLowerCase()));
+        const lista = colaboradores.filter(value => value.NOMBRE.toLowerCase().includes(busqueda.toLowerCase()));
         setFiltrado(lista);
-    }, [busqueda, colaborador]);
+    }, [busqueda, colaboradores]);
 
     // Cerrar menú al hacer click afuera
+    useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {setMenuActivoId(null);}};
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
-    // Eliminación lógica de colaborador
+    // Eliminación de colaboradores
+    const eliminarColaborador = (ID: number) => {
+        const registros = colaboradores.filter(valor => valor.ID !== ID)
+        setColaborador(registros);
+        setFiltrado(registros);
+        setMenuActivoId(null);
+    }
 
-    // Editar colaborador
+    // Editar colaboradores
+    const editarColaborador = (ID: number) => {
+        const colaboradorEditado = colaboradores.find(colaborador => colaborador.ID === ID);
+        if (colaboradorEditado) {
+            setEdicion(colaboradorEditado);
+            setMostrarModal(true);
+        }
+    }
 
     // Guardar colaborador
+    const guardarColaborador = () => {
+        if (edicion) {
+            const registros = colaboradores.map(colaborador => colaborador.ID === edicion.ID ? edicion : colaborador);
+            setColaborador(registros);
+            setFiltrado(registros);
+            setEdicion(null);
+        } else {
+            const nuevo: Colaborador = {
+                ID: colaboradores.length + 1,
+                CODIGO: "CODIGO0",
+                ENTIDAD: "ENTIDAD",
+                NOMBRE: "Nuevo Colaborador",
+                FECHA_INGRESO: new Date().toISOString().split("T")[0],
+                USUARIO: "USUARIO",
+                ACTIVO: 1
+            };
+            setColaborador([...colaboradores, nuevo]);
+            setFiltrado([...colaboradores, nuevo]);
+        }
+    }
 
     return (
         <div id="colaboradores">
             <Br_administrativa onMinimizeChange={setMinimizado}/>
             <main className={minimizado ? "minimize" : ""}>
                 <section id="listar_colaboradores">
-                    <div className="encabezado">
-                        <h2>Lista de colaboradores</h2>
-                    </div>
+                    <div className="encabezado"><h2>Lista de colaboradores</h2></div>
                     <div className="buscador">
                         <div className="barra_buscador"><input type="text" placeholder="Ingrese nombre de colaborador" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
                         <button onClick={() => { setMostrarModal(true); setEdicion(null); }}>Registrar colaborador</button>
                     </div>
 
-                    <div className="listar_colaboradores">
+                    <div className="listar-colaboradores">
                         {filtrado.map((registro) => (
-                            <div className="registro_colaborador" key={registro.ID}>
-                                <span className="colaborador"></span>
-                                <span className="fecha">📅{registro.FECHA_INGRESO}</span>
-                                <div className="listar_opciones_contenedor">
-                                    <div className="listar_opciones" onClick={() => setMenuActivoId(registro.ID)}></div>
+                            <div className="registro-colaborador" key={registro.ID}>
+                                <span className="texto-de-registro">{registro.CODIGO}</span>
+                                <span className="texto-de-registro">{registro.ENTIDAD}</span>
+                                <span className="texto-de-registro">{registro.NOMBRE}</span>
+                                <span className="texto-de-registro">{registro.ACTIVO}</span>                                
+                                <span className="texto-de-registro">{registro.USUARIO}</span>
+                                <span className="texto-de-registro">📅{registro.FECHA_INGRESO}</span>
+                                <div className="listar-opciones-contenedor">
+                                    <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.ID)}><i className="fa-solid fa-ellipsis-vertical"/></div>
                                     {menuActivoId === registro.ID && (
                                         <div ref={menuRef} className="menu-opciones">
                                             <button onClick={() => editarColaborador(registro.ID)}>✏️ Editar</button>
@@ -84,10 +125,15 @@ function gestionarColaboradores() {
                 <div className="model-overlay">
                     <div className="model-content">
                         <h3>{edicion ? "Editar colaborador" : "Registrar colaborador"}</h3>
-                        <input type="text" />
-                        <input type="text" />
-                        <input type="text" />
-                        <input type="text" />
+                        <input type="text" placeholder="Seleccione tipo de entidad" value={edicion?.ENTIDAD || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ENTIDAD: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Nombre de colaborador" value={edicion?.NOMBRE || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, NOMBRE: nuevoValor.target.value } : null)}/>
+                        <input type="date" value={edicion?.FECHA_INGRESO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, FECHA_INGRESO: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Nombre de usuario" value={edicion?.USUARIO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USUARIO: nuevoValor.target.value } : null)}/>
+                        <input type="number" placeholder="Activo" value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value)} : null)}/>
+                        <div className="acciones-de-registro">
+                            <button onClick={guardarColaborador}>Guardar</button>
+                            <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Editar</button>
+                        </div>
                     </div>
                 </div>
             )}
