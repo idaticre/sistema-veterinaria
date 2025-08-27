@@ -9,14 +9,12 @@
 
 .marcas-title {
   text-align: center;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #5e4e2f;
   text-transform: uppercase;
 }
 
-/* Viewport y pista */
 .marcas-viewport {
   overflow: hidden;
   width: 100%;
@@ -28,7 +26,6 @@
   animation: marcas-scroll 25s linear infinite;
 }
 
-/* Cada item ahora tiene el borde y el margen lateral */
 .marcas-item {
   flex: 0 0 auto;
   display: flex;
@@ -36,14 +33,13 @@
   align-items: center;
   min-width: 10%;
   position: relative;
-  overflow: visible;                 /* deja que la imagen crecida sobresalga */
+  overflow: visible;                 
   border-radius: 1rem;
-  padding: 6px;                      /* espacio interno para el borde */
-  margin: 0 40px;                    /* separación entre logos */
+  padding: 6px;                      
+  margin: 0 40px;                    
   background: transparent;
 }
 
-/* La imagen ya no tiene borde ni margen; solo escala suave */
 .marcas-item img {
   display: block;
   height: 70px;
@@ -53,15 +49,11 @@
   border-radius: 10px;
 }
 
-/* Efecto hover: solo la imagen crece (no el borde) */
 .marcas-item:hover img {
-  transform: scale(1.25);            /* menos agresivo que 1.5 para evitar “salto visual” */
+  transform: scale(1.25);            
   filter: brightness(1.05);
   z-index: 10;
 }
-
-/* Opcional: si quieres que el item “flote” un poquito al hover */
-/* .marcas-item:hover { transform: translateZ(0); } */
 
 @keyframes marcas-scroll {
   from { transform: translateX(0); }

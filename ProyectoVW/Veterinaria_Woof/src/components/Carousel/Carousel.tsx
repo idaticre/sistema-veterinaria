@@ -6,21 +6,21 @@ const slides = [
     title: 'Servicio de Calidad',
     description:
       'Nuestro equipo de profesionales está altamente capacitado para cuidar de su mascota como si fuera nuestra propia familia. Nos aseguramos de que cada mascota reciba la atención y el amor que merece, brindando un servicio excepcional en cada visita.',
-    image: '/src/pages/home/images/slider1.png',
+    image: '/src/pages/home/images/servicio.png',
     whatsappMessage: 'Hola, quisiera más información sobre el servicio que brindan.',
   },
   {
-    title: 'Pet Shop',
+    title: 'Pet-Shop',
     description:
       'Descubre nuestra amplia gama de productos para mascotas, desde alimentos de alta calidad hasta accesorios y juguetes. Nos esforzamos por ofrecer solo lo mejor para tu compañero peludo, asegurando que encuentres todo lo que necesitas en un solo lugar.',
-    image: '/src/pages/home/images/slider2.png',
+    image: '/src/pages/home/images/pet-shop.png',
     whatsappMessage: 'Hola, estoy interesado en adquirir articulos de su catalogo PET-SHOP.',
   },
   {
     title: 'Guardería',
     description:
       'Ofrecemos un ambiente seguro y divertido para que tu mascota socialice y juegue mientras estás fuera. Nuestro personal capacitado se asegura de que cada mascota esté feliz y saludable, brindando atención personalizada y actividades adecuadas a sus necesidades.',
-    image: '/src/pages/home/images/slider3.png',
+    image: '/src/pages/home/images/guarderia.png',
     whatsappMessage: 'Hola, quisiera más información sobre la Guardería, para mi mascota.',
   },
   {

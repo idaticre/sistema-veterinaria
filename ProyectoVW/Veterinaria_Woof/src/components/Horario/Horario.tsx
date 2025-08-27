@@ -32,13 +32,19 @@ const Horario: React.FC = () => {
           <div className="txt">
             <h4>Redes Sociales</h4>
             <div className="horario-socials">
-              <a href="#">
+              <a href="https://www.facebook.com/LaCasaDelSchnau?rdid=uK1ZgnnCPX7hnD3r&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F19R4eu642E%2F"
+              target="_blank"
+              rel="noopener noreferrer"
+              >
                 <div className="horario-social">
                   <img src="/src/pages/home/images/s1.svg" alt="Facebook" />
                 </div>
               </a>
 
-              <a href="#">
+              <a href="https://www.instagram.com/manada.woof?igsh=MWsydm9mOHplYWhpaQ%3D"
+              target="_blank"
+              rel="noopener noreferrer"
+              >
                 <div className="horario-social">
                   <img src="/src/pages/home/images/s3.svg" alt="Instagram" />
                 </div>
