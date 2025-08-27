@@ -25,9 +25,9 @@ function gestionarUsuarios() {
 
     useEffect(() => {
         const ejemplo = [
-            {ID: 1, CODIGO: "RED", USERNAME: "ANA", PASSWORD: "123ASD", ACTIVO: 1, FECHA_CREACION: "12-12-12"},
-            {ID: 2, CODIGO: "YELLOW", USERNAME: "BAP", PASSWORD: "123ASD", ACTIVO: 1, FECHA_CREACION: "12-12-12"},
-            {ID: 3, CODIGO: "GREEN", USERNAME: "ROD", PASSWORD: "123ASD", ACTIVO: 1, FECHA_CREACION: "12-12-12"},  
+            {ID: 1, CODIGO: "RED", USERNAME: "ANA", PASSWORD: "123ASD", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
+            {ID: 2, CODIGO: "YELLOW", USERNAME: "BAP", PASSWORD: "123ASD", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
+            {ID: 3, CODIGO: "GREEN", USERNAME: "ROD", PASSWORD: "123ASD", ACTIVO: 2, FECHA_CREACION: "12-12-12"},  
         ];
         setUsuarios(ejemplo);
         setFiltrado(ejemplo);
@@ -52,6 +52,20 @@ function gestionarUsuarios() {
         setMenuActivoId(null);
     }
 
+    const registrarUsuario = () => {
+        const nuevo: Usuario = {
+            ID: usuarios.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
+            CODIGO: "",
+            USERNAME: "",
+            PASSWORD: "",
+            ACTIVO: 2,
+            FECHA_CREACION: new Date().toISOString().split("T")[0],
+            FECHA_BAJA: ""
+        }
+        setEdicion(nuevo);
+        setMostrarModal(true)
+    }
+
     const editarUsuario = (ID: number) => {
         const usuarioEditado = usuarios.find(usuario => usuario.ID === ID);
         if (usuarioEditado) {
@@ -61,24 +75,39 @@ function gestionarUsuarios() {
     }
 
     const guardarUsuario = () => {
-        if (edicion) {
+        if (!edicion) return;
+        if (!edicion.USERNAME.trim()) {alert("El nombre de usuario es obligatorio"); return;}
+        if (!edicion.PASSWORD.trim()) {alert("La contraseña es obligatoria"); return;}
+        if (!edicion.ACTIVO) {alert("Debes seleccionar un estado (Activo/Inactivo/Suspendido)"); return;}
+        if (!edicion.FECHA_CREACION) {alert("Seleccione la fecha de creacion"); return;}
+
+        
+        // Madre para actualizar la vaina de la fecha de baja ALERTA, NO FUNCIONA = ESTÁ EN DESARROLLO
+        let actualizado = { ...edicion };
+        if (actualizado.ACTIVO === 1 || actualizado.ACTIVO === 3) {
+            if (!actualizado.FECHA_BAJA) {actualizado.FECHA_BAJA = new Date().toISOString().split("T")[0];}} 
+        else if (actualizado.ACTIVO === 2) {actualizado.FECHA_BAJA = "";}
+
+        {/* Todo lo demás */}
+        const existe = usuarios.some(usuario => usuario.ID === edicion.ID);
+        if (existe) {
             const registros = usuarios.map(usuario => usuario.ID === edicion.ID ? edicion : usuario);
             setUsuarios(registros);
             setFiltrado(registros);
-            setEdicion(null);
         } else {
             const nuevo: Usuario = {
-                ID: usuarios.length + 1,
-                CODIGO: "CODIGO0",
-                USERNAME: "USERNAME",
-                PASSWORD: "PASSWORD",
-                ACTIVO: 1,
+                ...edicion,
+                ID: usuarios.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
+                CODIGO: edicion.CODIGO || "CODIGO0", // CODIGO está siendo generado manualmente, editar cuando se conecte la base de datos para cumplir con la COMPOUND KEY
                 FECHA_CREACION: new Date().toISOString().split("T")[0],
-                FECHA_BAJA: ""
             };
-            setUsuarios([...usuarios, nuevo]);
-            setFiltrado([...usuarios, nuevo]);
+            const registros = [...usuarios, nuevo];
+            setUsuarios(registros);
+            setFiltrado(registros);
         }
+
+        setEdicion(null);
+        setMostrarModal(false);
     }
 
     return (
@@ -90,7 +119,7 @@ function gestionarUsuarios() {
                     <div className="goated">
                         <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del usuario que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
                         <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_colaboradores">Regresar</Link>
-                        <button className="boton-goated anadir-a-goated animacion-goated" onClick={() => { setMostrarModal(true); setEdicion(null); }}>Registrar usuario</button>
+                        <button className="boton-goated anadir-a-goated animacion-goated" onClick={registrarUsuario}>Registrar usuario</button>
                     </div>
 
                     <div className="listar-registros">
@@ -101,7 +130,14 @@ function gestionarUsuarios() {
                                 <span className="texto-de-registro">{registro.PASSWORD}</span>
                                 <span className="texto-de-registro">{{1: "Inactivo", 2: "Activo", 3: "Suspendido"}[registro.ACTIVO] || "Desconocido"}</span>                                
                                 <span className="texto-de-registro">{registro.FECHA_CREACION}</span>
-                                <span className="texto-de-registro">📅{registro?.FECHA_BAJA}</span>
+                                <span className="texto-de-registro">{ // Arreglar display de la fecha de baja (checar comentario en editarUsuario)
+                                    registro?.FECHA_BAJA === undefined 
+                                        ? ""
+                                        : registro.ACTIVO === 1
+                                            ? `(Inactivo desde ${registro.FECHA_BAJA})`
+                                            : registro.ACTIVO === 3
+                                                ? `(Suspendido desde ${registro.FECHA_BAJA})`
+                                                : "NO_ELIMINAR_ESTO"}</span>
                                 <div className="listar-opciones-contenedor">
                                     <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.ID)}><i className="fa-solid fa-ellipsis-vertical"/></div>
                                     {menuActivoId === registro.ID && (
@@ -117,20 +153,13 @@ function gestionarUsuarios() {
                 </section>
             </main>
 
-            {mostrarModal && (
+            {mostrarModal && edicion && (
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
-                        <h3>{edicion ? "Editar usuario" : "Registrar usuario"}</h3>
-                        <input type="text" placeholder="Ingrese el nuevo nombre de usuario" value={edicion?.USERNAME || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USERNAME: nuevoValor.target.value } : null)}/>
-                        <input type="text" placeholder="Ingrese una contraseña" value={edicion?.PASSWORD || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, PASSWORD: nuevoValor.target.value } : null)}/>
-                        <input type="date" value={edicion?.FECHA_CREACION || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, FECHA_CREACION: nuevoValor.target.value } : null)}/>
-                        <input type="date" value={edicion?.FECHA_BAJA || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, FECHA_BAJA: nuevoValor.target.value } : null)}/>
-                        <select value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value) } : null)}>
-                            <option value="">-- Selecciona estado --</option>
-                            <option value={1}>Inactivo</option>
-                            <option value={2}>Activo</option>
-                            <option value={3}>Suspendido</option>
-                        </select>
+                        <h3>Registrar usuario</h3>
+                        <p><strong>Siendo creado el:</strong> {edicion.FECHA_CREACION}</p>
+                        <input type="text" placeholder="Ingrese el nuevo nombre de usuario" value={edicion.USERNAME} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USERNAME: nuevoValor.target.value } : null)}/>
+                        <input type="password" placeholder="Ingrese una contraseña" value={edicion.PASSWORD} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, PASSWORD: nuevoValor.target.value } : null)}/> {/* Añadir mostrar contraseña*/}
                         <div className="acciones-de-registro">
                             <button onClick={guardarUsuario}>Guardar</button>
                             <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
@@ -142,5 +171,4 @@ function gestionarUsuarios() {
     )
 }
 
-/* Se requiere solucionar la adicion de nuevos registros */
 export default gestionarUsuarios

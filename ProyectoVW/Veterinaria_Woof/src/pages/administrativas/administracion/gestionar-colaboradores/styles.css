@@ -90,8 +90,8 @@
 }
 
 .mostrar-registros:hover {
-  transform: translateY(-3px);
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  background: #ff9900;
 }
 
 .texto-de-registro {
