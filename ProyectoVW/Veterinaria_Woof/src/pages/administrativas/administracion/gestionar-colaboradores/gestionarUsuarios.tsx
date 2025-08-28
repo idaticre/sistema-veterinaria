@@ -79,8 +79,6 @@ function gestionarUsuarios() {
         if (!edicion.USERNAME.trim()) {alert("El nombre de usuario es obligatorio"); return;}
         if (!edicion.PASSWORD.trim()) {alert("La contraseña es obligatoria"); return;}
         if (!edicion.ACTIVO) {alert("Debes seleccionar un estado (Activo/Inactivo/Suspendido)"); return;}
-        if (!edicion.FECHA_CREACION) {alert("Seleccione la fecha de creacion"); return;}
-
         
         // Madre para actualizar la vaina de la fecha de baja ALERTA, NO FUNCIONA = ESTÁ EN DESARROLLO
         let actualizado = { ...edicion };

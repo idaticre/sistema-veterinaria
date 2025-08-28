@@ -12,11 +12,11 @@ interface Entidad {
     SEXO?: string,
     DOCUMENTO: string,
     TIPO_DOCUMENTO: string,
-    TELEFONO: string,
-    CORREO: string,
-    DIRECCION: string,
-    CIUDAD: string,
-    DISTRITO: string,
+    TELEFONO?: string,
+    CORREO?: string,
+    DIRECCION?: string,
+    CIUDAD?: string,
+    DISTRITO?: string,
     REPRESENTANTE: string,
     FECHA_CREACION: string,
     FECHA_BAJA: string,
@@ -35,7 +35,7 @@ function gestionarEntidades() {
 
     useEffect(() => {
         const ejemplo = [
-            {ID: 1, CODIGO: "EMP001", TIPO_ENTIDAD: "Empresa", TIPO_PERSONA_JURIDICA: "Sociedad Anónima", NOMBRE: "Tech Solutions SAC", SEXO: undefined, DOCUMENTO: "20123456789", TIPO_DOCUMENTO: "RUC", TELEFONO: "987654321", CORREO: "contacto@techsolutions.com", DIRECCION: "Av. Siempre Viva 123", CIUDAD: "Lima", DISTRITO: "Miraflores", REPRESENTANTE: "Carlos López", FECHA_CREACION: "2025-08-27", FECHA_BAJA: "2025-08-27", ACTIVO: 1,},
+            {ID: 1, CODIGO: "EMP001", TIPO_ENTIDAD: "Empresa", TIPO_PERSONA_JURIDICA: "Sociedad Anónima", NOMBRE: "Tech Solutions SAC", SEXO: undefined, DOCUMENTO: "20123456789", TIPO_DOCUMENTO: "RUC", TELEFONO: "987654321", CORREO: "contacto@techsolutions.com", DIRECCION: "Av. Siempre Viva 123", CIUDAD: "Lima", DISTRITO: "Miraflores", REPRESENTANTE: "Carlos López", FECHA_CREACION: "2025-08-27", FECHA_BAJA: "2025-08-27", ACTIVO: 2},
         ];
         setEntidades(ejemplo);
         setFiltrado(ejemplo);
@@ -63,22 +63,22 @@ function gestionarEntidades() {
     const registrarEntidad = () => {
         const nuevo: Entidad = {
             ID: entidades.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
-            CODIGO: "EMP001",
-            TIPO_ENTIDAD: "Empresa",
-            TIPO_PERSONA_JURIDICA: "Sociedad Anónima",
-            NOMBRE: "Tech Solutions SAC",
+            CODIGO: "",
+            TIPO_ENTIDAD: "",
+            TIPO_PERSONA_JURIDICA: "",
+            NOMBRE: "",
             SEXO: undefined, // opcional
-            DOCUMENTO: "20123456789",
-            TIPO_DOCUMENTO: "RUC",
-            TELEFONO: "987654321",
-            CORREO: "contacto@techsolutions.com",
-            DIRECCION: "Av. Siempre Viva 123",
-            CIUDAD: "Lima",
-            DISTRITO: "Miraflores",
-            REPRESENTANTE: "Carlos López",
-            FECHA_CREACION: "2025-08-27",
-            FECHA_BAJA: "2025-08-27",
-            ACTIVO: 1,
+            DOCUMENTO: "",
+            TIPO_DOCUMENTO: "",
+            TELEFONO: "",
+            CORREO: "",
+            DIRECCION: "",
+            CIUDAD: "",
+            DISTRITO: "",
+            REPRESENTANTE: "",
+            FECHA_CREACION: new Date().toISOString().split("T")[0],
+            FECHA_BAJA: "",
+            ACTIVO: 2,
         }
         setEdicion(nuevo);
         setMostrarModal(true)
@@ -94,12 +94,16 @@ function gestionarEntidades() {
 
     const guardarEntidad = () => {
         if (!edicion) return;
-        if (!edicion.NOMBRE.trim()) {alert("El nombre de usuario es obligatorio"); return;}
-        if (!edicion.DOCUMENTO.trim()) {alert("La contraseña es obligatoria"); return;}
+        if (!edicion.NOMBRE.trim()) {alert("Ingresar el nombre de la entidad es obligatorio"); return;}
+        if (!edicion.DOCUMENTO.trim()) {alert("Ingresar el número de documento es obligatorio"); return;}
         if (!edicion.ACTIVO) {alert("Debes seleccionar un estado (Activo/Inactivo/Suspendido)"); return;}
-        if (!edicion.REPRESENTANTE) {alert("Seleccione la fecha de creacion"); return;}
+        if (!edicion.REPRESENTANTE) {alert("Debe ingresar el nombre del representante"); return;}
+        if (!edicion.TELEFONO) {alert("Debe ingresar un telefono"); return;}
+        if (!edicion.CORREO) {alert("Debe ingresar un correo"); return;}
+        if (!edicion.TIPO_ENTIDAD) {alert("Debe seleccionar un tipo de entidad"); return;}
+        if (!edicion.TIPO_PERSONA_JURIDICA) {alert("Debe seleccionar un tipo de persona jurídica"); return;}
+        if (!edicion.TIPO_DOCUMENTO) {alert("Debe seleccionar un tipo de documento"); return;}
 
-        
         // Madre para actualizar la vaina de la fecha de baja ALERTA, NO FUNCIONA = ESTÁ EN DESARROLLO
         let actualizado = { ...edicion };
         if (actualizado.ACTIVO === 1 || actualizado.ACTIVO === 3) {
@@ -143,7 +147,6 @@ function gestionarEntidades() {
                     <div className="listar-registros">
                         {filtrado.map((registro) => (
                             <div className="mostrar-registros" key={registro.ID}>
-                                <span className="texto-de-registro">{registro.CODIGO}</span>
                                 <span className="texto-de-registro">{registro.TIPO_ENTIDAD}</span>
                                 <span className="texto-de-registro">{registro.TIPO_PERSONA_JURIDICA}</span>
                                 <span className="texto-de-registro">{registro.NOMBRE}</span>
@@ -156,8 +159,6 @@ function gestionarEntidades() {
                                 <span className="texto-de-registro">{registro.CIUDAD}</span>
                                 <span className="texto-de-registro">{registro.DISTRITO}</span>
                                 <span className="texto-de-registro">{registro.REPRESENTANTE}</span>
-                                <span className="texto-de-registro">{registro.FECHA_CREACION}</span>
-                                <span className="texto-de-registro">{registro.FECHA_BAJA}</span>
                                 <span className="texto-de-registro">{{1: "Inactivo", 2: "Activo", 3: "Suspendido"}[registro.ACTIVO] || "Desconocido"}</span>                                
                                 <span className="texto-de-registro">{registro.FECHA_CREACION}</span>
                                 <span className="texto-de-registro">{ // Arreglar display de la fecha de baja (checar comentario en editarUsuario)
@@ -167,7 +168,7 @@ function gestionarEntidades() {
                                             ? `(Inactivo desde ${registro.FECHA_BAJA})`
                                             : registro.ACTIVO === 3
                                                 ? `(Suspendido desde ${registro.FECHA_BAJA})`
-                                                : "NO_ELIMINAR_ESTO"}</span>
+                                                : ""}</span>
                                 <div className="listar-opciones-contenedor">
                                     <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.ID)}><i className="fa-solid fa-ellipsis-vertical"/></div>
                                     {menuActivoId === registro.ID && (
@@ -186,10 +187,37 @@ function gestionarEntidades() {
             {mostrarModal && edicion && (
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
-                        <h3>Registrar usuario</h3>
+                        <h3>Registrar entidad</h3>
                         <p><strong>Siendo creado el:</strong> {edicion.FECHA_CREACION}</p>
-                        <input type="text" placeholder="Seleccione tipo de entidad" value={edicion?.ENTIDAD || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ENTIDAD: nuevoValor.target.value } : null)}/>
-                        
+                        <input type="text" placeholder="Representante" value={edicion.REPRESENTANTE} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, REPRESENTANTE: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Nombre de entidad" value={edicion.NOMBRE} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, NOMBRE: nuevoValor.target.value } : null)}/>                   
+                        <select value={edicion.TIPO_ENTIDAD} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TIPO_ENTIDAD: nuevoValor.target.value } : null)}>
+                            <option value="">-- Seleccionar tipo de entidad --</option> {/* Que chucha va acá*/}
+                            <option value="1">TIPO 1</option>
+                            <option value="2">TIPO 2</option>
+                        </select>
+                        <select value={edicion.TIPO_PERSONA_JURIDICA} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TIPO_PERSONA_JURIDICA: nuevoValor.target.value } : null)}>
+                            <option value="">-- Seleccionar tipo de persona jurídica --</option>
+                            <option value="derecho-publico">Derecho público</option>
+                            <option value="derecho-privado">Derecho privado</option>
+                        </select>
+                        <select value={edicion?.SEXO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, SEXO: nuevoValor.target.value } : null)}>
+                            <option value="">-- Seleccionar sexo --</option>
+                            <option value="hombre">Hombre</option>
+                            <option value="mujer">Mujer</option>
+                        </select>
+                        <select value={edicion.TIPO_DOCUMENTO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TIPO_DOCUMENTO: nuevoValor.target.value } : null)}>
+                            <option value="">-- Seleccionar tipo de documento</option>
+                            <option value="dni">DNI</option>
+                            <option value="ce">CE</option>
+                            <option value="ruc">RUC</option>
+                        </select>
+                        <input type="text" placeholder="Documento" value={edicion.DOCUMENTO } onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, DOCUMENTO: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Telefono" value={edicion.TELEFONO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TELEFONO: nuevoValor.target.value } : null)}/>
+                        <input type="email" placeholder="Ingrese@correo" value={edicion.CORREO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, CORREO: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Dirección" value={edicion.DIRECCION} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, DIRECCION: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Ciudad" value={edicion.CIUDAD} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, CIUDAD: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Distrito" value={edicion.DISTRITO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, DISTRITO: nuevoValor.target.value } : null)}/>
                         <div className="acciones-de-registro">
                             <button onClick={guardarEntidad}>Guardar</button>
                             <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
@@ -197,7 +225,7 @@ function gestionarEntidades() {
                     </div>
                 </div>
             )}
-        </div>        
+        </div>
     )
 }
 
