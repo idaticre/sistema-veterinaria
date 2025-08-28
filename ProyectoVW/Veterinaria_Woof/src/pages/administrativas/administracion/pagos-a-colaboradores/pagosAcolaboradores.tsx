@@ -22,15 +22,27 @@ function Pagos() {
   const [edicion, setEdicion] = useState<Pago | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // Datos de ejemplo
+  // Cargar desde LocalStorage al iniciar
   useEffect(() => {
-    const datos: Pago[] = [
-      { id: 1, colaborador: "Carlos López", cargo: "Administrador", monto: 1200, fecha: "2025-08-10", metodo: "Transferencia", estado: "Pagado" },
-      { id: 2, colaborador: "Ana Torres", cargo: "Veterinaria", monto: 1500, fecha: "2025-08-15", metodo: "Efectivo", estado: "Pendiente" },
-    ];
-    setPagos(datos);
-    setFiltrados(datos);
+    const guardados = localStorage.getItem("pagos");
+    if (guardados) {
+      const datos = JSON.parse(guardados);
+      setPagos(datos);
+      setFiltrados(datos);
+    } else {
+      const inicial: Pago[] = [
+        { id: 1, colaborador: "Carlos López", cargo: "Administrador", monto: 1200, fecha: "2025-08-10", metodo: "Transferencia", estado: "Pagado" },
+        { id: 2, colaborador: "Ana Torres", cargo: "Veterinaria", monto: 1500, fecha: "2025-08-15", metodo: "Efectivo", estado: "Pendiente" },
+      ];
+      setPagos(inicial);
+      setFiltrados(inicial);
+    }
   }, []);
+
+  // Guardar en LocalStorage cada vez que cambien los pagos
+  useEffect(() => {
+    localStorage.setItem("pagos", JSON.stringify(pagos));
+  }, [pagos]);
 
   // Filtrar por búsqueda
   useEffect(() => {
@@ -68,29 +80,25 @@ function Pagos() {
     }
   };
 
-  // Guardar nuevo o editado pago
+  // Guardar nuevo o editado
   const guardarPago = () => {
-    if (edicion) {
+    if (!edicion) return;
+
+    if (edicion.id === 0) {
+      const nuevo = { ...edicion, id: pagos.length ? Math.max(...pagos.map(p => p.id)) + 1 : 1 };
+      const nuevosPagos = [...pagos, nuevo];
+      setPagos(nuevosPagos);
+      setFiltrados(nuevosPagos);
+    } else {
       const actualizados = pagos.map(p =>
         p.id === edicion.id ? edicion : p
       );
       setPagos(actualizados);
       setFiltrados(actualizados);
-      setEdicion(null);
-    } else {
-      const nuevo: Pago = {
-        id: pagos.length + 1,
-        colaborador: "Nuevo Colaborador",
-        cargo: "Cargo",
-        monto: 1000,
-        fecha: new Date().toISOString().split("T")[0],
-        metodo: "Transferencia",
-        estado: "Pendiente",
-      };
-      setPagos([...pagos, nuevo]);
-      setFiltrados([...pagos, nuevo]);
     }
+
     setMostrarModal(false);
+    setEdicion(null);
   };
 
   return (
@@ -110,7 +118,20 @@ function Pagos() {
                 onChange={(e) => setBusqueda(e.target.value)}
               />
             </div>
-            <button onClick={() => { setMostrarModal(true); setEdicion(null); }}>
+            <button
+              onClick={() => {
+                setMostrarModal(true);
+                setEdicion({
+                  id: 0,
+                  colaborador: "",
+                  cargo: "",
+                  monto: 0,
+                  fecha: new Date().toISOString().split("T")[0],
+                  metodo: "",
+                  estado: "Pendiente",
+                });
+              }}
+            >
               ➕ Registrar Pago
             </button>
           </div>
@@ -148,33 +169,43 @@ function Pagos() {
       {mostrarModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>{edicion ? "Editar Pago" : "Registrar Nuevo Pago"}</h3>
+            <h3>{edicion?.id === 0 ? "Registrar Nuevo Pago" : "Editar Pago"}</h3>
             <input
               type="text"
               placeholder="Nombre del colaborador"
               value={edicion?.colaborador || ""}
-              onChange={(e) => setEdicion(edicion ? { ...edicion, colaborador: e.target.value } : null)}
+              onChange={(e) =>
+                setEdicion(prev => prev ? { ...prev, colaborador: e.target.value } : null)
+              }
             />
             <input
               type="text"
               placeholder="Cargo"
               value={edicion?.cargo || ""}
-              onChange={(e) => setEdicion(edicion ? { ...edicion, cargo: e.target.value } : null)}
+              onChange={(e) =>
+                setEdicion(prev => prev ? { ...prev, cargo: e.target.value } : null)
+              }
             />
             <input
               type="number"
               placeholder="Monto"
               value={edicion?.monto || ""}
-              onChange={(e) => setEdicion(edicion ? { ...edicion, monto: Number(e.target.value) } : null)}
+              onChange={(e) =>
+                setEdicion(prev => prev ? { ...prev, monto: Number(e.target.value) } : null)
+              }
             />
             <input
               type="date"
               value={edicion?.fecha || ""}
-              onChange={(e) => setEdicion(edicion ? { ...edicion, fecha: e.target.value } : null)}
+              onChange={(e) =>
+                setEdicion(prev => prev ? { ...prev, fecha: e.target.value } : null)
+              }
             />
             <select
               value={edicion?.metodo || ""}
-              onChange={(e) => setEdicion(edicion ? { ...edicion, metodo: e.target.value } : null)}
+              onChange={(e) =>
+                setEdicion(prev => prev ? { ...prev, metodo: e.target.value } : null)
+              }
             >
               <option value="">Seleccione método</option>
               <option value="Transferencia">Transferencia</option>
@@ -184,7 +215,9 @@ function Pagos() {
             </select>
             <select
               value={edicion?.estado || ""}
-              onChange={(e) => setEdicion(edicion ? { ...edicion, estado: e.target.value } : null)}
+              onChange={(e) =>
+                setEdicion(prev => prev ? { ...prev, estado: e.target.value } : null)
+              }
             >
               <option value="Pendiente">Pendiente</option>
               <option value="Pagado">Pagado</option>
