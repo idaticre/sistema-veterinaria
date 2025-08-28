@@ -154,8 +154,14 @@ function gestionarUsuarios() {
             {mostrarModal && edicion && (
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
-                        <h3>Registrar usuario</h3>
+                        <h3>Información de usuario</h3>
                         <p><strong>Siendo creado el:</strong> {edicion.FECHA_CREACION}</p>
+                        <select value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value) } : null)}>
+                            <option value="">-- Selecciona estado --</option>
+                            <option value="1">Inactivo</option>
+                            <option value="2">Activo</option>
+                            <option value="3">Suspendido</option>
+                        </select>
                         <input type="text" placeholder="Ingrese el nuevo nombre de usuario" value={edicion.USERNAME} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USERNAME: nuevoValor.target.value } : null)}/>
                         <input type="password" placeholder="Ingrese una contraseña" value={edicion.PASSWORD} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, PASSWORD: nuevoValor.target.value } : null)}/> {/* Añadir mostrar contraseña*/}
                         <div className="acciones-de-registro">
@@ -168,5 +174,5 @@ function gestionarUsuarios() {
         </div>        
     )
 }
-
+/* Checar los comentarios, los errores son generalmente los mismos en los 3 CRUDS. */
 export default gestionarUsuarios

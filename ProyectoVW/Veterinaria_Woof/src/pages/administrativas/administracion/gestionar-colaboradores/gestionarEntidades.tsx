@@ -187,8 +187,14 @@ function gestionarEntidades() {
             {mostrarModal && edicion && (
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
-                        <h3>Registrar entidad</h3>
+                        <h3>Información de entidad</h3>
                         <p><strong>Siendo creado el:</strong> {edicion.FECHA_CREACION}</p>
+                        <select value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value) } : null)}>
+                            <option value="">-- Selecciona estado --</option>
+                            <option value="1">Inactivo</option>
+                            <option value="2">Activo</option>
+                            <option value="3">Suspendido</option>
+                        </select>
                         <input type="text" placeholder="Representante" value={edicion.REPRESENTANTE} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, REPRESENTANTE: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Nombre de entidad" value={edicion.NOMBRE} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, NOMBRE: nuevoValor.target.value } : null)}/>                   
                         <select value={edicion.TIPO_ENTIDAD} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TIPO_ENTIDAD: nuevoValor.target.value } : null)}>
@@ -228,5 +234,5 @@ function gestionarEntidades() {
         </div>
     )
 }
-
+/* Checar los comentarios, los errores son generalmente los mismos en los 3 CRUDS. */
 export default gestionarEntidades
