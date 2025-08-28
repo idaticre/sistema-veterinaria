@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './encabezado.css';
+import './Emcabezado.css';
 import { Link } from 'react-router-dom';
 
 function Encabezado() {

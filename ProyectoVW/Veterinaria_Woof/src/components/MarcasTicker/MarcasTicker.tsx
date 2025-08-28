@@ -12,7 +12,7 @@ const logos: Logo[] = [
 ];
 
 const MarcasTicker: React.FC = () => {
-  // Duplicar la lista para un loop sin cortes
+  
   const loop = [...logos, ...logos];
 
   return (

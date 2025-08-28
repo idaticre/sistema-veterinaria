@@ -186,12 +186,22 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={adminRef} className="submenu">
+
                                    <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestionar colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Turnos y horarios</Link></li>
                                     <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos a colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
                                     <li><Link to="/administracion/administracion/desempeno_de_colaboradores" className="sub_opcion">Desempeño de colaboradores</Link></li>
+
+                                    <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestión de colaboradores</Link></li>
+                                    <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Turnos y horarios</Link></li>
+                                    <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
+                                    <li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos de colaboradores</Link></li>
+                                    <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
+                                    <li><Link to="/administracion/administracion/desempeno_de_colaboradores" className="sub_opcion">Desempeño de los colaboradores</Link></li>
+
+
                                 </ul>
                             </li>
                             <li className={`opcion opcion_desplegable ${openMenu === "seguridad"?"toggle_submenu":""}`} 
@@ -224,7 +234,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <img src="/baño.png" alt="" />
                             </div>
                             <div id="inf_user">
-                                <span className="nombre_user">jose martines</span>
+                                <span className="nombre_user">VETERINARIA WOOF AUUUU</span>
                                 <span className="mail_user">123456@gmail.com</span>
                             </div>
                             <div className="user_icon">

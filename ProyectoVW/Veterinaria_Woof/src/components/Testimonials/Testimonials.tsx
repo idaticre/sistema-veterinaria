@@ -13,12 +13,12 @@ interface Testimonial {
 const testimonials: Testimonial[] = [
   {
     id: 1,
-    name: "Edgar Quispe",
+    name: "Rafael Nieto",
     pet: "Rocky",
     image: "/src/pages/home/images/Testimonials1.jpg",
-    text: "En Manada Woof siempre cuidan de Rocky como si fuera suyo. Lo dejan limpio, feliz y cansado de tanto jugar. Además, siempre me mandan fotos y videos, lo que me da mucha tranquilidad.",
+    text: "Me preocupo mucho por dejar a mis bebes en buenas manos y eso encontré en Manada Woof La manera como los cuidan y se preocupan por ellos me da la tranquilidad de poder confiarles a mis engreídos", 
     rating: 5,
-  },
+  }, 
   {
     id: 2,
     name: "Javier Torres",
