@@ -225,7 +225,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <img src="/baño.png" alt="" />
                             </div>
                             <div id="inf_user">
-                                <span className="nombre_user">jose martines</span>
+                                <span className="nombre_user">VETERINARIA WOOF AUUUU</span>
                                 <span className="mail_user">123456@gmail.com</span>
                             </div>
                             <div className="user_icon">

@@ -38,19 +38,22 @@ function gestionarUsuarios() {
         setFiltrado(lista);
     }, [busqueda, usuarios]);
 
-    useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {setMenuActivoId(null);}};
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
     const eliminarUsuario = (ID: number) => {
         const registros = usuarios.filter(valor => valor.ID !== ID);
         setUsuarios(registros);
         setFiltrado(registros);
         setMenuActivoId(null);
     }
+    
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            setMenuActivoId(null);
+        }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const registrarUsuario = () => {
         const nuevo: Usuario = {
@@ -63,7 +66,7 @@ function gestionarUsuarios() {
             FECHA_BAJA: ""
         }
         setEdicion(nuevo);
-        setMostrarModal(true)
+        setMostrarModal(true);
     }
 
     const editarUsuario = (ID: number) => {

@@ -46,13 +46,6 @@ function gestionarEntidades() {
         setFiltrado(lista);
     }, [busqueda, entidades]);
 
-    useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {setMenuActivoId(null);}};
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
     const eliminarEntidad = (ID: number) => {
         const registros = entidades.filter(valor => valor.ID !== ID);
         setEntidades(registros);
@@ -91,6 +84,16 @@ function gestionarEntidades() {
             setMostrarModal(true);
         }
     }
+    
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            setMenuActivoId(null);
+        }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const guardarEntidad = () => {
         if (!edicion) return;

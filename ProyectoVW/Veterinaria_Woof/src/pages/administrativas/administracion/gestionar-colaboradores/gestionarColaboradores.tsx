@@ -35,19 +35,21 @@ function gestionarColaboradores() {
         setFiltrado(ejemplo);
     }, []);
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            setMenuActivoId(null);
+        }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+    
     // Filtra por búsqueda
     useEffect(() => {
         const lista = colaboradores.filter(value => value.NOMBRE.toLowerCase().includes(busqueda.toLowerCase()));
         setFiltrado(lista);
     }, [busqueda, colaboradores]);
-
-    // Cerrar menú al hacer click afuera
-    useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {setMenuActivoId(null);}};
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
 
     // Eliminación de colaboradores
     const eliminarColaborador = (ID: number) => {
