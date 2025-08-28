@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
-import "./gestionarColaboradores.css"
+import "./styles.css"
+import { Link } from "react-router-dom";
 
 interface Colaborador {
     ID: number,
@@ -16,7 +17,7 @@ interface Colaborador {
 function gestionarColaboradores() {
     const [minimizado, setMinimizado] = useState(false);
     const [busqueda, setBusqueda] = useState("");
-    const [colaboradores, setColaborador] = useState<Colaborador[]>([]);
+    const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
     const [filtrado, setFiltrado] = useState<Colaborador[]>([]);
     const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
     const [mostrarModal, setMostrarModal] = useState(false);
@@ -30,7 +31,7 @@ function gestionarColaboradores() {
             {ID: 2, CODIGO: "JKL", ENTIDAD: "ENTIDAD", NOMBRE: "PIO", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 1, FOTO: "url/ay.jpg"},
             {ID: 3, CODIGO: "QWE", ENTIDAD: "ENTIDAD", NOMBRE: "AYA", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 0, FOTO: "url/ay.jpg"},
         ];
-        setColaborador(ejemplo);
+        setColaboradores(ejemplo);
         setFiltrado(ejemplo);
     }, []);
 
@@ -51,9 +52,25 @@ function gestionarColaboradores() {
     // Eliminación de colaboradores
     const eliminarColaborador = (ID: number) => {
         const registros = colaboradores.filter(valor => valor.ID !== ID)
-        setColaborador(registros);
+        setColaboradores(registros);
         setFiltrado(registros);
         setMenuActivoId(null);
+    }
+
+    // Registrar colaborador beibi
+    const registrarColaborador = () => {
+        const nuevo: Colaborador = {
+            ID: colaboradores.length + 1,
+            CODIGO: "",
+            ENTIDAD: "",
+            NOMBRE: "",
+            FECHA_INGRESO: new Date().toISOString().split("T")[0],
+            USUARIO: "",
+            ACTIVO: 2, // Al crear uno nuevo, siempre estará activo
+            FOTO: ""
+        }
+        setEdicion(nuevo);
+        setMostrarModal(true);
     }
 
     // Editar colaboradores
@@ -67,44 +84,53 @@ function gestionarColaboradores() {
 
     // Guardar colaborador
     const guardarColaborador = () => {
-        if (edicion) {
+        if (!edicion) return;
+        if (!edicion.ENTIDAD.trim()) {alert("Ingresar una entidad es obligatorio"); return;}
+        if (!edicion.NOMBRE.trim()) {alert("Ingresar un nombre es obligatorio"); return;}
+        if (!edicion.USUARIO.trim()) {alert("Ingresar un usuario es obligatorio"); return;}
+        if (!edicion.ACTIVO) {alert("Debes seleccionar un estado (Activo/Inactivo/Suspendido)"); return;}
+
+        const existe = colaboradores.some(colaborador => colaborador.ID === edicion.ID);
+        if (existe) {
             const registros = colaboradores.map(colaborador => colaborador.ID === edicion.ID ? edicion : colaborador);
-            setColaborador(registros);
+            setColaboradores(registros);
             setFiltrado(registros);
-            setEdicion(null);
         } else {
             const nuevo: Colaborador = {
-                ID: colaboradores.length + 1,
-                CODIGO: "CODIGO0",
-                ENTIDAD: "ENTIDAD",
-                NOMBRE: "Nuevo Colaborador",
+                ...edicion,
+                ID: colaboradores.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
+                CODIGO: edicion.CODIGO || "CODIGO0", // CODIGO está siendo generado manualmente, editar cuando se conecte la base de datos para cumplir con la COMPOUND KEY
                 FECHA_INGRESO: new Date().toISOString().split("T")[0],
-                USUARIO: "USUARIO",
-                ACTIVO: 1
             };
-            setColaborador([...colaboradores, nuevo]);
-            setFiltrado([...colaboradores, nuevo]);
+            const registros = [...colaboradores, nuevo];
+            setColaboradores(registros);
+            setFiltrado(registros);
         }
+
+        setEdicion(null);
+        setMostrarModal(false);
     }
 
     return (
-        <div id="colaboradores">
+        <div id="cuerpo-main">
             <Br_administrativa onMinimizeChange={setMinimizado}/>
             <main className={minimizado ? "minimize" : ""}>
-                <section id="listar_colaboradores">
+                <section id="listar-registros">
                     <div className="encabezado"><h2>Lista de colaboradores</h2></div>
-                    <div className="buscador">
-                        <div className="barra_buscador"><input type="text" placeholder="Ingrese nombre de colaborador" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
-                        <button onClick={() => { setMostrarModal(true); setEdicion(null); }}>Registrar colaborador</button>
+                    <div className="goated">
+                        <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del colaborador que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
+                        <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_usuarios">Gestionar usuarios</Link>
+                        <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_entidades">Gestionar entidades</Link>
+                        <button className="boton-goated anadir-a-goated animacion-goated" onClick={registrarColaborador}>Registrar colaborador</button>
                     </div>
 
-                    <div className="listar-colaboradores">
+                    <div className="listar-registros">
                         {filtrado.map((registro) => (
-                            <div className="registro-colaborador" key={registro.ID}>
+                            <div className="mostrar-registros" key={registro.ID}>
                                 <span className="texto-de-registro">{registro.CODIGO}</span>
                                 <span className="texto-de-registro">{registro.ENTIDAD}</span>
                                 <span className="texto-de-registro">{registro.NOMBRE}</span>
-                                <span className="texto-de-registro">{registro.ACTIVO ? "Activo" : "Inactivo"}</span>                                
+                                <span className="texto-de-registro">{{1: "Inactivo", 2: "Activo", 3: "Suspendido"}[registro.ACTIVO] || "Desconocido"}</span>                             
                                 <span className="texto-de-registro">{registro.USUARIO}</span>
                                 <span className="texto-de-registro">📅{registro.FECHA_INGRESO}</span>
                                 <div className="listar-opciones-contenedor">
@@ -122,20 +148,20 @@ function gestionarColaboradores() {
                 </section>
             </main>
             
-            {mostrarModal && (
+            {mostrarModal && edicion && (
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
-                        <h3>{edicion ? "Editar colaborador" : "Registrar colaborador"}</h3>
-                        <input type="text" placeholder="Seleccione tipo de entidad" value={edicion?.ENTIDAD || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ENTIDAD: nuevoValor.target.value } : null)}/>
-                        <input type="text" placeholder="Nombre de colaborador" value={edicion?.NOMBRE || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, NOMBRE: nuevoValor.target.value } : null)}/>
-                        <input type="date" value={edicion?.FECHA_INGRESO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, FECHA_INGRESO: nuevoValor.target.value } : null)}/>
-                        <input type="text" placeholder="Nombre de usuario" value={edicion?.USUARIO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USUARIO: nuevoValor.target.value } : null)}/>
+                        <h3>Información del colaborador</h3>
+                        <p><strong>Siendo creado el:</strong> {edicion.FECHA_INGRESO}</p>
                         <select value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value) } : null)}>
                             <option value="">-- Selecciona estado --</option>
-                            <option value="0">Inctivo</option>
-                            <option value="1">Activo</option>
-                            <option value="2">Suspendido</option>
+                            <option value="1">Inactivo</option>
+                            <option value="2">Activo</option>
+                            <option value="3">Suspendido</option>
                         </select>
+                        <input type="text" placeholder="Seleccione tipo de entidad" value={edicion?.ENTIDAD || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ENTIDAD: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Nombre de colaborador" value={edicion?.NOMBRE || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, NOMBRE: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Nombre de usuario" value={edicion?.USUARIO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USUARIO: nuevoValor.target.value } : null)}/>
                         <div className="acciones-de-registro">
                             <button onClick={guardarColaborador}>Guardar</button>
                             <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
@@ -146,5 +172,5 @@ function gestionarColaboradores() {
         </div>
     )
 }
-
+/* Checar los comentarios, los errores son generalmente los mismos en los 3 CRUDS. */
 export default gestionarColaboradores

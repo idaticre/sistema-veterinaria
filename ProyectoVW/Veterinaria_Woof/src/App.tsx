@@ -18,6 +18,8 @@ import Lst_mascotas from './pages/administrativas/mascotas/Lst_mascotas';
 import Vacunas from './pages/administrativas/mascotas/Vacunas';
 
 import Gestionar_colaboradores from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarColaboradores'
+import Gestionar_entidades from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarEntidades'
+import Gestionar_usuarios from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarUsuarios'
 import Turnos_y_horarios from './pages/administrativas/administracion/turnos-y-horarios/turnosYhorarios'
 import Asistencia_de_colaboradores from './pages/administrativas/administracion/asistencia-de-colaboradores/asistenciaDeColaboradores';
 import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-a-colaboradores/pagosAcolaboradores'
@@ -62,6 +64,8 @@ function App() {
 
       {/* Administración */}
       <Route path='/administracion/administracion/gestionar_colaboradores' element={<Gestionar_colaboradores/>}/>
+      <Route path='/administracion/administracion/gestionar_entidades' element={<Gestionar_entidades/>}/>
+      <Route path='/administracion/administracion/gestionar_usuarios' element={<Gestionar_usuarios/>}/>
       <Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}/>
       <Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>
       <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>

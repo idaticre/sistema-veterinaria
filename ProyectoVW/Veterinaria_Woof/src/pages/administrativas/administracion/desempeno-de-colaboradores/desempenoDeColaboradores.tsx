@@ -3,10 +3,17 @@ import Br_administrativa from "../../../../components/barra_administrativa/Br_ad
 import "./desempenoDeColaboradores.css";
 
 function desempenoDeColaboradores() {
+    
     return (
-        <>
-            <span>Texo de ejemplo!!!</span>
-        </>
+        <div id="cuerpo-main">
+            <Br_administrativa onMinimizeChange={setMinimizado}/>
+            <main className={minimizado ? "minimize" : ""}>
+                <section id="listar-registros">
+                    <div className="listar-registros">
+                    </div>
+                </section>
+            </main>
+        </div>
     )
 }
 

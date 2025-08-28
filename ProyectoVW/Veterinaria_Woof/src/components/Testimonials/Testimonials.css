@@ -12,7 +12,7 @@
 .testimonials-subtitle {
   margin-bottom: 30px;
   font-size: 1rem;
-  color: #333;
+  color: #ffffff;
 }
 
 .testimonial-card {
@@ -21,6 +21,14 @@
   justify-content: center;
   gap: 30px;
   flex-wrap: wrap;
+}
+
+.testimonial-info h3{
+  color: #000000;
+}
+
+.testimonial-info{
+  color: #ffffff;
 }
 
 .testimonial-img {
@@ -62,7 +70,7 @@
 }
 
 .dot.active {
-  background-color: #333;
+  background-color: #635632;
 }
 
 @media (max-width: 768px) {
