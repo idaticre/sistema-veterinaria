@@ -11,7 +11,7 @@
 
 /* ================== CONTENIDO ================== */
 #lst_asistencia {
-  background-color: #617ff4;
+  background-color: #ffffff;
   padding: 1rem;
   flex: 1;
   border-radius: 10px;
@@ -22,7 +22,7 @@
 
 /* Encabezado */
 #encabezado h2 {
-  color: white;
+  color: rgb(0, 0, 0);
   margin-bottom: 1rem;
 }
 
@@ -58,7 +58,7 @@
 }
 
 #buscador button:hover {
-  background-color: #faba3a;
+  background-color: #1d1d1d;
   transform: scale(1.05);
 }
 

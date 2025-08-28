@@ -5,8 +5,11 @@ import "./pagos.css";
 interface Pago {
   id: number;
   colaborador: string;
+  cargo: string;
   monto: number;
   fecha: string;
+  metodo: string;
+  estado: string;
 }
 
 function Pagos() {
@@ -21,9 +24,9 @@ function Pagos() {
 
   // Datos de ejemplo
   useEffect(() => {
-    const datos = [
-      { id: 1, colaborador: "Carlos López", monto: 1200, fecha: "2025-08-10" },
-      { id: 2, colaborador: "Ana Torres", monto: 1500, fecha: "2025-08-15" },
+    const datos: Pago[] = [
+      { id: 1, colaborador: "Carlos López", cargo: "Administrador", monto: 1200, fecha: "2025-08-10", metodo: "Transferencia", estado: "Pagado" },
+      { id: 2, colaborador: "Ana Torres", cargo: "Veterinaria", monto: 1500, fecha: "2025-08-15", metodo: "Efectivo", estado: "Pendiente" },
     ];
     setPagos(datos);
     setFiltrados(datos);
@@ -78,8 +81,11 @@ function Pagos() {
       const nuevo: Pago = {
         id: pagos.length + 1,
         colaborador: "Nuevo Colaborador",
+        cargo: "Cargo",
         monto: 1000,
         fecha: new Date().toISOString().split("T")[0],
+        metodo: "Transferencia",
+        estado: "Pendiente",
       };
       setPagos([...pagos, nuevo]);
       setFiltrados([...pagos, nuevo]);
@@ -112,9 +118,16 @@ function Pagos() {
           <div id="lista_pagos">
             {filtrados.map((p) => (
               <div className="registro_pago" key={p.id}>
-                <span className="colaborador">{p.colaborador}</span>
+                <div className="info_pago">
+                  <span className="colaborador">{p.colaborador}</span>
+                  <span className="cargo">👔 {p.cargo}</span>
+                </div>
                 <span className="monto">💲 {p.monto}</span>
                 <span className="fecha">📅 {p.fecha}</span>
+                <span className="metodo">💳 {p.metodo}</span>
+                <span className={`estado ${p.estado.toLowerCase()}`}>
+                  {p.estado}
+                </span>
                 <div className="lst_opciones_container">
                   <div className="lst_opciones" onClick={() => setMenuActivoId(p.id)}>
                     <i className="fa-solid fa-ellipsis-vertical" />
@@ -143,6 +156,12 @@ function Pagos() {
               onChange={(e) => setEdicion(edicion ? { ...edicion, colaborador: e.target.value } : null)}
             />
             <input
+              type="text"
+              placeholder="Cargo"
+              value={edicion?.cargo || ""}
+              onChange={(e) => setEdicion(edicion ? { ...edicion, cargo: e.target.value } : null)}
+            />
+            <input
               type="number"
               placeholder="Monto"
               value={edicion?.monto || ""}
@@ -153,6 +172,23 @@ function Pagos() {
               value={edicion?.fecha || ""}
               onChange={(e) => setEdicion(edicion ? { ...edicion, fecha: e.target.value } : null)}
             />
+            <select
+              value={edicion?.metodo || ""}
+              onChange={(e) => setEdicion(edicion ? { ...edicion, metodo: e.target.value } : null)}
+            >
+              <option value="">Seleccione método</option>
+              <option value="Transferencia">Transferencia</option>
+              <option value="Efectivo">Efectivo</option>
+              <option value="Yape">Yape</option>
+              <option value="Plin">Plin</option>
+            </select>
+            <select
+              value={edicion?.estado || ""}
+              onChange={(e) => setEdicion(edicion ? { ...edicion, estado: e.target.value } : null)}
+            >
+              <option value="Pendiente">Pendiente</option>
+              <option value="Pagado">Pagado</option>
+            </select>
             <div className="acciones-modal">
               <button onClick={guardarPago}>Guardar</button>
               <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
