@@ -15,7 +15,7 @@ public class EntidadServiceImpl implements EntidadService {
 
     @Override
     public String registrarEntidad(EntidadEntity entidad) {
-        return repository.registrarEntidad(
+        return repository.spRegistrarEntidad(
                 entidad.getTipoEntidad().getId(),
                 entidad.getTipoPersonaJuridica().getId(),
                 entidad.getNombre(),
@@ -33,7 +33,7 @@ public class EntidadServiceImpl implements EntidadService {
 
     @Override
     public String actualizarEntidad(EntidadEntity entidad) {
-        return repository.actualizarEntidad(
+        return repository.spActualizarEntidad(
                 entidad.getId(),
                 entidad.getTipoPersonaJuridica().getId(),
                 entidad.getNombre(),

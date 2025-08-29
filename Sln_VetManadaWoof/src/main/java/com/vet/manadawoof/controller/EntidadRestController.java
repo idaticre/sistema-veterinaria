@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/entidades")
 @RequiredArgsConstructor
@@ -30,12 +31,11 @@ public class EntidadRestController {
     @GetMapping("/{id}")
     public ResponseEntity<EntidadEntity> obtenerPorId(@PathVariable Long id) {
         EntidadEntity entidad = service.findById(id);
-        return ResponseEntity.ok(entidad);
+        return entidad != null ? ResponseEntity.ok(entidad) : ResponseEntity.notFound().build();
     }
 
     @GetMapping
     public ResponseEntity<List<EntidadEntity>> listarTodas() {
-        List<EntidadEntity> lista = service.findAll();
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(service.findAll());
     }
 }

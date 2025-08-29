@@ -8,33 +8,29 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins ="http://localhost:5173")
 @RestController
 @RequestMapping("/api/empresas")
 @RequiredArgsConstructor
 public class EmpresaRestController {
 
-    private final EmpresaService empresaService;
+    private final EmpresaService service;
 
-    // GET: Listar todas las empresas
     @GetMapping
     public ResponseEntity<List<EmpresaEntity>> listarEmpresas() {
-        List<EmpresaEntity> empresas = empresaService.listarEmpresas();
-        return ResponseEntity.ok(empresas);
+        return ResponseEntity.ok(service.listarEmpresas());
     }
 
-    // GET: Obtener empresa por ID
     @GetMapping("/{id}")
     public ResponseEntity<EmpresaEntity> obtenerEmpresa(@PathVariable Long id) {
-        EmpresaEntity empresa = empresaService.obtenerEmpresa(id);
-        return (empresa == null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(empresa);
+        EmpresaEntity empresa = service.obtenerEmpresa(id);
+        return empresa != null ? ResponseEntity.ok(empresa) : ResponseEntity.notFound().build();
     }
 
-    // PUT: Actualizar empresa existente
     @PutMapping("/{id}")
     public ResponseEntity<String> actualizarEmpresa(@PathVariable Long id,
                                                     @RequestBody EmpresaEntity empresa) {
         empresa.setId(id);
-        String resultado = empresaService.actualizarEmpresa(empresa);
-        return ResponseEntity.ok(resultado);
+        return ResponseEntity.ok(service.actualizarEmpresa(empresa));
     }
 }

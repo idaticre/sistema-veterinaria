@@ -18,7 +18,6 @@ public class ClienteServiceImpl implements ClienteService {
         Integer tipoPersonaJuridicaId = cliente.getEntidad().getTipoPersonaJuridica() != null
                 ? cliente.getEntidad().getTipoPersonaJuridica().getId().intValue()
                 : null;
-
         Integer tipoDocumentoId = cliente.getEntidad().getTipoDocumento() != null
                 ? cliente.getEntidad().getTipoDocumento().getId().intValue()
                 : null;
@@ -34,47 +33,45 @@ public class ClienteServiceImpl implements ClienteService {
                 cliente.getEntidad().getDireccion(),
                 cliente.getEntidad().getCiudad(),
                 cliente.getEntidad().getDistrito(),
-                null, // OUT código entidad
-                null  // OUT código cliente
+                null,
+                null
         );
     }
 
     @Override
     public String actualizarCliente(ClienteEntity cliente) {
-        // NO convertimos id_entidad a Integer, se mantiene como Long
         Long idEntidad = cliente.getEntidad().getId();
 
         Integer tipoPersonaJuridicaId = cliente.getEntidad().getTipoPersonaJuridica() != null
                 ? cliente.getEntidad().getTipoPersonaJuridica().getId().intValue()
                 : null;
-
         Integer tipoDocumentoId = cliente.getEntidad().getTipoDocumento() != null
                 ? cliente.getEntidad().getTipoDocumento().getId().intValue()
                 : null;
 
         return repository.actualizarCliente(
-                idEntidad,                 // Long
-                tipoPersonaJuridicaId,     // Integer
+                idEntidad,
+                tipoPersonaJuridicaId,
                 cliente.getEntidad().getNombre(),
                 cliente.getEntidad().getSexo(),
                 cliente.getEntidad().getDocumento(),
-                tipoDocumentoId,           // Integer
+                tipoDocumentoId,
                 cliente.getEntidad().getCorreo(),
                 cliente.getEntidad().getTelefono(),
                 cliente.getEntidad().getDireccion(),
                 cliente.getEntidad().getCiudad(),
                 cliente.getEntidad().getDistrito(),
-                cliente.getActivo()        // Boolean
+                cliente.getActivo()
         );
     }
 
     @Override
-    public ClienteEntity findById(Long id) {
+    public ClienteEntity obtenerPorId(Long id) {
         return repository.findById(id).orElse(null);
     }
 
     @Override
-    public List<ClienteEntity> findAll() {
+    public List<ClienteEntity> listarClientes() {
         return repository.findAll();
     }
 }

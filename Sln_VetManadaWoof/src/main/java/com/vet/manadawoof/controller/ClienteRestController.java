@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins ="http://localhost:5173")
 @RestController
 @RequestMapping("/api/clientes")
 @RequiredArgsConstructor
@@ -29,12 +30,13 @@ public class ClienteRestController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ClienteEntity> obtenerPorId(@PathVariable Long id) {
-        ClienteEntity cliente = service.findById(id);
+        ClienteEntity cliente = service.obtenerPorId(id);
         return cliente != null ? ResponseEntity.ok(cliente) : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/listar")
     public ResponseEntity<List<ClienteEntity>> listar() {
-        return ResponseEntity.ok(service.findAll());
+        List<ClienteEntity> lista = service.listarClientes();
+        return ResponseEntity.ok(lista);
     }
 }
