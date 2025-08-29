@@ -33,7 +33,7 @@ function Encabezado() {
         </nav>
 
         <div id="enlaces">
-          <button id="sign_in"><a href="">Sign in</a></button>
+          {/* <button id="sign_in"><a href="">Sign in</a></button> */}
           <Link to="/administracion/home"><button id="login">Login</button></Link>
           <button id="btn_menu" onClick={() => setMenuAbierto(true)}>☰</button>
         </div>

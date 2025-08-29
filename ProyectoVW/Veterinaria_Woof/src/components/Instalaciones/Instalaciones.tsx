@@ -6,8 +6,8 @@ const imagenes = [
   "/src/pages/home/images/instalaciones2.jpg",
   "/src/pages/home/images/instalaciones3.jpg",
   "/src/pages/home/images/instalaciones4.jpg",
-  "/src/pages/home/images/instalaciones5.jpg",
-  "/src/pages/home/images/instalaciones6.jpg",
+  "/src/pages/home/images/instalaciones51.jpg",
+  "/src/pages/home/images/instalaciones61.jpg",
 ];
 
 const Instalaciones: React.FC = () => {

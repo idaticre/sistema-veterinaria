@@ -2,7 +2,7 @@
 
 .instalaciones-container {
   text-align: center;
-  padding: 20px;
+  padding: 40px;
   font-family: "Poppins", sans-serif; 
 }
 
@@ -25,7 +25,7 @@
 .grid-imagenes {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  gap: 40px;
   justify-items: center;
 }
 
