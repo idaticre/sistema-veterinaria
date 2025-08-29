@@ -186,7 +186,6 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={adminRef} className="submenu">
-
                                    <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestionar colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Turnos y horarios</Link></li>
                                     <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>

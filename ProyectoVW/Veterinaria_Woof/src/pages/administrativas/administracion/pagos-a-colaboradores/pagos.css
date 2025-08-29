@@ -73,8 +73,8 @@
 }
 
 .registro_pago:hover {
-  transform: translateY(-3px);
-  box-shadow: 0px 6px 14px rgba(0,0,0,0.15);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  background: #ff9900;
 }
 
 .info_pago {

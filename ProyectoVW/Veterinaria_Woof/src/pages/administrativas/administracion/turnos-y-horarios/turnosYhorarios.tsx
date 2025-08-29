@@ -169,6 +169,39 @@ function turnosYhorarios() {
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
                         <h3>Información del horario</h3>
+                        <label>Día:</label>
+                        <input
+                        type="text"
+                        value={edicion.HORARIO.DIA}
+                        onChange={(e) => setEdicion({ ...edicion, DIA: e.target.value })}
+                        />
+
+                        <label>Tipo de día:</label>
+                        <input
+                        type="number"
+                        value={edicion.TIPO_DIA}
+                        onChange={(e) =>
+                            setEdicion({ ...edicion, TIPO_DIA: parseInt(e.target.value) })
+                        }
+                        />
+
+                        <label>Hora inicio:</label>
+                        <input
+                        type="time"
+                        value={edicion.HORA_INICIO}
+                        onChange={(e) =>
+                            setEdicion({ ...edicion, HORA_INICIO: e.target.value })
+                        }
+                        />
+
+                        <label>Hora fin:</label>
+                        <input
+                        type="time"
+                        value={edicion.HORA_FIN}
+                        onChange={(e) =>
+                            setEdicion({ ...edicion, HORA_FIN: e.target.value })
+                        }
+                        />
                         <div className="acciones-de-registro">
                             <button onClick={guardarHorario}>Guardar</button>
                             <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
