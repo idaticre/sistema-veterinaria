@@ -58,6 +58,11 @@ h2 {
   box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 
+.promo_card:hover {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  background: #ff9900;
+}
+
 .promo_card h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
