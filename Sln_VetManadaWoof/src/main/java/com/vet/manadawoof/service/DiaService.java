@@ -5,9 +5,12 @@ import com.vet.manadawoof.entity.DiaEntity;
 import java.util.List;
 
 public interface DiaService {
-    String spDiasSemana(String accion, Long id, String nombre, Boolean activo);
 
-    List<DiaEntity> findAll();
+    String crearDia(DiaEntity dia);
 
-    DiaEntity findById(Long id);
+    String actualizarDia(DiaEntity dia);
+
+    String eliminarDia(Long id);
+
+    List<DiaEntity> listarDias();
 }

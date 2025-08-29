@@ -1,6 +1,5 @@
 package com.vet.manadawoof.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 import java.io.Serializable;
@@ -11,6 +10,17 @@ import java.io.Serializable;
 @Data
 @Entity(name = "TipoDiaEntity")
 @Table(name = "tipos_dia")
+@NamedStoredProcedureQuery(
+        name = "TipoDiaEntity.spTiposDia",
+        procedureName = "sp_tipos_dia",
+        parameters = {
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_accion", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id", type = Long.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_nombre", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_activo", type = Boolean.class),
+                @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_mensaje", type = String.class)
+        }
+)
 public class TipoDiaEntity implements Serializable {
 
     @Id

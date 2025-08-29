@@ -4,7 +4,14 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.List;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Entity(name = "EmpresaEntity")
+@Table(name = "empresa")
 @NamedStoredProcedureQuery(
         name = "EmpresaEntity.spEmpresa",
         procedureName = "sp_empresa",
@@ -22,43 +29,27 @@ import java.io.Serializable;
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_logo_empresa", type = String.class)
         }
 )
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-@Entity
-@Table(name = "empresa")
 public class EmpresaEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "razon_social", length = 128)
     private String razonSocial;
 
-    @Column(name = "ruc", length = 11)
     private String ruc;
 
-    @Column(name = "direccion", length = 256)
     private String direccion;
 
-    @Column(name = "ciudad", length = 64)
     private String ciudad;
 
-    @Column(name = "distrito", length = 64)
     private String distrito;
 
-    @Column(name = "telefono", length = 15)
     private String telefono;
 
-    @Column(name = "correo", length = 64)
     private String correo;
 
-    @Column(name = "representante", length = 64)
     private String representante;
 
-    @Column(name = "logo_empresa", length = 255)
     private String logoEmpresa;
 }

@@ -11,20 +11,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DiaServiceImpl implements DiaService {
 
-    private final DiaRepository diaRepository;
+    private final DiaRepository repository;
 
     @Override
-    public String spDiasSemana(String accion, Long id, String nombre, Boolean activo) {
-        return diaRepository.spDiasSemana(accion, id, nombre, activo);
+    public String crearDia(DiaEntity dia) {
+        return repository.spDiasSemana("CREATE", null, dia.getNombre(), dia.getActivo());
     }
 
     @Override
-    public List<DiaEntity> findAll() {
-        return diaRepository.findAll();
+    public String actualizarDia(DiaEntity dia) {
+        return repository.spDiasSemana("UPDATE", dia.getId(), dia.getNombre(), dia.getActivo());
     }
 
     @Override
-    public DiaEntity findById(Long id) {
-        return diaRepository.findById(id).orElse(null);
+    public String eliminarDia(Long id) {
+        return repository.spDiasSemana("DELETE", id, null, null);
+    }
+
+    @Override
+    public List<DiaEntity> listarDias() {
+        repository.spDiasSemana("READ", null, null, null);
+        // Retornamos findAll solo como referencia
+        return repository.findAll();
     }
 }

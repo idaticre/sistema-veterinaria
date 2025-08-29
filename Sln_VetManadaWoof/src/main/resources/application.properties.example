@@ -1,4 +1,11 @@
+# ============================================
+# Configuración general de la aplicación
+# ============================================
+
+# Nombre de la aplicación
 spring.application.name=VetManadaWoof
+
+# Puerto en el que correrá la app
 server.port=8088
 
 # Contexto base para los endpoints
@@ -11,9 +18,14 @@ server.servlet.context-path=/
 # y reemplazar con sus credenciales locales.
 # ============================================
 
+# URL de conexión
 spring.datasource.url=jdbc:mysql://localhost:3306/vet_manada_woof
-spring.datasource.username=root
-spring.datasource.password=yS!A8697aZNSyFqk 
+
+# Usuario de la base de datos
+spring.datasource.username=TU_USUARIO
+
+# Contraseña de la base de datos
+spring.datasource.password=TU_PASSWORD
 
 # Driver JDBC para MySQL (no cambiar)
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
