@@ -27,9 +27,9 @@ function gestionarColaboradores() {
     // Mete datos de ejemplo
     useEffect(() => {
         const ejemplo = [
-            {ID: 1, CODIGO: "ZXC", ENTIDAD: "ENTIDAD", NOMBRE: "PLZ", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 1, FOTO: "url/ay.jpg"},
-            {ID: 2, CODIGO: "JKL", ENTIDAD: "ENTIDAD", NOMBRE: "PIO", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 1, FOTO: "url/ay.jpg"},
-            {ID: 3, CODIGO: "QWE", ENTIDAD: "ENTIDAD", NOMBRE: "AYA", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO", ACTIVO: 0, FOTO: "url/ay.jpg"},
+            {ID: 1, CODIGO: "CODIGO1", ENTIDAD: "COLABORADOR1", NOMBRE: "NOMBRE1", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO1", ACTIVO: 1, FOTO: "url/ay.jpg"},
+            {ID: 2, CODIGO: "CODIGO2", ENTIDAD: "COLABORADOR2", NOMBRE: "NOMBRE2", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO2", ACTIVO: 1, FOTO: "url/ay.jpg"},
+            {ID: 3, CODIGO: "CODIGO3", ENTIDAD: "COLABORADOR3", NOMBRE: "NOMBRE3", FECHA_INGRESO: "12-12-12", USUARIO: "USUARIO3", ACTIVO: 0, FOTO: "url/ay.jpg"},
         ];
         setColaboradores(ejemplo);
         setFiltrado(ejemplo);

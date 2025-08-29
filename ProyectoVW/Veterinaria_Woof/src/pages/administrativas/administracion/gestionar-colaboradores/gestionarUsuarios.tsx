@@ -25,9 +25,9 @@ function gestionarUsuarios() {
 
     useEffect(() => {
         const ejemplo = [
-            {ID: 1, CODIGO: "RED", USERNAME: "ANA", PASSWORD: "123ASD", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
-            {ID: 2, CODIGO: "YELLOW", USERNAME: "BAP", PASSWORD: "123ASD", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
-            {ID: 3, CODIGO: "GREEN", USERNAME: "ROD", PASSWORD: "123ASD", ACTIVO: 2, FECHA_CREACION: "12-12-12"},  
+            {ID: 1, CODIGO: "CODIGO1", USERNAME: "USUARIO1", PASSWORD: "CONTRASEÑA1", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
+            {ID: 2, CODIGO: "CODIGO2", USERNAME: "USUARIO2", PASSWORD: "CONTRASEÑA2", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
+            {ID: 3, CODIGO: "CODIGO3", USERNAME: "USUARIO3", PASSWORD: "CONTRASEÑA3", ACTIVO: 2, FECHA_CREACION: "12-12-12"},  
         ];
         setUsuarios(ejemplo);
         setFiltrado(ejemplo);

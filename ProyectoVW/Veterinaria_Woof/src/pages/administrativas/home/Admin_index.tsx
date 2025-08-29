@@ -5,7 +5,7 @@ import "./Admin_index.css"
 
 function Admin_index() {
     const [minimizado, setMinimizado] = useState(false);
-    const COLORS = ['#6c08beff', '#b34d16ff', '#ffffffff']; 
+    const COLORS = ['#f79f4eff', '#b34d16ff', '#9b7200ff']; 
 
     const data = [
         { name: 'Canino', cantidad: 10 },
@@ -133,7 +133,7 @@ function Admin_index() {
                                     <XAxis dataKey="name" stroke="black"/>
                                     <YAxis stroke="black" />
                                     <Tooltip />
-                                    <Bar dataKey="cantidad" fill="#5047f5ff" />
+                                    <Bar dataKey="cantidad" fill="#f1c461ff" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
