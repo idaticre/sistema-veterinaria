@@ -191,7 +191,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos a colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
-                                    <li><Link to="/administracion/administracion/desempeno_de_colaboradores" className="sub_opcion">Desempeño de colaboradores</Link></li>
+                                    {/*<li><Link to="/administracion/administracion/desempeno_de_colaboradores" className="sub_opcion">Desempeño de colaboradores</Link></li>*/}
                                 </ul>
                             </li>
                             <li className={`opcion opcion_desplegable ${openMenu === "seguridad"?"toggle_submenu":""}`} 

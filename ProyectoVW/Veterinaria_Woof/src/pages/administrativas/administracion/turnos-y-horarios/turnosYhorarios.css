@@ -18,3 +18,28 @@
   overflow-y: auto;
   box-sizing: border-box;
 }
+
+.registros {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tarjeta-horario {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  width: 260px;
+  margin: 20px;
+  padding: 10px 0px 10px 0px;
+
+  border: 2px solid #b34d16ff;
+  background-color: white;
+
+  border-radius: 5px;
+}
+
+.contenido-ventana select {
+}

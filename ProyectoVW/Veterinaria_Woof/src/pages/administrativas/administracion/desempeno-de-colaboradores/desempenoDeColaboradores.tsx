@@ -5,15 +5,7 @@ import "./desempenoDeColaboradores.css";
 function desempenoDeColaboradores() {
     
     return (
-        <div id="cuerpo-main">
-            <Br_administrativa onMinimizeChange={setMinimizado}/>
-            <main className={minimizado ? "minimize" : ""}>
-                <section id="listar-registros">
-                    <div className="listar-registros">
-                    </div>
-                </section>
-            </main>
-        </div>
+        <></>
     )
 }
 

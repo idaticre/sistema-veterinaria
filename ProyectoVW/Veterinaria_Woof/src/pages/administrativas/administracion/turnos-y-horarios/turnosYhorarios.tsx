@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
 import "./turnosYhorarios.css"
-import { Link } from "react-router-dom";
-import { col } from 'framer-motion/client';
 
 interface Colaborador {
     ID: number,
@@ -20,7 +18,6 @@ interface Horario {
 function turnosYhorarios() {
     const [minimizado, setMinimizado] = useState(false);
     const [busqueda, setBusqueda] = useState("");
-    const [horarios, setHorario] = useState<Horario[]>([]);
     const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
     const [filtrado, setFiltrado] = useState<Colaborador[]>([]);
     const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
@@ -40,7 +37,6 @@ function turnosYhorarios() {
             { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "17:00" },
             { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
             { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
-            { DIA: "Domingo", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
             ],
         },
         {
@@ -53,13 +49,65 @@ function turnosYhorarios() {
             { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
             { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
             { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
-            { DIA: "Domingo", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
             ],
         },
+        {
+            ID: 3,
+            NOMBRE: "Ana Torres",
+            HORARIO: [
+            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
+            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
+            ],
+        },
+        {
+            ID: 4,
+            NOMBRE: "Ana Torres",
+            HORARIO: [
+            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
+            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
+            ],
+        },
+        {
+            ID: 5,
+            NOMBRE: "Ana Torres",
+            HORARIO: [
+            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
+            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
+            ],
+        },
+        {
+            ID: 6,
+            NOMBRE: "Ana Torres",
+            HORARIO: [
+            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
+            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
+            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
+            ],
+        }
         ];
 
         setColaboradores(ejemplo);
     }, []);
+
+    useEffect(() => {
+        const lista = colaboradores.filter(value => value.NOMBRE.toLocaleLowerCase().includes(busqueda.toLowerCase()));
+        setFiltrado(lista);
+    }, [busqueda, colaboradores]);
 
     // Cerrar menú si hago click fuera
     useEffect(() => {
@@ -97,6 +145,7 @@ function turnosYhorarios() {
             { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
             { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
             { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
+            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
             ],
         }
         setEdicion(nuevo);
@@ -133,35 +182,47 @@ function turnosYhorarios() {
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={registrarHorario}>Asignar horario</button>
                     </div>
                     <div className="listar-registros">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                            {colaboradores.map((registro) => (
-                                <div key={registro.ID} className="border rounded-xl shadow-md p-4 bg-white relative">
-                                    <h3 className="text-xl font-bold mb-4">{registro.NOMBRE}</h3>
-                                    <div className="space-y-2">
+                        <div className="registros">
+                            {filtrado.length > 0 ? (
+                                filtrado.map((registro) => (
+                                    <div key={registro.ID} className="tarjeta-horario">
+                                    <h3 className="nombre-tarjeta">{registro.NOMBRE}</h3>
+                                    <div className="info-tarjeta">
                                         {registro.HORARIO.map((h, i) => (
-                                        <div key={i} className="flex gap-2 text-sm">
-                                            <p className="font-semibold">{h.DIA}</p>
-                                            <p className="text-gray-500">({h.TIPO_DIA})</p>
-                                            <p className="ml-1">{h.HORA_INICIO} - {h.HORA_FIN}</p>
+                                        <div key={i}>
+                                            {h.TIPO_DIA === 1 ? (
+                                            <p>
+                                                {h.DIA}: {h.HORA_INICIO} - {h.HORA_FIN}
+                                            </p>
+                                            ) : (
+                                            <p>{h.DIA}: No laboral</p>
+                                            )}
                                         </div>
                                         ))}
                                     </div>
-                                    <div className="flex justify-between items-center mt-4">
-                                        <span className="font-semibold">horario</span>
+                                    <div>
                                         <div className="listar-opciones-contenedor">
-                                            <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.ID)}><i className="fa-solid fa-ellipsis-vertical"/></div>
-                                            {menuActivoId === registro.ID && (
-                                                <div ref={menuRef} className="menu-opciones">
-                                                    <button onClick={() => editarHorario(registro.ID)}>✏️ Editar</button>
-                                                    <button onClick={() => eliminarHorario(registro.ID)}>🗑️ Eliminar</button>
-                                                </div>
-                                            )}
+                                        <div
+                                            className="listar-registro-opciones"
+                                            onClick={() => setMenuActivoId(registro.ID)}
+                                        >
+                                            <i className="fa-solid fa-ellipsis-vertical" />
+                                        </div>
+                                        {menuActivoId === registro.ID && (
+                                            <div ref={menuRef} className="menu-opciones">
+                                            <button onClick={() => editarHorario(registro.ID)}>✏️ Editar</button>
+                                            <button onClick={() => eliminarHorario(registro.ID)}>🗑️ Eliminar</button>
+                                            </div>
+                                        )}
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                    </div>
+                                ))
+                                ) : (
+                                <p className="mensaje-vacio">❌ No se encontraron colaboradores</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
                 </section>
             </main>
 
@@ -169,39 +230,45 @@ function turnosYhorarios() {
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
                         <h3>Información del horario</h3>
-                        <label>Día:</label>
-                        <input
-                        type="text"
-                        value={edicion.HORARIO.DIA}
-                        onChange={(e) => setEdicion({ ...edicion, DIA: e.target.value })}
-                        />
+                        <label>Nombre del colaborador:</label>
+                        <input type="text" value={edicion.NOMBRE} onChange={(e) => setEdicion({ ...edicion, NOMBRE: e.target.value })} placeholder="Ingrese el nombre"/>
+                        {edicion.HORARIO.map((h, index) => (
+                        <div key={index} className="bloque-dia">
+                            <h4>{h.DIA}</h4>
+                            <label>Tipo de día:</label>
+                            <select value={h.TIPO_DIA} onChange={(e) => {
+                                    const nuevoHorario = [...edicion.HORARIO];
+                                    nuevoHorario[index] = {
+                                        ...h,
+                                        TIPO_DIA: parseInt(e.target.value)
+                                    };
+                                    setEdicion({ ...edicion, HORARIO: nuevoHorario });
+                                }}>
+                                <option value={1}>Laboral</option>
+                                <option value={0}>No laboral</option>
+                            </select>
+                            <br></br>
+                            <label>Hora inicio:</label>
+                            <input type="time" value={h.HORA_INICIO} onChange={(e) => {
+                                    const nuevoHorario = [...edicion.HORARIO];
+                                    nuevoHorario[index] = {
+                                        ...h,
+                                        HORA_INICIO: e.target.value
+                                    };
+                                    setEdicion({ ...edicion, HORARIO: nuevoHorario });
+                                }}/>
 
-                        <label>Tipo de día:</label>
-                        <input
-                        type="number"
-                        value={edicion.TIPO_DIA}
-                        onChange={(e) =>
-                            setEdicion({ ...edicion, TIPO_DIA: parseInt(e.target.value) })
-                        }
-                        />
-
-                        <label>Hora inicio:</label>
-                        <input
-                        type="time"
-                        value={edicion.HORA_INICIO}
-                        onChange={(e) =>
-                            setEdicion({ ...edicion, HORA_INICIO: e.target.value })
-                        }
-                        />
-
-                        <label>Hora fin:</label>
-                        <input
-                        type="time"
-                        value={edicion.HORA_FIN}
-                        onChange={(e) =>
-                            setEdicion({ ...edicion, HORA_FIN: e.target.value })
-                        }
-                        />
+                            <label>Hora fin:</label>
+                            <input type="time" value={h.HORA_FIN} onChange={(e) => {
+                                    const nuevoHorario = [...edicion.HORARIO];
+                                    nuevoHorario[index] = {
+                                        ...h,
+                                        HORA_FIN: e.target.value
+                                    };
+                                    setEdicion({ ...edicion, HORARIO: nuevoHorario });
+                                }}/>
+                        </div>
+                        ))}
                         <div className="acciones-de-registro">
                             <button onClick={guardarHorario}>Guardar</button>
                             <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
