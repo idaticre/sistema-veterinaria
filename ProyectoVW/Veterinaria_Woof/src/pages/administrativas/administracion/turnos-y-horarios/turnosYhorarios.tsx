@@ -154,8 +154,20 @@ function turnosYhorarios() {
 
     const guardarHorario = () => {
         if (!edicion) return;
-        if (!edicion.HORARIO) {alert("Es necesario completar todas las casillas"); return;}
-    
+        const incompletos = edicion.HORARIO.some(h => h.TIPO_DIA !== 0 && h.TIPO_DIA !== 1);
+        if (incompletos) {
+            alert("Debes seleccionar si cada día es laboral o no laboral");
+            return;
+        }
+
+        const horasIncompletas = edicion.HORARIO.some(h => h.TIPO_DIA === 1 && (!h.HORA_INICIO || !h.HORA_FIN));
+            if (horasIncompletas) {
+                alert("Debes completar hora de inicio y fin en los días laborales");
+                return;
+        }
+        
+        if (!edicion.NOMBRE.trim()) {alert("Ingresar el nombre del colaborador es obligatorio"); return;}
+
         const existe = colaboradores.some(colaborador => colaborador.ID === edicion.ID);
         if (existe) {
             const registros = colaboradores.map(colaborador => colaborador.ID === edicion.ID ? edicion : colaborador);
