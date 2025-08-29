@@ -2,87 +2,34 @@ package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.RolEntity;
 import com.vet.manadawoof.repository.RolRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.ParameterMode;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.StoredProcedureQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RolServiceImpl implements RolService {
 
-    private final RolRepository rolRepository;
+    private final RolRepository repository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    // Método auxiliar para preparar el SP
-    private StoredProcedureQuery prepareSP(String accion, Integer id, String nombre, String descripcion, Integer activo) {
-        StoredProcedureQuery query = entityManager
-                .createStoredProcedureQuery("sp_roles")
-                .registerStoredProcedureParameter("p_accion", String.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_id", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_nombre", String.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_descripcion", String.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_activo", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
-
-        query.setParameter("p_accion", accion);
-        query.setParameter("p_id", id);
-        query.setParameter("p_nombre", nombre);
-        query.setParameter("p_descripcion", descripcion);
-        query.setParameter("p_activo", activo);
-
-        return query;
+    @Override
+    public String crearRol(RolEntity rol) {
+        return repository.spRoles("CREATE", null, rol.getNombre(), rol.getDescripcion(), rol.getActivo());
     }
 
     @Override
-    public String createRol(RolEntity rol) {
-        StoredProcedureQuery query = prepareSP("CREATE", null, rol.getNombre(), rol.getDescripcion(), rol.getActivo());
-        query.execute();
-        return (String) query.getOutputParameterValue("p_mensaje");
+    public List<RolEntity> listarRoles() {
+        repository.spRoles("READ", null, null, null, null);
+        return repository.findAll();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<RolEntity> readRoles(Long id) {
-        Integer idInt = id != null ? id.intValue() : null;
-        StoredProcedureQuery query = entityManager
-                .createStoredProcedureQuery("sp_roles", RolEntity.class)
-                .registerStoredProcedureParameter("p_accion", String.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_id", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_nombre", String.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_descripcion", String.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_activo", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
-
-        query.setParameter("p_accion", "READ");
-        query.setParameter("p_id", idInt);
-        query.setParameter("p_nombre", null);
-        query.setParameter("p_descripcion", null);
-        query.setParameter("p_activo", null);
-
-        query.execute();
-        return query.getResultList();
+    public String actualizarRol(RolEntity rol) {
+        return repository.spRoles("UPDATE", rol.getId().intValue(), rol.getNombre(), rol.getDescripcion(), rol.getActivo());
     }
 
     @Override
-    public String updateRol(RolEntity rol) {
-        Integer idInt = rol.getId() != null ? rol.getId().intValue() : null;
-        StoredProcedureQuery query = prepareSP("UPDATE", idInt, rol.getNombre(), rol.getDescripcion(), rol.getActivo());
-        query.execute();
-        return (String) query.getOutputParameterValue("p_mensaje");
-    }
-
-    @Override
-    public String deleteRol(Long id) {
-        Integer idInt = id != null ? id.intValue() : null;
-        StoredProcedureQuery query = prepareSP("DELETE", idInt, null, null, null);
-        query.execute();
-        return (String) query.getOutputParameterValue("p_mensaje");
+    public String eliminarRol(Long id) {
+        return repository.spRoles("DELETE", id.intValue(), null, null, null);
     }
 }

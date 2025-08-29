@@ -5,11 +5,12 @@ import com.vet.manadawoof.entity.ClienteEntity;
 import java.util.List;
 
 public interface ClienteService {
+
     String registrarCliente(ClienteEntity cliente);
 
     String actualizarCliente(ClienteEntity cliente);
 
-    ClienteEntity findById(Long id);
+    ClienteEntity obtenerPorId(Long id);
 
-    List<ClienteEntity> findAll();
+    List<ClienteEntity> listarClientes();
 }

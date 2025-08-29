@@ -8,36 +8,40 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/roles")
 @RequiredArgsConstructor
 public class RolRestController {
 
-    private final RolService rolService;
+    private final RolService service;
 
-    @PostMapping
-    public ResponseEntity<String> create(@RequestBody RolEntity rol) {
-        return ResponseEntity.ok(rolService.createRol(rol));
+    @PostMapping("/crear")
+    public ResponseEntity<String> crear(@RequestBody RolEntity rol) {
+        return ResponseEntity.ok(service.crearRol(rol));
     }
 
-    @GetMapping
-    public ResponseEntity<List<RolEntity>> readAll() {
-        return ResponseEntity.ok(rolService.readRoles(null));
+    @GetMapping("/listar")
+    public ResponseEntity<List<RolEntity>> listar() {
+        return ResponseEntity.ok(service.listarRoles());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<RolEntity>> readById(@PathVariable Long id) {
-        return ResponseEntity.ok(rolService.readRoles(id));
+    public ResponseEntity<RolEntity> obtener(@PathVariable Long id) {
+        return ResponseEntity.ok(service.listarRoles().stream()
+                .filter(r -> r.getId().equals(id))
+                .findFirst()
+                .orElse(null));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable Long id, @RequestBody RolEntity rol) {
+    @PutMapping("/actualizar/{id}")
+    public ResponseEntity<String> actualizar(@PathVariable Long id, @RequestBody RolEntity rol) {
         rol.setId(id);
-        return ResponseEntity.ok(rolService.updateRol(rol));
+        return ResponseEntity.ok(service.actualizarRol(rol));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
-        return ResponseEntity.ok(rolService.deleteRol(id));
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<String> eliminar(@PathVariable Long id) {
+        return ResponseEntity.ok(service.eliminarRol(id));
     }
 }

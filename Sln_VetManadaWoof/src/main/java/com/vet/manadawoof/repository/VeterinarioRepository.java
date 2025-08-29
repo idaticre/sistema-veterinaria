@@ -9,18 +9,40 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VeterinarioRepository extends JpaRepository<VeterinarioEntity, Long> {
 
-    @Procedure(name = "registrar_veterinario")
+    @Procedure(name = "VeterinarioEntity.registrarVeterinario")
     String registrarVeterinario(
-            @Param("p_id_colaborador") Long idColaborador,
+            @Param("p_id_entidad") Long idEntidad,
+            @Param("p_id_tipo_persona_juridica") Long idTipoPersona,
+            @Param("p_nombre") String nombre,
+            @Param("p_sexo") String sexo,
+            @Param("p_documento") String documento,
+            @Param("p_id_tipo_documento") Long idTipoDocumento,
+            @Param("p_correo") String correo,
+            @Param("p_telefono") String telefono,
+            @Param("p_direccion") String direccion,
+            @Param("p_ciudad") String ciudad,
+            @Param("p_distrito") String distrito,
+            @Param("p_representante") String representante,
             @Param("p_id_especialidad") Long idEspecialidad,
-            @Param("p_cmp") String cmp,
-            @Param("p_activo") Boolean activo
+            @Param("p_cmp") String cmp
     );
 
-    @Procedure(name = "actualizar_veterinario")
+    @Procedure(name = "VeterinarioEntity.actualizarVeterinario")
     String actualizarVeterinario(
-            @Param("p_id") Long idVeterinario,
-            @Param("p_id_colaborador") Long idColaborador,
+            @Param("p_id_entidad") Long idEntidad,
+            @Param("p_id_tipo_persona_juridica") Long idTipoPersona,
+            @Param("p_nombre") String nombre,
+            @Param("p_sexo") String sexo,
+            @Param("p_documento") String documento,
+            @Param("p_id_tipo_documento") Long idTipoDocumento,
+            @Param("p_correo") String correo,
+            @Param("p_telefono") String telefono,
+            @Param("p_direccion") String direccion,
+            @Param("p_ciudad") String ciudad,
+            @Param("p_distrito") String distrito,
+            @Param("p_representante") String representante,
+            @Param("p_id_usuario") Long idUsuario,
+            @Param("p_foto") String foto,
             @Param("p_id_especialidad") Long idEspecialidad,
             @Param("p_cmp") String cmp,
             @Param("p_activo") Boolean activo

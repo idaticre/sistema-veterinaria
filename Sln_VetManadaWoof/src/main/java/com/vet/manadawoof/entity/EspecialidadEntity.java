@@ -1,6 +1,5 @@
 package com.vet.manadawoof.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,20 +12,27 @@ import java.util.List;
 @Data
 @Entity(name = "EspecialidadEntity")
 @Table(name = "especialidades")
+@NamedStoredProcedureQuery(
+        name = "EspecialidadEntity.spEspecialidades",
+        procedureName = "sp_especialidades",
+        parameters = {
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_accion", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id", type = Long.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_nombre", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_activo", type = Boolean.class),
+                @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_mensaje", type = String.class)
+        }
+)
 public class EspecialidadEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "codigo")
     private String codigo;
 
-    @Column(name = "nombre")
     private String nombre;
 
-    @Column(name = "activo")
     private Boolean activo;
 
     @OneToMany(mappedBy = "especialidad")

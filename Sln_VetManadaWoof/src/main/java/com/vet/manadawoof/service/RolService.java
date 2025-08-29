@@ -5,11 +5,11 @@ import java.util.List;
 
 public interface RolService {
 
-    String createRol(RolEntity rol);
+    String crearRol(RolEntity rol);
 
-    List<RolEntity> readRoles(Long id);
+    List<RolEntity> listarRoles();
 
-    String updateRol(RolEntity rol);
+    String actualizarRol(RolEntity rol);
 
-    String deleteRol(Long id);
+    String eliminarRol(Long id);
 }
