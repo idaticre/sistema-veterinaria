@@ -3,17 +3,15 @@ package com.vet.manadawoof.repository;
 import com.vet.manadawoof.entity.TipoDocumentoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.query.Procedure;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TipoDocumentoRepository extends JpaRepository<TipoDocumentoEntity, Long> {
+public interface TipoDocumentoRepository extends JpaRepository<TipoDocumentoEntity, Integer> {
 
-    @Procedure(name = "TipoDocumentoEntity.sp_tipo_documento")
+    @Procedure(name = "TipoDocumentoEntity.spTipoDocumento")
     String spTipoDocumento(
-            @Param("p_accion") String accion,
-            @Param("p_id") Long id,
-            @Param("p_nombre") String nombre,
-            @Param("p_activo") Boolean activo
-    );
+            String p_accion,
+            Integer p_id,
+            String p_descripcion,
+            Integer p_activo);
 }

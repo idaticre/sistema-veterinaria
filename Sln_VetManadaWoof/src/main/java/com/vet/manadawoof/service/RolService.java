@@ -1,7 +1,9 @@
 package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.RolEntity;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface RolService {
 
@@ -11,5 +13,7 @@ public interface RolService {
 
     String actualizarRol(RolEntity rol);
 
-    String eliminarRol(Long id);
+    String eliminarRol(Integer id);
+
+    Optional<RolEntity> obtenerPorId(Integer id);
 }

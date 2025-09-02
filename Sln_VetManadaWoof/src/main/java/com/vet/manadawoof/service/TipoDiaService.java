@@ -1,16 +1,17 @@
 package com.vet.manadawoof.service;
 
+import com.vet.manadawoof.dtos.response.TipoDiaResponseDTO;
 import com.vet.manadawoof.entity.TipoDiaEntity;
 
 import java.util.List;
 
 public interface TipoDiaService {
 
-    String crearTipoDia(TipoDiaEntity tipoDia);
+    TipoDiaResponseDTO crearTipoDia(TipoDiaEntity tipoDia);
 
-    String actualizarTipoDia(TipoDiaEntity tipoDia);
+    TipoDiaResponseDTO actualizarTipoDia(TipoDiaEntity tipoDia);
 
-    String eliminarTipoDia(Long id);
+    TipoDiaResponseDTO eliminarTipoDia(Integer id);
 
-    List<TipoDiaEntity> listarTiposDia();
+    List<TipoDiaResponseDTO> listarTiposDia();
 }

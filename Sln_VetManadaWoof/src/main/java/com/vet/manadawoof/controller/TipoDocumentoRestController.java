@@ -8,36 +8,31 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins ="http://localhost:5173")
 @RestController
 @RequestMapping("/api/tipo-documento")
 @RequiredArgsConstructor
 public class TipoDocumentoRestController {
 
-    private final TipoDocumentoService tipoDocumentoService;
+    private final TipoDocumentoService service;
+
+    @PostMapping("/crear")
+    public ResponseEntity<String> crear(@RequestBody TipoDocumentoEntity tipoDocumento) {
+        return ResponseEntity.ok(service.crearTipoDocumento(tipoDocumento));
+    }
+
+    @PutMapping("/actualizar")
+    public ResponseEntity<String> actualizar(@RequestBody TipoDocumentoEntity tipoDocumento) {
+        return ResponseEntity.ok(service.actualizarTipoDocumento(tipoDocumento));
+    }
+
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<String> eliminar(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.eliminarTipoDocumento(id));
+    }
 
     @GetMapping
-    public ResponseEntity<List<TipoDocumentoEntity>> listarTiposDocumento() {
-        return ResponseEntity.ok(tipoDocumentoService.listarTiposDocumento());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TipoDocumentoEntity> obtenerTipoDocumento(@PathVariable Long id) {
-        TipoDocumentoEntity tipoDocumento = tipoDocumentoService.obtenerTipoDocumento(id);
-        if (tipoDocumento == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(tipoDocumento);
-    }
-
-    @PostMapping
-    public ResponseEntity<String> guardarTipoDocumento(@RequestBody TipoDocumentoEntity tipoDocumento) {
-        String resultado = tipoDocumentoService.guardarTipoDocumento(tipoDocumento);
-        return ResponseEntity.ok(resultado);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarTipoDocumento(@PathVariable Long id) {
-        String resultado = tipoDocumentoService.eliminarTipoDocumento(id);
-        return ResponseEntity.ok(resultado);
+    public ResponseEntity<List<TipoDocumentoEntity>> listar() {
+        return ResponseEntity.ok(service.listarTiposDocumento());
     }
 }

@@ -5,9 +5,8 @@ import com.vet.manadawoof.entity.HorarioTrabajoEntity;
 import java.util.List;
 
 public interface HorarioTrabajoService {
-    String ejecutarSP(HorarioTrabajoEntity horario, String accion);
 
-    HorarioTrabajoEntity findById(Long id);
+    HorarioTrabajoEntity findById(Integer id);
 
     List<HorarioTrabajoEntity> findAll();
 }

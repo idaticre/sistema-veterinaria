@@ -5,9 +5,10 @@ import com.vet.manadawoof.entity.EmpresaEntity;
 import java.util.List;
 
 public interface EmpresaService {
+    
     List<EmpresaEntity> listarEmpresas();
 
-    EmpresaEntity obtenerEmpresa(Long id);
+    EmpresaEntity obtenerEmpresa(Integer id);
 
     String actualizarEmpresa(EmpresaEntity empresa);
 }

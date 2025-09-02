@@ -2,7 +2,9 @@ package com.vet.manadawoof.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.io.Serializable;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -23,17 +25,24 @@ import java.io.Serializable;
         }
 )
 public class RolEntity implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(unique = true)
     private String codigo;
 
     private String nombre;
-
     private String descripcion;
 
-    private Integer activo;
+    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
+    private Boolean activo;
+
+    @Transient
+    private String mensaje; // Para SP output
+
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<UsuarioEntity> usuarios;
 }

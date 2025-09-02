@@ -1,17 +1,19 @@
 package com.vet.manadawoof.service;
 
+import com.vet.manadawoof.dtos.response.UsuarioResponseDTO;
 import com.vet.manadawoof.entity.UsuarioEntity;
 
 import java.util.List;
 
 public interface UsuarioService {
-    String createUser(UsuarioEntity user);
 
-    String updateUser(UsuarioEntity user);
+    UsuarioResponseDTO createUser(UsuarioEntity user);
 
-    String deleteUser(Long id);
+    UsuarioResponseDTO updateUser(UsuarioEntity user);
 
-    UsuarioEntity findUserById(Long id);
+    UsuarioResponseDTO deleteUser(Integer id);
 
-    List<UsuarioEntity> findAllUsers();
+    UsuarioResponseDTO findUserById(Integer id);
+
+    List<UsuarioResponseDTO> findAllUsers();
 }

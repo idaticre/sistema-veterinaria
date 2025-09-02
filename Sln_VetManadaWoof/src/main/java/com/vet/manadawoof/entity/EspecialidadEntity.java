@@ -17,7 +17,7 @@ import java.util.List;
         procedureName = "sp_especialidades",
         parameters = {
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_accion", type = String.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id", type = Long.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id", type = Integer.class),
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_nombre", type = String.class),
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_activo", type = Boolean.class),
                 @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_mensaje", type = String.class)
@@ -27,12 +27,13 @@ public class EspecialidadEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String codigo;
 
     private String nombre;
 
+    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean activo;
 
     @OneToMany(mappedBy = "especialidad")

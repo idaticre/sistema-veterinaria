@@ -1,5 +1,6 @@
 package com.vet.manadawoof.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -55,13 +56,18 @@ public class ClienteEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String codigo;
 
+    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean activo;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_entidad", referencedColumnName = "id")
+
+    // evita recursión JSON si EntidadEntity tiene lista de clientes
+    @JsonIgnoreProperties({"clientes"})
+
     private EntidadEntity entidad;
 }

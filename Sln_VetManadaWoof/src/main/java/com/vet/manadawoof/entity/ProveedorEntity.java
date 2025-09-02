@@ -1,7 +1,9 @@
 package com.vet.manadawoof.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.io.Serializable;
 
 @Builder
@@ -35,7 +37,7 @@ import java.io.Serializable;
                 name = "ProveedorEntity.actualizarProveedor",
                 procedureName = "actualizar_proveedor",
                 parameters = {
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_entidad", type = Long.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_entidad", type = Integer.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_persona_juridica", type = Integer.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_nombre", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_sexo", type = String.class),
@@ -56,13 +58,16 @@ public class ProveedorEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
+    @Column(name = "codigo", length = 20, nullable = false, unique = true)
     private String codigo;
 
+    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean activo;
 
     @ManyToOne
     @JoinColumn(name = "id_entidad", referencedColumnName = "id")
+    @JsonIgnoreProperties({"proveedores"})
     private EntidadEntity entidad;
 }

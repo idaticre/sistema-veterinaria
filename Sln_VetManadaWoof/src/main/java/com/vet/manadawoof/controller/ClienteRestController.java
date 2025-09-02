@@ -1,5 +1,7 @@
 package com.vet.manadawoof.controller;
 
+import com.vet.manadawoof.dtos.request.ClienteRequestDTO;
+import com.vet.manadawoof.dtos.response.ClienteResponseDTO;
 import com.vet.manadawoof.entity.ClienteEntity;
 import com.vet.manadawoof.service.ClienteService;
 import lombok.RequiredArgsConstructor;
@@ -17,24 +19,26 @@ public class ClienteRestController {
     private final ClienteService service;
 
     @PostMapping("/registrar")
-    public ResponseEntity<String> registrar(@RequestBody ClienteEntity cliente) {
-        String mensaje = service.registrarCliente(cliente);
-        return ResponseEntity.ok(mensaje);
+    public ResponseEntity<ClienteResponseDTO> registrar(@RequestBody ClienteRequestDTO request) {
+        ClienteResponseDTO response = service.registrarCliente(request);
+        return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/actualizar")
-    public ResponseEntity<String> actualizar(@RequestBody ClienteEntity cliente) {
-        String mensaje = service.actualizarCliente(cliente);
-        return ResponseEntity.ok(mensaje);
+    @PutMapping("/actualizar/{id}")
+    public ResponseEntity<ClienteResponseDTO> actualizar(
+            @PathVariable Integer id,
+            @RequestBody ClienteRequestDTO request) {
+        ClienteResponseDTO response = service.actualizarCliente(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClienteEntity> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<ClienteEntity> obtenerPorId(@PathVariable Integer id) {
         ClienteEntity cliente = service.obtenerPorId(id);
         return cliente != null ? ResponseEntity.ok(cliente) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/listar")
+    @GetMapping
     public ResponseEntity<List<ClienteEntity>> listar() {
         List<ClienteEntity> lista = service.listarClientes();
         return ResponseEntity.ok(lista);

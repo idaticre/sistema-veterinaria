@@ -2,7 +2,9 @@ package com.vet.manadawoof.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.io.Serializable;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -11,22 +13,21 @@ import java.io.Serializable;
 @Entity
 @Table(name = "usuarios")
 @NamedStoredProcedureQuery(
-        name = "UsuarioEntity.sp_usuarios",
+        name = "UsuarioEntity.spUsuarios",
         procedureName = "sp_usuarios",
         parameters = {
-                @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_accion",  type = String.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_id",      type = Integer.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_usuario", type = String.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_clave",   type = String.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_activo",  type = Integer.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_accion", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id", type = Integer.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_usuario", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_clave", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_activo", type = Integer.class),
                 @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_mensaje", type = String.class)
         }
 )
 public class UsuarioEntity implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "codigo", unique = true)
     private String codigo;
@@ -37,6 +38,17 @@ public class UsuarioEntity implements Serializable {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "activo")
+    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean activo;
+
+    @OneToOne(mappedBy = "usuario")
+    private ColaboradorEntity colaborador;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "usuarios_roles",
+            joinColumns = @JoinColumn(name = "id_usuario"),
+            inverseJoinColumns = @JoinColumn(name = "id_rol")
+    )
+    private List<RolEntity> roles;
 }

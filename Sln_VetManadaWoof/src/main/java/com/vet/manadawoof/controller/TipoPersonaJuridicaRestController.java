@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins ="http://localhost:5173")
 @RestController
 @RequestMapping("/api/tipos-persona-juridica")
 @RequiredArgsConstructor
@@ -26,13 +27,14 @@ public class TipoPersonaJuridicaRestController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> actualizar(@PathVariable Long id, @RequestBody TipoPersonaJuridicaEntity entity) {
+    public ResponseEntity<String> actualizar(
+            @PathVariable Integer id, @RequestBody TipoPersonaJuridicaEntity entity) {
         entity.setId(id);
         return ResponseEntity.ok(service.actualizarTipoPersonaJuridica(entity));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminar(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         return ResponseEntity.ok(service.eliminarTipoPersonaJuridica(id));
     }
 }

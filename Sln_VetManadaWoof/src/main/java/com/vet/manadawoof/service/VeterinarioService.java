@@ -1,15 +1,13 @@
 package com.vet.manadawoof.service;
 
-import com.vet.manadawoof.entity.VeterinarioEntity;
+import com.vet.manadawoof.dtos.request.VeterinarioRequestDTO;
+import com.vet.manadawoof.dtos.response.VeterinarioResponseDTO;
+
 import java.util.List;
 
 public interface VeterinarioService {
-
-    String registrarVeterinario(VeterinarioEntity veterinario);
-
-    String actualizarVeterinario(VeterinarioEntity veterinario);
-
-    VeterinarioEntity findById(Long id);
-
-    List<VeterinarioEntity> findAll();
+    VeterinarioResponseDTO registrarVeterinario(VeterinarioRequestDTO dto);
+    VeterinarioResponseDTO actualizarVeterinario(VeterinarioRequestDTO dto);
+    VeterinarioResponseDTO obtenerPorId(Integer id);
+    List<VeterinarioResponseDTO> listar();
 }

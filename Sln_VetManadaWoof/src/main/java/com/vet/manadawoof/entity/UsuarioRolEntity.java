@@ -1,5 +1,6 @@
 package com.vet.manadawoof.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,17 +17,17 @@ import java.io.Serializable;
         procedureName = "sp_usuarios_roles",
         parameters = {
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_accion", type = String.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id", type = Long.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_usuario_id", type = Long.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_rol_id", type = Long.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id", type = Integer.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_usuario_id", type = Integer.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_rol_id", type = Integer.class),
                 @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_mensaje", type = String.class)
         }
 )
+@JsonIgnoreProperties({"roles", "usuarios"})
 public class UsuarioRolEntity implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")

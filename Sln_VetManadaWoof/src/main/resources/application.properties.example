@@ -38,7 +38,7 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 # - update: crea/modifica tablas sin borrar datos (desarrollo)
 # - validate: solo valida, no cambia la BD
 # - none: no hace nada (producción)
-spring.jpa.hibernate.ddl-auto=update
+spring.jpa.hibernate.ddl-auto=validate
 
 # Dialecto específico de MySQL (para generar SQL optimizado)
 spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect

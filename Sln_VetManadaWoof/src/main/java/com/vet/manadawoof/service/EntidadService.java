@@ -1,16 +1,18 @@
 package com.vet.manadawoof.service;
 
+import com.vet.manadawoof.dtos.request.EntidadRequestDTO;
+import com.vet.manadawoof.dtos.response.EntidadResponseDTO;
 import com.vet.manadawoof.entity.EntidadEntity;
 
 import java.util.List;
 
 public interface EntidadService {
 
-    String registrarEntidad(EntidadEntity entidad);
+    EntidadResponseDTO registrarEntidad(EntidadRequestDTO dto);
 
-    String actualizarEntidad(EntidadEntity entidad);
+    EntidadResponseDTO actualizarEntidad(EntidadRequestDTO dto);
 
-    EntidadEntity findById(Long id);
+    EntidadEntity findById(Integer id);
 
     List<EntidadEntity> findAll();
 }

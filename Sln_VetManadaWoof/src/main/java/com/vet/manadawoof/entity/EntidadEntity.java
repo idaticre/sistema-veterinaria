@@ -11,19 +11,19 @@ import java.util.List;
                 name = "EntidadEntity.spRegistrarEntidadBase",
                 procedureName = "registrar_entidad_base",
                 parameters = {
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_entidad", type = Long.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_persona_juridica", type = Long.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_entidad", type = Integer.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_persona_juridica", type = Integer.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_nombre", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_sexo", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_documento", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_documento", type = Long.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_documento", type = Integer.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_correo", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_telefono", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_direccion", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_ciudad", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_distrito", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_representante", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_id_entidad", type = Long.class),
+                        @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_id_entidad", type = Integer.class),
                         @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_codigo_entidad", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_mensaje", type = String.class)
                 }
@@ -32,12 +32,12 @@ import java.util.List;
                 name = "EntidadEntity.spActualizarEntidadBase",
                 procedureName = "actualizar_entidad_base",
                 parameters = {
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_entidad", type = Long.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_persona_juridica", type = Long.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_entidad", type = Integer.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_persona_juridica", type = Integer.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_nombre", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_sexo", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_documento", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_documento", type = Long.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id_tipo_documento", type = Integer.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_correo", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_telefono", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_direccion", type = String.class),
@@ -59,7 +59,7 @@ public class EntidadEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "id_tipo_entidad")
@@ -103,6 +103,7 @@ public class EntidadEntity implements Serializable {
     @Column(length = 20)
     private String codigo;
 
+    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean activo;
 
     @OneToMany(mappedBy = "entidad", cascade = CascadeType.ALL)
