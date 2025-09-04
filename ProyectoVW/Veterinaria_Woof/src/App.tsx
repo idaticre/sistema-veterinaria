@@ -4,8 +4,7 @@ SEGUNDO añade tu <Route> al cuerpo de la función function App() -> <Route path
 TERCERO, al hacer eso e importar App.tsx a tu otro .tsx deseado, podrás usar el element en vez del path en el proyecto :D (vélo en src/components/barra_administrativa/Br_administrativa.tsx) */
 
 // Ordenado por orden de aparición en la barra administrativa lateral de la página
-import { Route, Routes } from 'react-router-dom';
-import Home from './pages/home/home';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import Admin_index from './pages/administrativas/home/Admin_index';
 
@@ -26,19 +25,14 @@ import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-
 import Parametros_y_promociones from './pages/administrativas/administracion/parametros-y-promociones/parametrosYpromociones'
 import Desempeno_de_colaboradores from './pages/administrativas/administracion/desempeno-de-colaboradores/desempenoDeColaboradores'
 
-import Tienda from './pages/publicas/Tienda';
 
 function App() {
   return (
     <Routes>
-      {/* Inicio web */}
-      <Route path='/' element={<Home/>}/>
-
-      {/* Tienda */}
-      <Route path='/tienda' element={<Tienda/>}/>
-
+      <Route path="/" element={<Navigate to="/administracion/home" replace />} />
+      
       {/* Inicio de administración */}
-      <Route path='/administracion/home' element={<Admin_index/>}/>
+      <Route path='/administracion/home'  element={<Admin_index/>}/>
 
       {/* Clientes */}
       <Route path='/administracion/cliente/lista' element={<Lst_clientes/>}/>
