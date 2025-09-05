@@ -1,6 +1,7 @@
 package com.vet.manadawoof.controller;
 
-import com.vet.manadawoof.entity.UsuarioRolEntity;
+import com.vet.manadawoof.dtos.request.UsuarioRolRequestDTO;
+import com.vet.manadawoof.dtos.response.UsuarioRolResponseDTO;
 import com.vet.manadawoof.service.UsuarioRolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,27 +11,21 @@ import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
-@RequestMapping("/api/usuario-rol")
+@RequestMapping("/api/usuarios-roles")
 @RequiredArgsConstructor
 public class UsuarioRolRestController {
 
-    private final UsuarioRolService service;
+    private final UsuarioRolService usuarioRolService;
 
-    @PostMapping("/crear")
-    public ResponseEntity<String> crearRol(@RequestParam Long usuarioId, @RequestParam Long rolId) {
-        String mensaje = service.crearRolUsuario(usuarioId, rolId);
-        return ResponseEntity.ok(mensaje);
+    @PostMapping("/gestionar")
+    public ResponseEntity<UsuarioRolResponseDTO> gestionarUsuarioRol(@RequestBody UsuarioRolRequestDTO requestDTO) {
+        UsuarioRolResponseDTO response = usuarioRolService.gestionarUsuarioRol(requestDTO);
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/eliminar")
-    public ResponseEntity<String> eliminarRol(@RequestParam Long usuarioId, @RequestParam Long rolId) {
-        String mensaje = service.eliminarRolUsuario(usuarioId, rolId);
-        return ResponseEntity.ok(mensaje);
-    }
-
-    @GetMapping("/listar")
-    public ResponseEntity<List<UsuarioRolEntity>> listarRoles(@RequestParam(required = false) Long usuarioId) {
-        List<UsuarioRolEntity> lista = service.listarRolesUsuario(usuarioId);
-        return ResponseEntity.ok(lista);
+    @GetMapping("/{usuarioId}")
+    public ResponseEntity<List<UsuarioRolResponseDTO>> listarRolesPorUsuario(@PathVariable Integer usuarioId) {
+        List<UsuarioRolResponseDTO> response = usuarioRolService.listarRolesPorUsuario(usuarioId);
+        return ResponseEntity.ok(response);
     }
 }

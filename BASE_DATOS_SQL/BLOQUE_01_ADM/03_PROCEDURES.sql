@@ -335,6 +335,7 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS sp_usuarios_roles;
 DELIMITER $$
+
 CREATE PROCEDURE sp_usuarios_roles(
     IN p_accion VARCHAR(10),
     IN p_id INT,
@@ -346,30 +347,44 @@ main_block: BEGIN
     SET p_accion = UPPER(TRIM(p_accion));
 
     IF p_accion = 'CREATE' THEN
-        IF EXISTS (SELECT 1 FROM usuarios_roles WHERE id_usuario = p_usuario_id AND id_rol = p_rol_id) THEN
+        -- Validación: evitar duplicados
+        IF EXISTS (SELECT 1 
+                   FROM usuarios_roles 
+                   WHERE id_usuario = p_usuario_id AND id_rol = p_rol_id) THEN
             SET p_mensaje = 'ERROR: El rol ya está asignado al usuario.';
             LEAVE main_block;
         END IF;
+
         INSERT INTO usuarios_roles (id_usuario, id_rol)
         VALUES (p_usuario_id, p_rol_id);
         SET p_mensaje = 'Rol asignado al usuario correctamente.';
 
     ELSEIF p_accion = 'READ' THEN
         IF p_usuario_id IS NULL THEN
-            SELECT * FROM usuarios_roles;
+            SELECT id, id_usuario, id_rol, fecha_asignacion
+            FROM usuarios_roles;
         ELSE
-            SELECT * FROM usuarios_roles WHERE id_usuario = p_usuario_id;
+            SELECT id, id_usuario, id_rol, fecha_asignacion
+            FROM usuarios_roles
+            WHERE id_usuario = p_usuario_id;
         END IF;
         SET p_mensaje = 'Consulta realizada correctamente.';
 
     ELSEIF p_accion = 'DELETE' THEN
-        DELETE FROM usuarios_roles WHERE id_usuario = p_usuario_id AND id_rol = p_rol_id;
+        -- Puedes borrar por combinación (más común en este caso)
+        DELETE FROM usuarios_roles 
+        WHERE id_usuario = p_usuario_id AND id_rol = p_rol_id;
+        
+        -- Alternativa: borrar por PK (cuando usas id)
+        -- DELETE FROM usuarios_roles WHERE id = p_id;
+
         SET p_mensaje = 'Relación usuario-rol eliminada correctamente.';
 
     ELSE
         SET p_mensaje = 'ERROR: Acción no válida.';
     END IF;
 END$$
+
 DELIMITER ;
 
 -- ========================================

@@ -1,15 +1,17 @@
 package com.vet.manadawoof.service;
 
-import com.vet.manadawoof.entity.ColaboradorEntity;
+import com.vet.manadawoof.dtos.request.ColaboradorRequestDTO;
+import com.vet.manadawoof.dtos.response.ColaboradorResponseDTO;
 
 import java.util.List;
 
 public interface ColaboradorService {
-    String registrarColaborador(ColaboradorEntity colaborador);
 
-    String actualizarColaborador(ColaboradorEntity colaborador);
+    ColaboradorResponseDTO registrarColaborador(ColaboradorRequestDTO dto);
 
-    ColaboradorEntity findById(Long id);
+    ColaboradorResponseDTO actualizarColaborador(ColaboradorRequestDTO dto);
 
-    List<ColaboradorEntity> findAll();
+    ColaboradorResponseDTO buscarPorId(Integer id);
+
+    List<ColaboradorResponseDTO> listarColaboradores();
 }

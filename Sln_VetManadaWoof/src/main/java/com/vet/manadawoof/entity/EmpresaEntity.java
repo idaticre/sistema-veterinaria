@@ -5,12 +5,19 @@ import lombok.*;
 
 import java.io.Serializable;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Entity
+@Table(name = "empresa")
 @NamedStoredProcedureQuery(
         name = "EmpresaEntity.spEmpresa",
         procedureName = "sp_empresa",
+        resultClasses = EmpresaEntity.class,
         parameters = {
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_accion", type = String.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id", type = Long.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_id", type = Integer.class),
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_razon_social", type = String.class),
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_ruc", type = String.class),
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_direccion", type = String.class),
@@ -22,23 +29,16 @@ import java.io.Serializable;
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_logo_empresa", type = String.class)
         }
 )
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-@Entity
-@Table(name = "empresa")
 public class EmpresaEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    private Integer id;
 
-    @Column(name = "razon_social", length = 128)
+    @Column(name = "razon_social", length = 128, nullable = false)
     private String razonSocial;
 
-    @Column(name = "ruc", length = 11)
+    @Column(name = "ruc", columnDefinition = "CHAR(11)", nullable = false)
     private String ruc;
 
     @Column(name = "direccion", length = 256)

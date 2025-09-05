@@ -110,10 +110,11 @@ CREATE TABLE IF NOT EXISTS roles (
 -- Ejemplo: usuario_id = 1, rol_id = 2 (Usuario 1 tiene el rol 2 - VETERINARIO)
 -- ========================================
 CREATE TABLE IF NOT EXISTS usuarios_roles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
     id_usuario INT,
     id_rol INT,
     fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id_usuario, id_rol)
+    UNIQUE KEY uq_usuario_rol (id_usuario, id_rol)    
 );
 ALTER TABLE usuarios_roles
     ADD CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)

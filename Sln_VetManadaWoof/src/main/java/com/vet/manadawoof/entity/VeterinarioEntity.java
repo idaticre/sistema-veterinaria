@@ -2,35 +2,71 @@ package com.vet.manadawoof.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.io.Serializable;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-@Entity(name = "VeterinarioEntity")
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@Entity
 @Table(name = "veterinarios")
-public class VeterinarioEntity implements Serializable {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@NamedStoredProcedureQueries({
+        @NamedStoredProcedureQuery(
+                name = "registrar_veterinario",
+                procedureName = "registrar_veterinario",
+                parameters = {
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_nombres",       type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_apellido_paterno", type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_apellido_materno", type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_direccion",     type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_telefono",      type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_correo",        type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_id_especialidad", type = Integer.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_cmp",           type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_resultado",     type = String.class)
+                }
+        ),
+        @NamedStoredProcedureQuery(
+                name = "actualizar_veterinario",
+                procedureName = "actualizar_veterinario",
+                parameters = {
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_id_veterinario", type = Integer.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_nombres",        type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_apellido_paterno", type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_apellido_materno", type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_direccion",      type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_telefono",       type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_correo",         type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_id_especialidad", type = Integer.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_cmp",            type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN,  name = "p_activo",         type = Integer.class),
+                        @StoredProcedureParameter(mode = ParameterMode.OUT, name = "p_resultado",      type = String.class)
+                }
+        )
+})
+public class VeterinarioEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    private Integer id;
 
-    @Column(name = "codigo")
+    @Column(name = "codigo", length = 20, nullable = false, unique = true)
     private String codigo;
 
-    @Column(name = "cmp")
+    @Column(name = "cmp", length = 32, nullable = false)
     private String cmp;
 
-    @Column(name = "activo")
+    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean activo;
 
-    @ManyToOne
-    @JoinColumn(name = "id_colaborador", referencedColumnName = "id")
+    // Relaciones
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_colaborador", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private ColaboradorEntity colaborador;
 
-    @ManyToOne
-    @JoinColumn(name = "id_especialidad", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_especialidad", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private EspecialidadEntity especialidad;
 }

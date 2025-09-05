@@ -1,15 +1,18 @@
 package com.vet.manadawoof.service;
 
+import com.vet.manadawoof.dtos.request.ClienteRequestDTO;
+import com.vet.manadawoof.dtos.response.ClienteResponseDTO;
 import com.vet.manadawoof.entity.ClienteEntity;
 
 import java.util.List;
 
 public interface ClienteService {
-    String registrarCliente(ClienteEntity cliente);
 
-    String actualizarCliente(ClienteEntity cliente);
+    ClienteResponseDTO registrarCliente(ClienteRequestDTO request);
 
-    ClienteEntity findById(Long id);
+    ClienteResponseDTO actualizarCliente(Integer idCliente, ClienteRequestDTO request);
 
-    List<ClienteEntity> findAll();
+    ClienteEntity obtenerPorId(Integer id);
+
+    List<ClienteEntity> listarClientes();
 }

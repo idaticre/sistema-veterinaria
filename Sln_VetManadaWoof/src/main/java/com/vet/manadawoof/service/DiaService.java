@@ -1,13 +1,19 @@
 package com.vet.manadawoof.service;
 
+import com.vet.manadawoof.dtos.request.DiaRequestDTO;
+import com.vet.manadawoof.dtos.response.DiaResponseDTO;
 import com.vet.manadawoof.entity.DiaEntity;
 
 import java.util.List;
 
 public interface DiaService {
-    String spDiasSemana(String accion, Long id, String nombre, Boolean activo);
+    DiaResponseDTO crearDia(DiaRequestDTO dto);
 
-    List<DiaEntity> findAll();
+    DiaResponseDTO actualizarDia(DiaRequestDTO dto);
 
-    DiaEntity findById(Long id);
+    DiaResponseDTO eliminarDia(Integer id);
+
+    List<DiaResponseDTO> listarDias();
+
+    DiaEntity findById(Integer id);
 }

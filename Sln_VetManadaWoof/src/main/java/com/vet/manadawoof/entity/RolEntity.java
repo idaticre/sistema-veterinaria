@@ -2,16 +2,18 @@ package com.vet.manadawoof.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.io.Serializable;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Entity
+@Entity(name = "RolEntity")
 @Table(name = "roles")
 @NamedStoredProcedureQuery(
-        name = "RolEntity.sp_roles",
+        name = "RolEntity.spRoles",
         procedureName = "sp_roles",
         parameters = {
                 @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_accion", type = String.class),
@@ -23,20 +25,24 @@ import java.io.Serializable;
         }
 )
 public class RolEntity implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(name = "codigo", unique = true, length = 10)
+    @Column(unique = true)
     private String codigo;
 
-    @Column(name = "nombre", nullable = false, length = 32)
     private String nombre;
-
-    @Column(name = "descripcion", length = 64)
     private String descripcion;
 
-    @Column(name = "activo", nullable = false)
-    private Integer activo;
+    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
+    private Boolean activo;
+
+    @Transient
+    private String mensaje; // Para SP output
+
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<UsuarioEntity> usuarios;
 }

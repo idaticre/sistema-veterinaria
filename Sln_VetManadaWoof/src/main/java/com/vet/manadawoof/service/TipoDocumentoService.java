@@ -1,15 +1,15 @@
 package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.TipoDocumentoEntity;
-
 import java.util.List;
 
 public interface TipoDocumentoService {
+
+    String crearTipoDocumento(TipoDocumentoEntity tipoDocumento);
+
+    String actualizarTipoDocumento(TipoDocumentoEntity tipoDocumento);
+
+    String eliminarTipoDocumento(Integer id);
+
     List<TipoDocumentoEntity> listarTiposDocumento();
-
-    TipoDocumentoEntity obtenerTipoDocumento(Long id);
-
-    String guardarTipoDocumento(TipoDocumentoEntity tipoDocumento);
-
-    String eliminarTipoDocumento(Long id);
 }
