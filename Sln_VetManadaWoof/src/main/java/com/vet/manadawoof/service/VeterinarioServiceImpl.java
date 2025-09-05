@@ -1,4 +1,4 @@
-package com.vet.manadawoof.service;
+/*package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.VeterinarioEntity;
 import com.vet.manadawoof.repository.VeterinarioRepository;
@@ -47,3 +47,4 @@ public class VeterinarioServiceImpl implements VeterinarioService {
         return repository.findAll();
     }
 }
+*/

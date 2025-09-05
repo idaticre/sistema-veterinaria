@@ -1,4 +1,4 @@
-package com.vet.manadawoof.service;
+/*package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.HorarioTrabajoEntity;
 import com.vet.manadawoof.repository.HorarioTrabajoRepository;
@@ -38,3 +38,4 @@ public class HorarioTrabajoServiceImpl implements HorarioTrabajoService {
         return repository.findAll();
     }
 }
+*/

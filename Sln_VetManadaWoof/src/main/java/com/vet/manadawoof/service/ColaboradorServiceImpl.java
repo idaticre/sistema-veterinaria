@@ -19,7 +19,7 @@ public class ColaboradorServiceImpl implements ColaboradorService {
         java.sql.Date fechaIngresoSql = new java.sql.Date(colaborador.getFechaIngreso().getTime());
         // El SP genera automáticamente el código
         return repository.registrarColaborador(
-                colaborador.getEntidad().getIdEntidad(),
+                colaborador.getEntidad().getId(),
                 fechaIngresoSql,
                 colaborador.getFoto(),
                 colaborador.getActivo()
@@ -31,7 +31,7 @@ public class ColaboradorServiceImpl implements ColaboradorService {
         java.sql.Date fechaIngresoSql = new java.sql.Date(colaborador.getFechaIngreso().getTime());
         return repository.actualizarColaborador(
                 colaborador.getId(),
-                colaborador.getEntidad().getIdEntidad(),
+                colaborador.getEntidad().getId(),
                 fechaIngresoSql,
                 colaborador.getFoto(),
                 colaborador.getActivo()

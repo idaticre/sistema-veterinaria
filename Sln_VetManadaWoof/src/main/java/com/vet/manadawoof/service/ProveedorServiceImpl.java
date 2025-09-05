@@ -17,7 +17,7 @@ public class ProveedorServiceImpl implements ProveedorService {
     @Override
     public String registrarProveedor(ProveedorEntity proveedor) {
         return repository.registrarProveedor(
-                proveedor.getEntidad().getIdEntidad(),
+                proveedor.getEntidad().getId(),
                 proveedor.getActivo()
         );
     }
@@ -26,7 +26,7 @@ public class ProveedorServiceImpl implements ProveedorService {
     public String actualizarProveedor(ProveedorEntity proveedor) {
         return repository.actualizarProveedor(
                 proveedor.getId(),
-                proveedor.getEntidad().getIdEntidad(),
+                proveedor.getEntidad().getId(),
                 proveedor.getActivo()
         );
     }
