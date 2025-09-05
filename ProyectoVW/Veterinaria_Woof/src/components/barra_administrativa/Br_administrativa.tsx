@@ -187,6 +187,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 </Link>
                                 <ul ref={adminRef} className="submenu">
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                    <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestionar colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Turnos y horarios</Link></li>
                                     <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
@@ -194,12 +195,17 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
                                     {/*<li><Link to="/administracion/administracion/desempeno_de_colaboradores" className="sub_opcion">Desempeño de colaboradores</Link></li>*/}
 =======
+=======
+>>>>>>> Stashed changes
                                     <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestión de colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion"> Pagos de Colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">turnos_y_horarios</Link></li>
                                     <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">asistencia_de_colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
                                     <li><Link to="/administracion/administracion/desempeno_de_colaboradores" className="sub_opcion">Desempeño</Link></li>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                                 </ul>
                             </li>
