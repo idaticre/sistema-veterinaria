@@ -94,7 +94,7 @@ public class DiaServiceImpl implements DiaService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<DiaResponseDTO> listarDias() {
         StoredProcedureQuery sp = entityManager
                 .createNamedStoredProcedureQuery("DiaEntity.spDiasSemana");

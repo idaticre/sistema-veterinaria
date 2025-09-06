@@ -22,7 +22,7 @@ public class TipoPersonaJuridicaServiceImpl implements TipoPersonaJuridicaServic
     private EntityManager entityManager;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TipoPersonaJuridicaEntity> listarTiposPersonaJuridica() {
         return repository.findAll();
     }

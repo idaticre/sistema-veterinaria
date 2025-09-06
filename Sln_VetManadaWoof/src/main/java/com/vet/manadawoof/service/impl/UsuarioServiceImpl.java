@@ -90,7 +90,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UsuarioResponseDTO findUserById(Integer id) {
         StoredProcedureQuery sp = prepareSp("READ", id.intValue(), null, null, 1);
         List<UsuarioEntity> result = sp.getResultList();
@@ -107,7 +107,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<UsuarioResponseDTO> findAllUsers() {
         StoredProcedureQuery sp = prepareSp("READ", null, null, null, 1);
         List<UsuarioEntity> results = sp.getResultList();

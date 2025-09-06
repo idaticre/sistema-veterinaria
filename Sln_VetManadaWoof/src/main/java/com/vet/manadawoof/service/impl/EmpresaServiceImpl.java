@@ -16,7 +16,7 @@ public class EmpresaServiceImpl implements EmpresaService {
     private final EmpresaRepository repository;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<EmpresaEntity> listarEmpresas() {
         return repository.spEmpresa(
                 "READ",
@@ -33,7 +33,7 @@ public class EmpresaServiceImpl implements EmpresaService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public EmpresaEntity obtenerEmpresa(Integer id) {
         List<EmpresaEntity> result = repository.spEmpresa(
                 "READ", id,

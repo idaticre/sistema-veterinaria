@@ -37,7 +37,7 @@ public class RolServiceImpl implements RolService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RolEntity> listarRoles() {
         // Ejecuta SP con READ para consistencia
         StoredProcedureQuery sp = entityManager
@@ -66,6 +66,7 @@ public class RolServiceImpl implements RolService {
     }
 
     @Override
+    @Transactional
     public String eliminarRol(Integer id) {
         StoredProcedureQuery sp = entityManager
                 .createNamedStoredProcedureQuery("RolEntity.spRoles");
@@ -79,7 +80,7 @@ public class RolServiceImpl implements RolService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Optional<RolEntity> obtenerPorId(Integer id) {
         return repository.findById(id);
     }

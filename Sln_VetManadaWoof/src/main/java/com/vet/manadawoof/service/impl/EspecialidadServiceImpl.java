@@ -65,7 +65,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<EspecialidadResponseDTO> listarEspecialidades() {
         StoredProcedureQuery sp = entityManager.createNamedStoredProcedureQuery("EspecialidadEntity.spEspecialidades");
         sp.setParameter("p_accion", "READ");

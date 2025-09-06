@@ -47,7 +47,7 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<UsuarioRolResponseDTO> listarRolesPorUsuario(Integer usuarioId) {
         StoredProcedureQuery query = entityManager
                 .createStoredProcedureQuery("sp_usuarios_roles")

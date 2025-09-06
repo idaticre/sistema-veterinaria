@@ -137,7 +137,7 @@ public class VeterinarioServiceImpl implements VeterinarioService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public VeterinarioResponseDTO obtenerPorId(Integer id) {
         return repository.findById(id).map(v ->
                 VeterinarioResponseDTO.builder()
@@ -151,7 +151,7 @@ public class VeterinarioServiceImpl implements VeterinarioService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<VeterinarioResponseDTO> listar() {
         return repository.findAll().stream().map(v ->
                 VeterinarioResponseDTO.builder()

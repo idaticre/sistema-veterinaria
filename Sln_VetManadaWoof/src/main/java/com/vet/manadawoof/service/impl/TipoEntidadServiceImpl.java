@@ -60,7 +60,7 @@ public class TipoEntidadServiceImpl implements TipoEntidadService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TipoEntidadEntity> listarTipoEntidad(Integer id) {
         StoredProcedureQuery sp = entityManager.createNamedStoredProcedureQuery(
                 "TipoEntidadEntity.spTipoEntidad");

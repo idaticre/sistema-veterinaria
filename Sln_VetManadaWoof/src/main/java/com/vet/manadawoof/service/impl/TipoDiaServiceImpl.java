@@ -80,7 +80,7 @@ public class TipoDiaServiceImpl implements TipoDiaService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TipoDiaResponseDTO> listarTiposDia() {
         return repository.findAll().stream()
                 .map(tipoDia -> TipoDiaResponseDTO.builder()

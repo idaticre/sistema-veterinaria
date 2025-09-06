@@ -52,7 +52,7 @@ public class TipoDocumentoServiceImpl implements TipoDocumentoService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TipoDocumentoEntity> listarTiposDocumento() {
         StoredProcedureQuery query = entityManager
                 .createStoredProcedureQuery(
