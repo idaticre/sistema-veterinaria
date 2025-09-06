@@ -1,0 +1,19 @@
+.home{
+  margin: 10px;
+}
+
+
+@media (max-width: 1000px) {
+  #promo {
+    flex-direction: column;
+  }
+
+  #contenido {
+    flex-direction: column;
+  }
+
+  #mapa iframe {
+    height: 400px;
+  }
+}
+

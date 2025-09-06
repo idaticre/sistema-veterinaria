@@ -1,0 +1,97 @@
+:root {
+  --sidebar-width: 240px;
+  --sidebar-width-min: 60px;
+}
+
+#promociones {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+#promociones main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s ease;
+  padding: 2rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+#promociones main.minimize {
+  margin-left: var(--sidebar-width-min);
+}
+
+h2 {
+  margin-bottom: 1rem;
+  color: #444;
+}
+
+.btn {
+  background: #617ff4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 24px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.btn:hover {
+  background: #4054c6;
+}
+
+.lista_promos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.promo_card {
+  background: #f5f8ff;
+  border: 2px solid #617ff4;
+  border-radius: 10px;
+  padding: 1rem;
+  width: 250px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.promo_card:hover {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  background: #ff9900;
+}
+
+.promo_card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.acciones {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.acciones button {
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #617ff4;
+  color: white;
+  font-size: 14px;
+}
+
+.acciones button:hover {
+  background: #4054c6;
+}
+
+@media (max-width: 768px) {
+  #promociones main,
+  #promociones main.minimize {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}

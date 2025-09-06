@@ -1,0 +1,202 @@
+:root {
+  --sidebar-width: 240px;
+  --sidebar-width-min: 60px;
+}
+
+#cuerpo-main {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Contenedor padre del contenido principal*/
+#listar-registros {
+  background-color: #ffffff;
+  padding: 1rem;
+  flex: 1;
+  border-radius: 5px;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Encabezado */
+.encabezado {
+  display: flex;
+  justify-content: center;
+}
+
+.encabezado h2 {
+  color: rgb(0, 0, 0);
+  margin-bottom: 1rem;
+}
+
+/* Buscador */
+.goated {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  justify-content: space-between;
+}
+
+.animacion-goated:hover {transform: scale(1.05);}
+
+.barra-buscador {width: 55%;}
+
+.barra-buscador input {
+  width: 100%;
+  border: 2px solid rgb(209, 209, 209);
+  border-radius: 5px;
+  padding: 0.4rem;
+}
+
+.boton-goated {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+  color: white;
+  border: transparent;
+  text-decoration: none;
+}
+
+.anadir-a-goated {
+  background-color: #4caf50;
+  font-size: 17px;
+  height: 40px;
+}
+.ir-a-goated {background-color: #ff9900;}
+
+/* Lista asistencia */
+.listar-registros {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.mostrar-registros {
+  display: flex;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mostrar-registros:hover {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  background: #ff9900;
+}
+
+.texto-de-registro {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #000000;
+}
+
+/* Opciones */
+.listar-opciones-contenedor {
+  position: relative;
+  display: inline-block;
+  width: auto;
+  height: auto;
+}
+
+.listar-registro-opciones {
+  display: flex;
+  cursor: pointer;
+}
+
+.menu-opciones {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgb(255, 0, 0);
+  border: 1px solid #ff0000;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+  z-index: 99;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 130px;
+  border-radius: 8px;
+}
+
+.menu-opciones button {
+  z-index: 99;
+  color: black;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* Modal (ventana) */
+.ventana-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.contenido-ventana {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.contenido-ventana h3 {
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.contenido-ventana input,
+select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.acciones-de-registro {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.acciones-de-registro button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.acciones-de-registro button:first-child {
+  background-color: #4caf50;
+  color: white;
+}
+
+.acciones-de-registro button:last-child {
+  background-color: #f44336;
+  color: white;
+}
