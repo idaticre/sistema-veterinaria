@@ -6,6 +6,8 @@ TERCERO, al hacer eso e importar App.tsx a tu otro .tsx deseado, podrás usar el
 // Ordenado por orden de aparición en la barra administrativa lateral de la página
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import Login from './pages/login/Login';
+
 import Admin_index from './pages/administrativas/home/Admin_index';
 
 import Lst_clientes from './pages/administrativas/clientes/Clientes';
@@ -25,12 +27,14 @@ import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-
 import Parametros_y_promociones from './pages/administrativas/administracion/parametros-y-promociones/parametrosYpromociones'
 import Desempeno_de_colaboradores from './pages/administrativas/administracion/desempeno-de-colaboradores/desempenoDeColaboradores'
 
-
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/administracion/home" replace />} />
+      <Route path="/" element={<Navigate to="/administracion/login" replace />} />
       
+      {/* Login */}
+      <Route path='/administracion/login' element={<Login/>} />
+
       {/* Inicio de administración */}
       <Route path='/administracion/home'  element={<Admin_index/>}/>
 

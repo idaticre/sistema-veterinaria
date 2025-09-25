@@ -1,0 +1,79 @@
+.contenedor_login {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.contenedor_login::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/veterinaria.jpg") no-repeat center center;
+  background-size: cover;
+  filter: blur(4px);
+  transform: scale(1.1);
+  z-index: -1;
+}
+
+.form_login{
+  background: #fff;
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  width: 350px;
+  text-align: center;
+}
+
+.form_login h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.casilla_login {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
+  text-align: left;
+}
+
+.casilla_login label {
+  font-size: 1.2rem;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.casilla_login input {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: 0.3s;
+}
+
+.casilla_login input:focus {
+  border-color: #4facfe;
+  box-shadow: 0 0 5px rgba(79, 172, 254, 0.5);
+}
+
+.btn_login {
+  margin-top: 1rem;
+  background: #0b7cde;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 15px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn_login:hover {
+  background: #2aa6ee;
+  transform: scale(1.05);
+}
