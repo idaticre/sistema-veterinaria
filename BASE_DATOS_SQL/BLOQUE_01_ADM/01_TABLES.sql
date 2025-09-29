@@ -52,17 +52,30 @@ INSERT INTO empresa(razon_social, ruc, direccion, ciudad, distrito, telefono, co
 'Sandra Alexis Laguna De La Rosa'
 );
 
--- ========================================
--- TABLA: tipo_documento
--- Contiene los diferentes tipos de documentos permitidos para identificar entidades.
--- Ejemplo: “DNI”, “RUC”, “PASAPORTE”
--- ========================================
-CREATE TABLE IF NOT EXISTS tipo_documento (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
-    descripcion VARCHAR(32) NOT NULL UNIQUE,
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
-);
+	-- ========================================
+	-- TABLA: tipo_documento
+	-- Contiene los diferentes tipos de documentos permitidos para identificar entidades.
+	-- Ejemplo: “DNI”, “RUC”, “PASAPORTE”
+	-- ========================================
+	CREATE TABLE IF NOT EXISTS tipo_documento (
+		id INT PRIMARY KEY AUTO_INCREMENT,
+		descripcion VARCHAR(32) NOT NULL,
+		activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+	);
+	ALTER TABLE tipo_documento MODIFY descripcion VARCHAR(32) NOT NULL COLLATE utf8mb4_general_ci;
+
+	CREATE UNIQUE INDEX idx_tipo_documento_descripcion_ci ON tipo_documento(descripcion);
+	-- ========================================
+	-- TIPO DE DOCUMENTO
+	-- ========================================
+	INSERT INTO tipo_documento (descripcion) VALUES 
+	('DNI'), 
+	('RUC'), 
+	('CARNET EXT.'), 
+	('P. NAC.'), 
+	('PASAPORTE'), 
+	('OTROS');
+
 
 -- ========================================
 -- TABLA: tipo_persona_juridica
@@ -70,11 +83,20 @@ CREATE TABLE IF NOT EXISTS tipo_documento (
 -- ========================================
 CREATE TABLE tipo_persona_juridica (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
-    nombre VARCHAR(32) NOT NULL UNIQUE, -- Ej: 'NATURAL', 'JURIDICA'
+    nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(64),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+ALTER TABLE tipo_persona_juridica MODIFY nombre VARCHAR(32) NOT NULL COLLATE utf8mb4_general_ci;
+
+CREATE UNIQUE INDEX idx_tipo_perjur_nom ON tipo_persona_juridica(nombre);
+-- ========================================
+-- TIPO DE NATURALEZA LEGAL DE LA ENTIDAD
+-- Clasifica si la entidad es de tipo NATURAL (persona física) o JURÍDICA (empresa o institución con RUC propio).
+-- ========================================
+INSERT INTO tipo_persona_juridica (nombre, descripcion) VALUES
+('NATURAL', 'Persona natural que representa una entidad individual'),
+('JURIDICA', 'Entidad jurídica con existencia legal y RUC propio');
 
 -- ========================================
 -- TABLA: usuarios
@@ -83,7 +105,6 @@ CREATE TABLE tipo_persona_juridica (
 -- ========================================
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     username VARCHAR(32) UNIQUE NOT NULL,
     password_hash VARCHAR(128) NOT NULL,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1)),
@@ -92,17 +113,32 @@ CREATE TABLE IF NOT EXISTS usuarios (
 );
 
 -- ========================================
+-- Ejemplos de usuarios SOLO PRUEBAS)
+-- ========================================
+INSERT INTO usuarios (username, password_hash) VALUES
+('admin_woof',  'admin123'),   -- Administrador General (pwd: admin123)
+('admin_g2',    'admin234'),   -- Administrador G2     (pwd: admin234)
+('caja_milo',   'caja123'),   -- Auxiliar Caja         (pwd: caja123)
+('gromer_luna', 'luna123');   -- Auxiliar Gromers      (pwd: luna123)
+
+-- ========================================
 -- TABLA: roles
 -- Define los roles asignables a usuarios del sistema.
 -- Ejemplo: “ADMIN”, “VETERINARIO”
 -- ========================================
 CREATE TABLE IF NOT EXISTS roles (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
-    descripcion VARCHAR(128) DEFAULT NULL,
-	activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    descripcion VARCHAR(128) DEFAULT NULL
 );
+-- ========================================
+-- ROLES DEL SISTEMA
+-- ========================================
+INSERT INTO roles (nombre, descripcion) VALUES
+('ADMINISTRADOR GENERAL', NULL),
+('ADMINISTRADOR G 2', NULL),
+('AUXILIAR CAJA', NULL),
+('AUXILIAR GROMERS', NULL);
 
 -- ========================================
 -- TABLA: usuarios_roles
@@ -126,25 +162,21 @@ ALTER TABLE usuarios_roles
 CREATE INDEX idx_usuarios_roles_usuario ON usuarios_roles(id_usuario);
 
 -- ========================================
--- TABLA: tipo_entidad
--- Lista los tipos de entidad que pueden existir en el sistema.
--- Ejemplo: “CLIENTE”, “PROVEEDOR”, “COLABORADOR”
+-- usuarios con roles (ejemplo)
 -- ========================================
-CREATE TABLE tipo_entidad (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
-    nombre VARCHAR(32) UNIQUE NOT NULL,
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
-);
+INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES
+(1, 1),  -- admin_woof  → ADMINISTRADOR GENERAL
+(2, 2),  -- admin_g2    → ADMINISTRADOR G 2
+(3, 3),  -- caja_milo   → AUXILIAR CAJA
+(4, 4);  -- gromer_luna → AUXILIAR GROMERS
 
 -- ========================================
 -- TABLA: entidades
 -- Centraliza los datos generales de personas y empresas del sistema.
 -- ========================================
 CREATE TABLE IF NOT EXISTS entidades (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_tipo_entidad INT NOT NULL,					-- cliente, colaborador, proveedor
 	id_tipo_persona_juridica INT NOT NULL,			-- natural o juridica
     nombre VARCHAR(128) NOT NULL,
     sexo VARCHAR(1),
@@ -160,14 +192,9 @@ CREATE TABLE IF NOT EXISTS entidades (
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
 ALTER TABLE entidades
-	ADD CONSTRAINT fk_entidad_tipo FOREIGN KEY (id_tipo_entidad) REFERENCES tipo_entidad(id),
     ADD CONSTRAINT fk_entidad_tipo_doc FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documento(id),
     ADD CONSTRAINT fk_entidad_persona_juridica FOREIGN KEY (id_tipo_persona_juridica) REFERENCES tipo_persona_juridica(id)
     ON DELETE RESTRICT;
-
--- Índice para búsquedas rápidas de entidades según su tipo
--- (clientes, proveedores, colaboradores).
-CREATE INDEX idx_entidades_tipo ON entidades(id_tipo_entidad);
 
 -- Índice para acelerar las búsquedas de entidades por documento 
 -- (útil en login, validaciones, formularios).
@@ -185,10 +212,11 @@ CREATE INDEX idx_entidades_tipo_documento ON entidades(id_tipo_documento);
 -- Registra a los trabajadores vinculados a la veterinaria (personal interno).
 -- ========================================
 CREATE TABLE IF NOT EXISTS colaboradores (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_entidad INT NOT NULL UNIQUE,
+    id_entidad BIGINT NOT NULL UNIQUE,
     fecha_ingreso DATE,
+    fecha_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     id_usuario INT NOT NULL,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1)),
     foto VARCHAR(128)
@@ -214,9 +242,10 @@ CREATE INDEX idx_colaboradores_activo ON colaboradores(activo);
 -- Ejemplo: entidad = “Laboratorios ACME”, activo = 1
 -- ========================================
 CREATE TABLE IF NOT EXISTS proveedores (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_entidad INT NOT NULL UNIQUE,
+    id_entidad BIGINT NOT NULL UNIQUE,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
 ALTER TABLE proveedores 
@@ -234,9 +263,10 @@ CREATE INDEX idx_proveedores_activo ON proveedores(activo);
 -- Representa a las personas o empresas que reciben servicios de la veterinaria.
 -- ========================================
 CREATE TABLE IF NOT EXISTS clientes (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_entidad INT NOT NULL UNIQUE,
+    id_entidad BIGINT NOT NULL UNIQUE,    
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
 ALTER TABLE clientes 
@@ -255,21 +285,33 @@ CREATE INDEX idx_clientes_activo ON clientes(activo);
 -- Ejemplo: “DERMATOLOGÍA”, “CIRUGÍA GENERAL”
 -- ========================================
 CREATE TABLE IF NOT EXISTS especialidades (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(64) NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+
+ALTER TABLE especialidades MODIFY nombre VARCHAR(64) NOT NULL COLLATE utf8mb4_general_ci;
+
+CREATE UNIQUE INDEX idx_especialidades_nombre_ci ON especialidades(nombre);
+-- ========================================
+-- ESPECIALIDADES VETERINARIAS
+-- ========================================
+INSERT INTO especialidades (nombre) VALUES
+('MEDICINA GENERAL'), ('CIRUGÍA'), ('DERMATOLOGÍA'), 
+('OFTALMOLOGÍA'), ('TRAUMATOLOGÍA'),('CARDIOLOGÍA'), 
+('ODONTOLOGÍA VETERINARIA'), ('ONCOLOGÍA'), ('NEUROLOGÍA'),
+('ANESTESIOLOGÍA'), ('EMERGENCIAS Y CUIDADOS CRÍTICOS'), 
+('REHABILITACIÓN Y FISIOTERAPIA'),('ETOLOGÍA Y COMPORTAMIENTO ANIMAL');
 
 -- ========================================
 -- TABLA: veterinarios
 -- Contiene la información específica de los veterinarios de la clínica.
 -- ========================================
 CREATE TABLE IF NOT EXISTS veterinarios (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_colaborador INT NOT NULL UNIQUE,
-    id_especialidad INT NOT NULL,
+    id_colaborador BIGINT NOT NULL UNIQUE,
+    id_especialidad BIGINT NOT NULL,
     cmp VARCHAR(32) UNIQUE NULL,
     experiencia_meses INT CHECK (experiencia_meses >= 0),
     observaciones VARCHAR(128),
@@ -296,6 +338,11 @@ CREATE TABLE dias_semana (
     nombre VARCHAR(20) UNIQUE NOT NULL,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+-- ========================================
+-- DÍAS DE LA SEMANA
+-- ========================================
+INSERT INTO dias_semana (nombre) VALUES 
+('LUNES'), ('MARTES'), ('MIÉRCOLES'), ('JUEVES'), ('VIERNES'), ('SÁBADO'), ('DOMINGO');
 
 -- ========================================
 -- TABLA: tipos_dia
@@ -303,9 +350,18 @@ CREATE TABLE dias_semana (
 -- ========================================
 CREATE TABLE tipos_dia (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
-    nombre VARCHAR(20) UNIQUE NOT NULL
+    nombre VARCHAR(32) NOT NULL UNIQUE,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+ALTER TABLE tipos_dia MODIFY nombre VARCHAR(32) NOT NULL COLLATE utf8mb4_general_ci;
+
+CREATE UNIQUE INDEX idx_tipos_dia_nombre_ci ON tipos_dia(nombre);
+
+-- ========================================
+-- TIPOS DE DÍA
+-- ========================================
+INSERT INTO tipos_dia (nombre) VALUES 
+('FERIADO'), ('LABORAL'), ('DÍA PUENTE'), ('DÍA NO LABORABLE');
 
 -- ========================================
 -- TABLA: horarios_trabajo
@@ -316,7 +372,7 @@ CREATE TABLE tipos_dia (
 CREATE TABLE IF NOT EXISTS horarios_trabajo (
     id INT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_colaborador INT NOT NULL,
+    id_colaborador BIGINT NOT NULL,
     id_dia_semana INT NOT NULL,
     id_tipo_dia INT DEFAULT NULL,
     hora_inicio TIME NOT NULL,
@@ -344,8 +400,7 @@ CREATE INDEX idx_horarios_tipo_dia ON horarios_trabajo(id_tipo_dia);
 -- ========================================
 CREATE TABLE IF NOT EXISTS registro_asistencia (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_colaborador INT NOT NULL,
+    id_colaborador BIGINT NOT NULL,
     fecha DATE NOT NULL,
     hora_entrada TIME,
     hora_salida TIME,
