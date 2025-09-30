@@ -18,6 +18,8 @@ import Especies_razas from './pages/administrativas/mascotas/Especies_razas';
 import Lst_mascotas from './pages/administrativas/mascotas/Lst_mascotas';
 import Vacunas from './pages/administrativas/mascotas/Vacunas';
 
+import Proveedores from './pages/distribucion/Proveedores';
+
 import Gestionar_colaboradores from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarColaboradores'
 import Gestionar_entidades from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarEntidades'
 import Gestionar_usuarios from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarUsuarios'
@@ -26,6 +28,7 @@ import Asistencia_de_colaboradores from './pages/administrativas/administracion/
 import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-a-colaboradores/pagosAcolaboradores'
 import Parametros_y_promociones from './pages/administrativas/administracion/parametros-y-promociones/parametrosYpromociones'
 import Desempeno_de_colaboradores from './pages/administrativas/administracion/desempeno-de-colaboradores/desempenoDeColaboradores'
+
 
 function App() {
   return (
@@ -55,6 +58,7 @@ function App() {
       {/* Agenda */}
 
       {/* Distribución */}
+      <Route path='/administracion/distribucion/proveedores' element={<Proveedores/>}/>
 
       {/* Ventas */}
 

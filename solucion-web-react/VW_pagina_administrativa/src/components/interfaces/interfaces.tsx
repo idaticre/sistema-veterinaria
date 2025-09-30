@@ -1,145 +1,214 @@
-export interface TipoDocumento{
-    id: number;
-    codigo: string;
-    descripcion: string;
-    activo: boolean;
-    entidades: Entidad[];
-}
-
-export interface TipoEntidad{
-    id: number;
-    codigo: string;
+export interface EntidadRequest{
+    id?: number;
+    idTipoPersonaJuridica: number;
     nombre: string;
-    activo: boolean;
-    entidades: Entidad[];
-}
-
-export interface TipoPersonaJuridica{
-    id: number;
-    codigo:  string;
-    nombre: string;
-    descripcion: string;
-    activo: boolean;
-    entidades: Entidad[];
-}
-
-export interface Rol{
-    id: number;
-    codigo: string;
-    nombre: string;
-    descripcion: string;
-    activo: boolean;
-    mensaje: string;
-    usuarios: Usuario;
-}
-
-export interface Entidad{
-    id: number;
-    tipoEntidad: TipoEntidad;
-    tipoPersJurid: TipoPersonaJuridica;
-    nombre: String;
-    sexo: string;
+    sexo?: "M" | "F";
     documento: string;
-    tipoDocumento: TipoDocumento;
+    idTipoDocumento: number;
     correo: string;
     telefono: string;
     direccion: string;
-    ciudad: string;
-    destrito: string;
+    ciudad: string;    
+    distrito: string;
     representante: string;
-    codigo: string;
-    activo: boolean;
-    clientes: Cliente[];
-    proveedores: Proveedores[];
-    colaboradores: Colaboradores[];
-}
-
-export interface Cliente{
-    id: number;
-    codigo: string;
-    activo:  boolean;
-    entidad: Entidad;
-}
-
-export interface Proveedores{
-    id: number;
-    codigo: string;
     activo: boolean;
 }
 
-export interface Colaboradores{
-    id: number;
-    entidad: Entidad;
-    usuario: Usuario;
-    codigo: string;
-    fechaIngreso: string;
-    foto: string;
-    activo: boolean;
-}
-
-export interface Usuario{
-    id: number;
-    codigo: string;
-    username: string;
-    passwordHash: string;
-    activo: boolean;
-    colaborador:  Colaboradores;
-    roles: Rol[];
-}
-
-export interface Dia{
+export interface ClienteResquest{
     id: number;
     nombre: string;
-    activo: boolean;
-}
-
-export interface TipoDia{
-    id:number;
-    codigo: string;
-    nombre: string;
-}
-
-export interface Empresa{
-    id: number;
-    razonSocial: string;
-    ruc: string;
+    sexo: "M" | "F";
+    documento: string;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
     direccion: string;
     ciudad: string;
     distrito: string;
-    telefono: string;
-    correo: string;
-    representante: string;
-    logoEmpresa: string;
+    activo: boolean;
 }
 
-export interface Especialidad{
+export interface ColaboradorRequest{
     id: number;
-    codigo: string;
     nombre: string;
-    activo: boolean;
-    veterinarios: Veterinario[];
+    sexo: "M" | "F";
+    documento:  string;
+    idTipoPersonaJuridica: number;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion:string;
+    ciudad: string;
+    distrito: string;
+    idUsuario: number;
+    estado: boolean;
+    fechaIngreso: string;
+    foto: string;
 }
 
-export interface Veterinario{
+export interface HorarioTrabajoRequest{
     id: number;
-    codigo: string;
-    cmp: string;
-    activo: boolean;
-    colaborador: Colaboradores;
-    especialidad: Especialidad;
-}
-
-export interface HorarioTrabajo{
-    id: number;
-    colaborador: Colaboradores;
-    dia: Dia;
-    tipoDia: TipoDia;
+    idColaborador: number;
+    idDiaSemana: number;
+    idTipoDia: number;
     horaInicio: string;
     horaFin: string;
 }
 
-export interface UsuarioRol{
+export interface ProveedorRequest{
     id: number;
-    usuario: Usuario;
-    rol: Rol;
+    idTipoPersonaJuridica: number;
+    nombre: string;
+    sexo: "M" | "F";
+    documento: string;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    distrito: string;
+    representante: string;
+    activo: boolean;
+}
+
+export interface veterinarioRequest{
+    id: number;
+    nombre: string;
+    sexo: "M" | "F";
+    documento: string;
+    idTipoPersonaJuridica: number;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    distrito: string;
+    idUsuario: number;
+    activo: boolean;
+    foto: string;
+    idEspecialidad: number;
+    cmp: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T | null;
+}
+
+export interface ClienteResponse{
+    id: number;
+    codigoCliente: string;
+    idEntidad: number;
+    nombre: string;
+    sexo: string;
+    documento: string;
+    idTipoPersonaJuridica: number;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    distrito: string;
+    activo: boolean;
+    fechaRegistro: string;
+    mensaje: string;
+}
+
+export interface ColaboradorResponse{
+    idColaborador: number;
+    codigoColaborador: string;
+    idEntidad: number;
+    nombre: string;
+    sexo: string;
+    documento: string;
+    idTipoPersonaJuridica: number;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    distrito: string;
+    usuario: string;
+    activo: boolean;
+    fechaRegistro: string;
+    fechaIngreso: string;
+    foto: string;
+    mensaje: string;
+}
+
+export interface EntidadResponse{
+    id: number;
+    codigo: string;
+    nombre: string;
+    correo: string;
+    telefono: string;
+    sexo: string;
+    documento: string;
+    direccion: string;
+    idTipoDocumento: number;
+    idTipoPersonaJuridica: number;
+    ciudad: string;
+    distrito: string;
+    representante: string;
+    activo: boolean;
+    tipoDocumento: string;
+    tipoPersonaJuridica: string;
+    fechaRegistro: string;
+}
+    
+
+export interface HorarioTrabajoResponse{
+    id: number;
+    codigo: string;
+    idColaborador: number;
+    idDiaSemana: number;
+    idTipoDia: number;
+    horaInicio: string;
+    horaFin: string;
+}
+
+export interface ProveedorResponse{
+    id: number;
+    codigoProveedor: string;
+    idEntidad: number;
+    nombre: string;
+    sexo: string;
+    documento: string;
+    idTipoPersonaJuridica: number;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    distrito: string;
+    representante: string;
+    activo: boolean;
+    fechaRegistro: string;
+    mensaje: string;
+}
+
+export interface veterinarioResponse{
+    id: number;
+    codigo: string;
+    cmp: string;
+    especialidad: string;
+    usuario: string;
+    activo: boolean;
+    fechaRegistro: string;
+    fechaIngreso: string;
+    foto: string;
+    idColaborador: number;
+    idEntidad: number;
+    nombre: string;
+    sexo: string;
+    documento: string;
+    idTipoPersonaJuridica: number;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    distrito: string;
+    mensaje: string;
 }
