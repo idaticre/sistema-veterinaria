@@ -32,36 +32,59 @@ function regis_dueños() {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="dni">DNI/Cédula</label>
-                    <input type="text" id="dni" />
+                    <label htmlFor="dni">Tipo entidad</label>
+                    <select name="" id="">
+                      <option value="0" disabled selected>Elija Entidad</option>
+                      <option value="1">Tipo 1</option>
+                      <option value="2">Tipo 2</option>
+                      <option value="3">Tipo 3</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="dni">Tipo persona juridica</label>
+                    <select name="" id="">
+                      <option value="0" disabled selected>Elija la persona</option>
+                      <option value="1">Tipo 1</option>
+                      <option value="2">Tipo 2</option>
+                      <option value="3">Tipo 3</option>
+                    </select>
                   </div>
                   <div className="form-group">
                     <label htmlFor="nombre">Nombre</label>
                     <input type="text" id="nombre" />
                   </div>
                 </div>
-
-                <div className="form-row"> 
-                  <div className="form-group">
-                    <label htmlFor="apellido">Apellido</label>
-                    <input type="text" id="apellido"/>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="telefono">Teléfono</label>
-                    <input type="text" id="telefono"/>
-                  </div>
-                </div>
-
-                <div className="form-group full-width">
-                  <label htmlFor="email">Email</label>
-                  <input type="email" id="email"/>
-                </div>
-
                 <div className="form-group full-width">
                   <label>Género</label>
                   <div className="radio-group">
                     <label><input type="radio" name="genero"/> Masculino</label>
                     <label><input type="radio" name="genero"/> Femenino</label>
+                  </div>
+                </div>
+
+                <div className="form-row"> 
+                  <div className="form-group">
+                    <label htmlFor="dni">Tipo de documento</label>
+                    <select name="" id="">
+                      <option value="0" disabled selected>Elija documento</option>
+                      <option value="1">Tipo 1</option>
+                      <option value="2">Tipo 2</option>
+                      <option value="3">Tipo 3</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="telefono">Numero de documento</label>
+                    <input type="text" id="telefono"/>
+                  </div>
+                </div>
+                <div className="form-row"> 
+                  <div className="form-group">
+                    <label htmlFor="telefono">Telefono</label>
+                    <input type="email" id="telefono"/>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="email">Email</label>
+                    <input type="email" id="email"/>
                   </div>
                 </div>
 

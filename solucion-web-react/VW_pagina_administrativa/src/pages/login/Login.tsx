@@ -8,8 +8,8 @@ function Login() {
           <h2>INGRESO</h2>
           <form action="">
             <div className="casilla_login">
-              <label>Correo:</label>
-              <input type="email" placeholder="Ingrese su correo"/>
+              <label>Usuario:</label>
+              <input type="text" placeholder="Ingrese su usuario"/>
             </div>
             <div className="casilla_login">
               <label>Contraseña:</label>
