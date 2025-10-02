@@ -18,7 +18,7 @@ import Especies_razas from './pages/administrativas/mascotas/Especies_razas';
 import Lst_mascotas from './pages/administrativas/mascotas/Lst_mascotas';
 import Vacunas from './pages/administrativas/mascotas/Vacunas';
 
-import Proveedores from './pages/distribucion/Proveedores';
+/* import Proveedores from './pages/distribucion/Proveedores'; */
 
 import Gestionar_colaboradores from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarColaboradores'
 import Gestionar_entidades from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarEntidades'
@@ -28,6 +28,13 @@ import Asistencia_de_colaboradores from './pages/administrativas/administracion/
 import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-a-colaboradores/pagosAcolaboradores'
 import Parametros_y_promociones from './pages/administrativas/administracion/parametros-y-promociones/parametrosYpromociones'
 import Desempeno_de_colaboradores from './pages/administrativas/administracion/desempeno-de-colaboradores/desempenoDeColaboradores'
+
+
+/* Asignar Roles y Permisos */
+import AsignarRolesPermisos from './pages/administrativas/administracion/AsignarRolesPermisos/AsignarRolesPermisos';
+import RegistrarSalidaMascota from './pages/administrativas/administracion/RegistrarSalidaMascota/RegistrarSalidaMascota';
+import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
+
 
 
 function App() {
@@ -58,7 +65,7 @@ function App() {
       {/* Agenda */}
 
       {/* Distribución */}
-      <Route path='/administracion/distribucion/proveedores' element={<Proveedores/>}/>
+      {/* <Route path='/administracion/distribucion/proveedores' element={<Proveedores/>}/> */}
 
       {/* Ventas */}
 
@@ -73,6 +80,11 @@ function App() {
       <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>
       <Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>
       <Route path='/administracion/administracion/desempeno_de_colaboradores' element={<Desempeno_de_colaboradores/>}/>
+
+      {/* Aquí van las nuevas páginas administrativas */}
+      <Route path='/administracion/administracion/asignar_roles_y_permisos' element={<AsignarRolesPermisos/>}/>
+      <Route path='/administracion/administracion/registrar_salida_mascota' element={<RegistrarSalidaMascota />}/>
+      <Route path='/administracion/administracion/dashboard_administrativo' element={<DashboardAdministrativo/>}/>
 
       {/* Seguridad y mantenimiento */}
     </Routes>
