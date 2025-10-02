@@ -1,8 +1,8 @@
 package com.vet.manadawoof.service.impl;
 
 import com.vet.manadawoof.dtos.request.ProveedorRequestDTO;
+import com.vet.manadawoof.dtos.response.EntidadResponseDTO;
 import com.vet.manadawoof.dtos.response.ProveedorResponseDTO;
-import com.vet.manadawoof.repository.ProveedorRepository;
 import com.vet.manadawoof.service.ProveedorService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProveedorServiceImpl implements ProveedorService {
 
-    private final ProveedorRepository repository;
-
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -36,7 +34,9 @@ public class ProveedorServiceImpl implements ProveedorService {
     @Override
     @Transactional
     public ProveedorResponseDTO actualizar(ProveedorRequestDTO dto) {
-        if (dto.getId() == null) throw new RuntimeException("ID de proveedor requerido para actualizar");
+        if (dto.getId() == null) {
+            throw new RuntimeException("ID de entidad requerido para actualizar proveedor");
+        }
         StoredProcedureQuery sp = buildSP(dto, "UPDATE");
         sp.execute();
         Object[] row = (Object[]) sp.getSingleResult();
@@ -44,23 +44,29 @@ public class ProveedorServiceImpl implements ProveedorService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ProveedorResponseDTO> listar() {
-        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("listar_proveedores");
-        List<Object[]> resultList = sp.getResultList();
-        return resultList.stream().map(this::mapRowToDto).collect(Collectors.toList());
+        List<Object[]> results = entityManager.createNativeQuery(
+                "SELECT p.id, p.codigo, p.activo, e.id, e.codigo, e.nombre, e.sexo, e.documento, "
+                + "e.id_tipo_persona_juridica, e.id_tipo_documento, e.correo, e.telefono, "
+                + "e.direccion, e.ciudad, e.distrito, e.representante, e.activo, e.fecha_registro "
+                + "FROM proveedores p "
+                + "JOIN entidades e ON p.id_entidad = e.id"
+        ).getResultList();
+
+        return results.stream()
+                .map(this::mapRowToFullDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ProveedorResponseDTO obtenerPorId(Long id) {
         StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("obtener_proveedor_por_id");
-        sp.registerStoredProcedureParameter(1, Long.class, ParameterMode.IN);
-        sp.setParameter(1, id);
-        Object rowObj = sp.getSingleResult();
-        if(rowObj == null) return null;
-        Object[] row = (Object[]) rowObj;
-        return mapRowToDto(row);
+        sp.registerStoredProcedureParameter("p_id_entidad", Long.class, ParameterMode.IN);
+        sp.setParameter("p_id_entidad", id);
+        Object[] row = (Object[]) sp.getSingleResult();
+        return row != null ? mapRowToDto(row) : null;
     }
 
     private StoredProcedureQuery buildSP(ProveedorRequestDTO dto, String accion) {
@@ -94,7 +100,7 @@ public class ProveedorServiceImpl implements ProveedorService {
             sp.setParameter("p_distrito", dto.getDistrito());
             sp.setParameter("p_representante", dto.getRepresentante());
 
-        } else {
+        } else if ("UPDATE".equalsIgnoreCase(accion)) {
             sp = entityManager.createStoredProcedureQuery("actualizar_proveedor");
             sp.registerStoredProcedureParameter("p_id_entidad", Long.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_id_tipo_persona_juridica", Integer.class, ParameterMode.IN);
@@ -124,12 +130,17 @@ public class ProveedorServiceImpl implements ProveedorService {
             sp.setParameter("p_distrito", dto.getDistrito());
             sp.setParameter("p_representante", dto.getRepresentante());
             sp.setParameter("p_activo", dto.getActivo());
+
+        } else {
+            throw new RuntimeException("Acción de SP inválida: " + accion);
         }
         return sp;
     }
 
     private ProveedorResponseDTO mapRowToDto(Object[] row) {
-        if (row == null) return null;
+        if (row == null) {
+            return null;
+        }
 
         Long idProveedor = row[0] != null ? ((Number) row[0]).longValue() : null;
         String codigoProveedor = row[1] != null ? row[1].toString() : null;
@@ -137,30 +148,65 @@ public class ProveedorServiceImpl implements ProveedorService {
         Long idEntidad = row[3] != null ? ((Number) row[3]).longValue() : null;
 
         Object[] entRow = (Object[]) entityManager.createNativeQuery(
-                        "SELECT e.id, e.codigo, e.nombre, e.sexo, e.documento, e.id_tipo_persona_juridica, " +
-                                "e.id_tipo_documento, e.correo, e.telefono, e.direccion, e.ciudad, e.distrito, " +
-                                "e.representante, e.activo, e.fecha_registro " +
-                                "FROM entidades e WHERE e.id = ?1")
+                "SELECT e.id, e.codigo, e.nombre, e.sexo, e.documento, e.id_tipo_persona_juridica, "
+                + "e.id_tipo_documento, e.correo, e.telefono, e.direccion, e.ciudad, e.distrito, "
+                + "e.representante, e.activo, e.fecha_registro "
+                + "FROM entidades e WHERE e.id = ?1")
                 .setParameter(1, idEntidad)
                 .getSingleResult();
 
-        return ProveedorResponseDTO.builder()
-                .id(idProveedor)
-                .codigoProveedor(codigoProveedor)
-                .activo(activo)
-                .idEntidad(entRow[0] != null ? ((Number) entRow[0]).longValue() : null)
+        EntidadResponseDTO entidadDTO = EntidadResponseDTO.builder()
+                .id(((Number) entRow[0]).longValue())
+                .codigo((String) entRow[1])
                 .nombre((String) entRow[2])
                 .sexo((String) entRow[3])
                 .documento((String) entRow[4])
-                .idTipoPersonaJuridica(entRow[5] != null ? ((Number) entRow[5]).intValue() : null)
-                .idTipoDocumento(entRow[6] != null ? ((Number) entRow[6]).intValue() : null)
+                .idTipoPersonaJuridica(((Number) entRow[5]).intValue())
+                .idTipoDocumento(((Number) entRow[6]).intValue())
                 .correo((String) entRow[7])
                 .telefono((String) entRow[8])
                 .direccion((String) entRow[9])
                 .ciudad((String) entRow[10])
                 .distrito((String) entRow[11])
                 .representante((String) entRow[12])
+                .activo(entRow[13] != null ? ((Number) entRow[13]).intValue() == 1 : false)
                 .fechaRegistro(entRow[14] != null ? ((java.sql.Timestamp) entRow[14]).toLocalDateTime() : null)
+                .build();
+
+        return ProveedorResponseDTO.builder()
+                .id(idProveedor)
+                .codigoProveedor(codigoProveedor)
+                .nombre(entidadDTO.getNombre())
+                .documento(entidadDTO.getDocumento())
+                .correo(entidadDTO.getCorreo())
+                .telefono(entidadDTO.getTelefono())
+                .direccion(entidadDTO.getDireccion())
+                .ciudad(entidadDTO.getCiudad())
+                .distrito(entidadDTO.getDistrito())
+                .representante(entidadDTO.getRepresentante())
+                .activo(entidadDTO.getActivo())
+                .mensaje("Operación exitosa")
+                .build();
+    }
+
+    private ProveedorResponseDTO mapRowToFullDto(Object[] row) {
+        return ProveedorResponseDTO.builder()
+                .id(((Number) row[0]).longValue())
+                .codigoProveedor((String) row[1])
+                .activo(((Number) row[2]).intValue() == 1)
+                .idEntidad(((Number) row[3]).longValue())
+                .nombre((String) row[5])
+                .sexo((String) row[6])
+                .documento((String) row[7])
+                .idTipoPersonaJuridica(((Number) row[8]).intValue())
+                .idTipoDocumento(((Number) row[9]).intValue())
+                .correo((String) row[10])
+                .telefono((String) row[11])
+                .direccion((String) row[12])
+                .ciudad((String) row[13])
+                .distrito((String) row[14])
+                .representante((String) row[15])
+                .fechaRegistro(row[17] != null ? ((java.sql.Timestamp) row[17]).toLocalDateTime() : null)
                 .mensaje("Operación exitosa")
                 .build();
     }

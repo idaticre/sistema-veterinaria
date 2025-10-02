@@ -14,8 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "especialidades",
-        uniqueConstraints = @UniqueConstraint(columnNames = "nombre"))
+@Table(name = "especialidades")
 public class EspecialidadEntity implements Serializable {
 
     @Id

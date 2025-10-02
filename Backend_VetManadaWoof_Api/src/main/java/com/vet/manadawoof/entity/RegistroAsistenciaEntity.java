@@ -1,5 +1,6 @@
 package com.vet.manadawoof.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.io.Serializable;
@@ -13,8 +14,8 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "registro_asistencia",
         indexes = {
-                @Index(name = "idx_asistencia_colaborador_fecha", columnList = "id_colaborador, fecha"),
-                @Index(name = "idx_asistencia_fecha", columnList = "fecha")
+            @Index(name = "idx_asistencia_colaborador_fecha", columnList = "id_colaborador, fecha"),
+            @Index(name = "idx_asistencia_fecha", columnList = "fecha")
         })
 public class RegistroAsistenciaEntity implements Serializable {
 
@@ -24,6 +25,7 @@ public class RegistroAsistenciaEntity implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_colaborador", nullable = false)
+    @JsonIgnore
     private ColaboradorEntity colaborador;
 
     @Column(nullable = false)

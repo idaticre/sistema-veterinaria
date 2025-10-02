@@ -20,37 +20,77 @@ import java.util.stream.Collectors;
 public class ClienteServiceImpl implements ClienteService {
 
     @PersistenceContext
-    private final EntityManager entityManager;
+    private EntityManager entityManager;
 
     @Override
     @Transactional
     public ClienteResponseDTO registrar(ClienteRequestDTO dto) {
         StoredProcedureQuery sp = buildSP(dto, "CREATE");
         sp.execute();
-        Object[] row = (Object[]) sp.getSingleResult();
-        return mapRowToDto(row);
+
+        String codigoEntidad = (String) sp.getOutputParameterValue("p_codigo_entidad");
+        String codigoCliente = (String) sp.getOutputParameterValue("p_codigo_cliente");
+        String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
+
+        return ClienteResponseDTO.builder()
+                .codigoCliente(codigoCliente)
+                .idEntidad(null) // si necesitas, luego puedes consultar con SELECT
+                .nombre(dto.getNombre())
+                .documento(dto.getDocumento())
+                .correo(dto.getCorreo())
+                .telefono(dto.getTelefono())
+                .direccion(dto.getDireccion())
+                .ciudad(dto.getCiudad())
+                .distrito(dto.getDistrito())
+                .activo(true)
+                .mensaje(mensaje)
+                .build();
     }
 
     @Override
     @Transactional
     public ClienteResponseDTO actualizar(ClienteRequestDTO dto) {
-        if (dto.getIdEntidad() == null) throw new RuntimeException("ID de entidad requerido para actualizar");
+        if (dto.getIdEntidad() == null) {
+            throw new RuntimeException("ID de entidad requerido para actualizar");
+        }
+
         StoredProcedureQuery sp = buildSP(dto, "UPDATE");
         sp.execute();
-        Object[] row = (Object[]) sp.getSingleResult();
-        return mapRowToDto(row);
+
+        String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
+
+        return ClienteResponseDTO.builder()
+                .idEntidad(dto.getIdEntidad())
+                .nombre(dto.getNombre())
+                .documento(dto.getDocumento())
+                .correo(dto.getCorreo())
+                .telefono(dto.getTelefono())
+                .direccion(dto.getDireccion())
+                .ciudad(dto.getCiudad())
+                .distrito(dto.getDistrito())
+                .activo(dto.getActivo())
+                .mensaje(mensaje)
+                .build();
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ClienteResponseDTO> listar() {
-        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("listar_clientes");
-        List<Object[]> resultList = sp.getResultList();
-        return resultList.stream().map(this::mapRowToDto).collect(Collectors.toList());
+        List<Object[]> results = entityManager.createNativeQuery(
+                "SELECT c.id, c.codigo, c.activo, e.id, e.codigo, e.nombre, e.sexo, e.documento, "
+                + "e.id_tipo_persona_juridica, e.id_tipo_documento, e.correo, e.telefono, "
+                + "e.direccion, e.ciudad, e.distrito, e.representante, e.activo, e.fecha_registro "
+                + "FROM clientes c "
+                + "JOIN entidades e ON c.id_entidad = e.id"
+        ).getResultList();
+
+        return results.stream()
+                .map(this::mapRowToFullDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ClienteResponseDTO obtenerPorId(Long id) {
         StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("obtener_cliente_por_id");
         sp.registerStoredProcedureParameter("p_id_entidad", Long.class, ParameterMode.IN);
@@ -124,7 +164,9 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     private ClienteResponseDTO mapRowToDto(Object[] row) {
-        if (row == null) return null;
+        if (row == null) {
+            return null;
+        }
 
         Long idCliente = row[0] != null ? ((Number) row[0]).longValue() : null;
         String codigoCliente = row[1] != null ? row[1].toString() : null;
@@ -132,10 +174,10 @@ public class ClienteServiceImpl implements ClienteService {
         Long idEntidad = row[3] != null ? ((Number) row[3]).longValue() : null;
 
         Object[] entRow = (Object[]) entityManager.createNativeQuery(
-                        "SELECT e.id, e.codigo, e.nombre, e.sexo, e.documento, e.id_tipo_persona_juridica, " +
-                                "e.id_tipo_documento, e.correo, e.telefono, e.direccion, e.ciudad, e.distrito, " +
-                                "e.representante, e.activo, e.fecha_registro " +
-                                "FROM entidades e WHERE e.id = ?1")
+                "SELECT e.id, e.codigo, e.nombre, e.sexo, e.documento, e.id_tipo_persona_juridica, "
+                + "e.id_tipo_documento, e.correo, e.telefono, e.direccion, e.ciudad, e.distrito, "
+                + "e.representante, e.activo, e.fecha_registro "
+                + "FROM entidades e WHERE e.id = ?1")
                 .setParameter(1, idEntidad)
                 .getSingleResult();
 
@@ -143,7 +185,7 @@ public class ClienteServiceImpl implements ClienteService {
                 .id(((Number) entRow[0]).longValue())
                 .codigo((String) entRow[1])
                 .nombre((String) entRow[2])
-                .sexo((String) entRow[3])
+                .sexo(entRow[3] != null ? entRow[3].toString() : null)
                 .documento((String) entRow[4])
                 .idTipoPersonaJuridica(((Number) entRow[5]).intValue())
                 .idTipoDocumento(((Number) entRow[6]).intValue())
@@ -171,4 +213,26 @@ public class ClienteServiceImpl implements ClienteService {
                 .mensaje("Operación exitosa")
                 .build();
     }
+
+    private ClienteResponseDTO mapRowToFullDto(Object[] row) {
+        return ClienteResponseDTO.builder()
+                .id(((Number) row[0]).longValue())
+                .codigoCliente((String) row[1])
+                .activo(((Number) row[2]).intValue() == 1)
+                .idEntidad(((Number) row[3]).longValue())
+                .nombre((String) row[5])
+                .sexo(row[6] != null ? row[6].toString() : null)
+                .documento((String) row[7])
+                .idTipoPersonaJuridica(((Number) row[8]).intValue())
+                .idTipoDocumento(((Number) row[9]).intValue())
+                .correo((String) row[10])
+                .telefono((String) row[11])
+                .direccion((String) row[12])
+                .ciudad((String) row[13])
+                .distrito((String) row[14])
+                .fechaRegistro(row[17] != null ? ((java.sql.Timestamp) row[17]).toLocalDateTime() : null)
+                .mensaje("Operación exitosa")
+                .build();
+    }
+
 }

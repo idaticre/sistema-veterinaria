@@ -1,9 +1,12 @@
 package com.vet.manadawoof.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.io.Serializable;
 import java.time.LocalTime;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Builder
 @AllArgsConstructor
@@ -27,14 +30,17 @@ public class HorarioTrabajoEntity implements Serializable {
     private LocalTime horaFin;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "id_colaborador", nullable = false)
     private ColaboradorEntity colaborador;
 
     @ManyToOne
     @JoinColumn(name = "id_dia_semana", nullable = false)
+    @JsonIgnore
     private DiaEntity dia;
 
     @ManyToOne
     @JoinColumn(name = "id_tipo_dia")
+    @JsonIgnore
     private TipoDiaEntity tipoDia;
 }

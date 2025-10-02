@@ -1,9 +1,8 @@
 package com.vet.manadawoof.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.List;
@@ -26,8 +25,8 @@ public class RolEntity implements Serializable {
     @Column(length = 128)
     private String descripcion;
 
-
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<UsuarioEntity> usuarios;

@@ -32,6 +32,14 @@ public class UsuarioRolRestController {
         return ResponseEntity.ok("UsuarioRol eliminado correctamente");
     }
 
+
+    @GetMapping
+    public ResponseEntity<List<UsuarioRolEntity>> listar() {
+        List<UsuarioRolEntity> list = service.listar();
+        if (list.isEmpty()) return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping("/{usuarioId}")
     public ResponseEntity<List<UsuarioRolEntity>> listar(@PathVariable Integer usuarioId) {
         List<UsuarioRolEntity> list = service.listarRolesPorUsuario(usuarioId);

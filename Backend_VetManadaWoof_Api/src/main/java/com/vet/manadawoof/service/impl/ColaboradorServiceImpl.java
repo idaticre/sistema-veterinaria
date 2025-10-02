@@ -2,6 +2,7 @@ package com.vet.manadawoof.service.impl;
 
 import com.vet.manadawoof.dtos.request.ColaboradorRequestDTO;
 import com.vet.manadawoof.dtos.response.ColaboradorResponseDTO;
+import com.vet.manadawoof.dtos.response.EntidadResponseDTO;
 import com.vet.manadawoof.service.ColaboradorService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public class ColaboradorServiceImpl implements ColaboradorService {
 
     @PersistenceContext
-    private final EntityManager entityManager;
+    private EntityManager entityManager;
 
     @Override
     @Transactional
@@ -33,7 +34,9 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     @Override
     @Transactional
     public ColaboradorResponseDTO actualizar(Long idColaborador, ColaboradorRequestDTO dto) {
-        if (idColaborador == null) throw new RuntimeException("ID de colaborador requerido para actualizar");
+        if (idColaborador == null) {
+            throw new RuntimeException("ID de colaborador requerido para actualizar");
+        }
         dto.setId(idColaborador);
         StoredProcedureQuery sp = buildSP(dto, "UPDATE");
         sp.execute();
@@ -44,9 +47,35 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     @Override
     @Transactional
     public List<ColaboradorResponseDTO> listar() {
-        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("listar_colaboradores");
-        List<Object[]> resultList = sp.getResultList();
-        return resultList.stream().map(this::mapRowToDto).collect(Collectors.toList());
+        List<Object[]> results = entityManager.createNativeQuery("""
+        SELECT
+            c.id AS id_colaborador,
+            c.codigo AS codigo_colaborador,
+            e.id AS id_entidad,
+            e.nombre,
+            e.sexo,
+            e.documento,
+            e.id_tipo_persona_juridica,
+            e.id_tipo_documento,
+            e.correo,
+            e.telefono,
+            e.direccion,
+            e.ciudad,
+            e.distrito,
+            u.username AS usuario,
+            c.activo,
+            c.fecha_registro,
+            c.fecha_ingreso,
+            c.foto
+        FROM colaboradores c
+        JOIN entidades e ON c.id_entidad = e.id
+        JOIN usuarios u ON c.id_usuario = u.id;
+        """).getResultList();
+
+        return results.stream()
+                .map(this::mapRow)
+                .collect(Collectors.toList());
+
     }
 
     @Override
@@ -134,27 +163,78 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     }
 
     private ColaboradorResponseDTO mapRowToDto(Object[] row) {
-        if (row == null) return null;
+        if (row == null) {
+            return null;
+        }
+
+        Long idColaborador = row[0] != null ? ((Number) row[0]).longValue() : null;
+        String codigoColaborador = row[1] != null ? row[1].toString() : null;
+        Long idEntidad = row[2] != null ? ((Number) row[2]).longValue() : null;
+
+        // Consulto la entidad
+        Object[] entRow = (Object[]) entityManager.createNativeQuery(
+                "SELECT e.id, e.codigo, e.nombre, e.sexo, e.documento, e.id_tipo_persona_juridica, "
+                + "e.id_tipo_documento, e.correo, e.telefono, e.direccion, e.ciudad, e.distrito, "
+                + "e.representante, e.activo, e.fecha_registro "
+                + "FROM entidades e WHERE e.id = ?1")
+                .setParameter(1, idEntidad)
+                .getSingleResult();
+
+        EntidadResponseDTO entidadDTO = EntidadResponseDTO.builder()
+                .id(((Number) entRow[0]).longValue())
+                .codigo((String) entRow[1])
+                .nombre((String) entRow[2])
+                .sexo((String) entRow[3])
+                .documento((String) entRow[4])
+                .idTipoPersonaJuridica(((Number) entRow[5]).intValue())
+                .idTipoDocumento(((Number) entRow[6]).intValue())
+                .correo((String) entRow[7])
+                .telefono((String) entRow[8])
+                .direccion((String) entRow[9])
+                .ciudad((String) entRow[10])
+                .distrito((String) entRow[11])
+                .representante((String) entRow[12])
+                .activo(entRow[13] != null ? ((Number) entRow[13]).intValue() == 1 : false)
+                .fechaRegistro(entRow[14] != null ? ((java.sql.Timestamp) entRow[14]).toLocalDateTime() : null)
+                .build();
 
         return ColaboradorResponseDTO.builder()
-                .idColaborador(row[0] != null ? ((Number) row[0]).longValue() : null)
-                .codigoColaborador(row[1] != null ? row[1].toString() : null)
-                .idEntidad(row[2] != null ? ((Number) row[2]).longValue() : null)
-                .nombre(row[3] != null ? row[3].toString() : null)
-                .sexo(row[4] != null ? row[4].toString() : null)
-                .documento(row[5] != null ? row[5].toString() : null)
-                .idTipoPersonaJuridica(row[6] != null ? ((Number) row[6]).intValue() : null)
-                .idTipoDocumento(row[7] != null ? ((Number) row[7]).intValue() : null)
-                .correo(row[8] != null ? row[8].toString() : null)
-                .telefono(row[9] != null ? row[9].toString() : null)
-                .direccion(row[10] != null ? row[10].toString() : null)
-                .ciudad(row[11] != null ? row[11].toString() : null)
-                .distrito(row[12] != null ? row[12].toString() : null)
-                .usuario(row[13] != null ? row[13].toString() : null)
-                .activo(row[14] != null ? ((Number) row[14]).intValue() == 1 : null)
-                .fechaIngreso(row[15] != null ? ((java.sql.Date) row[15]).toLocalDate() : null)
-                .foto(row[16] != null ? row[16].toString() : null)
-                .mensaje(row.length > 17 && row[17] != null ? row[17].toString() : "Operación exitosa")
+                .idColaborador(idColaborador)
+                .codigoColaborador(codigoColaborador)
+                .idEntidad(idEntidad)
+                .nombre(entidadDTO.getNombre())
+                .documento(entidadDTO.getDocumento())
+                .correo(entidadDTO.getCorreo())
+                .telefono(entidadDTO.getTelefono())
+                .direccion(entidadDTO.getDireccion())
+                .ciudad(entidadDTO.getCiudad())
+                .distrito(entidadDTO.getDistrito())
+                .activo(entidadDTO.getActivo())
+                .mensaje("Operación exitosa")
                 .build();
     }
+
+    private ColaboradorResponseDTO mapRow(Object[] row) {
+        return ColaboradorResponseDTO.builder()
+                .idColaborador(((Number) row[0]).longValue())
+                .codigoColaborador((String) row[1])
+                .idEntidad(((Number) row[2]).longValue())
+                .nombre((String) row[3])
+                .sexo((String) row[4])
+                .documento((String) row[5])
+                .idTipoPersonaJuridica(((Number) row[6]).intValue())
+                .idTipoDocumento(((Number) row[7]).intValue())
+                .correo((String) row[8])
+                .telefono((String) row[9])
+                .direccion((String) row[10])
+                .ciudad((String) row[11])
+                .distrito((String) row[12])
+                .usuario((String) row[13]) // ✅ corregido
+                .activo(((Number) row[14]).intValue() == 1)
+                .fechaRegistro(((java.sql.Timestamp) row[15]).toLocalDateTime())
+                .fechaIngreso(row[16] != null ? ((java.sql.Date) row[16]).toLocalDate() : null)
+                .foto((String) row[17])
+                .build();
+    }
+
 }

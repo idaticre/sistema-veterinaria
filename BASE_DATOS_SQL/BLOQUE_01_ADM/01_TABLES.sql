@@ -6,7 +6,7 @@
 -- y gestión de personal (veterinarios, horarios, asistencia).
 -- Al final del script podrá hacer un show tables para revisar mejor.
 -- =========================================================
-
+-- select * from entidades;
 -- ========================================
 -- 0. Creación de la Base de Datos
 -- ========================================
@@ -176,7 +176,7 @@ INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES
 -- ========================================
 CREATE TABLE IF NOT EXISTS entidades (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
+    codigo VARCHAR(16) NULL UNIQUE,
 	id_tipo_persona_juridica INT NOT NULL,			-- natural o juridica
     nombre VARCHAR(128) NOT NULL,
     sexo VARCHAR(1),
@@ -213,7 +213,7 @@ CREATE INDEX idx_entidades_tipo_documento ON entidades(id_tipo_documento);
 -- ========================================
 CREATE TABLE IF NOT EXISTS colaboradores (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
+    codigo VARCHAR(16) NULL UNIQUE,
     id_entidad BIGINT NOT NULL UNIQUE,
     fecha_ingreso DATE,
     fecha_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -243,7 +243,7 @@ CREATE INDEX idx_colaboradores_activo ON colaboradores(activo);
 -- ========================================
 CREATE TABLE IF NOT EXISTS proveedores (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
+    codigo VARCHAR(16) NULL UNIQUE,
     id_entidad BIGINT NOT NULL UNIQUE,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -264,7 +264,7 @@ CREATE INDEX idx_proveedores_activo ON proveedores(activo);
 -- ========================================
 CREATE TABLE IF NOT EXISTS clientes (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
+    codigo VARCHAR(16) NULL UNIQUE,
     id_entidad BIGINT NOT NULL UNIQUE,    
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
@@ -309,7 +309,7 @@ INSERT INTO especialidades (nombre) VALUES
 -- ========================================
 CREATE TABLE IF NOT EXISTS veterinarios (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
+    codigo VARCHAR(16) NULL UNIQUE,
     id_colaborador BIGINT NOT NULL UNIQUE,
     id_especialidad BIGINT NOT NULL,
     cmp VARCHAR(32) UNIQUE NULL,
@@ -371,7 +371,7 @@ INSERT INTO tipos_dia (nombre) VALUES
 -- Validar en la lógica de aplicación con una consulta
 CREATE TABLE IF NOT EXISTS horarios_trabajo (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
+    codigo VARCHAR(16) NULL UNIQUE,
     id_colaborador BIGINT NOT NULL,
     id_dia_semana INT NOT NULL,
     id_tipo_dia INT DEFAULT NULL,

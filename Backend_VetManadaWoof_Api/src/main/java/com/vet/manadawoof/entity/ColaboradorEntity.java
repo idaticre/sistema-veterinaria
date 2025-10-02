@@ -32,6 +32,7 @@ public class ColaboradorEntity {
     private Date fechaIngreso;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "id_usuario", nullable = false)
     private UsuarioEntity usuario;
 

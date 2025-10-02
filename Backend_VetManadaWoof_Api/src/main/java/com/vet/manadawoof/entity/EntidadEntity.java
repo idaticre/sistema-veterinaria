@@ -58,15 +58,16 @@ public class EntidadEntity {
 
     // Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "id_tipo_persona_juridica", insertable = false, updatable = false)
     private TipoPersonaJuridicaEntity tipoPersonaJuridica;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "id_tipo_documento", insertable = false, updatable = false)
     private TipoDocumentoEntity tipoDocumento;
 
     // Campos auxiliares para el DTO
-
     // mantiene congruencia con DTO
     @Transient
     @Column(name = "id_tipo_documento", insertable = true, updatable = true)

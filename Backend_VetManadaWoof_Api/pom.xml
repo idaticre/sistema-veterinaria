@@ -28,6 +28,7 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <start-class>com.vet.manadawoof.VetManadaWoofApplication</start-class>
     </properties>
     <dependencies>
         <!-- Spring Boot JPA para manejo de entidades y persistencia con Hibernate -->

@@ -1,5 +1,6 @@
 package com.vet.manadawoof.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -32,9 +33,11 @@ public class UsuarioEntity implements Serializable {
 
     // Relaciones
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ColaboradorEntity> colaboradores;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinTable(
             name = "usuarios_roles",
             joinColumns = @JoinColumn(name = "id_usuario"),

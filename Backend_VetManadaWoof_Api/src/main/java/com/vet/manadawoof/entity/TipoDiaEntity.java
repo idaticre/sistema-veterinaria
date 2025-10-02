@@ -26,7 +26,7 @@ public class TipoDiaEntity implements Serializable {
 
     @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     @JdbcTypeCode(SqlTypes.BIT)
-    private Boolean activo = true;
+    private Boolean activo;
 
     @OneToMany(mappedBy = "tipoDia")
     @JsonIgnore

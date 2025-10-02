@@ -36,12 +36,16 @@ public class VeterinarioRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>(false, "ID de veterinario requerido para actualizar", null));
         }
-        VeterinarioResponseDTO response = service.actualizar(dto);
-        if (response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
+
+        VeterinarioResponseDTO response = service.actualizar(dto.getId(), dto);
+
+        String mensaje = response.getMensaje() != null ? response.getMensaje() : "Operación fallida";
+
+        if (mensaje.startsWith("ERROR:")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(false, response.getMensaje(), null));
+                    .body(new ApiResponse<>(false, mensaje, null));
         }
-        return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+        return ResponseEntity.ok(new ApiResponse<>(true, mensaje, response));
     }
 
     @GetMapping

@@ -45,6 +45,12 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<UsuarioRolEntity> listar() {
+        return repository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<UsuarioRolEntity> listarRolesPorUsuario(Integer usuarioId) {
         return repository.findByUsuarioId(usuarioId);
     }

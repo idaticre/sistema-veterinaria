@@ -10,5 +10,7 @@ public interface UsuarioRolService {
 
     void eliminarUsuarioRol(Integer id, Integer usuarioId, Integer rolId);
 
+    List<UsuarioRolEntity> listar();
+
     List<UsuarioRolEntity> listarRolesPorUsuario(Integer usuarioId);
 }
