@@ -15,9 +15,10 @@ export interface EntidadRequest{
 }
 
 export interface ClienteResquest{
-    id: number;
+    id?: number;
+    idTipoPersonaJuridica: number;
     nombre: string;
-    sexo: "M" | "F";
+    sexo?: "M" | "F";
     documento: string;
     idTipoDocumento: number;
     correo: string;
@@ -211,4 +212,16 @@ export interface veterinarioResponse{
     ciudad: string;
     distrito: string;
     mensaje: string;
+}
+
+export interface Especialidad {
+  id?: number;
+  nombre: string;
+  activo: boolean;
+}
+
+export interface tipo_doc{
+    id: number;
+    descripcion: string;
+    activo: boolean;
 }

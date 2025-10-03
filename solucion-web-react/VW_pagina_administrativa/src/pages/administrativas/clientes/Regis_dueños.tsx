@@ -1,12 +1,80 @@
-import  { useState } from 'react'
+import  { useEffect, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
 import './regis_dueños.css'
+import type { tipo_doc, EntidadRequest } from '../../../components/interfaces/interfaces';
+import axios from 'axios';
 
 function regis_dueños() {
   const [minimizado, setMinimizado] = useState(false);
   const [imagenDueño, setImagenDueño] = useState<string | null>(null); 
+  const [tipoDoc, setTipDoc] = useState<tipo_doc[]>([]);
+  const [entidadReq, setEntidaReq] = useState<EntidadRequest[]>([]);
+  const [idTipoPersonaJuridica, setIdTipoPersonaJuridica] = useState<number>(0);
+  const [nombre, setNombre] = useState("");
+  const [sexo, setSexo] = useState<"M" | "F" | undefined>(undefined);
+  const [documento, setDocumento] = useState("");
+  const [idTipoDocumento, setIdTipoDocumento] = useState<number>(0);
+  const [correo, setCorreo] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [direccion, setDireccion] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [distrito, setDistrito] = useState("");
+  const [representante, setRepresentante] = useState("");
+  const [activo, setActivo] = useState(true);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  useEffect(() => {
+    axios.get("http://localhost:8088/api/tipo-documento")
+    .then(res => {
+      setTipDoc(res.data);
+    })
+    .catch(err => {
+      console.error("Error en la carga de datos", err)
+    });
+  }, [])
+
+  const handleSubmit = (e: React.FormEvent) => {
+
+    e.preventDefault();
+
+    const nuevaEntidad: EntidadRequest = {
+      idTipoPersonaJuridica,
+      nombre,
+      sexo,
+      documento,
+      idTipoDocumento,
+      correo,
+      telefono,
+      direccion,
+      ciudad,
+      distrito,
+      representante,
+      activo
+    };
+
+    axios.post("http://localhost:8088/api/entidades/crear", nuevaEntidad)
+    .then(res => {
+      console.log("Entidad creada:", res.data);
+      alert("Entidad registrada correctamente ✅");
+
+      setNombre("");
+      setSexo(undefined);
+      setDocumento("");
+      setCorreo("");
+      setTelefono("");
+      setDireccion("");
+      setCiudad("");
+      setDistrito("");
+      setRepresentante("");
+      setActivo(true);
+    })
+    .catch(err => {
+      console.error("Error al registrar entidad", err);
+      alert("Error al registrar entidad ❌");
+    });
+  }
+
+  /*const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -15,7 +83,7 @@ function regis_dueños() {
       };
       reader.readAsDataURL(file);
     }
-  };
+  };*/
 
   return (
     <>
@@ -29,76 +97,89 @@ function regis_dueños() {
             <div className="form-box">
               <div className="form-section">
                 <h3><i className="icon-id-card"></i> Información General</h3>
+                <form onSubmit={handleSubmit}>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="dni">Tipo persona juridica</label>
+                      <select value={idTipoPersonaJuridica} onChange={(e) => setIdTipoPersonaJuridica(Number(e.target.value))}>
+                        <option value="0" disabled>Elija la persona</option>
+                        <option value="1">Natural</option>
+                        <option value="2">Jurídica</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="nombre">Nombre</label>
+                      <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="form-group full-width">
+                    <label>Género</label>
+                    <div className="radio-group">
+                      <input type="radio" name="genero" value="M" checked={sexo === "M"} onChange={() => setSexo("M")} /> Masculino
+                      <input type="radio" name="genero" value="F" checked={sexo === "F"} onChange={() => setSexo("F")} /> Femenino
+                    </div>
+                  </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="dni">Tipo entidad</label>
-                    <select name="" id="">
-                      <option value="0" disabled selected>Elija Entidad</option>
-                      <option value="1">Tipo 1</option>
-                      <option value="2">Tipo 2</option>
-                      <option value="3">Tipo 3</option>
-                    </select>
+                  <div className="form-row"> 
+                    <div className="form-group">
+                      <label htmlFor="dni">Tipo de documento</label>
+                      <select id="tipo_doc" value={idTipoDocumento} onChange={(e) => setIdTipoDocumento(Number(e.target.value))}>
+                        <option value="0" disabled selected>Elija documento</option>
+                        {tipoDoc.map((TD)=>(
+                          <option key={TD.id} value={TD.id}>{TD.descripcion}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="telefono">Numero de documento</label>
+                      <input type="text" value={documento} onChange={(e) => setDocumento(e.target.value)} />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="dni">Tipo persona juridica</label>
-                    <select name="" id="">
-                      <option value="0" disabled selected>Elija la persona</option>
-                      <option value="1">Tipo 1</option>
-                      <option value="2">Tipo 2</option>
-                      <option value="3">Tipo 3</option>
-                    </select>
+                  <div className="form-row"> 
+                    <div className="form-group">
+                      <label htmlFor="telefono">Telefono</label>
+                      <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="email">Email</label>
+                      <input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="nombre">Nombre</label>
-                    <input type="text" id="nombre" />
+                  <div className="form-row"> 
+                    <div className="form-group">
+                      <label htmlFor="ciudad">Ciudad</label>
+                      <input type="text" value={ciudad} onChange={(e) => setCiudad(e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="distrito">Distrito</label>
+                      <input type="text" value={distrito} onChange={(e) => setDistrito(e.target.value)}/>
+                    </div>
                   </div>
-                </div>
-                <div className="form-group full-width">
-                  <label>Género</label>
-                  <div className="radio-group">
-                    <label><input type="radio" name="genero"/> Masculino</label>
-                    <label><input type="radio" name="genero"/> Femenino</label>
+                  <div className="form-row"> 
+                    <div className="form-group">
+                      <label htmlFor="representante">Representante</label>
+                      <input type="text" value={representante} onChange={(e) => setRepresentante(e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="activo">Estado</label>
+                      <select value={activo ? "true" : "false"} onChange={(e) => setActivo(e.target.value === "true")}>
+                        <option value="false">Inactiva</option>
+                        <option value="true">Activo</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
+                  <div className="form-group full-width">
+                    <label htmlFor="domicilio">Dirección</label>
+                    <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+                  </div>
 
-                <div className="form-row"> 
-                  <div className="form-group">
-                    <label htmlFor="dni">Tipo de documento</label>
-                    <select name="" id="">
-                      <option value="0" disabled selected>Elija documento</option>
-                      <option value="1">Tipo 1</option>
-                      <option value="2">Tipo 2</option>
-                      <option value="3">Tipo 3</option>
-                    </select>
+                  <div className="form-group full-width">
+                    <button type='submit' className="btn">Guardar</button>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="telefono">Numero de documento</label>
-                    <input type="text" id="telefono"/>
-                  </div>
-                </div>
-                <div className="form-row"> 
-                  <div className="form-group">
-                    <label htmlFor="telefono">Telefono</label>
-                    <input type="email" id="telefono"/>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="email">Email</label>
-                    <input type="email" id="email"/>
-                  </div>
-                </div>
-
-                <div className="form-group full-width">
-                  <label htmlFor="domicilio">Domicilio</label>
-                  <input type="text" id="domicilio"/>
-                </div>
-
-                <div className="form-group full-width">
-                  <button className="btn">Guardar</button>
-                </div>
+                </form>
               </div>
 
-              <div className="profile-section">
+              {/*<div className="profile-section">
                 <h3>
                   <i className="icon-camera"></i> Foto de perfil
                 </h3>
@@ -127,7 +208,7 @@ function regis_dueños() {
                     onChange={handleImageChange}
                   />
                 </label>
-              </div>
+              </div>*/}
               
             </div>
           </div>
