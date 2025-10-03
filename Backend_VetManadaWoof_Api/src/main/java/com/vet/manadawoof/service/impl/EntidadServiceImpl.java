@@ -38,7 +38,7 @@ public class EntidadServiceImpl implements EntidadService {
 
         sp.setParameter("p_id_tipo_persona_juridica", request.getIdTipoPersonaJuridica());
         sp.setParameter("p_nombre", request.getNombre());
-        sp.setParameter("p_sexo", request.getSexo());
+        sp.setParameter("p_sexo", request.getSexo() != null ? request.getSexo().substring(0,1) : null);
         sp.setParameter("p_documento", request.getDocumento());
         sp.setParameter("p_id_tipo_documento", request.getIdTipoDocumento());
         sp.setParameter("p_correo", request.getCorreo());
@@ -54,7 +54,7 @@ public class EntidadServiceImpl implements EntidadService {
         if (mensaje != null && mensaje.startsWith("ERROR:"))
             throw new RuntimeException(mensaje);
 
-        // Convertimos el OUT INT a Long
+        // Convertimos el OUT INT to Long
         Long id = ((Number) sp.getOutputParameterValue("p_id_entidad")).longValue();
         String codigo = (String) sp.getOutputParameterValue("p_codigo_entidad");
 
@@ -102,7 +102,7 @@ public class EntidadServiceImpl implements EntidadService {
         sp.setParameter("p_id_entidad", request.getId().intValue()); // <--- Conversión Long -> Integer
         sp.setParameter("p_id_tipo_persona_juridica", request.getIdTipoPersonaJuridica());
         sp.setParameter("p_nombre", request.getNombre());
-        sp.setParameter("p_sexo", request.getSexo());
+        sp.setParameter("p_sexo", request.getSexo() != null ? request.getSexo().substring(0,1) : null);
         sp.setParameter("p_documento", request.getDocumento());
         sp.setParameter("p_id_tipo_documento", request.getIdTipoDocumento());
         sp.setParameter("p_correo", request.getCorreo());
@@ -162,7 +162,9 @@ public class EntidadServiceImpl implements EntidadService {
         List<Object[]> rows = entityManager.createNativeQuery(
                 "SELECT e.id, e.codigo, e.nombre, e.correo, e.telefono, e.sexo, e.documento, " +
                         "e.direccion, e.ciudad, e.distrito, e.representante, e.activo, " +
-                        "tpj.nombre, td.nombre, e.fecha_registro " +
+                        "e.id_tipo_persona_juridica, tpj.nombre, " +
+                        "e.id_tipo_documento, td.descripcion, " +
+                        "e.fecha_registro " +
                         "FROM entidades e " +
                         "LEFT JOIN tipo_persona_juridica tpj ON e.id_tipo_persona_juridica = tpj.id " +
                         "LEFT JOIN tipo_documento td ON e.id_tipo_documento = td.id"
@@ -174,18 +176,21 @@ public class EntidadServiceImpl implements EntidadService {
                 .nombre((String) r[2])
                 .correo((String) r[3])
                 .telefono((String) r[4])
-                .sexo((String) r[5])
+                .sexo(r[5] != null ? r[5].toString() : null)
                 .documento((String) r[6])
                 .direccion((String) r[7])
                 .ciudad((String) r[8])
                 .distrito((String) r[9])
                 .representante((String) r[10])
-                // Boolean activo
                 .activo(r[11] != null && (((Number) r[11]).intValue() == 1))
-                .tipoPersonaJuridica((String) r[12])
-                .tipoDocumento((String) r[13])
-                .fechaRegistro((r[14] != null) ? ((java.sql.Timestamp) r[14]).toLocalDateTime() : null)
+                .idTipoPersonaJuridica(r[12] != null ? ((Number) r[12]).intValue() : null)  // <-- ahora sí
+                .tipoPersonaJuridica((String) r[13])
+                .idTipoDocumento(r[14] != null ? ((Number) r[14]).intValue() : null)        // <-- ahora sí
+                .tipoDocumento((String) r[15])
+                .fechaRegistro((r[16] != null) ? ((java.sql.Timestamp) r[16]).toLocalDateTime() : null)
                 .build()
         ).toList();
+
+
     }
 }

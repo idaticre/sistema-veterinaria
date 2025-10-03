@@ -13,4 +13,8 @@ public interface ClienteService {
     List<ClienteResponseDTO> listar();
 
     ClienteResponseDTO obtenerPorId(Long id);
+
+    // borrado lógico
+    ClienteResponseDTO eliminar(Long idCliente);
+
 }

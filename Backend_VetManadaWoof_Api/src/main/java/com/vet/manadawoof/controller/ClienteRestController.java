@@ -62,4 +62,24 @@ public class ClienteRestController {
         return ResponseEntity.ok(new ApiResponse<>(
                 true, "Cliente encontrado", cliente));
     }
+
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<ApiResponse<ClienteResponseDTO>>
+    eliminar(@PathVariable Long id) {
+        try {
+            ClienteResponseDTO response = service.eliminar(id);
+            if (response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>(false, response.getMensaje(), null));
+            }
+            return ResponseEntity.ok(
+                    new ApiResponse<>(true, response.getMensaje(), response)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
+        }
+    }
+
+
 }
