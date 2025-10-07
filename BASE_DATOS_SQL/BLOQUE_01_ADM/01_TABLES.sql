@@ -6,7 +6,7 @@
 -- y gestión de personal (veterinarios, horarios, asistencia).
 -- Al final del script podrá hacer un show tables para revisar mejor.
 -- =========================================================
--- select * from entidades;
+-- select * from proveedores;
 -- ========================================
 -- 0. Creación de la Base de Datos
 -- ========================================

@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ColaboradorResponseDTO {
-
-    private Long idColaborador;
+    
+    private Long id;
     private String codigoColaborador;
-
+    
     // Datos de entidad
     private Long idEntidad;
     private String nombre;
@@ -26,14 +26,14 @@ public class ColaboradorResponseDTO {
     private String direccion;
     private String ciudad;
     private String distrito;
-
+    
     // Datos específicos
     private String usuario;
     private Boolean activo;
     private LocalDateTime fechaRegistro;
     private LocalDate fechaIngreso;
     private String foto;
-
+    
     // fallback de SP
     private String mensaje;
 }

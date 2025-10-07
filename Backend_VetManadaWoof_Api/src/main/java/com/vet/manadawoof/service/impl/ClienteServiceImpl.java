@@ -15,40 +15,48 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ClienteServiceImpl implements ClienteService {
-
+    
     @PersistenceContext
-    private EntityManager entityManager;
-
+    private final EntityManager entityManager;
+    
+    /**
+     * Registra un nuevo cliente en el sistema mediante el SP 'registrar_cliente'.
+     * Se validan los datos y se obtiene la información generada de la entidad.
+     */
     @Override
     @Transactional
     public ClienteResponseDTO registrar(ClienteRequestDTO dto) {
         StoredProcedureQuery sp = buildSP(dto, "CREATE");
         sp.setParameter("p_sexo", dto.getSexo() != null ? dto.getSexo() : null);
         sp.execute();
-
+        
+        // Recuperar valores devueltos por el SP
         String codigoEntidad = (String) sp.getOutputParameterValue("p_codigo_entidad");
         String codigoCliente = (String) sp.getOutputParameterValue("p_codigo_cliente");
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
-
-        if (mensaje != null && mensaje.startsWith("ERROR")) {
+        
+        // Validar errores del SP
+        if(mensaje != null && mensaje.startsWith("ERROR")) {
             return ClienteResponseDTO.builder().mensaje(mensaje).build();
         }
-
+        
+        // Consultar la entidad recién creada
         Object[] entRow = (Object[]) entityManager.createNativeQuery(
                         "SELECT id, codigo, nombre, sexo, documento, id_tipo_persona_juridica, " +
                                 "id_tipo_documento, correo, telefono, direccion, ciudad, distrito, " +
                                 "representante, activo, fecha_registro FROM entidades WHERE codigo = ?1")
                 .setParameter(1, codigoEntidad)
                 .getSingleResult();
-
+        
         Long idEntidad = ((Number) entRow[0]).longValue();
-
-        // Obtener ID real de cliente
+        
+        // Obtener el ID real del cliente asociado a esa entidad
         Long idCliente = ((Number) entityManager.createNativeQuery(
                         "SELECT id FROM clientes WHERE id_entidad = ?1")
                 .setParameter(1, idEntidad)
                 .getSingleResult()).longValue();
-
+        
+        // Construcción del DTO de respuesta
         return ClienteResponseDTO.builder()
                 .id(idCliente)
                 .idEntidad(idEntidad)
@@ -68,42 +76,45 @@ public class ClienteServiceImpl implements ClienteService {
                 .mensaje(mensaje)
                 .build();
     }
-
+    
+    /**
+     * Actualiza la información de un cliente existente mediante el SP 'actualizar_cliente'.
+     */
     @Override
     @Transactional
     public ClienteResponseDTO actualizar(ClienteRequestDTO dto) {
-        if (dto.getIdEntidad() == null) {
+        if(dto.getIdEntidad() == null) {
             throw new RuntimeException("ID de entidad requerido para actualizar");
         }
-
+        
         StoredProcedureQuery sp = buildSP(dto, "UPDATE");
         sp.setParameter("p_sexo", dto.getSexo() != null ? dto.getSexo() : null);
         sp.execute();
-
+        
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
-        if (mensaje != null && mensaje.startsWith("ERROR")) {
+        if(mensaje != null && mensaje.startsWith("ERROR")) {
             return ClienteResponseDTO.builder().mensaje(mensaje).build();
         }
-
+        
+        // Consultar datos actualizados de la entidad
         Object[] entRow = (Object[]) entityManager.createNativeQuery(
                         "SELECT id, codigo, nombre, sexo, documento, id_tipo_persona_juridica, " +
                                 "id_tipo_documento, correo, telefono, direccion, ciudad, distrito, " +
                                 "representante, activo, fecha_registro FROM entidades WHERE id = ?1")
                 .setParameter(1, dto.getIdEntidad())
                 .getSingleResult();
-
-        // ID real de cliente
+        
+        // Obtener identificadores reales del cliente
         Long idCliente = ((Number) entityManager.createNativeQuery(
                         "SELECT id FROM clientes WHERE id_entidad = ?1")
                 .setParameter(1, dto.getIdEntidad())
                 .getSingleResult()).longValue();
-
-        // Código de cliente
+        
         String codigoCliente = (String) entityManager.createNativeQuery(
                         "SELECT codigo FROM clientes WHERE id_entidad = ?1")
                 .setParameter(1, dto.getIdEntidad())
                 .getSingleResult();
-
+        
         return ClienteResponseDTO.builder()
                 .id(idCliente)
                 .idEntidad(dto.getIdEntidad())
@@ -123,7 +134,10 @@ public class ClienteServiceImpl implements ClienteService {
                 .mensaje(mensaje)
                 .build();
     }
-
+    
+    /**
+     * Lista todos los clientes activos con información completa de la entidad relacionada.
+     */
     @Override
     @Transactional
     public List<ClienteResponseDTO> listar() {
@@ -131,28 +145,33 @@ public class ClienteServiceImpl implements ClienteService {
                         "SELECT c.id, c.codigo, c.activo, e.id, e.codigo, e.nombre, e.sexo, e.documento, " +
                                 "e.id_tipo_persona_juridica, e.id_tipo_documento, e.correo, e.telefono, " +
                                 "e.direccion, e.ciudad, e.distrito, e.representante, e.activo, e.fecha_registro " +
-                                "FROM clientes c " +
-                                "JOIN entidades e ON c.id_entidad = e.id")
+                                "FROM clientes c JOIN entidades e ON c.id_entidad = e.id")
                 .getResultList();
-
-        return results.stream()
-                .map(this::mapRowToFullDto)
-                .collect(Collectors.toList());
+        
+        return results.stream().map(this :: mapRowToFullDto).collect(Collectors.toList());
     }
-
+    
+    /**
+     * Obtiene un cliente por su ID utilizando el SP 'obtener_cliente_por_id'.
+     */
     @Override
     @Transactional
     public ClienteResponseDTO obtenerPorId(Long id) {
         StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("obtener_cliente_por_id");
         sp.registerStoredProcedureParameter("p_id_entidad", Long.class, ParameterMode.IN);
         sp.setParameter("p_id_entidad", id);
+        
         Object[] row = (Object[]) sp.getSingleResult();
         return row != null ? mapRowToDto(row) : null;
     }
-
+    
+    /**
+     * Construye el StoredProcedureQuery según la acción (CREATE o UPDATE).
+     */
     private StoredProcedureQuery buildSP(ClienteRequestDTO dto, String accion) {
         StoredProcedureQuery sp;
-        if ("CREATE".equalsIgnoreCase(accion)) {
+        if("CREATE".equalsIgnoreCase(accion)) {
+            // Registro de cliente
             sp = entityManager.createStoredProcedureQuery("registrar_cliente");
             sp.registerStoredProcedureParameter("p_id_tipo_persona_juridica", Integer.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_nombre", String.class, ParameterMode.IN);
@@ -167,7 +186,7 @@ public class ClienteServiceImpl implements ClienteService {
             sp.registerStoredProcedureParameter("p_codigo_entidad", String.class, ParameterMode.OUT);
             sp.registerStoredProcedureParameter("p_codigo_cliente", String.class, ParameterMode.OUT);
             sp.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
-
+            
             sp.setParameter("p_id_tipo_persona_juridica", dto.getIdTipoPersonaJuridica());
             sp.setParameter("p_nombre", dto.getNombre());
             sp.setParameter("p_sexo", dto.getSexo() != null ? dto.getSexo().substring(0, 1) : null);
@@ -178,8 +197,9 @@ public class ClienteServiceImpl implements ClienteService {
             sp.setParameter("p_direccion", dto.getDireccion());
             sp.setParameter("p_ciudad", dto.getCiudad());
             sp.setParameter("p_distrito", dto.getDistrito());
-
-        } else if ("UPDATE".equalsIgnoreCase(accion)) {
+            
+        } else if("UPDATE".equalsIgnoreCase(accion)) {
+            // Actualización de cliente
             sp = entityManager.createStoredProcedureQuery("actualizar_cliente");
             sp.registerStoredProcedureParameter("p_id_entidad", Long.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_id_tipo_persona_juridica", Integer.class, ParameterMode.IN);
@@ -194,7 +214,7 @@ public class ClienteServiceImpl implements ClienteService {
             sp.registerStoredProcedureParameter("p_distrito", String.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_activo", Boolean.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
-
+            
             sp.setParameter("p_id_entidad", dto.getIdEntidad());
             sp.setParameter("p_id_tipo_persona_juridica", dto.getIdTipoPersonaJuridica());
             sp.setParameter("p_nombre", dto.getNombre());
@@ -207,21 +227,24 @@ public class ClienteServiceImpl implements ClienteService {
             sp.setParameter("p_ciudad", dto.getCiudad());
             sp.setParameter("p_distrito", dto.getDistrito());
             sp.setParameter("p_activo", dto.getActivo());
-
+            
         } else {
             throw new RuntimeException("Acción de SP inválida: " + accion);
         }
         return sp;
     }
-
+    
+    /**
+     * Convierte el resultado de un SP o consulta en un ClienteResponseDTO básico.
+     */
     private ClienteResponseDTO mapRowToDto(Object[] row) {
-        if (row == null) return null;
-
+        if(row == null) return null;
+        // Mapeo de datos principales y consulta complementaria a la tabla 'entidades'
         Long idCliente = row[0] != null ? ((Number) row[0]).longValue() : null;
         String codigoCliente = row[1] != null ? row[1].toString() : null;
         Boolean activo = row[2] != null ? ((Number) row[2]).intValue() == 1 : null;
         Long idEntidad = row[3] != null ? ((Number) row[3]).longValue() : null;
-
+        
         Object[] entRow = (Object[]) entityManager.createNativeQuery(
                         "SELECT e.id, e.codigo, e.nombre, e.sexo, e.documento, e.id_tipo_persona_juridica, " +
                                 "e.id_tipo_documento, e.correo, e.telefono, e.direccion, e.ciudad, e.distrito, " +
@@ -229,7 +252,7 @@ public class ClienteServiceImpl implements ClienteService {
                                 "FROM entidades e WHERE e.id = ?1")
                 .setParameter(1, idEntidad)
                 .getSingleResult();
-
+        
         return ClienteResponseDTO.builder()
                 .id(idCliente)
                 .codigoCliente(codigoCliente)
@@ -249,15 +272,18 @@ public class ClienteServiceImpl implements ClienteService {
                 .mensaje("Operación exitosa")
                 .build();
     }
-
+    
+    /**
+     * Convierte un resultado de consulta completa en un DTO con todos los campos.
+     */
     private ClienteResponseDTO mapRowToFullDto(Object[] row) {
-        if (row == null) return null;
-
+        if(row == null) return null;
+        
         return ClienteResponseDTO.builder()
-                .id(row[0] != null ? ((Number) row[0]).longValue() : null)              // c.id
-                .codigoCliente(row[1] != null ? row[1].toString() : null)               // c.codigo
-                .activo(row[2] != null ? ((Number) row[2]).intValue() == 1 : true)      // c.activo
-                .idEntidad(row[3] != null ? ((Number) row[3]).longValue() : null)       // e.id
+                .id(row[0] != null ? ((Number) row[0]).longValue() : null)
+                .codigoCliente(row[1] != null ? row[1].toString() : null)
+                .activo(row[2] != null ? ((Number) row[2]).intValue() == 1 : true)
+                .idEntidad(row[3] != null ? ((Number) row[3]).longValue() : null)
                 .nombre((String) row[5])
                 .sexo(row[6] != null ? row[6].toString() : null)
                 .documento((String) row[7])
@@ -272,40 +298,38 @@ public class ClienteServiceImpl implements ClienteService {
                 .mensaje("Operación exitosa")
                 .build();
     }
-
+    
+    /**
+     * Realiza un borrado lógico del cliente (activo = false) y devuelve la información resultante.
+     */
     @Override
     @Transactional
     public ClienteResponseDTO eliminar(Long idCliente) {
-        // Paso 1: Verificar que el cliente exista
+        // Verificar existencia del cliente
         Object[] row = (Object[]) entityManager.createNativeQuery(
-                        "SELECT c.id, c.codigo, c.id_entidad, c.activo " +
-                                "FROM clientes c WHERE c.id = ?1")
+                        "SELECT c.id, c.codigo, c.id_entidad, c.activo FROM clientes c WHERE c.id = ?1")
                 .setParameter(1, idCliente)
                 .getSingleResult();
-
-        if (row == null) {
-            return ClienteResponseDTO.builder()
-                    .mensaje("ERROR: Cliente no encontrado")
-                    .build();
+        
+        if(row == null) {
+            return ClienteResponseDTO.builder().mensaje("ERROR: Cliente no encontrado").build();
         }
-
+        
         Long idEntidad = ((Number) row[2]).longValue();
-
-        // Paso 2: Actualizar el estado lógico (desactivar cliente)
-        entityManager.createNativeQuery(
-                        "UPDATE clientes SET activo = 0 WHERE id = ?1")
+        
+        // Desactivar cliente (borrado lógico)
+        entityManager.createNativeQuery("UPDATE clientes SET activo = 0 WHERE id = ?1")
                 .setParameter(1, idCliente)
                 .executeUpdate();
-
-        // Paso 3: Obtener info actualizada de la entidad
+        
+        // Recuperar datos actualizados
         Object[] entRow = (Object[]) entityManager.createNativeQuery(
                         "SELECT e.id, e.codigo, e.nombre, e.sexo, e.documento, e.id_tipo_persona_juridica, " +
                                 "e.id_tipo_documento, e.correo, e.telefono, e.direccion, e.ciudad, e.distrito, " +
-                                "e.representante, e.activo, e.fecha_registro " +
-                                "FROM entidades e WHERE e.id = ?1")
+                                "e.representante, e.activo, e.fecha_registro FROM entidades e WHERE e.id = ?1")
                 .setParameter(1, idEntidad)
                 .getSingleResult();
-
+        
         return ClienteResponseDTO.builder()
                 .id(idCliente)
                 .idEntidad(idEntidad)
@@ -320,11 +344,9 @@ public class ClienteServiceImpl implements ClienteService {
                 .direccion((String) entRow[9])
                 .ciudad((String) entRow[10])
                 .distrito((String) entRow[11])
-                // desactivar
                 .activo(false)
                 .fechaRegistro(entRow[14] != null ? ((Timestamp) entRow[14]).toLocalDateTime() : null)
                 .mensaje("Cliente eliminado lógicamente con éxito")
                 .build();
     }
-
 }
