@@ -3,44 +3,49 @@ import Br_administrativa from '../../../components/barra_administrativa/Br_admin
 import './clientes.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import type { ClienteResponse } from '../../../components/interfaces/interfaces';
 
-{/*interface dueño {
-  id: number;
-  apellido: string;
-  correo: string;
-  direccion: string
-  nombre: string;
-  num_doc: string;
-  telefono: string
-  tipo_documento: number;
-} */}
-
-interface Cliente {
-  id: number;
-  nombre: string;
-  apellido: string;
-}
 
 function Lst_clientes() {
   const [minimizado, setMinimizado] = useState(false);
   const [busqueda, setBusqueda] = useState("");
-  const [filtrados, setFiltrados] = useState<Cliente[]>([]);
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
+  const [filtrados, setFiltrados] = useState<ClienteResponse[]>([]);
+  const [clientes, setClientes] = useState<ClienteResponse[]>([]);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteResponse | null>(null);
   const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
-
-  /*const [dueños, setDueños] = useState<dueño[]>([]);*/
   
-  /*useEffect(() => {
-    axios.get("http://localhost:8080/clientes")
-    .then(res => {
-      setDueños(res.data);
-    })
-    .catch(err => {
-      console.error("Error en la carga de datos", err)
-    });
-  }, [])*/
+  useEffect(() => {
+    axios.get("http://localhost:8088/api/clientes")
+      .then(res => {
+        console.log("DATA CLIENTES:", res.data);
+        const lista = res.data.data;
+        setClientes(lista);
+        setFiltrados(lista);
+      })
+      .catch(err => {
+        console.error("Error en la carga de datos", err);
+      });
+  }, []);
+
+  /*const handleDelete = (idEntidad?: number) => {
+    if (idEntidad === undefined) return;
+
+    if (!window.confirm("¿Seguro que deseas eliminar este cliente")) {
+      return;
+    }
+
+    axios.delete(`http://localhost:8088/api/entidades/${idEntidad}`)
+      .then(() => {
+        setClientes(prev => prev.filter(c => c.idEntidad !== idEntidad));
+        setFiltrados(prev => prev.filter(c => c.idEntidad !== idEntidad));
+        alert("✅ Entidad eliminada correctamente");
+      })
+      .catch(err => {
+        console.error("Error al eliminar la entidad:", err);
+        alert("❌ No se pudo eliminar la entidad.");
+      });
+  };*/
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -54,19 +59,6 @@ function Lst_clientes() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-  // borralo una vez tengas la base de datos, no te olvide pendejo xd
-  const datos = [
-      { id: 1, nombre: "Juan", apellido: "Pérez rosendo" },
-      { id: 2, nombre: "Ana", apellido: "Torres quiñones" },
-      { id: 3, nombre: "Carlos", apellido: "Ramírez manfredi" },
-      { id: 10, nombre: "Marlos", apellido: "Ramírez quiñones" },
-    ];
-    setClientes(datos);
-    setFiltrados(datos);
-  }, []);
-
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -83,7 +75,7 @@ function Lst_clientes() {
     const palabrasBusqueda = busqueda.toLowerCase().split(" ").filter(Boolean);
 
     const resultado = clientes.filter((cliente) =>{
-      const texto = `${cliente.nombre} ${cliente.apellido}`.toLowerCase();
+      const texto = `${cliente.nombre} ${cliente.documento}`.toLowerCase();
       return palabrasBusqueda.every(palabra => texto.includes(palabra));
     });
     setFiltrados(resultado);
@@ -113,11 +105,11 @@ function Lst_clientes() {
                         </div>
                         <div className='data_client' onClick={() => setClienteSeleccionado(cliente)} key={cliente.id}>
                           <div className='info_cliente'>
-                            <span className='nombre_cliente'>{cliente.nombre} {cliente.apellido}</span>
-                            <span className='dni_dueño'>DNI: #########</span>
+                            <span className='nombre_cliente'>{cliente.nombre}</span>
+                            <span className='dni_dueño'>Numero: {cliente.documento}</span>
                           </div>
                           <div className='info_cliente'>
-                            <span className='correo_dueño'>CORREO: ##########################</span>
+                            <span className='correo_dueño'>CORREO: {cliente.correo}</span>
                           </div>
                         </div>
                         <div className="lst_opciones_container">
@@ -126,8 +118,13 @@ function Lst_clientes() {
                           </div>
                           {menuActivoId === cliente.id && (
                             <div ref={menuRef} className="menu-opciones">
-                              <a href={`/clientes/editar/${cliente.id}`} onClick={() => setMenuActivoId(null)}>Editar</a>
-                              <a href={`/clientes/eliminar/${cliente.id}` } onClick={() => setMenuActivoId(null)}>Eliminar</a>
+                              <Link to="/administracion/cliente/registro" state={{ cliente }} onClick={() => setMenuActivoId(null)}>
+                                Editar
+                              </Link>
+                              {/*<button onClick={() => {handleDelete(cliente.idEntidad);setMenuActivoId(null);}}
+                              >
+                                Eliminar
+                              </button>*/}
                             </div>
                           )}
                         </div>
@@ -148,7 +145,7 @@ function Lst_clientes() {
                       </tr>
                       <tr>
                         <td><strong>DNI:</strong></td>
-                        <td>12345678</td>
+                        <td>{clienteSeleccionado.documento}</td>
                       </tr>
                       <tr>
                         <td><strong>Nombre:</strong></td>
@@ -156,19 +153,19 @@ function Lst_clientes() {
                       </tr>
                       <tr>
                         <td><strong>Apellidos:</strong></td>
-                        <td>{clienteSeleccionado.apellido}</td>
+                        <td>{clienteSeleccionado.ciudad}</td>
                       </tr>
                       <tr>
                         <td><strong>Correo:</strong></td>
-                        <td>###################</td>
+                        <td>{clienteSeleccionado.correo}</td>
                       </tr>
                       <tr>
                         <td><strong>Telefono:</strong></td>
-                        <td>123456789</td>
+                        <td>{clienteSeleccionado.telefono}</td>
                       </tr>
                       <tr>
                         <td><strong>Dirección:</strong></td>
-                        <td>###############</td>
+                        <td>{clienteSeleccionado.direccion}</td>
                       </tr>
                     </table>
                     <div className='VDCliente_foto'>
