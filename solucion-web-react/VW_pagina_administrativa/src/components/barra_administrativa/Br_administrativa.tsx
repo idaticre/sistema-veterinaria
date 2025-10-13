@@ -118,7 +118,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 </Link>
                             </li>
                             <li className="opcion opcion_simple">
-                                <Link to="#" className="enlace_opcion">
+                                <Link to="/administracion/servicios" className="enlace_opcion">
                                     <i className="fa-solid fa-folder"></i>
                                     <span>Servicios</span>
                                 </Link>

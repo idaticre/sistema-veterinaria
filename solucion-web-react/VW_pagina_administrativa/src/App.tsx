@@ -1,9 +1,10 @@
 /* GM: Este .tsx permite modificar como se muestran los URL de las páginas.
 PRIMERO importa la página con el nombre que desees -> import (nombre) from (path)
 SEGUNDO añade tu <Route> al cuerpo de la función function App() -> <Route path='URL/queGustes/QueAparezca/EnLaBarra' element={<NombreQueUsasteEnElImport>}/> 
-TERCERO, al hacer eso e importar App.tsx a tu otro .tsx deseado, podrás usar el element en vez del path en el proyecto :D (vélo en src/components/barra_administrativa/Br_administrativa.tsx) */
+TERCERO, al hacer eso e importar App.tsx a tu otro .tsx deseado, podrás usar el element en vez del path en el proyecto :D (vélo en src/components/barra_administrativa/Br_administrativa.tsx) 
 
-// Ordenado por orden de aparición en la barra administrativa lateral de la página
+Ordenado por orden de aparición en la barra administrativa lateral de la página*/
+
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import Login from './pages/login/Login';
@@ -18,7 +19,7 @@ import Especies_razas from './pages/administrativas/mascotas/Especies_razas';
 import Lst_mascotas from './pages/administrativas/mascotas/Lst_mascotas';
 import Vacunas from './pages/administrativas/mascotas/Vacunas';
 
-/* import Proveedores from './pages/distribucion/Proveedores'; */
+import Servicios from './pages/administrativas/servicios/servicios';
 
 import Gestionar_colaboradores from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarColaboradores'
 import Gestionar_entidades from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarEntidades'
@@ -29,8 +30,6 @@ import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-
 import Parametros_y_promociones from './pages/administrativas/administracion/parametros-y-promociones/parametrosYpromociones'
 import Desempeno_de_colaboradores from './pages/administrativas/administracion/desempeno-de-colaboradores/desempenoDeColaboradores'
 
-
-/* Asignar Roles y Permisos */
 import AsignarRolesPermisos from './pages/administrativas/administracion/AsignarRolesPermisos/AsignarRolesPermisos';
 import RegistrarSalidaMascota from './pages/administrativas/administracion/RegistrarSalidaMascota/RegistrarSalidaMascota';
 import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
@@ -57,15 +56,15 @@ function App() {
       <Route path='/administracion/mascotas/espcies_razas' element={<Especies_razas/>}/>
       <Route path='/administracion/mascotas/lista' element={<Lst_mascotas/>}/>
       <Route path='/administracion/mascotas/vacunas' element={<Vacunas/>}/>
-      
-      {/* Mascotas */}
 
       {/* Historial médico */}
+
+      {/* Servicios*/}
+      <Route path='/administracion/servicios' element={<Servicios/>}/>      
 
       {/* Agenda */}
 
       {/* Distribución */}
-      {/* <Route path='/administracion/distribucion/proveedores' element={<Proveedores/>}/> */}
 
       {/* Ventas */}
 
