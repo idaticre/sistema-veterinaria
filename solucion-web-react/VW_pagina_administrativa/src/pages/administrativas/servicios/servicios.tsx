@@ -3,53 +3,47 @@ import Br_administrativa from '../../../components/barra_administrativa/Br_admin
 import "./styles.css"
 import { Link } from "react-router-dom";
 
-interface Usuario {
+interface Servicios {
     ID: number,
     CODIGO: string,
-    USERNAME: string,
-    PASSWORD: string,
-    ACTIVO: number,
-    FECHA_CREACION: string,
-    FECHA_BAJA?: string
+    NOMBRE: string,
+    DESCRIPCION?: string,
+    ACTIVO: number
 }
 
-function gestionarUsuarios() {
+function gestionarServicios() {
     const [minimizado, setMinimizado] = useState(false);
     const [busqueda, setBusqueda] = useState("");
-    const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-    const [filtrado, setFiltrado] = useState<Usuario[]>([]);
+    const [servicios, setServicios] = useState<Servicios[]>([]);
+    const [filtrado, setFiltrado] = useState<Servicios[]>([]);
     const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
     const [mostrarModal, setMostrarModal] = useState(false);
-    const [edicion, setEdicion] = useState<Usuario | null>(null);
+    const [edicion, setEdicion] = useState<Servicios | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
 
-
-    useEffect(() => {
-        fetch("https://localhost:8088/api/usuarios")
-    })
-
+    // Registros
     useEffect(() => {
         const ejemplo = [
-            {ID: 1, CODIGO: "CODIGO1", USERNAME: "USUARIO1", PASSWORD: "CONTRASEÑA1", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
-            {ID: 2, CODIGO: "CODIGO2", USERNAME: "USUARIO2", PASSWORD: "CONTRASEÑA2", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
-            {ID: 3, CODIGO: "CODIGO3", USERNAME: "USUARIO3", PASSWORD: "CONTRASEÑA3", ACTIVO: 2, FECHA_CREACION: "12-12-12"},  
+            {ID: 1, CODIGO: "CODIGO1", NOMBRE: "USUARIO1", DESCRIPCION: "CONTRASEÑA1", ACTIVO: 2},
         ];
-        setUsuarios(ejemplo);
+        setServicios(ejemplo);
         setFiltrado(ejemplo);
     }, []);
 
+    // Filtro en barra de búsqueda
     useEffect(() => {
-        const lista = usuarios.filter(value => value.USERNAME.toLocaleLowerCase().includes(busqueda.toLowerCase()));
+        const lista = servicios.filter(value => value.NOMBRE.toLocaleLowerCase().includes(busqueda.toLowerCase()));
         setFiltrado(lista);
-    }, [busqueda, usuarios]);
+    }, [busqueda, servicios]);
 
-    const eliminarUsuario = (ID: number) => {
-        const registros = usuarios.filter(valor => valor.ID !== ID);
-        setUsuarios(registros);
+    const eliminarServicio = (ID: number) => {
+        const registros = servicios.filter(valor => valor.ID !== ID);
+        setServicios(registros);
         setFiltrado(registros);
         setMenuActivoId(null);
     }
     
+    // Cerrar modal
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
         if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -60,55 +54,45 @@ function gestionarUsuarios() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const registrarUsuario = () => {
-        const nuevo: Usuario = {
-            ID: usuarios.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
+    const registrarServicio = () => {
+        const nuevo: Servicios = {
+            ID: servicios.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
             CODIGO: "",
-            USERNAME: "",
-            PASSWORD: "",
+            NOMBRE: "",
+            DESCRIPCION: "",
             ACTIVO: 2,
-            FECHA_CREACION: new Date().toISOString().split("T")[0],
-            FECHA_BAJA: ""
         }
         setEdicion(nuevo);
         setMostrarModal(true);
     }
 
-    const editarUsuario = (ID: number) => {
-        const usuarioEditado = usuarios.find(usuario => usuario.ID === ID);
+    const editarServicio = (ID: number) => {
+        const usuarioEditado = servicios.find(servicios => servicios.ID === ID);
         if (usuarioEditado) {
             setEdicion(usuarioEditado);
             setMostrarModal(true);
         }
     }
 
-    const guardarUsuario = () => {
+    const guardarServicio = () => {
         if (!edicion) return;
-        if (!edicion.USERNAME.trim()) {alert("El nombre de usuario es obligatorio"); return;}
-        if (!edicion.PASSWORD.trim()) {alert("La contraseña es obligatoria"); return;}
+        if (!edicion.NOMBRE.trim()) {alert("El nombre de usuario es obligatorio"); return;}
         if (!edicion.ACTIVO) {alert("Debes seleccionar un estado (Activo/Inactivo/Suspendido)"); return;}
-        
-        // Madre para actualizar la vaina de la fecha de baja ALERTA, NO FUNCIONA = ESTÁ EN DESARROLLO
-        let actualizado = { ...edicion };
-        if (actualizado.ACTIVO === 1 || actualizado.ACTIVO === 3) {
-            if (!actualizado.FECHA_BAJA) {actualizado.FECHA_BAJA = new Date().toISOString().split("T")[0];}} 
-        else if (actualizado.ACTIVO === 2) {actualizado.FECHA_BAJA = "";}
 
         {/* Todo lo demás */}
-        const existe = usuarios.some(usuario => usuario.ID === edicion.ID);
+        const existe = servicios.some(servicio => servicio.ID === edicion.ID);
         if (existe) {
-            const registros = usuarios.map(usuario => usuario.ID === edicion.ID ? edicion : usuario);
-            setUsuarios(registros);
+            const registros = servicios.map(servicio => servicio.ID === edicion.ID ? edicion : servicio);
+            setServicios(registros);
             setFiltrado(registros);
         } else {
-            const nuevo: Usuario = {
+            const nuevo: Servicios = {
                 ...edicion,
-                ID: usuarios.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
+                ID: servicios.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
                 CODIGO: edicion.CODIGO || "CODIGO0", // CODIGO está siendo generado manualmente, editar cuando se conecte la base de datos para cumplir con la COMPOUND KEY
-                FECHA_CREACION: new Date().toISOString().split("T")[0],
             };
-            const registros = [...usuarios, nuevo];
-            setUsuarios(registros);
+            const registros = [...servicios, nuevo];
+            setServicios(registros);
             setFiltrado(registros);
         }
 
@@ -121,35 +105,25 @@ function gestionarUsuarios() {
             <Br_administrativa onMinimizeChange={setMinimizado}/>
             <main className={minimizado ? "minimize" : ""}>
                 <section id="listar-registros">
-                    <div className="encabezado"><h2>Lista de usuarios</h2></div>
+                    <div className="encabezado"><h2>Lista de servicios</h2></div>
                     <div className="goated">
-                        <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del usuario que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
-                        <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_colaboradores">Regresar</Link>
-                        <button className="boton-goated anadir-a-goated animacion-goated" onClick={registrarUsuario}>Registrar usuario</button>
+                        <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del servicio que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
+                        <button className="boton-goated anadir-a-goated animacion-goated" onClick={registrarServicio}>Registrar servicio</button>
                     </div>
 
                     <div className="listar-registros">
                         {filtrado.map((registro) => (
                             <div className="mostrar-registros" key={registro.ID}>
                                 <span className="texto-de-registro">{registro.CODIGO}</span>
-                                <span className="texto-de-registro">{registro.USERNAME}</span>
-                                <span className="texto-de-registro">{registro.PASSWORD}</span>
+                                <span className="texto-de-registro">{registro.NOMBRE}</span>
+                                <span className="texto-de-registro">{registro.DESCRIPCION}</span>
                                 <span className="texto-de-registro">{{1: "Inactivo", 2: "Activo", 3: "Suspendido"}[registro.ACTIVO] || "Desconocido"}</span>                                
-                                <span className="texto-de-registro">{registro.FECHA_CREACION}</span>
-                                <span className="texto-de-registro">{ // Arreglar display de la fecha de baja (checar comentario en editarUsuario)
-                                    registro?.FECHA_BAJA === undefined 
-                                        ? ""
-                                        : registro.ACTIVO === 1
-                                            ? `(Inactivo desde ${registro.FECHA_BAJA})`
-                                            : registro.ACTIVO === 3
-                                                ? `(Suspendido desde ${registro.FECHA_BAJA})`
-                                                : "NO_ELIMINAR_ESTO"}</span>
                                 <div className="listar-opciones-contenedor">
                                     <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.ID)}><i className="fa-solid fa-ellipsis-vertical"/></div>
                                     {menuActivoId === registro.ID && (
                                         <div ref={menuRef} className="menu-opciones">
-                                            <button onClick={() => editarUsuario(registro.ID)}>✏️ Editar</button>
-                                            <button onClick={() => eliminarUsuario(registro.ID)}>🗑️ Eliminar</button>
+                                            <button onClick={() => editarServicio(registro.ID)}>✏️ Editar</button>
+                                            <button onClick={() => eliminarServicio(registro.ID)}>🗑️ Eliminar</button>
                                         </div>
                                     )}
                                 </div>
@@ -162,18 +136,17 @@ function gestionarUsuarios() {
             {mostrarModal && edicion && (
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
-                        <h3>Información de usuario</h3>
-                        <p><strong>Siendo creado el:</strong> {edicion.FECHA_CREACION}</p>
+                        <h3>Información de servicio</h3>
                         <select value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value) } : null)}>
                             <option value="">-- Selecciona estado --</option>
                             <option value="1">Inactivo</option>
                             <option value="2">Activo</option>
                             <option value="3">Suspendido</option>
                         </select>
-                        <input type="text" placeholder="Ingrese el nuevo nombre de usuario" value={edicion.USERNAME} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USERNAME: nuevoValor.target.value } : null)}/>
-                        <input type="password" placeholder="Ingrese una contraseña" value={edicion.PASSWORD} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, PASSWORD: nuevoValor.target.value } : null)}/> {/* Añadir mostrar contraseña*/}
+                        <input type="text" placeholder="Servicio" value={edicion.NOMBRE} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, NOMBRE: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Descripción" value={edicion.DESCRIPCION} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, DESCRIPCION: nuevoValor.target.value } : null)}/>
                         <div className="acciones-de-registro">
-                            <button onClick={guardarUsuario}>Guardar</button>
+                            <button onClick={guardarServicio}>Guardar</button>
                             <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
                         </div>
                     </div>
@@ -182,5 +155,5 @@ function gestionarUsuarios() {
         </div>        
     )
 }
-/* Checar los comentarios, los errores son generalmente los mismos en los 3 CRUDS. */
-export default gestionarUsuarios
+
+export default gestionarServicios
