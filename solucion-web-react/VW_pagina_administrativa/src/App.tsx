@@ -18,6 +18,7 @@ import Mascotas from './pages/administrativas/mascotas/Regis_mascotas';
 import Especies_razas from './pages/administrativas/mascotas/Especies_razas';
 import Lst_mascotas from './pages/administrativas/mascotas/Lst_mascotas';
 import Vacunas from './pages/administrativas/mascotas/Vacunas';
+import RegistrarSalidaMascota from './pages/administrativas/mascotas/RegistrarSalidaMascota/RegistrarSalidaMascota';
 
 import Servicios from './pages/administrativas/servicios/servicios';
 
@@ -31,7 +32,6 @@ import Parametros_y_promociones from './pages/administrativas/administracion/par
 import Desempeno_de_colaboradores from './pages/administrativas/administracion/desempeno-de-colaboradores/desempenoDeColaboradores'
 
 import AsignarRolesPermisos from './pages/administrativas/administracion/AsignarRolesPermisos/AsignarRolesPermisos';
-import RegistrarSalidaMascota from './pages/administrativas/administracion/RegistrarSalidaMascota/RegistrarSalidaMascota';
 import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
 
 
@@ -53,7 +53,8 @@ function App() {
       
       {/* Mascotas */}
       <Route path='/administracion/mascotas/registro' element={<Mascotas/>}/>
-      <Route path='/administracion/mascotas/espcies_razas' element={<Especies_razas/>}/>
+      <Route path='/administracion/mascotas/especies_razas' element={<Especies_razas/>}/>
+      <Route path='/administracion/mascotas/registrar_salida_mascota' element={<RegistrarSalidaMascota />}/>
       <Route path='/administracion/mascotas/lista' element={<Lst_mascotas/>}/>
       <Route path='/administracion/mascotas/vacunas' element={<Vacunas/>}/>
 
@@ -82,7 +83,6 @@ function App() {
 
       {/* Aquí van las nuevas páginas administrativas */}
       <Route path='/administracion/administracion/asignar_roles_y_permisos' element={<AsignarRolesPermisos/>}/>
-      <Route path='/administracion/administracion/registrar_salida_mascota' element={<RegistrarSalidaMascota />}/>
       <Route path='/administracion/administracion/dashboard_administrativo' element={<DashboardAdministrativo/>}/>
 
       {/* Seguridad y mantenimiento */}
