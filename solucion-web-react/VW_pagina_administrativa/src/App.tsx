@@ -29,7 +29,6 @@ import Turnos_y_horarios from './pages/administrativas/administracion/turnos-y-h
 import Asistencia_de_colaboradores from './pages/administrativas/administracion/asistencia-de-colaboradores/asistenciaDeColaboradores';
 import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-a-colaboradores/pagosAcolaboradores'
 import Parametros_y_promociones from './pages/administrativas/administracion/parametros-y-promociones/parametrosYpromociones'
-import Desempeno_de_colaboradores from './pages/administrativas/administracion/desempeno-de-colaboradores/desempenoDeColaboradores'
 
 import AsignarRolesPermisos from './pages/administrativas/administracion/AsignarRolesPermisos/AsignarRolesPermisos';
 import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
@@ -79,7 +78,6 @@ function App() {
       <Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>
       <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>
       <Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>
-      <Route path='/administracion/administracion/desempeno_de_colaboradores' element={<Desempeno_de_colaboradores/>}/>
 
       {/* Aquí van las nuevas páginas administrativas */}
       <Route path='/administracion/administracion/asignar_roles_y_permisos' element={<AsignarRolesPermisos/>}/>

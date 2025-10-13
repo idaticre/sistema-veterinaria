@@ -225,3 +225,16 @@ export interface tipo_doc{
     descripcion: string;
     activo: boolean;
 }
+
+export interface Usuario {
+  id: number;
+  username: string;
+  password: string;
+  activo: boolean;
+}
+
+export interface Rol {
+  id: number;
+  nombre: string;
+  descripcion: string | null;
+}
