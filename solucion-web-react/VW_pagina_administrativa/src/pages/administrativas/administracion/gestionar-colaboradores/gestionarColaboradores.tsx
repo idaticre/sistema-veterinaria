@@ -3,6 +3,26 @@ import Br_administrativa from '../../../../components/barra_administrativa/Br_ad
 import "./styles.css"
 import { Link } from "react-router-dom";
 
+interface Entidad {
+    ID: number,
+    CODIGO: string,
+    TIPO_ENTIDAD: string,
+    TIPO_PERSONA_JURIDICA: string,
+    NOMBRE: string,
+    SEXO?: string,
+    DOCUMENTO: string,
+    TIPO_DOCUMENTO: string,
+    TELEFONO?: string,
+    CORREO?: string,
+    DIRECCION?: string,
+    CIUDAD?: string,
+    DISTRITO?: string,
+    REPRESENTANTE: string,
+    FECHA_CREACION: string,
+    FECHA_BAJA: string,
+    ACTIVO: number
+}
+
 interface Colaborador {
     ID: number,
     CODIGO: string,
@@ -69,7 +89,7 @@ function gestionarColaboradores() {
             FECHA_INGRESO: new Date().toISOString().split("T")[0],
             USUARIO: "",
             ACTIVO: 2, // Al crear uno nuevo, siempre estará activo
-            FOTO: ""
+            FOTO: ""    
         }
         setEdicion(nuevo);
         setMostrarModal(true);
@@ -121,8 +141,6 @@ function gestionarColaboradores() {
                     <div className="encabezado"><h2>Lista de colaboradores</h2></div>
                     <div className="goated">
                         <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del colaborador que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
-                        <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_usuarios">Gestionar usuarios</Link>
-                        <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_entidades">Gestionar entidades</Link>
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={registrarColaborador}>Registrar colaborador</button>
                     </div>
 
@@ -154,16 +172,32 @@ function gestionarColaboradores() {
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
                         <h3>Información del colaborador</h3>
-                        <p><strong>Siendo creado el:</strong> {edicion.FECHA_INGRESO}</p>
-                        <select value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value) } : null)}>
-                            <option value="">-- Selecciona estado --</option>
-                            <option value="1">Inactivo</option>
-                            <option value="2">Activo</option>
-                            <option value="3">Suspendido</option>
+                        <p><strong>Siendo registrado el:</strong> {edicion.FECHA_INGRESO}</p>
+                        {/*
+                        <input type="text" placeholder="Nombre del colaborador" value={edicion?.NOMBRE || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, NOMBRE: nuevoValor.target.value } : null)}/>
+                        <select value={edicion?.SEXO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, SEXO: nuevoValor.target.value } : null)}>
+                            <option value="">-- Seleccionar sexo --</option>
+                            <option value="hombre">Hombre</option>
+                            <option value="mujer">Mujer</option>
                         </select>
-                        <input type="text" placeholder="Seleccione tipo de entidad" value={edicion?.ENTIDAD || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ENTIDAD: nuevoValor.target.value } : null)}/>
-                        <input type="text" placeholder="Nombre de colaborador" value={edicion?.NOMBRE || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, NOMBRE: nuevoValor.target.value } : null)}/>
-                        <input type="text" placeholder="Nombre de usuario" value={edicion?.USUARIO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USUARIO: nuevoValor.target.value } : null)}/>
+                        <select value={edicion.TIPO_PERSONA_JURIDICA} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TIPO_PERSONA_JURIDICA: nuevoValor.target.value } : null)}>
+                            <option value="">-- Seleccionar tipo de persona jurídica --</option>
+                            <option value="derecho-publico">Derecho público</option>
+                            <option value="derecho-privado">Derecho privado</option>
+                        </select>
+                        <select value={edicion.TIPO_DOCUMENTO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TIPO_DOCUMENTO: nuevoValor.target.value } : null)}>
+                            <option value="">-- Seleccionar tipo de documento</option>
+                            <option value="dni">DNI</option>
+                            <option value="ce">CE</option>
+                            <option value="ruc">RUC</option>
+                        </select>
+                        <input type="text" placeholder="Documento" value={edicion.DOCUMENTO } onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, DOCUMENTO: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Telefono" value={edicion.TELEFONO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TELEFONO: nuevoValor.target.value } : null)}/>
+                        <input type="email" placeholder="Ingrese@correo" value={edicion.CORREO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, CORREO: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Dirección" value={edicion.DIRECCION} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, DIRECCION: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Ciudad" value={edicion.CIUDAD} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, CIUDAD: nuevoValor.target.value } : null)}/>
+                        <input type="text" placeholder="Distrito" value={edicion.DISTRITO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, DISTRITO: nuevoValor.target.value } : null)}/>
+                        */}
                         <div className="acciones-de-registro">
                             <button onClick={guardarColaborador}>Guardar</button>
                             <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>

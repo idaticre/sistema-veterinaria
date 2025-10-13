@@ -22,7 +22,7 @@ import Vacunas from './pages/administrativas/mascotas/Vacunas';
 
 import Gestionar_colaboradores from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarColaboradores'
 import Gestionar_entidades from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarEntidades'
-import Gestionar_usuarios from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarUsuarios'
+import Gestionar_usuarios from  './pages/administrativas/administracion/gestionar-usarios/gestionarUsuarios'
 import Turnos_y_horarios from './pages/administrativas/administracion/turnos-y-horarios/turnosYhorarios'
 import Asistencia_de_colaboradores from './pages/administrativas/administracion/asistencia-de-colaboradores/asistenciaDeColaboradores';
 import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-a-colaboradores/pagosAcolaboradores'
