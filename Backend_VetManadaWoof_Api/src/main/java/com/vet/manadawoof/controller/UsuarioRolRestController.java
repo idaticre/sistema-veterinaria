@@ -93,7 +93,7 @@ public class UsuarioRolRestController {
         return ResponseEntity.ok("UsuarioRol eliminado correctamente");
     }
 
-    // Mantuve el método original también
+    // Esto podriamos eliminarlo tal vez...?
     @DeleteMapping
     public ResponseEntity<String> eliminar(
             @RequestParam(required = false) Integer id,
