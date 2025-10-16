@@ -256,8 +256,10 @@ function turnosYhorarios() {
                                     };
                                     setEdicion({ ...edicion, HORARIO: nuevoHorario });
                                 }}>
-                                <option value={1}>Laboral</option>
-                                <option value={0}>No laboral</option>
+                                <option value={1}>Feriado</option>
+                                <option value={2}>Laboral</option>
+                                <option value={3}>Puente</option>
+                                <option value={4}>No laborable</option>
                             </select>
                             <br></br>
                             <label>Hora inicio:</label>
