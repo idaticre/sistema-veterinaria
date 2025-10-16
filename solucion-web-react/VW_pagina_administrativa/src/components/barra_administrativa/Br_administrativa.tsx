@@ -172,7 +172,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                             >
                                 <Link to="" className="enlace_opcion"> 
                                     <i className="fa-solid fa-file"></i>
-                                    <span>Reportes/Informes</span>
+                                    <span>Reportes e Informes</span>
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={informRef} className="submenu">

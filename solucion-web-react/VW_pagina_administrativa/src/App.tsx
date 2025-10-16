@@ -32,8 +32,6 @@ import Parametros_y_promociones from './pages/administrativas/administracion/par
 
 import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
 
-
-
 function App() {
   return (
     <Routes>
