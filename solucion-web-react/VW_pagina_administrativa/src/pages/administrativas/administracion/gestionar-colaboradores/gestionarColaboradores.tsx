@@ -180,15 +180,18 @@ function gestionarColaboradores() {
                             <option value="mujer">Mujer</option>
                         </select>
                         <select value={edicion.TIPO_PERSONA_JURIDICA} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TIPO_PERSONA_JURIDICA: nuevoValor.target.value } : null)}>
-                            <option value="">-- Seleccionar tipo de persona jurídica --</option>
-                            <option value="derecho-publico">Derecho público</option>
-                            <option value="derecho-privado">Derecho privado</option>
+                            <option value="">-- Seleccionar tipo de persona --</option>
+                            <option value="derecho-publico">Natural</option>
+                            <option value="derecho-privado">Jurídica</option>
                         </select>
                         <select value={edicion.TIPO_DOCUMENTO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TIPO_DOCUMENTO: nuevoValor.target.value } : null)}>
                             <option value="">-- Seleccionar tipo de documento</option>
                             <option value="dni">DNI</option>
-                            <option value="ce">CE</option>
                             <option value="ruc">RUC</option>
+                            <option value="ce">Carnet Ext.</option>
+                            <option value="pn">Pasaporte Nac.</option>
+                            <option value="pas">Pasaporte</option>
+                            <option value="otros">Otros</option>
                         </select>
                         <input type="text" placeholder="Documento" value={edicion.DOCUMENTO } onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, DOCUMENTO: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Telefono" value={edicion.TELEFONO} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, TELEFONO: nuevoValor.target.value } : null)}/>
