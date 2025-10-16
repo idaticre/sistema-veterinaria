@@ -105,7 +105,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={mascotasRef} className="submenu">
-                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Lista de mascotas</Link></li>
+                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Mascotas registradas</Link></li>
                                     <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Registrar mascota</Link></li>
                                     <li><Link to="/administracion/mascotas/registrar_salida_mascota" className="sub_opcion">Registrar salida de mascota</Link></li>
                                     <li><Link to="/administracion/mascotas/espcies_razas" className="sub_opcion">Especies y razas</Link></li>

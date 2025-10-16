@@ -5,10 +5,15 @@
 }
 
 #lst_mascotas {
-  background-color: #f4a261;
+  background-color: white;
   padding: 1rem;
   flex: 1;
-  border: solid 2px red;
+  border-radius: 5px;
+}
+
+#lst_mascotas h2 {
+  display: flex;
+  justify-content: center;
 }
 
 #lista_mascotas{
@@ -18,13 +23,18 @@
   gap: 0.3rem 0.8rem;
 }
 
+.anadir-goated {
+  background-color: #4caf50;
+  font-size: 17px;
+  height: 40px;
+}
+
 .registro_mascota{
   border-radius: 10px;
   display: flex;
   padding: 0.5rem;
   width: 24.1%;
-  background-color: rgb(230, 132, 132);
-  border: black solid 2px;
+  border: 2px solid rgb(209, 209, 209);
   justify-content: center;
   align-items: center;
   flex-direction: column;
@@ -58,7 +68,6 @@
     flex-direction: column;
     flex: 1;
 }
-
 
 .VDMascota {
   position: fixed;
