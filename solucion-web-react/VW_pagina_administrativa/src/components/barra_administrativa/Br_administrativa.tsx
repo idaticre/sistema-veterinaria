@@ -93,7 +93,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 </Link>
                                 <ul ref={clienteRef} className="submenu">
                                     <li><Link to="/administracion/cliente/lista" className="sub_opcion">Lista de clientes</Link></li>
-                                    <li><Link to="/administracion/cliente/registro" className="sub_opcion">Añadir cliente</Link></li>
+                                    <li><Link to="/administracion/cliente/registro" className="sub_opcion">Registrar cliente</Link></li>
                                 </ul>
                             </li>
                             <li className={`opcion opcion_desplegable ${openMenu === "mascotas"?"toggle_submenu":""}`} 
@@ -106,8 +106,8 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 </Link>
                                 <ul ref={mascotasRef} className="submenu">
                                     <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Lista de mascotas</Link></li>
-                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Añadir Mascota</Link></li>
-                                    <li><Link to="/administracion/mascotas/registrar_salida_mascota" className="sub_opcion">Registrar Salida Mascota</Link></li>
+                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Registrar mascota</Link></li>
+                                    <li><Link to="/administracion/mascotas/registrar_salida_mascota" className="sub_opcion">Registrar salida de mascota</Link></li>
                                     <li><Link to="/administracion/mascotas/espcies_razas" className="sub_opcion">Especies y razas</Link></li>
                                     <li><Link to="/administracion/mascotas/vacunas" className="sub_opcion">Vacunas disponibles</Link></li>
                                 </ul>
@@ -135,7 +135,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <ul ref={agendaRef} className="submenu">
                                     <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Agenda general</Link></li>
                                     <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Tiempo estimado</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Recordatorio</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Recordatorios</Link></li>
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Sala de espera</Link></li>
                                 </ul>
                             </li>
@@ -164,7 +164,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <ul ref={ventaRef} className="submenu">
                                     <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestion de ventas</Link></li>
                                     <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Facturación electronica</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">notas de credito</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Notas de credito</Link></li>
                                 </ul>
                             </li>
                             <li className={`opcion opcion_desplegable ${openMenu === "informe"?"toggle_submenu":""}`} 
@@ -211,7 +211,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={seguridadRef   } className="submenu">
-                                    <li><Link to="/administracion/administracion/gestionar_usuarios" className="sub_opcion">Usuarios de sistema</Link></li>
+                                    <li><Link to="/administracion/administracion/gestionar_usuarios" className="sub_opcion">Usuarios del sistema</Link></li>
                                     <li><Link to="/administracion/administracion/Asignar_roles_y_permisos" className="sub_opcion">Asignar roles y permisos</Link></li>
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Copia de seguridad</Link></li>
                                 </ul>
