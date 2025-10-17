@@ -83,10 +83,29 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     @Transactional
     public ClienteResponseDTO actualizar(ClienteRequestDTO dto) {
-        if(dto.getIdEntidad() == null) {
-            throw new RuntimeException("ID de entidad requerido para actualizar");
+        // Si no envían idEntidad, lo obtenemos automáticamente desde la BD
+        if(dto.getIdEntidad() == null && dto.getId() != null) {
+            try {
+                Long idEntidad = ((Number) entityManager.createNativeQuery(
+                                "SELECT id_entidad FROM clientes WHERE id = ?1")
+                        .setParameter(1, dto.getId())
+                        .getSingleResult()).longValue();
+                dto.setIdEntidad(idEntidad);
+            } catch (NoResultException e) {
+                return ClienteResponseDTO.builder()
+                        .mensaje("ERROR: Cliente no encontrado para actualizar.")
+                        .build();
+            }
         }
         
+        // Validación final
+        if(dto.getIdEntidad() == null) {
+            return ClienteResponseDTO.builder()
+                    .mensaje("ERROR: No se pudo determinar la entidad del cliente.")
+                    .build();
+        }
+        
+        // Llamada al SP
         StoredProcedureQuery sp = buildSP(dto, "UPDATE");
         sp.setParameter("p_sexo", dto.getSexo() != null ? dto.getSexo() : null);
         sp.execute();
@@ -115,6 +134,7 @@ public class ClienteServiceImpl implements ClienteService {
                 .setParameter(1, dto.getIdEntidad())
                 .getSingleResult();
         
+        // Construir DTO de respuesta
         return ClienteResponseDTO.builder()
                 .id(idCliente)
                 .idEntidad(dto.getIdEntidad())
@@ -131,9 +151,10 @@ public class ClienteServiceImpl implements ClienteService {
                 .distrito((String) entRow[11])
                 .activo(entRow[13] != null ? ((Number) entRow[13]).intValue() == 1 : true)
                 .fechaRegistro(entRow[14] != null ? ((Timestamp) entRow[14]).toLocalDateTime() : null)
-                .mensaje(mensaje)
+                .mensaje(mensaje != null ? mensaje : "Actualización exitosa")
                 .build();
     }
+    
     
     /**
      * Lista todos los clientes activos con información completa de la entidad relacionada.

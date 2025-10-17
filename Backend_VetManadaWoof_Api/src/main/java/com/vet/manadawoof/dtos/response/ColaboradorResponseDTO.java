@@ -1,10 +1,12 @@
 package com.vet.manadawoof.dtos.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @Builder
 @AllArgsConstructor
@@ -14,7 +16,7 @@ public class ColaboradorResponseDTO {
     private Long id;
     private String codigoColaborador;
     
-    // Datos de entidad
+    // Datos de la entidad
     private Long idEntidad;
     private String nombre;
     private String sexo;
@@ -27,13 +29,13 @@ public class ColaboradorResponseDTO {
     private String ciudad;
     private String distrito;
     
-    // Datos específicos
+    // Datos específicos del colaborador
     private String usuario;
     private Boolean activo;
     private LocalDateTime fechaRegistro;
     private LocalDate fechaIngreso;
     private String foto;
     
-    // fallback de SP
+    // Mensaje de respuesta (para SP o validaciones)
     private String mensaje;
 }

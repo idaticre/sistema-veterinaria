@@ -1,34 +1,40 @@
 package com.vet.manadawoof.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
-import java.io.Serializable;
+import java.time.LocalDateTime;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 @Entity
 @Table(name = "usuarios_roles",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"id_usuario", "id_rol"}))
-public class UsuarioRolEntity implements Serializable {
-
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"id_usuario", "id_rol"}, name = "uq_usuario_rol")})
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class UsuarioRolEntity {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario", nullable = false)
+    @JsonIgnore  // Evita ciclos al serializar Usuario → UsuarioRol → Usuario
     private UsuarioEntity usuario;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JoinColumn(name = "id_rol")
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_rol", nullable = false)
     private RolEntity rol;
-
-    @Column(name = "fecha_asignacion", insertable = false, updatable = false)
-    private java.sql.Timestamp fechaAsignacion;
+    
+    @Column(name = "fecha_asignacion", nullable = false)
+    private LocalDateTime fechaAsignacion;
+    
+    @PrePersist
+    public void prePersist() {
+        if(fechaAsignacion == null) {
+            fechaAsignacion = LocalDateTime.now();
+        }
+    }
 }

@@ -6,7 +6,7 @@
 -- y gestión de personal (veterinarios, horarios, asistencia).
 -- Al final del script podrá hacer un show tables para revisar mejor.
 -- =========================================================
--- select * from proveedores;
+-- select * from entidades;
 -- ========================================
 -- 0. Creación de la Base de Datos
 -- ========================================
@@ -364,57 +364,81 @@ INSERT INTO tipos_dia (nombre) VALUES
 ('FERIADO'), ('LABORAL'), ('DÍA PUENTE'), ('DÍA NO LABORABLE');
 
 -- ========================================
--- TABLA: horarios_trabajo
--- Define los turnos laborales establecidos para cada colaborador.
+-- TABLA: horarios_base
+-- Define plantillas de horarios reutilizables.
 -- ========================================
--- NOTA: Esta tabla no evita solapamientos de turnos automáticamente.
--- Validar en la lógica de aplicación con una consulta
-CREATE TABLE IF NOT EXISTS horarios_trabajo (
+CREATE TABLE IF NOT EXISTS horarios_base (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NULL UNIQUE,
-    id_colaborador BIGINT NOT NULL,
-    id_dia_semana INT NOT NULL,
-    id_tipo_dia INT DEFAULT NULL,
+    nombre VARCHAR(64) NOT NULL UNIQUE,
+    descripcion VARCHAR(128),
     hora_inicio TIME NOT NULL,
     hora_fin TIME NOT NULL,
-    CHECK (hora_fin > hora_inicio) 
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
-ALTER TABLE horarios_trabajo
-    ADD CONSTRAINT fk_horario_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
-    ON DELETE RESTRICT ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_horario_colab_dias FOREIGN KEY (id_dia_semana) REFERENCES dias_semana(id)
-    ON DELETE RESTRICT,
-    ADD CONSTRAINT fk_horario_tipo_dia FOREIGN KEY (id_tipo_dia) REFERENCES tipos_dia(id)
-    ON DELETE RESTRICT;
+
+-- ========================================
+-- INSERTS INICIALES: horarios_base
+-- ========================================
+INSERT INTO horarios_base (nombre, descripcion, hora_inicio, hora_fin)
+VALUES 
+('Horario estándar', 'Lunes a sábado de 9:00 a 18:00', '09:00:00', '18:00:00'),
+('Turno mañana', 'Lunes a sábado de 8:00 a 13:00', '08:00:00', '13:00:00'),
+('Turno tarde', 'Lunes a sábado de 13:00 a 18:00', '13:00:00', '18:00:00'),
+('Turno completo', 'Lunes a sábado de 8:00 a 17:00', '08:00:00', '17:00:00'),
+('Turno domingo', 'Domingo de 9:00 a 14:00', '09:00:00', '14:00:00');
+
+-- ========================================
+-- TABLA: asignacion_horarios
+-- Asigna un horario base a un colaborador y define los días aplicables.
+-- ========================================
+CREATE TABLE IF NOT EXISTS asignacion_horarios (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_colaborador BIGINT NOT NULL,
+    id_horario_base INT NOT NULL,
+    id_dia_semana INT NOT NULL,
+    fecha_asignacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+
+ALTER TABLE asignacion_horarios
+    ADD CONSTRAINT fk_asignacion_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_asignacion_horario FOREIGN KEY (id_horario_base) REFERENCES horarios_base(id)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_asignacion_dia FOREIGN KEY (id_dia_semana) REFERENCES dias_semana(id)
+        ON DELETE RESTRICT;
 
 -- Índice para consultas rápidas de horarios por colaborador
 -- (útil para generar la grilla semanal de turnos).
-CREATE INDEX idx_horarios_colaborador ON horarios_trabajo(id_colaborador);
+CREATE INDEX idx_asignacion_colaborador ON asignacion_horarios(id_colaborador);
 
 -- Índice para facilitar búsquedas por tipo de día en horarios laborales.
-CREATE INDEX idx_horarios_tipo_dia ON horarios_trabajo(id_tipo_dia);
+CREATE INDEX idx_asignacion_dia ON asignacion_horarios(id_dia_semana);
 
 -- ========================================
 -- TABLA: registro_asistencia
--- Controla los registros de asistencia diarios del personal.
+-- Controla los registros diarios de asistencia del personal.
 -- ========================================
-CREATE TABLE IF NOT EXISTS registro_asistencia (
+DROP TABLE IF EXISTS registro_asistencia;
+CREATE TABLE registro_asistencia (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_colaborador BIGINT NOT NULL,
     fecha DATE NOT NULL,
-    hora_entrada TIME,
-    hora_salida TIME,
+    hora_entrada TIME NULL,
+    hora_salida TIME NULL,
     observaciones TEXT,
     CHECK (hora_salida IS NULL OR hora_salida >= hora_entrada)
 );
+
+-- Relación con la tabla de colaboradores
 ALTER TABLE registro_asistencia
     ADD CONSTRAINT fk_asistencia_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
     ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- Índice compuesto para consultas rápidas de asistencia:
--- permite buscar registros de asistencia de un colaborador en una fecha específica
--- o en un rango de fechas.
-CREATE INDEX idx_asistencia_colaborador_fecha ON registro_asistencia(id_colaborador, fecha);
-
--- Índice para búsquedas generales por fecha en asistencia.
+-- Índices para optimizar búsquedas frecuentes
+CREATE INDEX idx_asistencia_colaborador ON registro_asistencia(id_colaborador);
 CREATE INDEX idx_asistencia_fecha ON registro_asistencia(fecha);
+
+-- Restricción para evitar duplicados (solo un registro por colaborador y fecha)
+ALTER TABLE registro_asistencia
+    ADD CONSTRAINT uq_asistencia_colab_fecha UNIQUE (id_colaborador, fecha);

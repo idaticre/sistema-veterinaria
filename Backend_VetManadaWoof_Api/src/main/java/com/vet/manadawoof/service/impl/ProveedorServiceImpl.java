@@ -93,11 +93,18 @@ public class ProveedorServiceImpl implements ProveedorService {
     @Override
     @Transactional
     public ProveedorResponseDTO actualizar(ProveedorRequestDTO dto) {
-        if(dto.getIdEntidad() == null)
-            throw new RuntimeException("ID de entidad requerido para actualizar");
+        if(dto.getId() == null)
+            throw new RuntimeException("ID del proveedor requerido para actualizar");
+        
+        // 🔍 Obtener el id_entidad automáticamente
+        Long idEntidad = ((Number) entityManager.createNativeQuery(
+                        "SELECT id_entidad FROM proveedores WHERE id = ?1")
+                .setParameter(1, dto.getId())
+                .getSingleResult()).longValue();
         
         // Construcción del Stored Procedure para actualización
         StoredProcedureQuery sp = buildSP(dto, "UPDATE");
+        sp.setParameter("p_id_entidad", idEntidad);
         sp.setParameter("p_sexo", dto.getSexo() != null ? dto.getSexo() : null);
         sp.execute();
         
@@ -111,24 +118,17 @@ public class ProveedorServiceImpl implements ProveedorService {
                         "SELECT id, codigo, nombre, sexo, documento, id_tipo_persona_juridica, " +
                                 "id_tipo_documento, correo, telefono, direccion, ciudad, distrito, " +
                                 "representante, activo, fecha_registro FROM entidades WHERE id = ?1")
-                .setParameter(1, dto.getIdEntidad())
+                .setParameter(1, idEntidad)
                 .getSingleResult();
-        
-        // Obtener datos complementarios de proveedor
-        Long idProveedor = ((Number) entityManager.createNativeQuery(
-                        "SELECT id FROM proveedores WHERE id_entidad = ?1")
-                .setParameter(1, dto.getIdEntidad())
-                .getSingleResult()).longValue();
         
         String codigoProveedor = (String) entityManager.createNativeQuery(
                         "SELECT codigo FROM proveedores WHERE id_entidad = ?1")
-                .setParameter(1, dto.getIdEntidad())
+                .setParameter(1, idEntidad)
                 .getSingleResult();
         
-        // Retornar DTO actualizado
         return ProveedorResponseDTO.builder()
-                .id(idProveedor)
-                .idEntidad(dto.getIdEntidad())
+                .id(dto.getId())
+                .idEntidad(idEntidad)
                 .codigoProveedor(codigoProveedor)
                 .nombre((String) entRow[2])
                 .sexo(entRow[3] != null ? entRow[3].toString() : null)
@@ -334,18 +334,28 @@ public class ProveedorServiceImpl implements ProveedorService {
         return ProveedorResponseDTO.builder()
                 .id(row[0] != null ? ((Number) row[0]).longValue() : null)
                 .codigoProveedor(row[1] != null ? row[1].toString() : null)
-                .idEntidad(idEntidad)
-                .nombre((String) entRow[2])
-                .sexo(entRow[3] != null ? entRow[3].toString() : null)
-                .documento((String) entRow[4])
-                .correo((String) entRow[7])
-                .telefono((String) entRow[8])
-                .direccion((String) entRow[9])
-                .activo(entRow[13] != null ? ((Number) entRow[13]).intValue() == 1 : true)
+                .activo(row[2] != null ? ((Number) row[2]).intValue() == 1 : true)
+                .idEntidad(row[3] != null ? ((Number) row[3]).longValue() : null)
+                .nombre((String) row[5])
+                .sexo(row[6] != null ? row[6].toString() : null)
+                .documento((String) row[7])
+                .idTipoPersonaJuridica(row[8] != null ? ((Number) row[8]).intValue() : null)
+                .idTipoDocumento(row[9] != null ? ((Number) row[9]).intValue() : null)
+                .correo((String) row[10])
+                .telefono((String) row[11])
+                .direccion((String) row[12])
+                .ciudad((String) row[13])
+                .distrito((String) row[14])
+                .representante((String) row[15])
+                .activo(row[16] != null ? ((Number) row[16]).intValue() == 1 : true)
+                .fechaRegistro(row[17] != null ? ((Timestamp) row[17]).toLocalDateTime() : null)
                 .mensaje("Operación exitosa")
                 .build();
     }
     
+    /**
+     * Mapea una fila completa (JOIN) a un DTO de proveedor.
+     */
     /**
      * Mapea una fila completa (JOIN) a un DTO de proveedor.
      */
@@ -360,14 +370,18 @@ public class ProveedorServiceImpl implements ProveedorService {
                 .nombre((String) row[5])
                 .sexo(row[6] != null ? row[6].toString() : null)
                 .documento((String) row[7])
+                .idTipoPersonaJuridica(row[8] != null ? ((Number) row[8]).intValue() : null)
+                .idTipoDocumento(row[9] != null ? ((Number) row[9]).intValue() : null)
                 .correo((String) row[10])
                 .telefono((String) row[11])
                 .direccion((String) row[12])
                 .ciudad((String) row[13])
                 .distrito((String) row[14])
                 .representante((String) row[15])
+                .activo(row[16] != null ? ((Number) row[16]).intValue() == 1 : true)
                 .fechaRegistro(row[17] != null ? ((Timestamp) row[17]).toLocalDateTime() : null)
                 .mensaje("Operación exitosa")
                 .build();
     }
+    
 }

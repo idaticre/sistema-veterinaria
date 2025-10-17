@@ -1,13 +1,18 @@
 package com.vet.manadawoof.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ColaboradorRequestDTO {
+    // --- Identificador del colaborador (solo para actualización) ---
+    private Long id;
     
     // Para update, no se expone al frontend
     private Long idEntidad;
@@ -46,6 +51,10 @@ public class ColaboradorRequestDTO {
     // Datos específicos de colaborador
     @NotNull(message = "Usuario es obligatorio")
     private Integer idUsuario;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate fechaIngreso;
+    
     
     @Size(max = 128)
     private String foto;

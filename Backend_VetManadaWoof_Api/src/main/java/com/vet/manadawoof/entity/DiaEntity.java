@@ -16,19 +16,20 @@ import java.util.List;
 @Entity
 @Table(name = "dias_semana")
 public class DiaEntity implements Serializable {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
+    
     @Column(length = 32, nullable = false, unique = true)
     private String nombre;
-
+    
     @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     @JdbcTypeCode(SqlTypes.BIT)
     private Boolean activo;
-
+    
     @OneToMany(mappedBy = "dia")
     @JsonIgnore
-    private List<HorarioTrabajoEntity> horario;
+    private List<AsignacionHorarioEntity> asignaciones;
+    
 }

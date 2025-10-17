@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,35 +35,36 @@ public class ColaboradorServiceImpl implements ColaboradorService {
         StoredProcedureQuery sp = buildSP(dto, "CREATE");
         sp.execute();
         
-        // Salidas del SP
         String codigoEntidad = (String) sp.getOutputParameterValue("p_codigo_entidad");
         String codigoColaborador = (String) sp.getOutputParameterValue("p_codigo_colaborador");
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
         
-        // Validar error
         if(mensaje != null && mensaje.startsWith("ERROR")) {
             return ColaboradorResponseDTO.builder().mensaje(mensaje).build();
         }
         
-        // Consultar entidad creada
+        // === Consultar la entidad base ===
         Object[] entRow = (Object[]) entityManager.createNativeQuery(
                         "SELECT id, codigo, nombre, sexo, documento, id_tipo_persona_juridica, " +
-                                "id_tipo_documento, correo, telefono, direccion, ciudad, distrito, " +
-                                "activo, fecha_registro FROM entidades WHERE codigo = ?1")
+                                "id_tipo_documento, correo, telefono, direccion, ciudad, distrito, representante, activo, fecha_registro " +
+                                "FROM entidades WHERE codigo = ?1")
                 .setParameter(1, codigoEntidad)
                 .getSingleResult();
         
-        // Obtener IDs reales
         Long idEntidad = ((Number) entRow[0]).longValue();
-        Long idColaborador = ((Number) entityManager.createNativeQuery(
-                        "SELECT id FROM colaboradores WHERE id_entidad = ?1")
+        
+        // === Consultar datos específicos del colaborador ===
+        Object[] colRow = (Object[]) entityManager.createNativeQuery(
+                        "SELECT id, codigo, id_usuario, fecha_ingreso, foto, activo " +
+                                "FROM colaboradores WHERE id_entidad = ?1")
                 .setParameter(1, idEntidad)
-                .getSingleResult()).longValue();
+                .getSingleResult();
         
         return ColaboradorResponseDTO.builder()
-                .id(idColaborador)
+                .id(((Number) colRow[0]).longValue())
+                .codigoColaborador((String) colRow[1])
                 .idEntidad(idEntidad)
-                .codigoColaborador(codigoColaborador)
+                .id(colRow[2] != null ? ((Number) colRow[2]).longValue() : null)
                 .nombre((String) entRow[2])
                 .sexo(entRow[3] != null ? entRow[3].toString() : null)
                 .documento((String) entRow[4])
@@ -73,11 +75,13 @@ public class ColaboradorServiceImpl implements ColaboradorService {
                 .direccion((String) entRow[9])
                 .ciudad((String) entRow[10])
                 .distrito((String) entRow[11])
-                .activo(entRow[12] != null && ((Number) entRow[12]).intValue() == 1)
-                .fechaRegistro(entRow[13] != null ? ((Timestamp) entRow[13]).toLocalDateTime() : null)
+                .activo(colRow[5] != null ? ((Number) colRow[5]).intValue() == 1 : true)
+                .fechaIngreso(colRow[3] != null ? ((java.sql.Date) colRow[3]).toLocalDate() : null)
+                .foto((String) colRow[4])
                 .mensaje(mensaje)
                 .build();
     }
+    
     
     /**
      * Actualiza la información de un colaborador existente usando el SP `actualizar_colaborador`.
@@ -85,8 +89,15 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     @Override
     @Transactional
     public ColaboradorResponseDTO actualizar(ColaboradorRequestDTO dto) {
-        if(dto.getIdEntidad() == null)
-            throw new RuntimeException("ID de entidad requerido para actualizar");
+        Long idEntidad = dto.getIdEntidad();
+        if(idEntidad == null) {
+            idEntidad = ((Number) entityManager.createNativeQuery(
+                            "SELECT id_entidad FROM colaboradores WHERE id = ?1")
+                    .setParameter(1, dto.getId())
+                    .getSingleResult()).longValue();
+            dto.setIdEntidad(idEntidad);
+        }
+        
         
         StoredProcedureQuery sp = buildSP(dto, "UPDATE");
         sp.execute();
@@ -141,13 +152,19 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     @Transactional(readOnly = true)
     public List<ColaboradorResponseDTO> listar() {
         List<Object[]> results = entityManager.createNativeQuery(
-                        "SELECT c.id, c.codigo, c.id_entidad, c.fecha_ingreso, c.fecha_registro, " +
+                        "SELECT c.id, c.codigo, c.id_entidad, c.fecha_ingreso, e.fecha_registro, " +
                                 "c.activo, c.foto, e.nombre, e.sexo, e.documento, e.id_tipo_persona_juridica, " +
                                 "e.id_tipo_documento, e.correo, e.telefono, e.direccion, e.ciudad, e.distrito " +
-                                "FROM colaboradores c JOIN entidades e ON c.id_entidad = e.id")
+                                "FROM colaboradores c " +
+                                "LEFT JOIN entidades e ON c.id_entidad = e.id")
                 .getResultList();
         
-        return results.stream().map(this :: mapRowToFullDto).collect(Collectors.toList());
+        // Debug temporal para ver si trae filas
+        System.out.println("=== TOTAL COLABORADORES ENCONTRADOS === " + results.size());
+        
+        return results.stream()
+                .map(this :: mapRowToFullDto)
+                .collect(Collectors.toList());
     }
     
     /**
@@ -205,6 +222,7 @@ public class ColaboradorServiceImpl implements ColaboradorService {
         
         if("CREATE".equalsIgnoreCase(accion)) {
             sp = entityManager.createStoredProcedureQuery("registrar_colaborador");
+            
             sp.registerStoredProcedureParameter("p_id_tipo_persona_juridica", Integer.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_nombre", String.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_sexo", String.class, ParameterMode.IN);
@@ -215,8 +233,8 @@ public class ColaboradorServiceImpl implements ColaboradorService {
             sp.registerStoredProcedureParameter("p_direccion", String.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_ciudad", String.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_distrito", String.class, ParameterMode.IN);
-            sp.registerStoredProcedureParameter("p_id_usuario", Integer.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_fecha_ingreso", Date.class, ParameterMode.IN);
+            sp.registerStoredProcedureParameter("p_id_usuario", Integer.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_foto", String.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_codigo_entidad", String.class, ParameterMode.OUT);
             sp.registerStoredProcedureParameter("p_codigo_colaborador", String.class, ParameterMode.OUT);
@@ -232,9 +250,10 @@ public class ColaboradorServiceImpl implements ColaboradorService {
             sp.setParameter("p_direccion", dto.getDireccion());
             sp.setParameter("p_ciudad", dto.getCiudad());
             sp.setParameter("p_distrito", dto.getDistrito());
+            sp.setParameter("p_fecha_ingreso",
+                    dto.getFechaIngreso() != null ? Date.valueOf(dto.getFechaIngreso()) : Date.valueOf(LocalDate.now()));
             sp.setParameter("p_id_usuario", dto.getIdUsuario());
             sp.setParameter("p_foto", dto.getFoto());
-            
         } else {
             sp = entityManager.createStoredProcedureQuery("actualizar_colaborador");
             sp.registerStoredProcedureParameter("p_id_entidad", Long.class, ParameterMode.IN);
@@ -248,8 +267,8 @@ public class ColaboradorServiceImpl implements ColaboradorService {
             sp.registerStoredProcedureParameter("p_direccion", String.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_ciudad", String.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_distrito", String.class, ParameterMode.IN);
-            sp.registerStoredProcedureParameter("p_id_usuario", Integer.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_fecha_ingreso", Date.class, ParameterMode.IN);
+            sp.registerStoredProcedureParameter("p_id_usuario", Integer.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_foto", String.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_activo", Boolean.class, ParameterMode.IN);
             sp.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
@@ -265,6 +284,11 @@ public class ColaboradorServiceImpl implements ColaboradorService {
             sp.setParameter("p_direccion", dto.getDireccion());
             sp.setParameter("p_ciudad", dto.getCiudad());
             sp.setParameter("p_distrito", dto.getDistrito());
+            if(dto.getFechaIngreso() != null) {
+                sp.setParameter("p_fecha_ingreso", Date.valueOf(dto.getFechaIngreso()));
+            } else {
+                sp.setParameter("p_fecha_ingreso", Date.valueOf(LocalDate.now()));
+            }
             sp.setParameter("p_id_usuario", dto.getIdUsuario());
             sp.setParameter("p_foto", dto.getFoto());
             sp.setParameter("p_activo", dto.getActivo());
@@ -285,10 +309,10 @@ public class ColaboradorServiceImpl implements ColaboradorService {
                 .idEntidad(row[2] != null ? ((Number) row[2]).longValue() : null)
                 .fechaIngreso(row[3] != null ? ((Date) row[3]).toLocalDate() : null)
                 .fechaRegistro(row[4] != null ? ((Timestamp) row[4]).toLocalDateTime() : null)
-                .activo(row[5] != null && ((Number) row[5]).intValue() == 1)
+                .activo(row[5] != null && (((Number) row[5]).intValue() == 1))
                 .foto((String) row[6])
                 .nombre((String) row[7])
-                .sexo(row[6] != null ? row[6].toString() : null)
+                .sexo(row[8] != null ? row[8].toString() : null)
                 .documento((String) row[9])
                 .idTipoPersonaJuridica(row[10] != null ? ((Number) row[10]).intValue() : null)
                 .idTipoDocumento(row[11] != null ? ((Number) row[11]).intValue() : null)
