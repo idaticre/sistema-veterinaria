@@ -46,21 +46,21 @@
 }
 
 /* Botón */
-#buscador button {
+/*#buscador button {
   display: flex;
   justify-content: center;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  background-color: #ffad09e2;
+  background-color: #52e000fb;
   cursor: pointer;
   font-weight: bold;
   transition: 0.2s;
 }
 
 #buscador button:hover {
-  background-color: #1d1d1d;
+  background-color: #9cea5c;
   transform: scale(1.05);
-}
+}*/
 
 /* Lista asistencia */
 #lista_asistencia {
