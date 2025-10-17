@@ -30,6 +30,8 @@ import Asistencia_de_colaboradores from './pages/administrativas/administracion/
 import Pagos_a_colaboradores from './pages/administrativas/administracion/pagos-a-colaboradores/pagosAcolaboradores'
 import Parametros_y_promociones from './pages/administrativas/administracion/parametros-y-promociones/parametrosYpromociones'
 
+import AsignarRolesPermisos from './pages/administrativas/administracion/AsignarRolesPermisos/AsignarRolesPermisos';
+
 import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
 
 function App() {
@@ -80,6 +82,8 @@ function App() {
       <Route path='/administracion/administracion/dashboard_administrativo' element={<DashboardAdministrativo/>}/>
 
       {/* Seguridad y mantenimiento */}
+      <Route path='/administracion/administracion/Asignar_roles_y_permisos' element={<AsignarRolesPermisos/>}/>
+      
     </Routes>
   )
 }
