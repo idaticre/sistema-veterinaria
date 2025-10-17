@@ -1,6 +1,9 @@
 :root {
   --sidebar-width: 240px;
   --sidebar-width-min: 60px;
+  --color-principal: #ff9900;
+  --color-principal-hover: #e07b00;
+  --color-borde: #ddd;
 }
 
 #asistencia {
@@ -22,8 +25,10 @@
 
 /* Encabezado */
 #encabezado h2 {
-  color: rgb(0, 0, 0);
+  color: #000;
   margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 /* Buscador */
@@ -32,33 +37,31 @@
   align-items: center;
   margin-bottom: 1rem;
   justify-content: space-between;
+  gap: 1rem;
 }
 
-#br_buscador {
-  width: 50%;
+#buscador input {
+  flex: 1;
+  border: solid #333 1.5px;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
 }
 
-#br_buscador input {
-  width: 100%;
-  border: solid black 2px;
-  border-radius: 10px;
-  padding: 0.4rem;
-}
-
-/* Botón */
 #buscador button {
   display: flex;
   justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  background-color: #ffad09e2;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  background-color: var(--color-principal);
   cursor: pointer;
   font-weight: bold;
   transition: 0.2s;
+  border: none;
 }
 
 #buscador button:hover {
-  background-color: #1d1d1d;
+  background-color: var(--color-principal-hover);
+  color: white;
   transform: scale(1.05);
 }
 
@@ -66,69 +69,102 @@
 #lista_asistencia {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 1rem;
 }
 
-.registro_asistencia {
+/* Tarjeta */
+.card-registro {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  background: #ffffff;
-  border: 1px solid #ddd;
-  padding: 0.8rem 1rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  border: 1px solid var(--color-borde);
   border-radius: 12px;
-  align-items: center;
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff;
+  transition: 0.25s ease;
   cursor: pointer;
 }
 
-.registro_asistencia:hover {
+.card-registro:hover {
+  background: var(--color-principal);
+  color: #fff;
+  transform: translateY(-3px);
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-  background: #ff9900;
 }
 
-.registro_asistencia span {
+/* ✅ Datos ahora en horizontal */
+.card-datos {
+  display: flex;
+  flex-direction: row; /* horizontal */
+  gap: 2rem;          /* espacio entre datos */
+  align-items: center;
+  flex-wrap: wrap;    /* si no alcanza, baja a otra línea */
+}
+
+.card-datos .card-item {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #333;
+  white-space: nowrap; /* evita cortes de texto */
 }
 
-/* Opciones */
-.lst_opciones_container {
-  position: relative;
-  display: inline-block;
+.card-registro:hover .card-datos .card-item {
+  color: #fff;
 }
 
-.menu-opciones {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border: 1px solid #ccc;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-  z-index: 1000;
-  padding: 0.5rem;
+/* Acciones */
+.card-acciones {
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  width: 130px;
-  border-radius: 8px;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.menu-opciones button {
-  background: none;
-  border: none;
-  text-align: left;
-  padding: 0.3rem 0.5rem;
-  cursor: pointer;
+.card-acciones button {
+  padding: 0.5rem 0.9rem;
   border-radius: 6px;
-  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: bold;
+  transition: 0.2s;
 }
 
-.menu-opciones button:hover {
-  background-color: #f1f1f1;
+/* Botón general (marcar horas) */
+.card-acciones button:not(.btn-editar):not(.btn-eliminar) {
+  background-color: var(--color-principal);
+  color: #000;
 }
 
-/* Modal */
+.card-acciones button:not(.btn-editar):not(.btn-eliminar):hover {
+  background-color: var(--color-principal-hover);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* Botón editar */
+.card-acciones .btn-editar {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.card-acciones .btn-editar:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Botón eliminar */
+.card-acciones .btn-eliminar {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.card-acciones .btn-eliminar:hover {
+  background-color: #c0392b;
+  transform: scale(1.05);
+}
+
+/* ================== MODAL ================== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -146,10 +182,10 @@
   background: white;
   padding: 2rem;
   border-radius: 12px;
-  width: 400px;
+  width: 420px;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 .modal-content h3 {
@@ -157,10 +193,34 @@
   text-align: center;
 }
 
-.modal-content input {
-  padding: 0.5rem;
+/* Inputs con separación */
+.modal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.modal-row input,
+.modal-row label {
+  width: 100%;
+}
+
+.modal-content input,
+.modal-content textarea {
+  padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 6px;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.modal-content input[type="time"] {
+  font-size: 0.9rem;
+}
+
+.modal-content textarea {
+  min-height: 70px;
+  resize: vertical;
 }
 
 .acciones-modal {
@@ -170,7 +230,7 @@
 }
 
 .acciones-modal button {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 6px;
   border: none;
   cursor: pointer;
