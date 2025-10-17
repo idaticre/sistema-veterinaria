@@ -1,0 +1,110 @@
+#index_admin{
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+#conteo_emtidades{
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#conteo_usuario, #conteo_clientes,
+#conteo_mascotas, #conteo_citas{
+  width: 200px;
+  min-width: 24%;
+  height: 150px;
+  min-height: 130px;
+  background-color: #ffffff;
+  margin: 0.5rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+}
+
+#conteo_usuario div, #conteo_clientes div,
+#conteo_mascotas div, #conteo_citas div{
+  width: 150px;
+  min-width: 50%;
+  height: 100%;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+}
+
+#conteo_usuario img, #conteo_clientes img,
+#conteo_mascotas img, #conteo_citas img{
+  width: 150px;
+  min-width: 50%;
+  height: 100%;
+  padding: 1.4rem;
+}
+
+#graficos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+}
+
+.grafico_pie_especie {
+  width: 59%;
+  height: 330px;
+  display: flex;
+  padding: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(255, 255, 255);
+  flex-direction: column;
+  border-radius: 10px;
+}
+
+.grafico_pie_citas {
+  width: 40%;
+  height: 330px;
+  min-height: 200px;
+  border-radius: 10px;
+  display: flex;
+  padding: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(255, 255, 255);
+  flex-direction: column;
+}
+
+.cabezerra_grafic_pie{
+  width: 100%;
+}
+
+.cabezerra_grafic_pie h3{
+  width: 100%;
+  font-size: 2rem;
+  border-bottom: solid 2px rgba(0, 0, 0, 0.359);
+  margin: 0;
+}
+
+#grafico_barra *:focus,
+.grafico_pie_especie *:focus,
+.grafico_pie_citas *:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+#grafico_barra{
+  margin-top: 0.5rem;
+  border-radius: 10px;
+  background-color: rgb(255, 255, 255);
+  width: 100%;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
