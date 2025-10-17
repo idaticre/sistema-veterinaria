@@ -1,14 +1,15 @@
 import  { useEffect, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
 import './regis_dueños.css'
-import type { tipo_doc, EntidadRequest } from '../../../components/interfaces/interfaces';
+import type { tipo_doc, ClienteResponse, ClienteResquest } from '../../../components/interfaces/interfaces';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function regis_dueños() {
   const [minimizado, setMinimizado] = useState(false);
   const [imagenDueño, setImagenDueño] = useState<string | null>(null); 
   const [tipoDoc, setTipDoc] = useState<tipo_doc[]>([]);
-  const [entidadReq, setEntidaReq] = useState<EntidadRequest[]>([]);
+  const [clienteReq, setClienteReq] = useState<ClienteResquest[]>([]);
   const [idTipoPersonaJuridica, setIdTipoPersonaJuridica] = useState<number>(0);
   const [nombre, setNombre] = useState("");
   const [sexo, setSexo] = useState<"M" | "F" | undefined>(undefined);
@@ -19,8 +20,10 @@ function regis_dueños() {
   const [direccion, setDireccion] = useState("");
   const [ciudad, setCiudad] = useState("");
   const [distrito, setDistrito] = useState("");
-  const [representante, setRepresentante] = useState("");
   const [activo, setActivo] = useState(true);
+  const location = useLocation();
+  const clienteSelecc = location.state?.cliente as ClienteResponse | undefined;
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -33,11 +36,27 @@ function regis_dueños() {
     });
   }, [])
 
+  useEffect(() => {
+    if (clienteSelecc) {
+      setIdTipoPersonaJuridica(clienteSelecc.idTipoPersonaJuridica || 0);
+      setIdTipoDocumento(clienteSelecc.idTipoDocumento || 0);
+      setNombre(clienteSelecc.nombre || "");
+      setSexo(clienteSelecc.sexo as "M" | "F" | undefined);
+      setDocumento(clienteSelecc.documento || "");
+      setCorreo(clienteSelecc.correo || "");
+      setTelefono(clienteSelecc.telefono || "");
+      setDireccion(clienteSelecc.direccion || "");
+      setCiudad(clienteSelecc.ciudad || "");
+      setDistrito(clienteSelecc.distrito || "");
+      setActivo(clienteSelecc.activo ?? true);
+    }
+  }, [clienteSelecc]);
+  
   const handleSubmit = (e: React.FormEvent) => {
-
     e.preventDefault();
 
-    const nuevaEntidad: EntidadRequest = {
+    const nuevoCliente: ClienteResquest = {
+      idEntidad: clienteSelecc?.idEntidad ?? undefined, 
       idTipoPersonaJuridica,
       nombre,
       sexo,
@@ -48,30 +67,32 @@ function regis_dueños() {
       direccion,
       ciudad,
       distrito,
-      representante,
       activo
     };
 
-    axios.post("http://localhost:8088/api/entidades/crear", nuevaEntidad)
-    .then(res => {
-      console.log("Entidad creada:", res.data);
-      alert("Entidad registrada correctamente ✅");
-
-      setNombre("");
-      setSexo(undefined);
-      setDocumento("");
-      setCorreo("");
-      setTelefono("");
-      setDireccion("");
-      setCiudad("");
-      setDistrito("");
-      setRepresentante("");
-      setActivo(true);
-    })
-    .catch(err => {
-      console.error("Error al registrar entidad", err);
-      alert("Error al registrar entidad ❌");
-    });
+    if (clienteSelecc) {
+      axios.put("http://localhost:8088/api/clientes/actualizar", nuevoCliente)
+        .then(res => {
+          console.log("cliente actualizado:", res.data);
+          alert("Cliente actualizado correctamente ✅");
+          navigate("/administracion/cliente/lista"); 
+        })
+        .catch(err => {
+          console.error("Error al actualizar cliente", err);
+          alert("Error al actualizar cliente ❌");
+        });
+    } else {
+      axios.post("http://localhost:8088/api/clientes/registrar", nuevoCliente)
+        .then(res => {
+          console.log("cliente creado:", res.data);
+          alert("Entidad registrada correctamente ✅");
+          navigate("/administracion/cliente/lista"); 
+        })
+        .catch(err => {
+          console.error("Error al registrar entidad", err);
+          alert("Error al registrar entidad ❌");
+        });
+    }
   }
 
   /*const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,6 +119,14 @@ function regis_dueños() {
               <div className="form-section">
                 <h3><i className="icon-id-card"></i> Información General</h3>
                 <form onSubmit={handleSubmit}>
+                  {clienteSelecc && (
+                    <div className="form-row">
+                      <div className="form-group full-width">
+                        <label>ID</label>
+                        <input type="text" value={clienteSelecc.id} readOnly/>
+                      </div>
+                    </div>
+                  )}
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="dni">Tipo persona juridica</label>
@@ -124,7 +153,7 @@ function regis_dueños() {
                     <div className="form-group">
                       <label htmlFor="dni">Tipo de documento</label>
                       <select id="tipo_doc" value={idTipoDocumento} onChange={(e) => setIdTipoDocumento(Number(e.target.value))}>
-                        <option value="0" disabled selected>Elija documento</option>
+                        <option value="0" disabled>Elija documento</option>
                         {tipoDoc.map((TD)=>(
                           <option key={TD.id} value={TD.id}>{TD.descripcion}</option>
                         ))}
@@ -157,8 +186,8 @@ function regis_dueños() {
                   </div>
                   <div className="form-row"> 
                     <div className="form-group">
-                      <label htmlFor="representante">Representante</label>
-                      <input type="text" value={representante} onChange={(e) => setRepresentante(e.target.value)} />
+                      <label htmlFor="domicilio">Dirección</label>
+                      <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
                     </div>
                     <div className="form-group">
                       <label htmlFor="activo">Estado</label>
@@ -168,13 +197,10 @@ function regis_dueños() {
                       </select>
                     </div>
                   </div>
-                  <div className="form-group full-width">
-                    <label htmlFor="domicilio">Dirección</label>
-                    <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
-                  </div>
+                  
 
                   <div className="form-group full-width">
-                    <button type='submit' className="btn">Guardar</button>
+                    <button type='submit' className="btn">{clienteSelecc? "Actualizar" : "Guardar"}</button>
                   </div>
                 </form>
               </div>

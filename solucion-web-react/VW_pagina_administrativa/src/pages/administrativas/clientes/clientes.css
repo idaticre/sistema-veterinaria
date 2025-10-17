@@ -35,7 +35,7 @@
   justify-content: center;
   padding: 0.5rem;
   border-radius: 0.5rem;
-  background-color: #ffad09e2;
+  background-color: #65f10efd;
   cursor: pointer;
 }
 
@@ -44,7 +44,7 @@
 }
 
 #buscador button:hover{
-  background-color: #faba3a;
+  background-color: #69f214db;
 }
 
 #lista_clientes{

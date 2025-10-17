@@ -15,7 +15,7 @@ export interface EntidadRequest{
 }
 
 export interface ClienteResquest{
-    id?: number;
+    idEntidad?:number;
     idTipoPersonaJuridica: number;
     nombre: string;
     sexo?: "M" | "F";
@@ -102,7 +102,7 @@ export interface ClienteResponse{
     codigoCliente: string;
     idEntidad: number;
     nombre: string;
-    sexo: string;
+    sexo: "M" | "F";
     documento: string;
     idTipoPersonaJuridica: number;
     idTipoDocumento: number;
@@ -224,4 +224,17 @@ export interface tipo_doc{
     id: number;
     descripcion: string;
     activo: boolean;
+}
+
+export interface Usuario {
+  id: number;
+  username: string;
+  password: string;
+  activo: boolean;
+}
+
+export interface Rol {
+  id: number;
+  nombre: string;
+  descripcion: string | null;
 }

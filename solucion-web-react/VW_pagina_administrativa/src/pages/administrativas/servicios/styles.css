@@ -3,73 +3,82 @@
   --sidebar-width-min: 60px;
 }
 
-#asistencia {
+#cuerpo-main {
   display: flex;
   width: 100%;
   height: 100vh;
 }
 
-/* ================== CONTENIDO ================== */
-#lst_asistencia {
+/* Contenedor padre del contenido principal*/
+#listar-registros {
   background-color: #ffffff;
   padding: 1rem;
   flex: 1;
-  border-radius: 10px;
+  border-radius: 5px;
   height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
 }
 
 /* Encabezado */
-#encabezado h2 {
+.encabezado {
+  display: flex;
+  justify-content: center;
+}
+
+.encabezado h2 {
   color: rgb(0, 0, 0);
   margin-bottom: 1rem;
 }
 
 /* Buscador */
-#buscador {
+.goated {
   display: flex;
   align-items: center;
   margin-bottom: 1rem;
   justify-content: space-between;
 }
 
-#br_buscador {
-  width: 50%;
-}
+.animacion-goated:hover {transform: scale(1.05);}
 
-#br_buscador input {
+.barra-buscador {width: 55%;}
+
+.barra-buscador input {
   width: 100%;
-  border: solid black 2px;
-  border-radius: 10px;
+  border: 2px solid rgb(209, 209, 209);
+  border-radius: 5px;
   padding: 0.4rem;
 }
 
-/* Botón */
-/*#buscador button {
+.boton-goated {
   display: flex;
   justify-content: center;
+  align-items: center;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  background-color: #52e000fb;
   cursor: pointer;
   font-weight: bold;
   transition: 0.2s;
+  color: white;
+  border: transparent;
+  text-decoration: none;
 }
 
-#buscador button:hover {
-  background-color: #9cea5c;
-  transform: scale(1.05);
-}*/
+.anadir-a-goated {
+  background-color: #4caf50;
+  font-size: 17px;
+  height: 40px;
+}
+.ir-a-goated {background-color: #ff9900;}
 
 /* Lista asistencia */
-#lista_asistencia {
+.listar-registros {
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
 }
 
-.registro_asistencia {
+.mostrar-registros {
   display: flex;
   justify-content: space-between;
   background: #ffffff;
@@ -78,34 +87,40 @@
   border-radius: 12px;
   align-items: center;
   transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
 }
 
-.registro_asistencia:hover {
+.mostrar-registros:hover {
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
   background: #ff9900;
 }
 
-.registro_asistencia span {
+.texto-de-registro {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #333;
+  color: #000000;
 }
 
 /* Opciones */
-.lst_opciones_container {
+.listar-opciones-contenedor {
   position: relative;
   display: inline-block;
+  width: auto;
+  height: auto;
+}
+
+.listar-registro-opciones {
+  display: flex;
+  cursor: pointer;
 }
 
 .menu-opciones {
   position: absolute;
   top: 100%;
   right: 0;
-  background: white;
-  border: 1px solid #ccc;
+  background: rgb(255, 0, 0);
+  border: 1px solid #ff0000;
   box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-  z-index: 1000;
+  z-index: 99;
   padding: 0.5rem;
   display: flex;
   flex-direction: column;
@@ -115,6 +130,8 @@
 }
 
 .menu-opciones button {
+  z-index: 99;
+  color: black;
   background: none;
   border: none;
   text-align: left;
@@ -124,12 +141,8 @@
   font-size: 0.9rem;
 }
 
-.menu-opciones button:hover {
-  background-color: #f1f1f1;
-}
-
-/* Modal */
-.modal-overlay {
+/* Modal (ventana) */
+.ventana-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -142,7 +155,7 @@
   z-index: 2000;
 }
 
-.modal-content {
+.contenido-ventana {
   background: white;
   padding: 2rem;
   border-radius: 12px;
@@ -152,24 +165,25 @@
   gap: 0.8rem;
 }
 
-.modal-content h3 {
+.contenido-ventana h3 {
   margin: 0 0 1rem 0;
   text-align: center;
 }
 
-.modal-content input {
+.contenido-ventana input,
+select {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
 
-.acciones-modal {
+.acciones-de-registro {
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
 }
 
-.acciones-modal button {
+.acciones-de-registro button {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   border: none;
@@ -177,12 +191,12 @@
   font-weight: bold;
 }
 
-.acciones-modal button:first-child {
+.acciones-de-registro button:first-child {
   background-color: #4caf50;
   color: white;
 }
 
-.acciones-modal button:last-child {
+.acciones-de-registro button:last-child {
   background-color: #f44336;
   color: white;
 }

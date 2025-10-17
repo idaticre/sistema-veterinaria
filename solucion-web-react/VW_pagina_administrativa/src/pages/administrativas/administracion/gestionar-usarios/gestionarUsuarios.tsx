@@ -23,6 +23,11 @@ function gestionarUsuarios() {
     const [edicion, setEdicion] = useState<Usuario | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
 
+
+    useEffect(() => {
+        fetch("https://localhost:8088/api/usuarios")
+    })
+
     useEffect(() => {
         const ejemplo = [
             {ID: 1, CODIGO: "CODIGO1", USERNAME: "USUARIO1", PASSWORD: "CONTRASEÑA1", ACTIVO: 2, FECHA_CREACION: "12-12-12"},

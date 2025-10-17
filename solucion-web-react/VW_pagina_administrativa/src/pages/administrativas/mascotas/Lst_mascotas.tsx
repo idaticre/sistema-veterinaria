@@ -70,15 +70,13 @@ function Lst_mascotas() {
         <Br_administrativa onMinimizeChange={setMinimizado}/>
         <main className={minimizado ? 'minimize' : ''}>
           <section id="lst_mascotas">
-                <div id='encabezado'>
-                    <h2>Lista de mascotas</h2>
-                </div>
+                <div id='encabezado'><h2>Lista de mascotas</h2></div>
                 <div id='buscador'>
                   <div id='br_buscador'>
-                    <input type="text" placeholder='Nombre del cliente.....' value={busqueda}
+                    <input type="text" placeholder='Ingrese el nombre del cliente que desea buscar' value={busqueda}
                       onChange={(e) => setBusqueda(e.target.value)}/>
                   </div>
-                  <button><Link to="/administracion/cliente/registro">➕AÑADIR</Link></button>
+                  <button className="anadir-goated"><Link to="/administracion/mascotas/registro">➕AÑADIR</Link></button>
                 </div>
                 <div id='lista_mascotas'>
                     {filtrados.map((mascota) =>(
