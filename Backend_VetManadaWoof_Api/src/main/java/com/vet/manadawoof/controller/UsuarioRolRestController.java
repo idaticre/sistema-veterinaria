@@ -41,9 +41,9 @@ public class UsuarioRolRestController {
     }
 
     @GetMapping("/{usuarioId}")
-    public ResponseEntity<List<UsuarioRolEntity>> listar(@PathVariable Integer usuarioId) {
+    public ResponseEntity<List<UsuarioRolEntity>> listarPorUsuario(@PathVariable Integer usuarioId) {
         List<UsuarioRolEntity> list = service.listarRolesPorUsuario(usuarioId);
         if (list.isEmpty()) return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         return ResponseEntity.ok(list);
-    }
+    }
 }
