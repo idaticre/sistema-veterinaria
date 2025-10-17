@@ -1,0 +1,932 @@
+-- =========================================================
+-- BASE DE DATOS: vet_manada_woof
+-- Este script contiene la definición inicial de la base de datos
+-- y las tablas principales relacionadas al núcleo (empresa),
+-- seguridad (usuarios, roles), entidades (clientes, proveedores, colaboradores)
+-- y gestión de personal (veterinarios, horarios, asistencia).
+-- Al final del script podrá hacer un show tables para revisar mejor.
+-- =========================================================
+
+-- ========================================
+-- 0. Creación de la Base de Datos
+-- ========================================
+DROP DATABASE IF EXISTS vet_manada_woof;
+CREATE DATABASE vet_manada_woof;
+USE vet_manada_woof;
+
+-- ========================================
+-- BLOQUE 01: Administracion inicial
+-- gestiona la información de entidades, colaboradores, entre otros
+-- ========================================
+
+-- ========================================
+-- TABLA: empresa
+-- Almacena la información de la veterinaria que opera el sistema.
+-- ========================================
+CREATE TABLE IF NOT EXISTS empresa (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    razon_social VARCHAR(128) NOT NULL,
+    ruc CHAR(11) NOT NULL UNIQUE,
+    direccion VARCHAR(256),
+    ciudad VARCHAR(64),
+    distrito VARCHAR(64),
+    telefono VARCHAR(15),
+    correo VARCHAR(64),
+    representante VARCHAR(64),
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    logo_empresa VARCHAR(255)  		-- Guardar solo la ruta al archivo
+);
+
+-- ========================================
+-- EMPRESA 
+-- Al ser información real se hace el insert y posterior hay un sp para visualizar y actualizar
+-- ========================================
+INSERT INTO empresa(razon_social, ruc, direccion, ciudad, distrito, telefono, correo, representante) VALUES 
+('Manada Woof.S.A.C.S ', 
+'20613366998', 
+'Jiron Arequipa 238', 
+'Lima', 
+'Magdalena del Mar', 
+'917 233 145', 
+'manadawoof.vet@gmail.com', 
+'Sandra Alexis Laguna De La Rosa'
+);
+
+-- ========================================
+-- TABLA: tipo_documento
+-- Contiene los diferentes tipos de documentos permitidos para identificar entidades.
+-- Ejemplo: “DNI”, “RUC”, “PASAPORTE”
+	-- ========================================
+CREATE TABLE IF NOT EXISTS tipo_documento (
+		id INT PRIMARY KEY AUTO_INCREMENT,
+		descripcion VARCHAR(32) NOT NULL,
+		activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE tipo_documento MODIFY descripcion VARCHAR(32) NOT NULL COLLATE utf8mb4_general_ci;
+
+CREATE UNIQUE INDEX idx_tipo_documento_descripcion_ci ON tipo_documento(descripcion);
+-- ========================================
+-- TIPO DE DOCUMENTO
+-- ========================================
+INSERT INTO tipo_documento (descripcion) VALUES 
+('DNI'), 
+('RUC'), 
+('CARNET EXT.'), 
+('P. NAC.'), 
+('PASAPORTE'), 
+('OTROS');
+
+-- ========================================
+-- TABLA: tipo_persona_juridica
+-- Clasifica la naturaleza legal de la entidad: NATURAL o JURÍDICA.
+-- ========================================
+CREATE TABLE tipo_persona_juridica (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(32) NOT NULL UNIQUE,
+    descripcion VARCHAR(64),
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE tipo_persona_juridica MODIFY nombre VARCHAR(32) NOT NULL COLLATE utf8mb4_general_ci;
+
+CREATE UNIQUE INDEX idx_tipo_perjur_nom ON tipo_persona_juridica(nombre);
+-- ========================================
+-- TIPO DE NATURALEZA LEGAL DE LA ENTIDAD
+-- Clasifica si la entidad es de tipo NATURAL (persona física) o JURÍDICA (empresa o institución con RUC propio).
+-- ========================================
+INSERT INTO tipo_persona_juridica (nombre, descripcion) VALUES
+('NATURAL', 'Persona natural que representa una entidad individual'),
+('JURIDICA', 'Entidad jurídica con existencia legal y RUC propio');
+
+-- ========================================
+-- TABLA: usuarios
+-- Guarda las credenciales de acceso al sistema para cada persona autorizada.
+-- Ejemplo: username = “admin01”, password_hash = “$2a$10$JHdY...”
+-- ========================================
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(32) UNIQUE NOT NULL,
+    password_hash VARCHAR(128) NOT NULL,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1)),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_baja DATETIME NULL
+);
+
+-- ========================================
+-- Ejemplos de usuarios SOLO PRUEBAS)
+-- ========================================
+INSERT INTO usuarios (username, password_hash) VALUES
+('admin_woof',  'admin123'),   -- Administrador General (pwd: admin123)
+('admin_g2',    'admin234'),   -- Administrador G2     (pwd: admin234)
+('caja_milo',   'caja123'),   -- Auxiliar Caja         (pwd: caja123)
+('gromer_luna', 'luna123');   -- Auxiliar Gromers      (pwd: luna123)
+
+-- ========================================
+-- TABLA: roles
+-- Define los roles asignables a usuarios del sistema.
+-- Ejemplo: “ADMIN”, “VETERINARIO”
+-- ========================================
+CREATE TABLE IF NOT EXISTS roles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(32) NOT NULL UNIQUE,
+    descripcion VARCHAR(128) DEFAULT NULL
+);
+-- ========================================
+-- ROLES DEL SISTEMA
+-- ========================================
+INSERT INTO roles (nombre, descripcion) VALUES
+('ADMINISTRADOR GENERAL', NULL),
+('ADMINISTRADOR G 2', NULL),
+('AUXILIAR CAJA', NULL),
+('AUXILIAR GROMERS', NULL);
+
+-- ========================================
+-- TABLA: usuarios_roles
+-- Relaciona usuarios con uno o varios roles.
+-- Ejemplo: usuario_id = 1, rol_id = 2 (Usuario 1 tiene el rol 2 - VETERINARIO)
+-- ========================================
+CREATE TABLE IF NOT EXISTS usuarios_roles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT,
+    id_rol INT,
+    fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_usuario_rol (id_usuario, id_rol)    
+);
+ALTER TABLE usuarios_roles
+    ADD CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+    ON DELETE CASCADE,
+    ADD CONSTRAINT fk_rol FOREIGN KEY (id_rol) REFERENCES roles(id)
+    ON DELETE CASCADE;
+
+-- Índice para búsquedas rápidas de roles asignados a un usuario específico.
+CREATE INDEX idx_usuarios_roles_usuario ON usuarios_roles(id_usuario);
+
+-- ========================================
+-- TABLA: entidades
+-- Centraliza los datos generales de personas y empresas del sistema.
+-- ========================================
+CREATE TABLE IF NOT EXISTS entidades (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NULL UNIQUE,
+	id_tipo_persona_juridica INT NOT NULL,			-- natural o juridica
+    nombre VARCHAR(128) NOT NULL,
+    sexo VARCHAR(1),
+    documento VARCHAR(20) NOT NULL UNIQUE,
+    id_tipo_documento INT NOT NULL,
+	telefono VARCHAR(15) CHECK (telefono REGEXP '^[0-9+ ]{6,15}$'),
+	correo VARCHAR(64) UNIQUE,												-- la verificacion queda para el frontend
+    direccion VARCHAR(128),
+    ciudad VARCHAR(64) NOT NULL,
+    distrito VARCHAR(64) NOT NULL,
+    representante VARCHAR(64) NULL,								-- Deberá ser en tal caso el mismo nombre
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE entidades
+    ADD CONSTRAINT fk_entidad_tipo_doc FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documento(id),
+    ADD CONSTRAINT fk_entidad_persona_juridica FOREIGN KEY (id_tipo_persona_juridica) REFERENCES tipo_persona_juridica(id)
+    ON DELETE RESTRICT;
+
+-- Índice para acelerar las búsquedas de entidades por documento 
+-- (útil en login, validaciones, formularios).
+CREATE UNIQUE INDEX idx_entidades_documento ON entidades(documento);
+
+-- Índice para acelerar la validación y búsqueda por correo 
+-- (por ejemplo, recuperación de cuenta o contacto).
+CREATE UNIQUE INDEX idx_entidades_correo ON entidades(correo);
+
+-- Índice para consultas filtradas por tipo de documento (DNI, RUC...).
+CREATE INDEX idx_entidades_tipo_documento ON entidades(id_tipo_documento);
+
+-- ========================================
+-- TABLA: colaboradores
+-- Registra a los trabajadores vinculados a la veterinaria (personal interno).
+-- ========================================
+CREATE TABLE IF NOT EXISTS colaboradores (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NULL UNIQUE,
+    id_entidad BIGINT NOT NULL UNIQUE,
+    fecha_ingreso DATE,
+    fecha_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_usuario INT NULL,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1)),
+    foto VARCHAR(128)
+);
+ALTER TABLE colaboradores
+    ADD CONSTRAINT fk_colaborador_entidad FOREIGN KEY (id_entidad) REFERENCES entidades(id)
+    ON DELETE RESTRICT,
+    ADD CONSTRAINT fk_colaborador_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+    ON DELETE RESTRICT;
+    
+-- Índice para acelerar las consultas que vinculan colaboradores con sus entidades.
+CREATE INDEX idx_colaboradores_entidad ON colaboradores(id_entidad);
+
+-- Índice para búsquedas cruzadas entre colaborador y usuario (útil para sesiones o perfil).
+CREATE INDEX idx_colaboradores_usuario ON colaboradores(id_usuario);
+
+-- Índice para mejorar filtros por estado en colaboradores.
+CREATE INDEX idx_colaboradores_activo ON colaboradores(activo);
+
+-- ========================================
+-- TABLA: proveedores
+-- Representa a las personas o empresas que suministran productos o servicios.
+-- Ejemplo: entidad = “Laboratorios ACME”, activo = 1
+-- ========================================
+CREATE TABLE IF NOT EXISTS proveedores (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NULL UNIQUE,
+    id_entidad BIGINT NOT NULL UNIQUE,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE proveedores 
+    ADD CONSTRAINT fk_proveedor_entidad FOREIGN KEY (id_entidad) REFERENCES entidades(id)
+    ON DELETE RESTRICT;
+
+-- Índice para consultas rápidas que relacionan proveedores con sus entidades.
+CREATE INDEX idx_proveedores_entidad ON proveedores(id_entidad);
+
+-- Índice para mejorar filtros por estado en proveedores.
+CREATE INDEX idx_proveedores_activo ON proveedores(activo);
+
+-- ========================================
+-- TABLA: clientes
+-- Representa a las personas o empresas que reciben servicios de la veterinaria.
+-- ========================================
+CREATE TABLE IF NOT EXISTS clientes (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NULL UNIQUE,
+    id_entidad BIGINT NOT NULL UNIQUE,    
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE clientes 
+    ADD CONSTRAINT fk_cliente_entidad FOREIGN KEY (id_entidad) REFERENCES entidades(id)
+    ON DELETE RESTRICT;
+
+-- Índice para consultas rápidas que relacionan clientes con sus entidades.
+CREATE INDEX idx_clientes_entidad ON clientes(id_entidad);
+
+-- Índice para mejorar filtros por estado en clientes.
+CREATE INDEX idx_clientes_activo ON clientes(activo);
+
+-- ========================================
+-- TABLA: especialidades
+-- Catálogo de especialidades médicas veterinarias.
+-- Ejemplo: “DERMATOLOGÍA”, “CIRUGÍA GENERAL”
+-- ========================================
+CREATE TABLE IF NOT EXISTS especialidades (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(64) NOT NULL UNIQUE,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+
+ALTER TABLE especialidades MODIFY nombre VARCHAR(64) NOT NULL COLLATE utf8mb4_general_ci;
+
+CREATE UNIQUE INDEX idx_especialidades_nombre_ci ON especialidades(nombre);
+-- ========================================
+-- ESPECIALIDADES VETERINARIAS
+-- ========================================
+INSERT INTO especialidades (nombre) VALUES
+('MEDICINA GENERAL'), ('CIRUGÍA'), ('DERMATOLOGÍA'), 
+('OFTALMOLOGÍA'), ('TRAUMATOLOGÍA'),('CARDIOLOGÍA'), 
+('ODONTOLOGÍA VETERINARIA'), ('ONCOLOGÍA'), ('NEUROLOGÍA'),
+('ANESTESIOLOGÍA'), ('EMERGENCIAS Y CUIDADOS CRÍTICOS'), 
+('REHABILITACIÓN Y FISIOTERAPIA'),('ETOLOGÍA Y COMPORTAMIENTO ANIMAL');
+
+-- ========================================
+-- TABLA: veterinarios
+-- Contiene la información específica de los veterinarios de la clínica.
+-- ========================================
+CREATE TABLE IF NOT EXISTS veterinarios (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NULL UNIQUE,
+    id_colaborador BIGINT NOT NULL UNIQUE,
+    id_especialidad BIGINT NOT NULL,
+    cmp VARCHAR(32) UNIQUE NULL,
+    experiencia_meses INT CHECK (experiencia_meses >= 0),
+    observaciones VARCHAR(128),
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE veterinarios
+    ADD CONSTRAINT fk_vet_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_vet_especialidad FOREIGN KEY (id_especialidad) REFERENCES especialidades(id)
+    ON DELETE RESTRICT;
+
+-- Índice para búsquedas rápidas de veterinarios asociados a un colaborador.
+CREATE INDEX idx_veterinarios_colaborador ON veterinarios(id_colaborador);
+
+-- Índice para facilitar consultas por especialidad (ej: veterinarios de dermatología).
+CREATE INDEX idx_veterinarios_especialidad ON veterinarios(id_especialidad);
+
+-- ========================================
+-- TABLA: dias_semana
+-- Lista los días de la semana para asignación de horarios.
+-- =========================	===============
+CREATE TABLE dias_semana (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(20) UNIQUE NOT NULL,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+-- ========================================
+-- DÍAS DE LA SEMANA
+-- ========================================
+INSERT INTO dias_semana (nombre) VALUES 
+('LUNES'), ('MARTES'), ('MIÉRCOLES'), ('JUEVES'), ('VIERNES'), ('SÁBADO'), ('DOMINGO');
+
+-- ========================================
+-- TABLA: horarios_base
+-- Define plantillas de horarios reutilizables.
+-- ========================================
+CREATE TABLE IF NOT EXISTS horarios_base (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(64) NOT NULL UNIQUE,
+    descripcion VARCHAR(128),
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+
+-- ========================================
+-- INSERTS INICIALES: horarios_base
+-- ========================================
+INSERT INTO horarios_base (nombre, descripcion, hora_inicio, hora_fin)
+VALUES 
+('Horario estándar', 'Lunes a sábado de 9:00 a 18:00', '09:00:00', '18:00:00'),
+('Turno mañana', 'Lunes a sábado de 8:00 a 13:00', '08:00:00', '13:00:00'),
+('Turno tarde', 'Lunes a sábado de 13:00 a 18:00', '13:00:00', '18:00:00'),
+('Turno completo', 'Lunes a sábado de 8:00 a 17:00', '08:00:00', '17:00:00'),
+('Turno domingo', 'Domingo de 9:00 a 14:00', '09:00:00', '14:00:00');
+
+-- ========================================
+-- TABLA: asignacion_horarios
+-- Asigna un horario base a un colaborador y define los días aplicables.
+-- ========================================
+CREATE TABLE IF NOT EXISTS asignacion_horarios (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    id_colaborador BIGINT NOT NULL,
+    id_horario_base INT NOT NULL,
+    id_dia_semana INT NOT NULL,
+    fecha_asignacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1)),
+    UNIQUE KEY uq_colab_dia (id_colaborador, id_dia_semana)
+);
+
+ALTER TABLE asignacion_horarios
+    ADD CONSTRAINT fk_asignacion_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+        
+    ADD CONSTRAINT fk_asignacion_horario FOREIGN KEY (id_horario_base) REFERENCES horarios_base(id)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+        
+    ADD CONSTRAINT fk_asignacion_dia FOREIGN KEY (id_dia_semana) REFERENCES dias_semana(id)
+        ON DELETE RESTRICT;
+
+-- Índice para consultas rápidas de horarios por colaborador
+-- (útil para generar la grilla semanal de turnos).
+CREATE INDEX idx_asignacion_colaborador ON asignacion_horarios(id_colaborador);
+
+-- Índice para facilitar búsquedas por tipo de día en horarios laborales.
+CREATE INDEX idx_asignacion_dia ON asignacion_horarios(id_dia_semana);
+
+-- ========================================
+-- TABLA: registro_asistencia
+-- Controla los registros diarios de asistencia del personal.
+-- ========================================
+DROP TABLE IF EXISTS registro_asistencia;
+CREATE TABLE registro_asistencia (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_colaborador BIGINT NOT NULL UNIQUE,
+    id_horario_base INT NULL, 
+    fecha DATE NOT NULL UNIQUE,
+    hora_entrada TIME NULL,
+    hora_salida TIME NULL,
+    observaciones TEXT,
+    CHECK (hora_salida IS NULL OR hora_salida >= hora_entrada)
+);
+
+-- Relación con la tabla de colaboradores
+ALTER TABLE registro_asistencia
+    ADD CONSTRAINT fk_asistencia_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE;
+    
+-- Índices para optimizar búsquedas frecuentes
+CREATE INDEX idx_asistencia_colaborador ON registro_asistencia(id_colaborador);
+
+CREATE INDEX idx_asistencia_fecha ON registro_asistencia(fecha);
+    
+-- =============================================================================================================================================
+-- =============================================================================================================================================
+-- =============================================================================================================================================
+
+-- ========================================
+-- BLOQUE 02: mascotas y salud veterinaria
+-- gestiona la información de mascotas, su clasificación,
+-- vacunas, medicamentos e historial clínico.
+-- ========================================
+
+-- ========================================
+-- TABLA: especies
+-- Define las especies de mascotas atendidas por la veterinaria.
+-- Ejemplo: PERRO, GATO, CONEJO.
+-- ========================================
+CREATE TABLE IF NOT EXISTS especies (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	nombre VARCHAR(32) NOT NULL UNIQUE,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+-- ========================================
+-- ESPECIES
+-- ========================================
+INSERT INTO especies (nombre) VALUES 
+('CANINO'), ('FELINO'), ('CONEJO');
+
+-- ========================================
+-- TABLA: razas
+-- Lista las razas asociadas a una especie específica.
+-- Ejemplo: LABRADOR (especie PERRO), SIAMÉS (especie GATO).
+-- ========================================
+CREATE TABLE IF NOT EXISTS razas (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	id_especie INT,
+	nombre VARCHAR(32) NOT NULL UNIQUE,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE razas 
+	ADD CONSTRAINT fk_raza_especie FOREIGN KEY (id_especie) REFERENCES especies(id)
+	ON DELETE RESTRICT
+	ON UPDATE CASCADE;
+
+-- Índice para búsquedas de razas según la especie seleccionada (útil en formularios o filtros).
+CREATE INDEX idx_razas_especie ON razas(id_especie);
+
+-- ========================================
+-- CANINO (id_especie = 1)
+-- ========================================
+INSERT INTO razas (id_especie, nombre) VALUES
+(1, 'AKITA INU'), (1, 'AMERICAN STAFFORDSHIRE TERRIER'), (1, 'BASSET HOUND'), (1, 'BEAGLE'),
+(1, 'BICHÓN FRISÉ'), (1, 'BORDER COLLIE'), (1, 'BORDER TERRIER'), (1, 'BOSTON TERRIER'), (1, 'BOXER'),
+(1, 'BULL TERRIER'), (1, 'BULLDOG FRANCÉS'), (1, 'BULLDOG INGLÉS'), (1, 'CANICHE (POODLE)'), (1, 'CANE CORSO'),
+(1, 'CAVALIER KING CHARLES SPANIEL'), (1, 'CHIHUAHUA'), (1, 'CHOW CHOW'), (1, 'COCKER SPANIEL'), (1, 'DÁLMATA'),
+(1, 'DOBERMAN'), (1, 'DOGO ARGENTINO'), (1, 'FOX TERRIER'), (1, 'GALGO'), (1, 'GOLDEN RETRIEVER'),
+(1, 'GREAT DANE (GRAN DANÉS)'), (1, 'HUSKY SIBERIANO'), (1, 'JACK RUSSELL TERRIER'), (1, 'LABRADOODLE'), (1, 'LABRADOR RETRIEVER'),
+(1, 'LHASA APSO'), (1, 'MALAMUTE DE ALASKA'), (1, 'MALTÉS'), (1, 'MESTIZO'), (1, 'PASTOR ALEMAN'), (1, 'PASTOR AUSTRALIANO'),
+(1, 'PASTOR BELGA'), (1, 'PEKÍNES'), (1, 'PITBULL TERRIER'), (1, 'POMERANIA'), (1, 'PUG'), (1, 'ROTTWEILER'), (1, 'SAMOYEDO'),
+(1, 'SAN BERNARDO'), (1, 'SCHNAUZER MINIATURA'), (1, 'SHIBA INU'), (1, 'SHIH TZU'), (1, 'TERRIER AUSTRALIANO'), (1, 'TERRIER ESCOCÉS'),
+(1, 'WEIMARANER'), (1, 'WHIPPET'), (1, 'YORKSHIRE TERRIER');
+
+-- FELINO (id_especie = 2)
+INSERT INTO razas (id_especie, nombre) VALUES
+(2, 'SIAMÉS'), (2, 'PERSA'), (2, 'MAINE COON'), (2, 'BENGALÍ'), (2, 'BRITISH SHORTHAIR'), (2, 'SPHYNX'),
+(2, 'ANGORA TURCO'), (2, 'AZUL RUSO'), (2, 'ABISINIO'), (2, 'SCOTTISH FOLD'); 
+
+-- CONEJO (id_especie = 3)
+INSERT INTO razas (id_especie, nombre) VALUES
+(3, 'CONEJO ENANO HOLANDÉS'), (3, 'CONEJO ANGORA');
+
+-- ========================================
+-- TABLA: tamanos
+-- Clasifica a las mascotas según su tamaño corporal.
+-- Ejemplo: talla_equivalente = "S", descripcion = "Pequeño".
+-- ========================================
+CREATE TABLE IF NOT EXISTS tamanos (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	tamano VARCHAR(8) NOT NULL UNIQUE,
+	descripcion VARCHAR(16) NOT NULL,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+
+-- ========================================
+-- TAMAÑOS
+-- ========================================
+INSERT INTO tamanos (tamano, descripcion) VALUES
+('XS','MUY PEQUEÑO'), ('S','PEQUEÑO'), ('M','MEDIANO'), ('L','GRANDE'), ('XL','MUY GRANDE');
+
+-- ========================================
+-- TABLA: etapas_vida
+-- Catálogo de etapas de desarrollo de una mascota.
+-- Ejemplo: CACHORRO, ADULTO, SENIOR.
+-- ========================================
+CREATE TABLE IF NOT EXISTS etapas_vida (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	descripcion VARCHAR(16) NOT NULL UNIQUE,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+
+-- ========================================
+-- ETAPAS DE VIDA
+-- ========================================
+INSERT INTO etapas_vida (descripcion) VALUES
+('CACHORRO'), ('JOVEN'), ('ADULTO'), ('SENIOR');
+
+-- ========================================
+-- TABLA: vacunas
+-- Catálogo de vacunas disponibles según especie.
+-- Ejemplo: RABIA (especie PERRO), TRIPLE FELINA (especie GATO).
+-- ========================================
+CREATE TABLE IF NOT EXISTS vacunas (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	nombre VARCHAR(64) NOT NULL,
+	id_especie INT NOT NULL,
+    descripcion VARCHAR(128),
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE vacunas 
+	ADD CONSTRAINT uq_vacuna_nom_esp UNIQUE(nombre, id_especie),
+	ADD CONSTRAINT fk_vacuna_especie FOREIGN KEY (id_especie) REFERENCES especies(id)
+	ON DELETE RESTRICT
+	ON UPDATE CASCADE;
+
+-- Índice para búsquedas rápidas de vacunas por especie
+-- (útil para listar vacunas específicas de una especie).
+CREATE INDEX idx_vacunas_especie ON vacunas(id_especie);
+
+-- ========================================
+-- VACUNAS (CANINOS)
+-- ========================================
+INSERT INTO vacunas (nombre, id_especie, descripcion) VALUES
+-- Básicas y esenciales
+('RABIA', 1, 'Vacuna anual contra el virus de la rabia.'),
+('MOQUILLO', 1, 'Protege contra el virus del moquillo canino.'),
+('PARVOVIRUS', 1, 'Previene infecciones graves por parvovirus.'),
+('HEPATITIS INFECCIOSA CANINA', 1, 'Protección frente al adenovirus tipo 1.'),
+('PARAINFLUENZA CANINA', 1, 'Previene infecciones respiratorias por parainfluenza.'),
+('TRIPLE CANINA', 1, 'Combinación contra moquillo, hepatitis y parvovirus.'),
+('QUÍNTUPLE CANINA', 1, 'Combinación contra 5 virus principales caninos.'),
+('SÉXTUPLE CANINA', 1, 'Versión ampliada con protección contra 2 cepas de leptospira.'),
+('TOS DE LAS PERRERAS', 1, 'Protección frente a Bordetella bronchiseptica y parainfluenza.'),
+('LEPTOSPIROSIS', 1, 'Previene infecciones por bacterias del género Leptospira.'),
+('CORONAVIRUS CANINO', 1, 'Prevención de la enteritis por coronavirus canino.'),
+('GIARDIASIS', 1, 'Vacuna contra el parásito Giardia intestinalis.'),
+('LYME', 1, 'Protege contra la enfermedad de Lyme causada por Borrelia burgdorferi.'),
+('INFLUENZA CANINA', 1, 'Vacuna contra los virus H3N2 y H3N8 de la gripe canina.'),
+('LEISHMANIASIS', 1, 'Previene la infección por Leishmania infantum.'),
+('BABESIOSIS', 1, 'Previene la babesiosis transmitida por garrapatas.'),
+('EHRLICHIOSIS', 1, 'Ayuda a prevenir la ehrlichiosis canina, también transmitida por garrapatas.');
+
+-- ========================================
+-- VACUNAS (FELINOS)
+-- ========================================
+INSERT INTO vacunas (nombre, id_especie, descripcion) VALUES
+-- Vacunas básicas (obligatorias o altamente recomendadas)
+('RABIA', 2, 'Vacuna obligatoria contra el virus de la rabia felina.'),
+('TRIPLE FELINA', 2, 'Combinación contra calicivirus, herpesvirus y panleucopenia felina.'),
+('PENTA FELINA', 2, 'Amplía la triple felina con clamidiosis y leucemia felina.'),
+('LEUCEMIA FELINA', 2, 'Protege frente al virus de la leucemia felina (FeLV).'),
+('PANLEUCOPENIA FELINA', 2, 'Previene infecciones graves por el parvovirus felino.'),
+('CALICIVIRUS FELINO', 2, 'Vacuna contra el virus responsable de infecciones respiratorias.'),
+('HERPESVIRUS FELINO (RINOTRAQUEÍTIS)', 2, 'Previene infecciones respiratorias por herpesvirus felino tipo 1.'),
+('CLAMIDIOSIS FELINA', 2, 'Protección contra Chlamydia felis, causante de conjuntivitis y afecciones respiratorias.'),
+('BORDETELLA BRONCHISEPTICA', 2, 'Previene infecciones respiratorias en ambientes con alta densidad felina.'),
+('INMUNODEFICIENCIA FELINA (FIV)', 2, 'Vacuna para gatos con riesgo de exposición al virus de la inmunodeficiencia felina.'),
+('PERITONITIS INFECCIOSA FELINA (PIF)', 2, 'Vacuna preventiva frente al coronavirus felino que causa la PIF.'),
+('GIARDIASIS', 2, 'Previene la infección intestinal causada por Giardia intestinalis.'),
+('MICOSIS (DERMATOFITOSIS)', 2, 'Protege frente a hongos dermatofitos como Microsporum canis.');
+
+-- ========================================
+-- VACUNAS (CONEJOS)
+-- ========================================
+INSERT INTO vacunas (nombre, id_especie, descripcion) VALUES
+('MIXOMATOSIS', 3, 'Protege contra el virus de la mixomatosis, transmitido por mosquitos y pulgas.'),
+('ENFERMEDAD VÍRICA HEMORRÁGICA (VHD1)', 3, 'Previene la enfermedad hemorrágica clásica causada por el calicivirus tipo 1.'),
+('ENFERMEDAD VÍRICA HEMORRÁGICA TIPO 2 (VHD2)', 3, 'Vacuna contra la cepa más reciente y agresiva del virus hemorrágico tipo 2.'),
+('TRIPLE CONEJOS (COMBINADA)', 3, 'Vacuna combinada que protege frente a mixomatosis y ambas variantes de VHD.'),
+('PASTEURELOSIS', 3, 'Ayuda a prevenir infecciones respiratorias por Pasteurella multocida, comunes en conejos domésticos.');
+
+-- ========================================
+-- TABLA: medicamento_tipo
+-- Lista los tipos o clasificaciones de medicamentos utilizados.
+-- Ejemplo: ANTIBIÓTICO, ANTIINFLAMATORIO.
+-- ========================================
+CREATE TABLE IF NOT EXISTS medicamento_tipo (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	nombre VARCHAR(32) NOT NULL UNIQUE,
+    descripcion VARCHAR(128),
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+
+-- ========================================
+-- TIPOS DE MEDICAMENTOS (AMPLIADO)
+-- ========================================
+INSERT INTO medicamento_tipo (nombre, descripcion) VALUES
+('ANTIBIÓTICO', 'Medicamentos que combaten infecciones bacterianas.'),
+('ANTIINFLAMATORIO', 'Reducen la inflamación y el dolor en tejidos y articulaciones.'),
+('ANALGÉSICO', 'Alivian el dolor leve, moderado o postoperatorio.'),
+('ANTIPIRÉTICO', 'Ayudan a reducir la fiebre y malestar asociado.'),
+('ANTIFÚNGICO', 'Tratan infecciones causadas por hongos o levaduras.'),
+('ANTIPARASITARIO INTERNO', 'Eliminan parásitos intestinales como nematodos o cestodos.'),
+('ANTIPARASITARIO EXTERNO', 'Controlan pulgas, garrapatas y ácaros en piel o pelaje.'),
+('VITAMÍNICO / SUPLEMENTO', 'Aportan nutrientes o refuerzan el sistema inmunológico.'),
+('SEDANTE / ANESTÉSICO', 'Inducen relajación o anestesia para procedimientos clínicos.'),
+('CARDIOLÓGICO', 'Medicamentos para control de enfermedades del corazón.'),
+('HORMONAL / REPRODUCTIVO', 'Regulan funciones hormonales o reproductivas.'),
+('DIGESTIVO / GASTROINTESTINAL', 'Ayudan en trastornos digestivos y protección gástrica.'),
+('OTRO', 'Otros tipos de medicamentos no clasificados.');
+
+-- ========================================
+-- TABLA: vias_aplicacion
+-- Vías por las cuales se aplican medicamentos o vacunas.
+-- Ejemplo: ORAL, INYECTABLE, TÓPICA.
+-- ========================================
+CREATE TABLE IF NOT EXISTS vias_aplicacion (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	nombre VARCHAR(32) UNIQUE NOT NULL,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+
+-- ========================================
+-- VÍAS DE APLICACIÓN
+-- ========================================
+INSERT INTO vias_aplicacion (nombre) VALUES 
+('ORAL'), ('TÓPICA'), ('SUBCUTÁNEA'), ('INTRAMUSCULAR'), ('INTRAVENOSA'), ('OTRA');
+
+-- ========================================
+-- TABLA: medicamentos
+-- Catálogo de medicamentos utilizados en tratamientos clínicos.
+-- Ejemplo: AMOXICILINA (tipo ANTIBIÓTICO), PREDNISONA (tipo ANTIINFLAMATORIO).
+-- ========================================
+CREATE TABLE IF NOT EXISTS medicamentos (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	nombre VARCHAR(64) NOT NULL,
+	id_tipo INT NOT NULL,
+    descripcion VARCHAR(128),
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE medicamentos
+	ADD CONSTRAINT uq_medicamento_nom_tip UNIQUE(nombre,id_tipo),
+	ADD CONSTRAINT fk_medicamento_tipo FOREIGN KEY (id_tipo) REFERENCES medicamento_tipo(id)
+	ON DELETE RESTRICT
+	ON UPDATE CASCADE;
+
+-- Índice para búsquedas rápidas de medicamentos por tipo
+-- (útil en reportes o filtrado de inventarios por categoría).
+CREATE INDEX idx_medicamentos_tipo ON medicamentos(id_tipo);
+
+-- ========================================
+-- MEDICAMENTOS (AMPLIADO)
+-- ========================================
+INSERT INTO medicamentos (nombre, id_tipo, descripcion) VALUES
+-- ANTIBIÓTICOS (id_tipo = 1)
+('AMOXICILINA 500MG', 1, 'Antibiótico de amplio espectro para infecciones bacterianas.'),
+('ENROFLOXACINA 5%', 1, 'Antibiótico fluoroquinolona para infecciones respiratorias y urinarias.'),
+('CEFTRIAXONA 1G', 1, 'Antibiótico de tercera generación de amplio espectro.'),
+('DOXICICLINA 100MG', 1, 'Antibiótico tetraciclina para infecciones respiratorias y cutáneas.'),
+('CEFALEXINA 500MG', 1, 'Antibiótico cefalosporínico de uso común en piel y vías respiratorias.'),
+('GENTAMICINA 10%', 1, 'Antibiótico aminoglucósido inyectable de amplio espectro.'),
+('CLAVAMOX 250MG', 1, 'Combinación de amoxicilina y ácido clavulánico para infecciones resistentes.'),
+
+-- ANTIINFLAMATORIOS (id_tipo = 2)
+('KETOPROFENO 100MG', 2, 'AINE utilizado en procesos inflamatorios y dolor.'),
+('CARPROFENO 50MG', 2, 'Antiinflamatorio y analgésico para perros.'),
+('MELOXICAM 1.5MG/ML', 2, 'AINE utilizado en perros y gatos para control del dolor y fiebre.'),
+('DEXAMETASONA 4MG/ML', 2, 'Corticosteroide de acción rápida para inflamaciones agudas.'),
+('PREDNISOLONA 5MG', 2, 'Corticoide antiinflamatorio sistémico.'),
+('FLUNIXINA MEGLUMINA', 2, 'AINE potente para inflamaciones y fiebre.'),
+
+-- DESPARASITANTES (id_tipo = 3)
+('ALBENDAZOL 10%', 3, 'Desparasitante oral de amplio espectro para uso veterinario.'),
+('IVERMECTINA 1%', 3, 'Antiparasitario interno y externo en dosis controladas.'),
+('FENBENDAZOL 10%', 3, 'Antiparasitario intestinal para perros, gatos y conejos.'),
+('PRAZIQUANTEL 50MG', 3, 'Desparasitante eficaz contra tenias y cestodos.'),
+('MILBEMAX', 3, 'Combinación antiparasitaria de amplio espectro (milbemicina + praziquantel).'),
+('SELAMECTINA (REVOLUTION)', 3, 'Antiparasitario externo tópico para pulgas, garrapatas y ácaros.'),
+
+-- ANTIFÚNGICOS (id_tipo = 4)
+('CLOTRIMAZOL SPRAY', 4, 'Antifúngico tópico para micosis cutáneas.'),
+('KETOCONAZOL 200MG', 4, 'Antifúngico sistémico para infecciones por hongos.'),
+('MICONAZOL CREMA', 4, 'Tratamiento tópico de infecciones por hongos en piel.'),
+('TERBINAFINA 250MG', 4, 'Antifúngico sistémico para dermatitis micótica.'),
+('ITRACONAZOL 100MG', 4, 'Antifúngico de amplio espectro, especialmente en gatos.'),
+
+-- ANALGÉSICOS (id_tipo = 5)
+('TRAMADOL 50MG', 5, 'Analgésico opiáceo utilizado en manejo del dolor moderado a severo.'),
+('BUXTONAL (BUTORFANOL)', 5, 'Analgésico opiáceo leve para control del dolor agudo.'),
+('METAMIZOL SÓDICO', 5, 'Analgésico y antipirético no opioide de uso veterinario.'),
+('MORFINA 10MG/ML', 5, 'Analgésico opioide para control del dolor intenso.'),
+('GABAPENTINA 300MG', 5, 'Control del dolor neuropático y ansiedad en felinos.'),
+
+-- VITAMÍNICOS Y SUPLEMENTOS (id_tipo = 6)
+('MULTIVITAMÍNICO PETS', 6, 'Suplemento nutricional multivitamínico para perros y gatos.'),
+('VITAMINA B COMPLEX', 6, 'Refuerza el sistema nervioso y metabolismo energético.'),
+('VITAMINA C ORAL', 6, 'Antioxidante y refuerzo inmunológico en conejos y roedores.'),
+('OMEGA 3 + 6 PETS', 6, 'Suplemento para piel, pelaje y función cardiovascular.'),
+('CALCIO PET', 6, 'Suplemento mineral para huesos y crecimiento.'),
+('PROBIÓTICO VET', 6, 'Apoya la salud intestinal y el equilibrio de la flora digestiva.');
+
+-- ========================================
+-- TABLA: estado_mascota
+-- Define el estado clínico o condición general de la mascota.
+-- Ejemplo: ACTIVO (en control), EN TRATAMIENTO, RECUPERADO.
+-- ========================================
+CREATE TABLE estado_mascota (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(32) NOT NULL UNIQUE,
+    descripcion VARCHAR(128),
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+
+-- ========================================
+-- ESTADO DE LAS MASCOTAS (CATÁLOGO AMPLIADO)
+-- ========================================
+INSERT INTO estado_mascota (nombre, descripcion) VALUES
+('ACTIVA', 'Mascota con atención vigente en la veterinaria.'),
+('EN TRATAMIENTO', 'En tratamiento médico o quirúrgico.'),
+('RECUPERADA', 'Ha finalizado su tratamiento con éxito.'),
+('EN OBSERVACIÓN', 'Bajo control o evaluación médica.'),
+('EN CIRUGÍA', 'Actualmente en procedimiento quirúrgico.'),
+('EN REHABILITACIÓN', 'En terapia física o recuperación postoperatoria.'),
+('CRÓNICA', 'Con enfermedad crónica de seguimiento continuo.'),
+('CRÍTICA', 'En estado grave o internada.'),
+('INACTIVA', 'Sin actividad reciente o controles pendientes.'),
+('TRANSFERIDA', 'Trasladada a otro propietario o centro.'),
+('FALLECIDA', 'Mascota registrada como fallecida.'),
+('EXTRAVIADA', 'Reportada como perdida.'),
+('EN ADOPCIÓN', 'Disponible para adopción.'),
+('ADOPTADA', 'Entregada en adopción.'),
+('RESCATADA', 'Rescatada y en evaluación inicial.'),
+('EN CUARENTENA', 'En aislamiento preventivo.'),
+('EN ACOGIDA TEMPORAL', 'En hogar temporal de acogida.'),
+('DEVUELTA', 'Mascota devuelta tras adopción fallida.');
+
+-- ========================================
+-- TABLA: mascotas
+-- Almacena la información detallada de las mascotas registradas.
+-- Incluye datos como raza, especie, edad, características físicas y estado clínico.
+-- ========================================
+CREATE TABLE IF NOT EXISTS mascotas (
+	id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
+	nombre VARCHAR(64) NOT NULL,
+    sexo VARCHAR(1),
+	id_cliente BIGINT NOT NULL,
+	id_raza INT NULL,
+	id_especie INT NOT NULL,
+    id_estado INT NOT NULL,
+    id_colaborador BIGINT NULL,
+    id_veterinario BIGINT NULL,
+	fecha_nacimiento DATE NOT NULL,
+	pelaje VARCHAR(16),
+	id_tamano INT NOT NULL,
+	id_etapa INT NOT NULL,
+	esterilizado TINYINT NOT NULL DEFAULT 0 CHECK (esterilizado IN (0,1)),
+	alergias VARCHAR(128),
+	peso DECIMAL(6,2) CHECK (peso >= 0),
+	chip TINYINT NOT NULL DEFAULT 0 CHECK (chip IN (0,1)),
+	pedigree TINYINT NOT NULL DEFAULT 0 CHECK (pedigree IN (0,1)),
+    -- factor_dea: Aplica solo para especie CANINA
+	factor_dea TINYINT NOT NULL DEFAULT 0 CHECK (factor_dea IN (0,1)),
+	agresividad TINYINT NOT NULL DEFAULT 0 CHECK (agresividad IN (0,1)),
+	foto VARCHAR(255),
+	fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE mascotas
+	ADD CONSTRAINT fk_mascota_cliente FOREIGN KEY (id_cliente) REFERENCES clientes(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_mascota_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_mascota_veterinario FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_mascota_estado FOREIGN KEY (id_estado) REFERENCES estado_mascota(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_mascota_raza FOREIGN KEY (id_raza) REFERENCES razas(id)
+		ON DELETE SET NULL ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_mascota_especie FOREIGN KEY (id_especie) REFERENCES especies(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_mascota_tamano FOREIGN KEY (id_tamano) REFERENCES tamanos(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_mascota_etapa FOREIGN KEY (id_etapa) REFERENCES etapas_vida(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE;
+	
+-- Índice para consultas rápidas de mascotas por cliente
+-- (permite listar todas las mascotas de un cliente en particular).
+CREATE INDEX idx_mascotas_cliente ON mascotas(id_cliente);
+    
+-- Índice para búsquedas eficientes de mascotas por estado
+-- (útil en reportes, listados filtrados o análisis clínico).
+CREATE INDEX idx_mascotas_estado ON mascotas(id_estado);
+
+-- Índice para mejorar las búsquedas de mascotas por raza.
+CREATE INDEX idx_mascotas_raza ON mascotas(id_raza);
+
+-- Índice para mejorar las búsquedas de mascotas por especie.
+CREATE INDEX idx_mascotas_especie ON mascotas(id_especie);
+
+-- Índice para búsquedas de mascotas por tamaño (útil en reportes o filtros).
+CREATE INDEX idx_mascotas_tamano ON mascotas(id_tamano);
+
+-- Índice para facilitar búsquedas de mascotas por etapa de vida (cachorro, adulto, etc.).
+CREATE INDEX idx_mascotas_etapa ON mascotas(id_etapa);
+
+-- Índice para ordenar o filtrar mascotas por fecha de registro.
+CREATE INDEX idx_mascotas_fecha_registro ON mascotas(fecha_registro);
+
+-- Índice para acelerar búsquedas o filtros por fecha de nacimiento,
+-- útil en reportes o estadísticas de edad.
+CREATE INDEX idx_mascotas_fecha_nac ON mascotas(fecha_nacimiento);
+
+
+-- ========================================
+-- TABLA: medicamentos_mascota
+-- Registro histórico de medicamentos administrados a cada mascota.
+-- Incluye vía, dosis, fecha y responsable de la aplicación.
+-- ========================================
+CREATE TABLE IF NOT EXISTS medicamentos_mascota (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
+	id_mascota BIGINT NOT NULL,
+	id_medicamento INT NOT NULL,
+	id_via INT NOT NULL,
+	dosis VARCHAR(32),
+	fecha_aplicacion DATE NOT NULL,
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	id_colaborador BIGINT NULL,
+    id_veterinario BIGINT NULL,
+	observaciones VARCHAR(64),
+	fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE medicamentos_mascota
+	ADD CONSTRAINT fk_med_mascota FOREIGN KEY (id_mascota) REFERENCES mascotas(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_med_medicamento FOREIGN KEY (id_medicamento) REFERENCES medicamentos(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_med_via FOREIGN KEY (id_via) REFERENCES vias_aplicacion(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_med_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+		ON DELETE SET NULL ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_med_veterinario FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
+		ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- Índice para consultas rápidas del historial de medicamentos
+-- aplicados a una mascota específica.
+CREATE INDEX idx_medicamentos_mascota_mascota ON medicamentos_mascota(id_mascota);
+
+-- Índice para búsquedas por colaborador en historial de medicamentos.
+CREATE INDEX idx_med_mascota_colaborador ON medicamentos_mascota(id_colaborador);
+
+-- Índice para búsquedas por veterinario en historial de medicamentos.
+CREATE INDEX idx_med_mascota_veterinario ON medicamentos_mascota(id_veterinario);
+
+-- Índice para reportes históricos de aplicación de medicamentos.
+CREATE INDEX idx_med_mascota_fecha ON medicamentos_mascota(fecha_aplicacion);
+
+-- Índice para optimizar las búsquedas por medicamento administrado,
+-- útil en reportes de tratamientos o historial farmacológico.
+CREATE INDEX idx_medicamentos_mascota_medicamento ON medicamentos_mascota(id_medicamento);
+
+-- ========================================
+-- TABLA: vacunas_mascota
+-- Registro histórico de vacunas aplicadas a las mascotas.
+-- Incluye vía, dosis, durabilidad, próxima dosis y colaborador responsable.
+-- ========================================
+CREATE TABLE IF NOT EXISTS vacunas_mascota (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
+	id_vacuna INT NOT NULL,
+	id_mascota BIGINT NOT NULL,
+	id_via INT NOT NULL,
+	dosis VARCHAR(32),
+	fecha_aplicacion DATE NOT NULL,
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	durabilidad_anios INT,
+	proxima_dosis DATE NULL,
+	id_colaborador BIGINT NULL,
+    id_veterinario BIGINT NULL,
+	observaciones VARCHAR(128),
+	fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+);
+ALTER TABLE vacunas_mascota
+	ADD CONSTRAINT fk_vacuna FOREIGN KEY (id_vacuna) REFERENCES vacunas(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_vacuna_mascota FOREIGN KEY (id_mascota) REFERENCES mascotas(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_vacuna_via FOREIGN KEY (id_via) REFERENCES vias_aplicacion(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_vacuna_colaborador FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+		ON DELETE SET NULL ON UPDATE CASCADE,
+	ADD CONSTRAINT fk_vacuna_veterinario FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
+		ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- Índice para consultas rápidas del historial de vacunas
+-- aplicadas a una mascota específica.
+CREATE INDEX idx_vacunas_mascota_mascota ON vacunas_mascota(id_mascota);
+
+-- Índice para búsquedas por colaborador en historial de vacunas.
+CREATE INDEX idx_vacuna_mascota_colaborador ON vacunas_mascota(id_colaborador);
+
+-- Índice para búsquedas por veterinario en historial de vacunas.
+CREATE INDEX idx_vacuna_mascota_veterinario ON vacunas_mascota(id_veterinario);
+
+-- Índice para consultar rápidamente las próximas dosis programadas.
+CREATE INDEX idx_vacuna_mascota_proxima_dosis ON vacunas_mascota(proxima_dosis);
+
+-- Índice para reportes históricos de vacunación.
+CREATE INDEX idx_vacuna_mascota_fecha ON vacunas_mascota(fecha_aplicacion);
+
+-- Índice para mejorar consultas por tipo de vacuna aplicada,
+-- usado en reportes de vacunación y seguimiento clínico.
+CREATE INDEX idx_vacuna_mascota_vacuna ON vacunas_mascota(id_vacuna);
+
+
