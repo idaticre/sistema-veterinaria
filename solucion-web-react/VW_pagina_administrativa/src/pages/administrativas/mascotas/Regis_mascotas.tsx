@@ -33,7 +33,7 @@ function Regis_mascotas() {
                 <main className={minimizado ? 'minimize' : ''}>
                     <div className="content-section hidden" id="nueva-mascota-section">
                             <div className="form-header">
-                                <h3>Información de la Mascota</h3>
+                                <h2>Información de la Mascota</h2>
                             </div>
                             <div className="form-content">
                                 <div className="form-main">
@@ -180,10 +180,10 @@ function Regis_mascotas() {
                                             </div>
 
                                             <div className="owner-info">
-                                                <h4>👤 Información del Dueño</h4>
+                                                <h4>Dueño</h4>
                                                 <div className="owner-search">
-                                                    <input type="text" id="owner-search" placeholder="Buscar por DNI o nombre del cliente"/>
-                                                    <button type="button" className="search-btn">Buscar</button>
+                                                    <input type="text" id="owner-search" placeholder="(FALTA DESARROLLAR) Buscar por DNI o número de documento"/>
+                                                    <button type="button" className="search-btn">Mostrar información del dueño</button>
                                                 </div>
                                                 <div className="owner-details" id="owner-details">
                                                     <div className="owner-item">

@@ -15,7 +15,7 @@ main.minimize{
 
 #nueva-mascota-section{
     position: relative;
-    background-color: #5cc7b1;
+    background-color: white;
     border-radius: 10px;
     padding: 1rem;
 }
@@ -36,11 +36,6 @@ main.minimize{
             font-weight: 400;
             display: flex;
             align-items: center;
-        }
-
-        .form-header h3::before {
-            content: '📋';
-            margin-right: 8px;
         }
 
         /* Contenido de formularios */
@@ -99,14 +94,7 @@ main.minimize{
             background: white;
         }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #00d4aa;
-            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
-        }
-
+        
         .form-group textarea {
             resize: vertical;
             min-height: 80px;
@@ -128,13 +116,13 @@ main.minimize{
         .radio-group input[type="radio"] {
             width: 18px;
             height: 18px;
-            accent-color: #007fd4;
+            accent-color: #ff9900;
         }
 
         .radio-group label {
             margin: 0;
             font-weight: 400;
-            color: #666;
+            color: #ff9900;
             cursor: pointer;
         }
 
@@ -156,7 +144,7 @@ main.minimize{
         }
 
         .profile-photo:hover {
-            border-color: #00d4aa;
+            border-color: #ff9900;
             transform: scale(1.05);
         }
 
@@ -174,7 +162,7 @@ main.minimize{
 
         /* Botón de envío */
         .submit-btn {
-            background: #786151;
+            background: #4caf50;
             color: white;
             padding: 12px 30px;
             border: none;
@@ -189,12 +177,11 @@ main.minimize{
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
 
         .photo-upload-text {
             font-size: 14px;
-            color: #00d4aa;
+            color: #ff9900;
             text-decoration: none;
             text-align: center;
             font-weight: 500;
@@ -210,13 +197,13 @@ main.minimize{
         }
 
         .list-container h3 {
-            color: #333;
+            color: #ff9900;
             margin-bottom: 20px;
             font-size: 20px;
         }
 
         .list-container p {
-            color: #666;
+            color: #ff9900;
             font-size: 16px;
             text-align: center;
             margin-top: 40px;
@@ -261,7 +248,6 @@ main.minimize{
 
         /* Sección de información del dueño */
         .owner-info {
-            background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
             margin-top: 20px;
@@ -288,7 +274,7 @@ main.minimize{
 
         .search-btn {
             padding: 10px 20px;
-            background: #2e6bf9;
+            background: #4caf50;
             color: white;
             border: none;
             border-radius: 6px;
@@ -296,9 +282,6 @@ main.minimize{
             font-weight: 500;
         }
 
-        .search-btn:hover {
-            background: #00b894;
-        }
 
         .owner-details {
             display: none;
