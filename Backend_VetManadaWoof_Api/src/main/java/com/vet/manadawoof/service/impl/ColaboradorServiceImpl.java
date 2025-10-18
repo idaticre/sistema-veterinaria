@@ -190,29 +190,43 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     @Override
     @Transactional
     public ColaboradorResponseDTO eliminar(Long idColaborador) {
-        Object[] row = (Object[]) entityManager.createNativeQuery(
+        // Obtener datos básicos del colaborador
+        Object[] colRow = (Object[]) entityManager.createNativeQuery(
                         "SELECT id, codigo, id_entidad FROM colaboradores WHERE id = ?1")
                 .setParameter(1, idColaborador)
                 .getSingleResult();
         
-        if(row == null) {
-            return ColaboradorResponseDTO.builder().mensaje("ERROR: Colaborador no encontrado").build();
+        if(colRow == null) {
+            return ColaboradorResponseDTO.builder()
+                    .mensaje("ERROR: Colaborador no encontrado")
+                    .build();
         }
         
-        Long idEntidad = ((Number) row[2]).longValue();
+        Long idEntidad = ((Number) colRow[2]).longValue();
         
+        // Eliminar lógicamente
         entityManager.createNativeQuery("UPDATE colaboradores SET activo = 0 WHERE id = ?1")
                 .setParameter(1, idColaborador)
                 .executeUpdate();
         
-        return ColaboradorResponseDTO.builder()
-                .id(idColaborador)
-                .idEntidad(idEntidad)
-                .codigoColaborador(row[1] != null ? row[1].toString() : null)
-                .activo(false)
-                .mensaje("Colaborador eliminado lógicamente con éxito")
-                .build();
+        // Consultar datos completos tras la eliminación
+        Object[] row = (Object[]) entityManager.createNativeQuery(
+                        "SELECT c.id, c.codigo, c.id_entidad, c.fecha_ingreso, e.fecha_registro, " +
+                                "c.activo, c.foto, e.nombre, e.sexo, e.documento, e.id_tipo_persona_juridica, " +
+                                "e.id_tipo_documento, e.correo, e.telefono, e.direccion, e.ciudad, e.distrito " +
+                                "FROM colaboradores c " +
+                                "LEFT JOIN entidades e ON c.id_entidad = e.id " +
+                                "WHERE c.id = ?1")
+                .setParameter(1, idColaborador)
+                .getSingleResult();
+        
+        // Reusar el mapper para mantener consistencia
+        ColaboradorResponseDTO dto = mapRowToFullDto(row);
+        dto.setActivo(false);
+        dto.setMensaje("Colaborador eliminado lógicamente con éxito");
+        return dto;
     }
+    
     
     /**
      * Construye el Stored Procedure de registro o actualización.

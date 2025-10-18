@@ -134,10 +134,10 @@ CREATE TABLE IF NOT EXISTS roles (
 -- ROLES DEL SISTEMA
 -- ========================================
 INSERT INTO roles (nombre, descripcion) VALUES
-('ADMINISTRADOR GENERAL', NULL),
-('ADMINISTRADOR G 2', NULL),
-('AUXILIAR CAJA', NULL),
-('AUXILIAR GROMERS', NULL);
+('ADMINISTRADOR GENERAL', 'Tiene control total del sistema'),
+('ADMINISTRADOR G 2', 'Permisos de gestión general de sucursal'),
+('AUXILIAR CAJA', 'Gestiona pagos y facturación'),
+('AUXILIAR GROMERS', 'Atiende grooming y soporte de servicios');
 
 -- ========================================
 -- TABLA: usuarios_roles

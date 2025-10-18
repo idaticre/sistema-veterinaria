@@ -37,7 +37,7 @@ public class UsuarioRolRestController {
      * Lista todos los usuarios con los roles asignados.
      * Ideal para vista administrativa (gestión interna).
      */
-    @GetMapping("/listar")
+    @GetMapping
     public ResponseEntity<ApiResponse<List<UsuarioRolResponseDTO>>> listar() {
         List<UsuarioRolResponseDTO> lista = service.listar();
         return ResponseEntity.ok(new ApiResponse<>(true, "Lista de usuarios y sus roles", lista));
@@ -46,7 +46,7 @@ public class UsuarioRolRestController {
     /**
      * Lista todos los roles asignados a un usuario específico.
      */
-    @GetMapping("/listar/{idUsuario}")
+    @GetMapping("/{idUsuario}")
     public ResponseEntity<ApiResponse<List<UsuarioRolResponseDTO>>> listarPorUsuario(@PathVariable Integer idUsuario) {
         List<UsuarioRolResponseDTO> lista = service.listarPorUsuario(idUsuario);
         return ResponseEntity.ok(new ApiResponse<>(true, "Roles asignados al usuario", lista));
