@@ -1,0 +1,80 @@
+.asignar-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.asignar-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.asignar-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: sans-serif;
+}
+
+.asignar-tabla th,
+.asignar-tabla td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+}
+
+.asignar-tabla th {
+  background-color: #f2f2f2;
+  color: #333;
+}
+
+.asignar-tabla td ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.asignar-tabla td li {
+  background-color: #e9f5ff;
+  margin: 5px 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-asignar {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-asignar:hover {
+  background-color: #0056b3;
+}
+
+.btn-eliminar {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.btn-eliminar:hover {
+  background-color: #b52a37;
+}
+
+.sin-rol {
+  color: #888;
+  font-style: italic;
+}

@@ -236,5 +236,10 @@ export interface Usuario {
 export interface Rol {
   id: number;
   nombre: string;
-  descripcion: string | null;
+  descripcion: string;
+}
+
+export interface UsuarioRol {
+  username: string;
+  rol: string;
 }
