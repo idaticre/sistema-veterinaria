@@ -1,104 +1,120 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./pagos.css";
 
+interface Colaborador {
+  id: number;
+  codigoColaborador: string;
+  nombre: string;
+  correo?: string;
+  telefono?: string;
+  activo: boolean;
+}
+
 interface Pago {
   id: number;
-  colaborador: string;
-  cargo: string;
+  colaborador: Colaborador;
   monto: number;
   fecha: string;
   metodo: string;
   estado: string;
 }
 
-function Pagos() {
+function PagosColaboradores() {
   const [minimizado, setMinimizado] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [pagos, setPagos] = useState<Pago[]>([]);
-  const [filtrados, setFiltrados] = useState<Pago[]>([]);
-  const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
+  const [filtrados, setFiltrados] = useState<Colaborador[]>([]);
+  const [colaboradorSeleccionado, setColaboradorSeleccionado] = useState<Colaborador | null>(null);
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [edicion, setEdicion] = useState<Pago | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [errorMonto, setErrorMonto] = useState("");
+  const [nuevoPago, setNuevoPago] = useState({
+    monto: "",
+    fecha: new Date().toISOString().split("T")[0],
+    metodo: "",
+    estado: "Pendiente",
+  });
 
-  // Cargar desde LocalStorage al iniciar
   useEffect(() => {
-    const guardados = localStorage.getItem("pagos");
-    if (guardados) {
-      const datos = JSON.parse(guardados);
-      setPagos(datos);
-      setFiltrados(datos);
-    } else {
-      const inicial: Pago[] = [
-        { id: 1, colaborador: "Carlos López", cargo: "Administrador", monto: 1200, fecha: "2025-08-10", metodo: "Transferencia", estado: "Pagado" },
-        { id: 2, colaborador: "Ana Torres", cargo: "Veterinaria", monto: 1500, fecha: "2025-08-15", metodo: "Efectivo", estado: "Pendiente" },
-      ];
-      setPagos(inicial);
-      setFiltrados(inicial);
-    }
+    axios
+      .get("http://localhost:8088/api/colaboradores")
+      .then((res) => setColaboradores(res.data.data || []))
+      .catch((err) => console.error("Error cargando colaboradores:", err));
+
+    axios
+      .get("http://localhost:8088/api/pagos")
+      .then((res) => setPagos(res.data.data || []))
+      .catch((err) => console.error("Error cargando pagos:", err));
   }, []);
 
-  // Guardar en LocalStorage cada vez que cambien los pagos
+  
   useEffect(() => {
-    localStorage.setItem("pagos", JSON.stringify(pagos));
-  }, [pagos]);
-
-  // Filtrar por búsqueda
-  useEffect(() => {
-    const resultado = pagos.filter(p =>
-      p.colaborador.toLowerCase().includes(busqueda.toLowerCase())
-    );
-    setFiltrados(resultado);
-  }, [busqueda, pagos]);
-
-  // Cerrar menú al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuActivoId(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Eliminar pago
-  const eliminarPago = (id: number) => {
-    const actualizados = pagos.filter(p => p.id !== id);
-    setPagos(actualizados);
-    setFiltrados(actualizados);
-    setMenuActivoId(null);
-  };
-
-  // Editar pago
-  const editarPago = (id: number) => {
-    const seleccionada = pagos.find(p => p.id === id);
-    if (seleccionada) {
-      setEdicion(seleccionada);
-      setMostrarModal(true);
-    }
-  };
-
-  // Guardar nuevo o editado
-  const guardarPago = () => {
-    if (!edicion) return;
-
-    if (edicion.id === 0) {
-      const nuevo = { ...edicion, id: pagos.length ? Math.max(...pagos.map(p => p.id)) + 1 : 1 };
-      const nuevosPagos = [...pagos, nuevo];
-      setPagos(nuevosPagos);
-      setFiltrados(nuevosPagos);
+    if (busqueda.trim() === "") {
+      setFiltrados([]);
     } else {
-      const actualizados = pagos.map(p =>
-        p.id === edicion.id ? edicion : p
+      setFiltrados(
+        colaboradores.filter((c) =>
+          c.nombre?.toLowerCase().includes(busqueda.toLowerCase())
+        )
       );
-      setPagos(actualizados);
-      setFiltrados(actualizados);
+    }
+  }, [busqueda, colaboradores]);
+
+  const pagosColaborador = pagos.filter(
+    (p) => p.colaborador?.id === colaboradorSeleccionado?.id
+  );
+
+  const registrarPago = () => {
+    if (!colaboradorSeleccionado) {
+      alert("Selecciona un colaborador primero");
+      return;
     }
 
-    setMostrarModal(false);
-    setEdicion(null);
+    if (!nuevoPago.monto || !nuevoPago.metodo) {
+      alert("Completa todos los campos del pago");
+      return;
+    }
+
+    const montoNum = Number(nuevoPago.monto);
+    if (isNaN(montoNum) || montoNum <= 0) {
+      setErrorMonto("Ingrese un número válido para el monto");
+      return;
+    }
+
+    const pagoNuevo = {
+      colaborador: { id: colaboradorSeleccionado.id },
+      monto: montoNum,
+      fecha: nuevoPago.fecha,
+      metodo: nuevoPago.metodo,
+      estado: nuevoPago.estado,
+    };
+
+    axios
+      .post("http://localhost:8088/api/pagos", pagoNuevo)
+      .then((res) => {
+        alert("✅ Pago registrado correctamente");
+        setPagos([...pagos, res.data.data || res.data]);
+        setMostrarModal(false);
+        setNuevoPago({
+          monto: "",
+          fecha: new Date().toISOString().split("T")[0],
+          metodo: "",
+          estado: "Pendiente",
+        });
+        setErrorMonto("");
+      })
+      .catch((err) => {
+        console.error("Error al registrar pago:", err);
+        alert("❌ No se pudo registrar el pago");
+      });
+  };
+
+  const seleccionarColaborador = (colaborador: Colaborador) => {
+    setColaboradorSeleccionado(colaborador);
+    setBusqueda("");
+    setFiltrados([]);
   };
 
   return (
@@ -107,105 +123,86 @@ function Pagos() {
       <main className={minimizado ? "minimize" : ""}>
         <section id="lst_pagos">
           <div id="encabezado">
-            <h2>💵 Pagos de Colaboradores</h2>
-          </div>
-          <div id="buscador">
-            <div id="br_buscador">
-              <input
-                type="text"
-                placeholder="Buscar colaborador..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-              />
-            </div>
-            <button
-              onClick={() => {
-                setMostrarModal(true);
-                setEdicion({
-                  id: 0,
-                  colaborador: "",
-                  cargo: "",
-                  monto: 0,
-                  fecha: new Date().toISOString().split("T")[0],
-                  metodo: "",
-                  estado: "Pendiente",
-                });
-              }}
-            >
-              ➕ Registrar Pago
-            </button>
+            <h2>💵 Pagos a Colaboradores</h2>
           </div>
 
-          <div id="lista_pagos">
-            {filtrados.map((p) => (
-              <div className="registro_pago" key={p.id}>
-                <div className="info_pago">
-                  <span className="colaborador">{p.colaborador}</span>
-                  <span className="cargo">👔 {p.cargo}</span>
-                </div>
-                <span className="monto">💲 {p.monto}</span>
-                <span className="fecha">📅 {p.fecha}</span>
-                <span className="metodo">💳 {p.metodo}</span>
-                <span className={`estado ${p.estado.toLowerCase()}`}>
-                  {p.estado}
-                </span>
-                <div className="lst_opciones_container">
-                  <div className="lst_opciones" onClick={() => setMenuActivoId(p.id)}>
-                    <i className="fa-solid fa-ellipsis-vertical" />
-                  </div>
-                  {menuActivoId === p.id && (
-                    <div ref={menuRef} className="menu-opciones">
-                      <button onClick={() => editarPago(p.id)}>✏️ Editar</button>
-                      <button onClick={() => eliminarPago(p.id)}>🗑️ Eliminar</button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+          <div id="buscador">
+            <input
+              type="text"
+              placeholder="Buscar colaborador..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
           </div>
+
+          {busqueda && filtrados.length > 0 && (
+            <div className="resultados-busqueda">
+              {filtrados.map((c) => (
+                <div
+                  key={c.id}
+                  className={`item-colaborador ${colaboradorSeleccionado?.id === c.id ? "seleccionado" : ""}`}
+                  onClick={() => seleccionarColaborador(c)}
+                >
+                  {c.nombre} ({c.codigoColaborador})
+                </div>
+              ))}
+            </div>
+          )}
+
+          {colaboradorSeleccionado && (
+            <div className="panel-pagos">
+              <div className="info-colaborador">
+                <h3>👤 {colaboradorSeleccionado.nombre}</h3>
+                <p><strong>Código:</strong> {colaboradorSeleccionado.codigoColaborador}</p>
+              </div>
+
+              <button className="btn-registrar" onClick={() => setMostrarModal(true)}>
+                ➕ Registrar Pago
+              </button>
+
+              <h4>📅 Historial de Pagos</h4>
+              <div className="tabla-pagos">
+                {pagosColaborador.length > 0 ? (
+                  pagosColaborador.map((p) => (
+                    <div key={p.id} className="fila-pago">
+                      <div><strong>Fecha:</strong> {p.fecha}</div>
+                      <div><strong>Monto:</strong> S/ {p.monto}</div>
+                      <div><strong>Método:</strong> {p.metodo}</div>
+                      <div><strong>Estado:</strong> {p.estado}</div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No hay pagos registrados para este colaborador.</p>
+                )}
+              </div>
+            </div>
+          )}
         </section>
       </main>
 
       {mostrarModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>{edicion?.id === 0 ? "Registrar Nuevo Pago" : "Editar Pago"}</h3>
+            <h3>Registrar nuevo pago</h3>
             <input
               type="text"
-              placeholder="Nombre del colaborador"
-              value={edicion?.colaborador || ""}
-              onChange={(e) =>
-                setEdicion(prev => prev ? { ...prev, colaborador: e.target.value } : null)
-              }
+              placeholder="Monto (S/.)"
+              value={nuevoPago.monto}
+              onChange={(e) => {
+                setNuevoPago({ ...nuevoPago, monto: e.target.value });
+                setErrorMonto("");
+              }}
             />
-            <input
-              type="text"
-              placeholder="Cargo"
-              value={edicion?.cargo || ""}
-              onChange={(e) =>
-                setEdicion(prev => prev ? { ...prev, cargo: e.target.value } : null)
-              }
-            />
-            <input
-              type="number"
-              placeholder="Monto"
-              value={edicion?.monto || ""}
-              onChange={(e) =>
-                setEdicion(prev => prev ? { ...prev, monto: Number(e.target.value) } : null)
-              }
-            />
+            {errorMonto && <span className="error">{errorMonto}</span>}
+
             <input
               type="date"
-              value={edicion?.fecha || ""}
-              onChange={(e) =>
-                setEdicion(prev => prev ? { ...prev, fecha: e.target.value } : null)
-              }
+              value={nuevoPago.fecha}
+              onChange={(e) => setNuevoPago({ ...nuevoPago, fecha: e.target.value })}
             />
             <select
-              value={edicion?.metodo || ""}
-              onChange={(e) =>
-                setEdicion(prev => prev ? { ...prev, metodo: e.target.value } : null)
-              }
+              value={nuevoPago.metodo}
+              onChange={(e) => setNuevoPago({ ...nuevoPago, metodo: e.target.value })}
             >
               <option value="">Seleccione método</option>
               <option value="Transferencia">Transferencia</option>
@@ -214,17 +211,15 @@ function Pagos() {
               <option value="Plin">Plin</option>
             </select>
             <select
-              value={edicion?.estado || ""}
-              onChange={(e) =>
-                setEdicion(prev => prev ? { ...prev, estado: e.target.value } : null)
-              }
+              value={nuevoPago.estado}
+              onChange={(e) => setNuevoPago({ ...nuevoPago, estado: e.target.value })}
             >
               <option value="Pendiente">Pendiente</option>
               <option value="Pagado">Pagado</option>
             </select>
             <div className="acciones-modal">
-              <button onClick={guardarPago}>Guardar</button>
-              <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
+              <button onClick={registrarPago}>Guardar</button>
+              <button onClick={() => setMostrarModal(false)}>Cancelar</button>
             </div>
           </div>
         </div>
@@ -233,4 +228,4 @@ function Pagos() {
   );
 }
 
-export default Pagos;
+export default PagosColaboradores;

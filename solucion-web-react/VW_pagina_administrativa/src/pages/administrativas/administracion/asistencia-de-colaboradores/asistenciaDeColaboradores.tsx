@@ -38,12 +38,10 @@ function AsistenciaColaboradores() {
     axios
       .get("http://localhost:8088/api/colaboradores")
       .then((res) => {
-        // Tu backend envía los datos en res.data.data
         setColaboradores(res.data.data || []);
       })
       .catch((err) => console.error("Error cargando colaboradores:", err));
 
-    // 🔹 Cargar asistencias
     axios
       .get("http://localhost:8088/api/registro-asistencia")
       .then((res) => setAsistencias(res.data.data || []))
@@ -65,7 +63,7 @@ function AsistenciaColaboradores() {
     return `COL-${String(numero).padStart(4, "0")}`;
   };
 
-  // 🔹 Registrar colaborador (ajustado al backend actual)
+  // 🔹 Registrar colaborador
   const registrarColaborador = () => {
     if (!nuevoColaborador.nombre) {
       alert("Completa todos los campos");
@@ -128,6 +126,12 @@ function AsistenciaColaboradores() {
       });
   };
 
+  // 🔹 Seleccionar colaborador (corregido)
+  const seleccionarColaborador = (colab: Colaborador) => {
+    setColaboradorSeleccionado(colab);
+    setBusqueda(""); // limpia el campo de búsqueda
+  };
+
   // 🔹 Filtrar registros del colaborador seleccionado
   const registrosColaborador = asistencias.filter(
     (a) => a.colaborador?.id === colaboradorSeleccionado?.id
@@ -149,9 +153,6 @@ function AsistenciaColaboradores() {
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
-            <button onClick={() => setMostrarModal(true)}>
-              ➕ Registrar Colaborador
-            </button>
           </div>
 
           {busqueda && filtrados.length > 0 && (
@@ -160,7 +161,7 @@ function AsistenciaColaboradores() {
                 <div
                   key={c.id}
                   className={`item-colaborador ${colaboradorSeleccionado?.id === c.id ? "seleccionado" : ""}`}
-                  onClick={() => setColaboradorSeleccionado(c)}
+                  onClick={() => seleccionarColaborador(c)} // ✅ usa la función corregida
                 >
                   {c.nombre} ({c.codigoColaborador})
                 </div>
