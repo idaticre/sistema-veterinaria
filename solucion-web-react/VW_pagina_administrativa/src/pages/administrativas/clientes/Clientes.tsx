@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import './clientes.css';
 import axios from 'axios';
@@ -12,53 +12,39 @@ function Lst_clientes() {
   const [filtrados, setFiltrados] = useState<ClienteResponse[]>([]);
   const [clientes, setClientes] = useState<ClienteResponse[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteResponse | null>(null);
-  const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+
   
   useEffect(() => {
     axios.get("http://localhost:8088/api/clientes")
       .then(res => {
-        console.log("DATA CLIENTES:", res.data);
+        console.log("clientes:", res.data);
         const lista = res.data.data;
-        setClientes(lista);
-        setFiltrados(lista);
+
+        const activos = lista.filter((cliente: ClienteResponse) =>cliente.activo === true);
+
+        setClientes(activos);
+        setFiltrados(activos);
       })
       .catch(err => {
         console.error("Error en la carga de datos", err);
       });
   }, []);
 
-  /*const handleDelete = (idEntidad?: number) => {
-    if (idEntidad === undefined) return;
+  const handleDelete = (id?: number) => {
+    if (id === undefined) return; 
 
-    if (!window.confirm("¿Seguro que deseas eliminar este cliente")) {
-      return;
-    }
+    if (!window.confirm("¿Seguro que deseas eliminar este cliente?")) return;
 
-    axios.delete(`http://localhost:8088/api/entidades/${idEntidad}`)
+    axios.delete(`http://localhost:8088/api/clientes/eliminar/${id}`)
       .then(() => {
-        setClientes(prev => prev.filter(c => c.idEntidad !== idEntidad));
-        setFiltrados(prev => prev.filter(c => c.idEntidad !== idEntidad));
-        alert("✅ Entidad eliminada correctamente");
+        const actualizados = clientes.filter(e => e.id !== id);
+        setClientes(actualizados);
+        setFiltrados(actualizados);
       })
       .catch(err => {
-        console.error("Error al eliminar la entidad:", err);
-        alert("❌ No se pudo eliminar la entidad.");
+        console.error("Error al eliminar este cliente", err);
       });
-  };*/
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuActivoId(null); 
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -98,38 +84,33 @@ function Lst_clientes() {
                   <Link to="/administracion/cliente/registro"><button>➕AÑADIR</button></Link>
                 </div>
                 <div id='lista_clientes'>
-                    {filtrados.map((cliente) =>(
-                      <div className='registro_cliente'>
-                        <div className='identificador_client' >
-                          <span id='identificador'>{cliente.id}</span>
-                        </div>
-                        <div className='data_client' onClick={() => setClienteSeleccionado(cliente)} key={cliente.id}>
-                          <div className='info_cliente'>
-                            <span className='nombre_cliente'>{cliente.nombre}</span>
-                            <span className='dni_dueño'>Numero: {cliente.documento}</span>
-                          </div>
-                          <div className='info_cliente'>
-                            <span className='correo_dueño'>CORREO: {cliente.correo}</span>
-                          </div>
-                        </div>
-                        <div className="lst_opciones_container">
-                          <div className='lst_opciones' onClick={() => setMenuActivoId(cliente.id)}>
-                            <i className="fa-solid fa-ellipsis-vertical" />
-                          </div>
-                          {menuActivoId === cliente.id && (
-                            <div ref={menuRef} className="menu-opciones">
-                              <Link to="/administracion/cliente/registro" state={{ cliente }} onClick={() => setMenuActivoId(null)}>
-                                Editar
-                              </Link>
-                              {/*<button onClick={() => {handleDelete(cliente.idEntidad);setMenuActivoId(null);}}
-                              >
-                                Eliminar
-                              </button>*/}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Nombre</th>
+                        <th>N. Documento</th>
+                        <th>Correo</th>
+                        <th>Estado</th>
+                        <th className='accion_lst_cliente' colSpan={2}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtrados.map((cliente) =>(
+                        <tr key={cliente.id}>
+                          <td className='cliente_dato_vd' onClick={() => setClienteSeleccionado(cliente)}>{cliente.nombre}</td>
+                          <td className='cliente_dato_vd' onClick={() => setClienteSeleccionado(cliente)}>{cliente.documento}</td>
+                          <td className='cliente_dato_vd' onClick={() => setClienteSeleccionado(cliente)}>{cliente.correo}</td>
+                          <td>{cliente.activo? "✅" : "❌"}</td>
+                          <td>
+                            <Link to="/administracion/cliente/registro" state={{ cliente }}>✏️</Link>
+                          </td>
+                          <td>
+                            <i onClick={() => {handleDelete(cliente.id)}}>🗑️</i>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>  
                 </div>
             </section>
             {clienteSeleccionado && (

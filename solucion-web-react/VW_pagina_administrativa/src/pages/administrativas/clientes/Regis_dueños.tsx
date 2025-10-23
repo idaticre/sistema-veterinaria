@@ -7,9 +7,9 @@ import axios from 'axios';
 
 function regis_dueños() {
   const [minimizado, setMinimizado] = useState(false);
-  const [imagenDueño, setImagenDueño] = useState<string | null>(null); 
+  //const [imagenDueño, setImagenDueño] = useState<string | null>(null); 
   const [tipoDoc, setTipDoc] = useState<tipo_doc[]>([]);
-  const [clienteReq, setClienteReq] = useState<ClienteResquest[]>([]);
+  //const [clienteReq, setClienteReq] = useState<ClienteResquest[]>([]);
   const [idTipoPersonaJuridica, setIdTipoPersonaJuridica] = useState<number>(0);
   const [nombre, setNombre] = useState("");
   const [sexo, setSexo] = useState<"M" | "F" | undefined>(undefined);
@@ -121,9 +121,15 @@ function regis_dueños() {
                 <form onSubmit={handleSubmit}>
                   {clienteSelecc && (
                     <div className="form-row">
-                      <div className="form-group full-width">
+                      <div className="form-group">
                         <label>ID</label>
-                        <input type="text" value={clienteSelecc.id} readOnly/>
+                        <input type="text" value={clienteSelecc.codigoCliente} disabled readOnly/>
+                      </div>
+                      <div className='form-group'>
+                        <label>Fecha de resgitro</label>
+                        <input type="text" value={
+                          clienteSelecc.fechaRegistro ? 
+                          `${clienteSelecc.fechaRegistro.slice(11, 16)}  del  ${clienteSelecc.fechaRegistro.split('T')[0]}` : '' } disabled readOnly/>
                       </div>
                     </div>
                   )}
@@ -148,7 +154,6 @@ function regis_dueños() {
                       <input type="radio" name="genero" value="F" checked={sexo === "F"} onChange={() => setSexo("F")} /> Femenino
                     </div>
                   </div>
-
                   <div className="form-row"> 
                     <div className="form-group">
                       <label htmlFor="dni">Tipo de documento</label>

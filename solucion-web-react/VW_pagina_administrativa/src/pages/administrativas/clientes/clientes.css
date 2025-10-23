@@ -1,4 +1,4 @@
-#clientes{
+#clientes {
   display: flex;
   width: 100%;
   height: 100vh;
@@ -11,7 +11,7 @@
   border-radius: 10px;
 }
 
-#buscador{
+#buscador {
   display: flex;
   align-items: center;
   margin-bottom: 1rem;
@@ -19,81 +19,103 @@
   justify-content: space-between;
 }
 
-#br_buscador{
+#br_buscador {
   width: 50vw;
 }
 
-#br_buscador input{
+#br_buscador input {
   width: 100%;
   border: solid black 2px;
   border-radius: 10px;
 }
 
-#buscador button{
-  display: flex;
-  width: 10rem;
-  justify-content: center;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  background-color: #ffad09e2;
-  cursor: pointer;
-}
-
-#buscador a{
+#buscador a {
   text-decoration: none;
 }
 
-#buscador button:hover{
-  background-color: #faba3a;
+#buscador button:hover {
+  background-color: #69f214db;
 }
-
-#lista_clientes{
-  display: flex;
-  flex-wrap: wrap;
+#lista_clientes {
   width: 100%;
-  gap: 0.3rem 0.8rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  font-family: "Poppins", sans-serif;
 }
 
-.registro_cliente{
-  display: flex;
-  padding: 1px 0.5rem;
-  width: 49%;
-  background-color: rgb(255, 223, 188);
-  border: black solid 2px;
-  border-radius: 10px;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
+#lista_clientes table {
+  width: 100%;
+  border-collapse: collapse;
 }
-.identificador_client{
-  display: flex;
-  justify-content: center;
-  width: 5%;
+
+#lista_clientes thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
 }
-.identificador_client span{
-  font-size: 2rem;
+
+#lista_clientes th {
+  text-align: left;
+  padding: 0.9rem;
   font-weight: 600;
+  color: #343a40;
+  font-size: 0.95rem;
+  text-align: center;
 }
 
-.data_client{
-  display: flex;
-  flex: 1;
-  flex-direction: column;
+#lista_clientes td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.95rem;
+  color: #212529;
+  text-align: center;
+  transition: all 0.4s ease;
+
 }
 
-.info_cliente{
-  display: flex;
-  justify-content:space-between;
-}
-
-.lst_opciones{
-  margin-left: 0.2rem;
+#lista_clientes tr:hover td {
+  background-color: #87d4c8;
   cursor: pointer;
 }
 
-.lst_opciones i{
-  font-size: 1.2rem;
+.accion_lst_cliente{
+  width: 10%;
+}
+
+#lista_clientes td a,
+#lista_clientes td i {
+  display: inline-block;
+  padding: 0.4rem 0.7rem;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.15s ease;
+}
+
+#lista_clientes td a {
+  background-color: #0d6efd;
+  color: white;
+}
+
+#lista_clientes td a:hover {
+  background-color: #0b5ed7;
+  transform: scale(1.05);
+}
+
+#lista_clientes td i {
+  background-color: #dc3545;
+  color: white;
+  font-style: normal;
+  margin-left: 0.4rem;
+  padding: 0.4rem 0.7rem;
+}
+
+#lista_clientes td i:hover {
+  background-color: #bb2d3b;
+  transform: scale(1.05);
 }
 
 .VDCliente {
@@ -119,17 +141,17 @@
   box-shadow: 0 0 10px black;
 }
 
-.VDCliente_contenido h2{
+.VDCliente_contenido h2 {
   text-align: center;
   justify-content: center;
 }
 
-.VDCliente_contenido_info{
+.VDCliente_contenido_info {
   display: flex;
   justify-content: space-evenly;
 }
 
-.VDCliente_contenido_info table{
+.VDCliente_contenido_info table {
   width: 60%;
   border-collapse: collapse;
 }
@@ -139,13 +161,13 @@
   border-bottom: 1px solid #ccc;
 }
 
-.VDCliente_foto{
+.VDCliente_foto {
   display: flex;
   width: 35%;
 }
 
-.VDCliente_foto img{
-  width: 100%;  
+.VDCliente_foto img {
+  width: 100%;
   border: #333 2px solid;
 }
 
@@ -159,40 +181,4 @@
   font-size: 1.2rem;
   cursor: pointer;
   border-radius: 4px;
-}
-
-.lst_opciones_container {
-  position: relative;
-  display: inline-block;
-}
-
-.lst_opciones {
-  cursor: pointer;
-  padding: 5px;
-}
-
-.menu-opciones {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border: 1px solid #ccc;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-  z-index: 1000;
-  padding: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  width: 120px;
-}
-
-.menu-opciones a {
-  text-decoration: none;
-  color: #333;
-  padding: 0.3rem 0.5rem;
-  border-radius: 4px;
-}
-
-.menu-opciones a:hover {
-  background-color: #f0f0f0;
 }
