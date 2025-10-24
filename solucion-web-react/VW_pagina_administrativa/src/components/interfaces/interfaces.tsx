@@ -41,7 +41,7 @@ export interface ColaboradorRequest{
     direccion:string;
     ciudad: string;
     distrito: string;
-    idUsuario: number;
+    idUsuario?: number;
     activo: boolean;
     fechaIngreso: string;
     foto?: string;

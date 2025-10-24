@@ -80,7 +80,6 @@ const gestionarColaboradores: React.FC = () => {
             direccion: "",
             ciudad: "",
             distrito: "",
-            idUsuario: 0,
             activo: true,
             fechaIngreso: new Date().toISOString().split("T")[0],
             foto: ""
@@ -103,7 +102,6 @@ const gestionarColaboradores: React.FC = () => {
             direccion: colaborador.direccion,
             ciudad: colaborador.ciudad,
             distrito: colaborador.distrito,
-            idUsuario: 0,                                          
             activo: colaborador.activo,                           
             fechaIngreso: colaborador.fechaIngreso,                
             foto: colaborador.foto || ""                           
