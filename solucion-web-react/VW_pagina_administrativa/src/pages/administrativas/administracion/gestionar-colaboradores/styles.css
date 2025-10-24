@@ -75,12 +75,12 @@
 .listar-registros {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 4px; /* espacio entre filas */
 }
 
 .mostrar-registros {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr 2fr 2fr auto; 
   background: #ffffff;
   border: 1px solid #ddd;
   padding: 0.8rem 1rem;
@@ -95,9 +95,10 @@
 }
 
 .texto-de-registro {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #000000;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Opciones */
@@ -113,12 +114,12 @@
   cursor: pointer;
 }
 
-.menu-opciones {
+.menu-opciones-gm {
   position: absolute;
   top: 100%;
   right: 0;
-  background: rgb(255, 0, 0);
-  border: 1px solid #ff0000;
+  background: white;
+  border: 1px solid #ffffff;
   box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
   z-index: 99;
   padding: 0.5rem;
@@ -129,7 +130,7 @@
   border-radius: 8px;
 }
 
-.menu-opciones button {
+.menu-opciones-gm button {
   z-index: 99;
   color: black;
   background: none;
@@ -197,6 +198,6 @@ select {
 }
 
 .acciones-de-registro button:last-child {
-  background-color: #f44336;
+  background-color: white;
   color: white;
 }

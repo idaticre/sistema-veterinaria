@@ -9,11 +9,11 @@ const gestionarColaboradores: React.FC = () => {
     const [busqueda, setBusqueda] = useState("");
     const [colaboradores, setColaboradores] = useState<ColaboradorResponse[]>([]);
     const [filtrado, setFiltrado] = useState<ColaboradorResponse[]>([]);
-    const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
     const [mostrarModal, setMostrarModal] = useState(false);
     const [edicion, setEdicion] = useState<ColaboradorRequest | null>(null);
     const [tiposDocumento, setTiposDocumento] = useState<tipo_doc[]>([]);
     const [tiposPersonasJuridicas, setTiposPersonasJuridicas] = useState<TipoPersonaJuridica[]>([]);
+    const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
     const baseURL = "http://localhost:8088/api";
     
@@ -45,7 +45,7 @@ const gestionarColaboradores: React.FC = () => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
-    
+
     // Filtra por búsqueda
     useEffect(() => {
         const lista = colaboradores.filter(value => value.nombre.toLowerCase().includes(busqueda.toLowerCase()));
@@ -113,14 +113,15 @@ const gestionarColaboradores: React.FC = () => {
     // Guardar
     const guardarColaborador = async () => {
         if (!edicion) return;
+        
 
         try {
             if (edicion.id && edicion.id > 0) {
-                await axios.put(`${baseURL}/colaboradores/actualizar/${edicion.id}`, edicion);
-                alert("Colaborador actualizado correctamente");
+                const response = await axios.put(`${baseURL}/colaboradores/actualizar/${edicion.id}`, edicion);
+                console.log("Respuesta backend:", response.data);
             } else {
-                await axios.post(`${baseURL}/colaboradores/registrar`, edicion);
-                alert("Colaborador registrado correctamente");
+                const response = await axios.post(`${baseURL}/colaboradores/registrar`, edicion);
+                console.log("Respuesta backend:", response.data);
             }
             listarColaboradores();
             setEdicion(null);
@@ -135,9 +136,8 @@ const gestionarColaboradores: React.FC = () => {
     // Eliminar
     const eliminarColaborador = async (id: number) => {
         try {
-            const respuesta = await axios.delete(`${baseURL}/colaboradores/eliminar/${id}`, { data: { id } });
+            await axios.delete(`${baseURL}/colaboradores/eliminar/${id}`, { data: { id } });
             listarColaboradores();
-            return respuesta.data;
         } catch (error) {
             alert(error);
             console.error("Error al eliminar: ", error);
@@ -158,15 +158,15 @@ const gestionarColaboradores: React.FC = () => {
                     <div className="listar-registros">
                         {filtrado.map((registro) => (
                             <div className="mostrar-registros" key={registro.idColaborador}>
-                                <span className="texto-de-registro">{registro.idEntidad}</span>
+                                <span className="texto-de-registro">{registro.codigoColaborador}</span>
                                 <span className="texto-de-registro">{registro.nombre}</span>
-                                <span className="texto-de-registro">{registro.activo}</span>                             
-                                <span className="texto-de-registro">{registro.usuario}</span>
+                                <span className="texto-de-registro">{registro.documento}</span>
+                                <span className="texto-de-registro">{registro.telefono}</span>
                                 <span className="texto-de-registro">📅{registro.fechaIngreso}</span>
                                 <div className="listar-opciones-contenedor">
                                     <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.idColaborador)}><i className="fa-solid fa-ellipsis-vertical"/></div>
                                     {menuActivoId === registro.idColaborador && (
-                                        <div ref={menuRef} className="menu-opciones">
+                                        <div ref={menuRef} className="menu-opciones-gm">
                                             <button onClick={() => abrirFormularioEditar(registro)}>✏️ Editar</button>
                                             <button onClick={() => eliminarColaborador(registro.idColaborador)}>🗑️ Eliminar</button>
                                         </div>
