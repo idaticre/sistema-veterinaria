@@ -27,6 +27,10 @@ function Login() {
 
       if (response.ok && data.success) {   
         console.log("Login exitoso:", data.message)
+
+        localStorage.setItem("token", data.token || "dummy-token");
+        localStorage.setItem("nombreUsuario", data.usuario || usuario);
+
         navigate("/administracion/home")
       } else {
         alert(data.message || "Credenciales incorrectas")

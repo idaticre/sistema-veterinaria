@@ -12,6 +12,8 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
     const [openMenu, setOpenMenu] = useState<MenuKey>(null);
     const [minimizado,setMinimizado] = useState(false)
 
+    const nombreUsuario = localStorage.getItem("nombreUsuario");
+
     const clienteRef = useRef<HTMLUListElement | null>(null);
     const mascotasRef = useRef<HTMLUListElement | null>(null);
     const distribRef = useRef<HTMLUListElement | null>(null);
@@ -20,6 +22,18 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
     const adminRef = useRef<HTMLUListElement | null>(null);
     const seguridadRef = useRef<HTMLUListElement | null>(null);
     const agendaRef = useRef<HTMLUListElement | null>(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+        window.location.href = "/login";
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("nombreUsuario");
+    };
 
     const toggleMinimizado = () => {
         const nuevoEstado = !minimizado;
@@ -232,11 +246,11 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <img src="/baño.png" alt="" />
                             </div>
                             <div id="inf_user">
-                                <span className="nombre_user">VETERINARIA WOOF AUUUU</span>
+                                <span className="nombre_user">{nombreUsuario }</span>
                                 <span className="mail_user">123456@gmail.com</span>
                             </div>
                             <div className="user_icon">
-                                <Link to="/"><i className="fa-solid fa-right-to-bracket"></i></Link>
+                                <Link to="/" onClick={handleLogout}><i className="fa-solid fa-right-to-bracket"></i></Link>
                             </div>
                         </div>
                     </div>
