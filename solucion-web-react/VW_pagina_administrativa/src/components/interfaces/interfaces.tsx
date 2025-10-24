@@ -30,7 +30,7 @@ export interface ClienteResquest{
 }
 
 export interface ColaboradorRequest{
-    id: number;
+    id?: number;
     nombre: string;
     sexo: "M" | "F";
     documento:  string;
@@ -42,9 +42,9 @@ export interface ColaboradorRequest{
     ciudad: string;
     distrito: string;
     idUsuario: number;
-    estado: boolean;
+    activo: boolean;
     fechaIngreso: string;
-    foto: string;
+    foto?: string;
 }
 
 export interface HorarioTrabajoRequest{
@@ -134,7 +134,7 @@ export interface ColaboradorResponse{
     activo: boolean;
     fechaRegistro: string;
     fechaIngreso: string;
-    foto: string;
+    foto?: string;
     mensaje: string;
 }
 
@@ -242,4 +242,11 @@ export interface Rol {
 export interface UsuarioRol {
   username: string;
   rol: string;
+}
+
+export interface TipoPersonaJuridica {
+    id: number,
+    nombre: string,
+    descripcion: string,
+    activo: boolean
 }
