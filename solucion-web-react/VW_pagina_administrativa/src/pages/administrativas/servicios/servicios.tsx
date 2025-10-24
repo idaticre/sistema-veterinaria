@@ -2,6 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
 import "./styles.css"
 
+/* 
+
+GM: La API de servicios todavía no ha sido programada, una vez esté lista proceder con:
+    1. realizar los imports necesarios de interface de interfaces.tsx (eliminar el hardcodeado) y axios
+    2. Reemplazar CRUD con la API
+
+*/
+    
 interface Servicios {
     ID: number,
     CODIGO: string,
@@ -23,7 +31,7 @@ function gestionarServicios() {
     // Registros
     useEffect(() => {
         const ejemplo = [
-            {ID: 1, CODIGO: "CODIGO1", NOMBRE: "USUARIO1", DESCRIPCION: "CONTRASEÑA1", ACTIVO: 2},
+            {ID: 2, CODIGO: "CODIGO1", NOMBRE: "USUARIO1", DESCRIPCION: "CONTRASEÑA1", ACTIVO: 2},
         ];
         setServicios(ejemplo);
         setFiltrado(ejemplo);
