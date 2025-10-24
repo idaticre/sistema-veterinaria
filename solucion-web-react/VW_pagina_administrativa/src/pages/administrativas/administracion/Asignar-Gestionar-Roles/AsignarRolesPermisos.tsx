@@ -52,7 +52,7 @@ const AsignarRolesPermisos: React.FC = () => {
       console.error(error);
     }
   };
-
+  
   //Eliminar rol
   const eliminarRol = async (idUsuario: number, idRol: number) => {
     try {
@@ -78,7 +78,7 @@ const AsignarRolesPermisos: React.FC = () => {
 
       <main className={`contenido-roles ${minimizado ? "minimize" : ""}`}>
         <div className="asignar-container">
-          <h2>Asignar y Gestionar Roles</h2>
+          <h2>Gestionar Roles</h2>
           <div className="tabla-wrapper">
             <table className="asignar-tabla">
               <thead>
@@ -86,7 +86,6 @@ const AsignarRolesPermisos: React.FC = () => {
                   <th>Usuario</th>
                   <th>Roles Asignados</th>
                   <th>Asignar Nuevo Rol</th>
-                  <th>Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -137,9 +136,6 @@ const AsignarRolesPermisos: React.FC = () => {
                             </option>
                           ))}
                         </select>
-                      </td>
-
-                      <td>
                         <button className="btn-asignar" onClick={() => asignarRol(usuario.id)}>
                           Asignar
                         </button>
