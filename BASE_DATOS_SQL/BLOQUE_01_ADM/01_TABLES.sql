@@ -6,7 +6,7 @@
 -- y gestión de personal (veterinarios, horarios, asistencia).
 -- Al final del script podrá hacer un show tables para revisar mejor.
 -- =========================================================
--- select * from entidades;
+
 -- ========================================
 -- 0. Creación de la Base de Datos
 -- ========================================
@@ -52,30 +52,29 @@ INSERT INTO empresa(razon_social, ruc, direccion, ciudad, distrito, telefono, co
 'Sandra Alexis Laguna De La Rosa'
 );
 
+-- ========================================
+-- TABLA: tipo_documento
+-- Contiene los diferentes tipos de documentos permitidos para identificar entidades.
+-- Ejemplo: “DNI”, “RUC”, “PASAPORTE”
 	-- ========================================
-	-- TABLA: tipo_documento
-	-- Contiene los diferentes tipos de documentos permitidos para identificar entidades.
-	-- Ejemplo: “DNI”, “RUC”, “PASAPORTE”
-	-- ========================================
-	CREATE TABLE IF NOT EXISTS tipo_documento (
+CREATE TABLE IF NOT EXISTS tipo_documento (
 		id INT PRIMARY KEY AUTO_INCREMENT,
 		descripcion VARCHAR(32) NOT NULL,
 		activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
-	);
-	ALTER TABLE tipo_documento MODIFY descripcion VARCHAR(32) NOT NULL COLLATE utf8mb4_general_ci;
+);
+ALTER TABLE tipo_documento MODIFY descripcion VARCHAR(32) NOT NULL COLLATE utf8mb4_general_ci;
 
-	CREATE UNIQUE INDEX idx_tipo_documento_descripcion_ci ON tipo_documento(descripcion);
-	-- ========================================
-	-- TIPO DE DOCUMENTO
-	-- ========================================
-	INSERT INTO tipo_documento (descripcion) VALUES 
-	('DNI'), 
-	('RUC'), 
-	('CARNET EXT.'), 
-	('P. NAC.'), 
-	('PASAPORTE'), 
-	('OTROS');
-
+CREATE UNIQUE INDEX idx_tipo_documento_descripcion_ci ON tipo_documento(descripcion);
+-- ========================================
+-- TIPO DE DOCUMENTO
+-- ========================================
+INSERT INTO tipo_documento (descripcion) VALUES 
+('DNI'), 
+('RUC'), 
+('CARNET EXT.'), 
+('P. NAC.'), 
+('PASAPORTE'), 
+('OTROS');
 
 -- ========================================
 -- TABLA: tipo_persona_juridica
@@ -135,10 +134,10 @@ CREATE TABLE IF NOT EXISTS roles (
 -- ROLES DEL SISTEMA
 -- ========================================
 INSERT INTO roles (nombre, descripcion) VALUES
-('ADMINISTRADOR GENERAL', NULL),
-('ADMINISTRADOR G 2', NULL),
-('AUXILIAR CAJA', NULL),
-('AUXILIAR GROMERS', NULL);
+('ADMINISTRADOR GENERAL', 'Tiene control total del sistema'),
+('ADMINISTRADOR G 2', 'Permisos de gestión general de sucursal'),
+('AUXILIAR CAJA', 'Gestiona pagos y facturación'),
+('AUXILIAR GROMERS', 'Atiende grooming y soporte de servicios');
 
 -- ========================================
 -- TABLA: usuarios_roles
@@ -160,15 +159,6 @@ ALTER TABLE usuarios_roles
 
 -- Índice para búsquedas rápidas de roles asignados a un usuario específico.
 CREATE INDEX idx_usuarios_roles_usuario ON usuarios_roles(id_usuario);
-
--- ========================================
--- usuarios con roles (ejemplo)
--- ========================================
-INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES
-(1, 1),  -- admin_woof  → ADMINISTRADOR GENERAL
-(2, 2),  -- admin_g2    → ADMINISTRADOR G 2
-(3, 3),  -- caja_milo   → AUXILIAR CAJA
-(4, 4);  -- gromer_luna → AUXILIAR GROMERS
 
 -- ========================================
 -- TABLA: entidades
@@ -217,7 +207,7 @@ CREATE TABLE IF NOT EXISTS colaboradores (
     id_entidad BIGINT NOT NULL UNIQUE,
     fecha_ingreso DATE,
     fecha_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    id_usuario INT NOT NULL,
+    id_usuario INT NULL,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1)),
     foto VARCHAR(128)
 );
@@ -332,7 +322,7 @@ CREATE INDEX idx_veterinarios_especialidad ON veterinarios(id_especialidad);
 -- ========================================
 -- TABLA: dias_semana
 -- Lista los días de la semana para asignación de horarios.
--- ========================================
+-- =========================	===============
 CREATE TABLE dias_semana (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(20) UNIQUE NOT NULL,
@@ -343,25 +333,6 @@ CREATE TABLE dias_semana (
 -- ========================================
 INSERT INTO dias_semana (nombre) VALUES 
 ('LUNES'), ('MARTES'), ('MIÉRCOLES'), ('JUEVES'), ('VIERNES'), ('SÁBADO'), ('DOMINGO');
-
--- ========================================
--- TABLA: tipos_dia
--- Lista tipos especiales de día (laborable, feriado, etc.).
--- ========================================
-CREATE TABLE tipos_dia (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(32) NOT NULL UNIQUE,
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
-);
-ALTER TABLE tipos_dia MODIFY nombre VARCHAR(32) NOT NULL COLLATE utf8mb4_general_ci;
-
-CREATE UNIQUE INDEX idx_tipos_dia_nombre_ci ON tipos_dia(nombre);
-
--- ========================================
--- TIPOS DE DÍA
--- ========================================
-INSERT INTO tipos_dia (nombre) VALUES 
-('FERIADO'), ('LABORAL'), ('DÍA PUENTE'), ('DÍA NO LABORABLE');
 
 -- ========================================
 -- TABLA: horarios_base
@@ -392,19 +363,22 @@ VALUES
 -- Asigna un horario base a un colaborador y define los días aplicables.
 -- ========================================
 CREATE TABLE IF NOT EXISTS asignacion_horarios (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     id_colaborador BIGINT NOT NULL,
     id_horario_base INT NOT NULL,
     id_dia_semana INT NOT NULL,
     fecha_asignacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1)),
+    UNIQUE KEY uq_colab_dia (id_colaborador, id_dia_semana)
 );
 
 ALTER TABLE asignacion_horarios
     ADD CONSTRAINT fk_asignacion_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
         ON DELETE CASCADE ON UPDATE CASCADE,
+        
     ADD CONSTRAINT fk_asignacion_horario FOREIGN KEY (id_horario_base) REFERENCES horarios_base(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
+        
     ADD CONSTRAINT fk_asignacion_dia FOREIGN KEY (id_dia_semana) REFERENCES dias_semana(id)
         ON DELETE RESTRICT;
 
@@ -422,8 +396,9 @@ CREATE INDEX idx_asignacion_dia ON asignacion_horarios(id_dia_semana);
 DROP TABLE IF EXISTS registro_asistencia;
 CREATE TABLE registro_asistencia (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    id_colaborador BIGINT NOT NULL,
-    fecha DATE NOT NULL,
+    id_colaborador BIGINT NOT NULL UNIQUE,
+    id_horario_base INT NULL, 
+    fecha DATE NOT NULL UNIQUE,
     hora_entrada TIME NULL,
     hora_salida TIME NULL,
     observaciones TEXT,
@@ -434,11 +409,8 @@ CREATE TABLE registro_asistencia (
 ALTER TABLE registro_asistencia
     ADD CONSTRAINT fk_asistencia_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
     ON DELETE RESTRICT ON UPDATE CASCADE;
-
+    
 -- Índices para optimizar búsquedas frecuentes
 CREATE INDEX idx_asistencia_colaborador ON registro_asistencia(id_colaborador);
-CREATE INDEX idx_asistencia_fecha ON registro_asistencia(fecha);
 
--- Restricción para evitar duplicados (solo un registro por colaborador y fecha)
-ALTER TABLE registro_asistencia
-    ADD CONSTRAINT uq_asistencia_colab_fecha UNIQUE (id_colaborador, fecha);
+CREATE INDEX idx_asistencia_fecha ON registro_asistencia(fecha);

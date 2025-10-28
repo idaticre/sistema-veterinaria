@@ -39,7 +39,7 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
         
         // Traemos los nombres para responder al frontend
         Object[] row = (Object[]) entityManager.createNativeQuery(
-                        "SELECT u.username, r.nombre " +
+                        "SELECT u.id, u.username, r.nombre, ur.fecha_asignacion " +
                                 "FROM usuarios_roles ur " +
                                 "JOIN usuarios u ON ur.id_usuario = u.id " +
                                 "JOIN roles r ON ur.id_rol = r.id " +
@@ -49,8 +49,10 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
                 .getSingleResult();
         
         return UsuarioRolResponseDTO.builder()
-                .username((String) row[0])
-                .rol((String) row[1])
+                .idUsuario((Integer) row[0])
+                .username((String) row[1])
+                .rol((String) row[2])
+                .fechaAsignacion(row[3] != null ? row[3].toString() : null)
                 .accion(dto.getAccion())
                 .mensaje(mensaje)
                 .build();
@@ -63,7 +65,7 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
     @Transactional(readOnly = true)
     public List<UsuarioRolResponseDTO> listar() {
         List<Object[]> results = entityManager.createNativeQuery(
-                        "SELECT u.username, r.nombre " +
+                        "SELECT u.id, u.username, r.nombre, ur.fecha_asignacion " +
                                 "FROM usuarios_roles ur " +
                                 "JOIN usuarios u ON ur.id_usuario = u.id " +
                                 "JOIN roles r ON ur.id_rol = r.id")
@@ -71,8 +73,10 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
         
         return results.stream()
                 .map(row -> UsuarioRolResponseDTO.builder()
-                        .username((String) row[0])
-                        .rol((String) row[1])
+                        .idUsuario((Integer) row[0])
+                        .username((String) row[1])
+                        .rol((String) row[2])
+                        .fechaAsignacion(row[3] != null ? row[3].toString() : null)
                         .mensaje("Operación exitosa")
                         .build())
                 .collect(Collectors.toList());
@@ -85,7 +89,7 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
     @Transactional(readOnly = true)
     public List<UsuarioRolResponseDTO> listarPorUsuario(Integer idUsuario) {
         List<Object[]> results = entityManager.createNativeQuery(
-                        "SELECT u.username, r.nombre " +
+                        "SELECT u.id, u.username, r.nombre, ur.fecha_asignacion" +
                                 "FROM usuarios_roles ur " +
                                 "JOIN usuarios u ON ur.id_usuario = u.id " +
                                 "JOIN roles r ON ur.id_rol = r.id " +
@@ -95,8 +99,10 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
         
         return results.stream()
                 .map(row -> UsuarioRolResponseDTO.builder()
-                        .username((String) row[0])
-                        .rol((String) row[1])
+                        .idUsuario((Integer) row[0])
+                        .username((String) row[1])
+                        .rol((String) row[2])
+                        .fechaAsignacion(row[3] != null ? row[3].toString() : null)
                         .mensaje("Operación exitosa")
                         .build())
                 .collect(Collectors.toList());
@@ -111,7 +117,7 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
         Object[] row;
         try {
             row = (Object[]) entityManager.createNativeQuery(
-                            "SELECT u.username, r.nombre " +
+                            "SELECT u.id, u.username, r.nombre, ur.fecha_asignacion " +
                                     "FROM usuarios_roles ur " +
                                     "JOIN usuarios u ON ur.id_usuario = u.id " +
                                     "JOIN roles r ON ur.id_rol = r.id " +
@@ -121,7 +127,7 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
                     .getSingleResult();
         } catch (NoResultException e) {
             return UsuarioRolResponseDTO.builder()
-                    .username(null)
+                    .idUsuario(idUsuario)
                     .rol(null)
                     .accion("ELIMINAR")
                     .mensaje("ERROR: La asignación usuario-rol no existe")
@@ -142,8 +148,10 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
         
         return UsuarioRolResponseDTO.builder()
-                .username((String) row[0])
-                .rol((String) row[1])
+                .idUsuario((Integer) row[0])
+                .username((String) row[1])
+                .rol((String) row[2])
+                .fechaAsignacion(row[3] != null ? row[3].toString() : null)
                 .accion("ELIMINAR")
                 .mensaje(mensaje)
                 .build();

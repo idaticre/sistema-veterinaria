@@ -1,15 +1,19 @@
+-- ================================================================
+-- SCRIPT: PROCEDIMIENTOS ALMACENADOS CRUD - SISTEMA VETERINARIA_WOOF
+-- ================================================================
 USE vet_manada_woof;
 
 -- BLOQUE 01 PROCEDIMIENTOS ALMACENADOS CRUD
+
 -- ========================================
--- SP: sp_asignar_eliminar_rol_usuario
+-- SP: gestionar_rol_usuario
 -- Asigna o elimina roles de usuarios.
 -- Un usuario puede tener varios roles y un rol puede estar en varios usuarios.
 -- ========================================
-DROP PROCEDURE IF EXISTS sp_asignar_eliminar_rol_usuario;
+DROP PROCEDURE IF EXISTS gestionar_rol_usuario;
 DELIMITER $$
 
-CREATE PROCEDURE sp_asignar_eliminar_rol_usuario(
+CREATE PROCEDURE gestionar_rol_usuario(
     IN p_accion VARCHAR(10),       -- 'ASIGNAR' o 'ELIMINAR'
     IN p_id_usuario INT,
     IN p_id_rol INT,
@@ -112,7 +116,7 @@ proc_main: BEGIN
         SET p_codigo_entidad = NULL;
         SET p_mensaje = 'ERROR: Falló el registro. Transacción revertida.';
     END;
-    
+
     START TRANSACTION;
 
     -- Validaciones obligatorias
@@ -982,61 +986,204 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- SP: asignar_horario_colaborador
--- Asigna un horario base a un colaborador en los días indicados.
+-- PROCEDURE: asignar_horario_dia
+-- Asigna un horario base específico a un colaborador en un día determinado.
+-- Si ya existe una asignación para ese día, la actualiza.
 -- ========================================
-DROP PROCEDURE IF EXISTS asignar_horario_colaborador;
+DROP PROCEDURE IF EXISTS asignar_horario_dia;
 DELIMITER $$
 
-CREATE PROCEDURE asignar_horario_colaborador (
+CREATE PROCEDURE asignar_horario_dia (
     IN p_id_colaborador BIGINT,
     IN p_id_horario_base INT,
-    IN p_dia_inicio INT,   -- normalmente 1 (lunes)
-    IN p_dia_fin INT,      -- normalmente 6 (sábado)
-    OUT p_mensaje VARCHAR(255)
+    IN p_id_dia_semana INT
 )
-proc_main: BEGIN
-    DECLARE v_exist_colab INT;
-    DECLARE v_exist_horario INT;
-
+BEGIN
+    -- Manejador de errores SQL genérico
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
-        SET p_mensaje = 'ERROR: Falló asignación de horario. Transacción revertida.';
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Error al asignar horario diario.';
     END;
 
     START TRANSACTION;
 
-    -- Validar existencia del colaborador
-    SELECT COUNT(*) INTO v_exist_colab FROM colaboradores WHERE id = p_id_colaborador;
-    IF v_exist_colab = 0 THEN
-        SET p_mensaje = 'ERROR: Colaborador no existe.';
-        ROLLBACK; LEAVE proc_main;
+    -- Validación: colaborador existente
+    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Colaborador no existe.';
     END IF;
 
-    -- Validar existencia del horario base
-    SELECT COUNT(*) INTO v_exist_horario FROM horarios_base WHERE id = p_id_horario_base;
-    IF v_exist_horario = 0 THEN
-        SET p_mensaje = 'ERROR: Horario base no existe.';
-        ROLLBACK; LEAVE proc_main;
+    -- Validación: horario activo
+    IF NOT EXISTS (SELECT 1 FROM horarios_base WHERE id = p_id_horario_base AND activo = 1) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Horario base no válido o inactivo.';
     END IF;
 
-    -- Eliminar asignaciones anteriores activas en ese rango de días (para evitar duplicidad)
-    DELETE FROM asignacion_horarios 
-    WHERE id_colaborador = p_id_colaborador 
-      AND id_dia_semana BETWEEN p_dia_inicio AND p_dia_fin;
+    -- Validación: día válido
+    IF NOT EXISTS (SELECT 1 FROM dias_semana WHERE id = p_id_dia_semana) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Día de semana no válido.';
+    END IF;
 
-    -- Insertar nuevas asignaciones según los días indicados
-    INSERT INTO asignacion_horarios (id_colaborador, id_horario_base, id_dia_semana)
-    SELECT p_id_colaborador, p_id_horario_base, id
-    FROM dias_semana
-    WHERE id BETWEEN p_dia_inicio AND p_dia_fin;
+    -- Inserta o actualiza la asignación existente según la clave única (colaborador + día)
+    INSERT INTO asignacion_horarios (
+        id_colaborador, id_horario_base, id_dia_semana, fecha_asignacion, activo
+    )
+    VALUES (
+        p_id_colaborador, p_id_horario_base, p_id_dia_semana, NOW(), 1
+    )
+    ON DUPLICATE KEY UPDATE
+        id_horario_base = VALUES(id_horario_base),
+        fecha_asignacion = NOW(),
+        activo = 1;
 
     COMMIT;
-    SET p_mensaje = CONCAT('Horario asignado correctamente al colaborador ', p_id_colaborador, '.');
 END$$
 DELIMITER ;
 
+-- ========================================
+-- PROCEDURE: asignar_horario_semana
+-- Asigna un mismo horario base a todos los días laborales (lunes a sábado)
+-- de un colaborador. Si ya existen asignaciones, se actualizan.
+-- ========================================
+DROP PROCEDURE IF EXISTS asignar_horario_semana;
+DELIMITER $$
+
+CREATE PROCEDURE asignar_horario_semana (
+    IN p_id_colaborador BIGINT,
+    IN p_id_horario_base INT
+)
+BEGIN
+    DECLARE v_dia INT DEFAULT 1; -- Contador de días (lunes a sábado)
+
+    -- Manejador de errores SQL genérico
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Error al asignar horario semanal.';
+    END;
+
+    START TRANSACTION;
+
+    -- Validación: colaborador existente
+    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Colaborador no existe.';
+    END IF;
+
+    -- Validación: horario activo
+    IF NOT EXISTS (SELECT 1 FROM horarios_base WHERE id = p_id_horario_base AND activo = 1) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Horario base no válido o inactivo.';
+    END IF;
+
+    -- (Opcional pero recomendable) Limpia asignaciones previas del colaborador
+    -- para evitar residuos de horarios antiguos o diferentes configuraciones
+    DELETE FROM asignacion_horarios
+    WHERE id_colaborador = p_id_colaborador;
+
+    -- Bucle de lunes (1) a sábado (6)
+    WHILE v_dia <= 6 DO
+        INSERT INTO asignacion_horarios (
+            id_colaborador, id_horario_base, id_dia_semana, fecha_asignacion, activo
+        )
+        VALUES (
+            p_id_colaborador, p_id_horario_base, v_dia, NOW(), 1
+        )
+        ON DUPLICATE KEY UPDATE
+            id_horario_base = VALUES(id_horario_base),
+            fecha_asignacion = NOW(),
+            activo = 1;
+        SET v_dia = v_dia + 1;
+    END WHILE;
+
+    COMMIT;
+END$$
+DELIMITER ;
+
+-- ========================================
+-- PROCEDURE: desasignar_horario_dia
+-- Desactiva (sin eliminar) la asignación de horario
+-- para un colaborador en un día específico.
+-- ========================================
+DROP PROCEDURE IF EXISTS desasignar_horario_dia;
+DELIMITER $$
+
+CREATE PROCEDURE desasignar_horario_dia (
+    IN p_id_colaborador BIGINT,
+    IN p_id_dia_semana INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Error al desasignar horario diario.';
+    END;
+
+    START TRANSACTION;
+
+    -- Validación: colaborador existente
+    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Colaborador no existe.';
+    END IF;
+
+    -- Validación: día válido
+    IF NOT EXISTS (SELECT 1 FROM dias_semana WHERE id = p_id_dia_semana) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Día de semana no válido.';
+    END IF;
+
+    -- Desactivar la asignación existente
+    UPDATE asignacion_horarios
+    SET activo = 0, fecha_asignacion = NOW()
+    WHERE id_colaborador = p_id_colaborador
+      AND id_dia_semana = p_id_dia_semana;
+
+    COMMIT;
+END$$
+DELIMITER ;
+
+-- ========================================
+-- PROCEDURE: desasignar_horario_semana
+-- Desactiva (sin eliminar) todas las asignaciones de horario
+-- para un colaborador de lunes a sábado.
+-- ========================================
+DROP PROCEDURE IF EXISTS desasignar_horario_semana;
+DELIMITER $$
+
+CREATE PROCEDURE desasignar_horario_semana (
+    IN p_id_colaborador BIGINT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Error al desasignar horario semanal.';
+    END;
+
+    START TRANSACTION;
+
+    -- Validación: colaborador existente
+    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Colaborador no existe.';
+    END IF;
+
+    -- Desactivar todas las asignaciones (lunes a sábado)
+    UPDATE asignacion_horarios
+    SET activo = 0, fecha_asignacion = NOW()
+    WHERE id_colaborador = p_id_colaborador
+      AND id_dia_semana BETWEEN 1 AND 6;
+
+    COMMIT;
+END$$
+DELIMITER ;
 
 -- ========================================
 -- PROCEDIMIENTO: registrar_asistencia

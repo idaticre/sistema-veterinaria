@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS etapas_vida (
 	descripcion VARCHAR(16) NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
-
+	
 -- ========================================
 -- ETAPAS DE VIDA
 -- ========================================
@@ -334,7 +334,7 @@ INSERT INTO estado_mascota (nombre, descripcion) VALUES
 -- ========================================
 CREATE TABLE IF NOT EXISTS mascotas (
 	id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
+    codigo VARCHAR(16) NULL,
 	nombre VARCHAR(64) NOT NULL,
     sexo VARCHAR(1),
 	id_cliente BIGINT NOT NULL,
@@ -507,4 +507,3 @@ CREATE INDEX idx_vacuna_mascota_fecha ON vacunas_mascota(fecha_aplicacion);
 -- Índice para mejorar consultas por tipo de vacuna aplicada,
 -- usado en reportes de vacunación y seguimiento clínico.
 CREATE INDEX idx_vacuna_mascota_vacuna ON vacunas_mascota(id_vacuna);
-

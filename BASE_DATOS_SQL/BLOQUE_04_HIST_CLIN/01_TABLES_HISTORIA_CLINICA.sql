@@ -4,7 +4,7 @@
 -- vinculando la información clínica con los ingresos/visitas
 -- y permitiendo almacenar archivos relacionados.
 -- ========================================
-
+USE vet_manada_woof;
 -- ========================================
 -- TABLA: estado_historia_clinica
 -- Define los estados posibles del ciclo de una historia clínica.
@@ -12,11 +12,25 @@
 -- ========================================
 CREATE TABLE estado_historia_clinica (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+INSERT INTO estado_historia_clinica (nombre, descripcion) VALUES
+('ABIERTA', 'Historia clínica en proceso de registro o atención activa.'),
+('EN EVALUACIÓN', 'Pendiente de diagnóstico definitivo o revisión médica.'),
+('EN TRATAMIENTO', 'Paciente con tratamiento activo y evolución en curso.'),
+('EN REVISIÓN', 'En seguimiento por control o revaloración médica.'),
+('DERIVADA', 'Derivada a otro veterinario o especialidad.'),
+('EN LABORATORIO', 'En espera o análisis de resultados clínicos o de imagen.'),
+('EN HOSPITALIZACIÓN', 'Historia activa mientras la mascota se encuentra internada.'),
+('POST-OPERATORIA', 'Historia en seguimiento tras una cirugía.'),
+('TEMPORAL', 'Historia generada por atención esporádica o sin ficha completa.'),
+('EN ESPERA DE CIERRE', 'Atención completada, pendiente de firma o revisión final.'),
+('CERRADA', 'Historia clínica concluida y validada por el veterinario.'),
+('ARCHIVADA', 'Historia clínica cerrada y almacenada en el sistema.'),
+('REABIERTA', 'Historia previamente cerrada, reactivada por un nuevo evento médico.'),
+('ANULADA', 'Historia cancelada o creada por error administrativo.');
 
 -- ========================================
 -- TABLA: tipos_archivo_clinico
@@ -25,11 +39,48 @@ CREATE TABLE estado_historia_clinica (
 -- ========================================
 CREATE TABLE IF NOT EXISTS tipos_archivo_clinico (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) UNIQUE NOT NULL,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+INSERT INTO tipos_archivo_clinico (nombre, descripcion) VALUES
+-- IMÁGENES DIAGNÓSTICAS
+('RADIOGRAFÍA', 'Imagen diagnóstica obtenida mediante rayos X.'),
+('ECOGRAFÍA', 'Estudio de diagnóstico por ultrasonido.'),
+('TOMOGRAFÍA', 'Imagen médica avanzada por TAC o escáner.'),
+('FOTOGRAFÍA CLÍNICA', 'Imagen de heridas, lesiones o condiciones físicas.'),
+
+-- LABORATORIO Y EXÁMENES
+('ANÁLISIS DE SANGRE', 'Resultados de hemograma o bioquímica sanguínea.'),
+('ANÁLISIS DE ORINA', 'Informe de análisis de orina.'),
+('ANÁLISIS COPROLÓGICO', 'Resultados de examen de heces.'),
+('CITOLOGÍA', 'Informe microscópico de células.'),
+('HISTOPATOLOGÍA', 'Informe de biopsia o tejido analizado.'),
+('MICROBIOLOGÍA', 'Informe de cultivo o antibiograma.'),
+
+--  DOCUMENTOS CLÍNICOS
+('CONSENTIMIENTO INFORMADO', 'Documento firmado por el propietario antes de un procedimiento.'),
+('FORMULARIO DE INGRESO', 'Ficha inicial de ingreso médico.'),
+('RECETA MÉDICA', 'Prescripción de medicamentos y dosis.'),
+('CERTIFICADO MÉDICO', 'Documento oficial emitido por el veterinario.'),
+('PLAN DE TRATAMIENTO', 'Cronograma de terapias, medicamentos y controles.'),
+('EVOLUCIÓN CLÍNICA', 'Notas o actualizaciones del seguimiento del paciente.'),
+('HOJA DE ALTA', 'Resumen final de la hospitalización o tratamiento.'),
+
+-- ESTÉTICA Y SPA
+('REGISTRO DE GROOMING', 'Ficha o fotos del servicio estético realizado.'),
+('EVALUACIÓN DERMATOLÓGICA', 'Informe visual o técnico del estado de piel y pelaje.'),
+('CONTROL POST-GROOMING', 'Registro de revisión posterior al servicio estético.'),
+
+-- HOSPEDAJE Y CONTROL
+('FICHA DE HOSPEDAJE', 'Registro de ingreso, control y cuidados durante la estadía.'),
+('CONTROL DE ALIMENTACIÓN', 'Registro de dieta y horarios de alimentación.'),
+('CONTROL DE ACTIVIDAD', 'Bitácora de paseo, juego o descanso.'),
+
+-- ADMINISTRATIVOS Y OTROS
+('AUTORIZACIÓN DE PROCEDIMIENTO', 'Permiso firmado para intervención o anestesia.'),
+('REPORTE DE INCIDENTE', 'Registro de eventos o accidentes durante la atención.'),
+('ARCHIVO ADICIONAL', 'Documento o archivo complementario no clasificado.');
 
 -- ========================================
 -- TABLA: historia_clinica
@@ -37,20 +88,20 @@ CREATE TABLE IF NOT EXISTS tipos_archivo_clinico (
 -- Se vincula con la visita, servicio, colaborador y veterinario responsable.
 -- ========================================
 CREATE TABLE IF NOT EXISTS historia_clinica (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_mascota INT NOT NULL,
-    id_colaborador INT NULL,
-    id_veterinario INT NULL,
-    id_visita INT NULL,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NULL UNIQUE,
+    id_mascota BIGINT NOT NULL,
+    id_colaborador BIGINT NULL,
+    id_veterinario BIGINT NULL,
+    id_visita BIGINT NULL,
     motivo_consulta VARCHAR(128) NULL,
     diagnostico TEXT NULL,
     tratamiento TEXT NULL,
     fecha DATE NOT NULL,
     hora_inicio TIME NOT NULL,
     hora_fin TIME NOT NULL,
-    descripcion VARCHAR(128),
-    observaciones VARCHAR(128),
+    descripcion TEXT NULL,
+    observaciones TEXT NULL,
     fecha_registro_inicial TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_estado INT NULL
 );
@@ -99,9 +150,9 @@ CREATE INDEX idx_historia_clinica_estado ON historia_clinica(id_estado);
 -- Ejemplo: Imagen de radiografía torácica asociada al historial médico #58.
 -- ========================================
 CREATE TABLE IF NOT EXISTS historia_clinica_archivos (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_historia_clinica INT NOT NULL,
+    id_historia_clinica BIGINT NOT NULL,
     id_t_archivo INT NULL,
     nombre_archivo VARCHAR(128) NOT NULL,
     extension_archivo VARCHAR(128) NOT NULL,

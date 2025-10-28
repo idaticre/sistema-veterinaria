@@ -1,9 +1,8 @@
--- ========================================
 -- BLOQUE 03: agenda y servicios
 -- gestiona los tipos de servicios, su registro,
 -- citas programadas, visitas y recordatorios.
 -- ========================================
-
+USE vet_manada_woof;
 -- ========================================
 -- TABLA: canales_comunicacion
 -- Define los canales de contacto utilizados.
@@ -14,6 +13,13 @@ CREATE TABLE IF NOT EXISTS canales_comunicacion (
     nombre VARCHAR(32) NOT NULL UNIQUE,
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+INSERT INTO canales_comunicacion (nombre) VALUES
+('WHATSAPP'),
+('EMAIL'),
+('LLAMADA TELEFÓNICA'),
+('SMS'),
+('REDES SOCIALES'),
+('MOSTRADOR');
 
 -- ========================================
 -- TABLA: medios_pago
@@ -21,11 +27,18 @@ CREATE TABLE IF NOT EXISTS canales_comunicacion (
 -- ========================================
 CREATE TABLE IF NOT EXISTS medios_pago (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+INSERT INTO medios_pago (nombre, descripcion) VALUES
+('EFECTIVO', 'Pago directo en caja.'),
+('TARJETA DE CRÉDITO', 'Pago mediante tarjeta de crédito Visa, MasterCard, etc.'),
+('TARJETA DE DÉBITO', 'Pago con tarjeta de débito bancaria.'),
+('TRANSFERENCIA BANCARIA', 'Transferencia directa a cuenta de la veterinaria.'),
+('YAPE', 'Pago rápido por aplicación móvil Yape.'),
+('PLIN', 'Pago rápido por aplicación móvil Plin.'),
+('LINK DE PAGO', 'Pago mediante link enviado por WhatsApp o correo.');
 
 -- ========================================
 -- TABLA: estado_agenda
@@ -34,11 +47,17 @@ CREATE TABLE IF NOT EXISTS medios_pago (
 -- ========================================
 CREATE TABLE IF NOT EXISTS estado_agenda (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+INSERT INTO estado_agenda (nombre, descripcion) VALUES
+('PENDIENTE', 'Cita registrada en espera de confirmación.'),
+('CONFIRMADA', 'Cita confirmada por el cliente o personal.'),
+('REPROGRAMADA', 'Cita movida a otra fecha o hora.'),
+('CANCELADA', 'Cita cancelada por el cliente o el personal.'),
+('ATENDIDA', 'Cita finalizada y registrada como atendida.'),
+('NO ASISTIÓ', 'El cliente no se presentó a la cita.');
 
 -- ========================================
 -- TABLA: tipo_recordatorio
@@ -47,11 +66,17 @@ CREATE TABLE IF NOT EXISTS estado_agenda (
 -- ========================================
 CREATE TABLE tipo_recordatorio (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(64) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+INSERT INTO tipo_recordatorio (nombre, descripcion) VALUES
+('VACUNACIÓN', 'Recordatorio para aplicación o refuerzo de vacunas.'),
+('CONTROL MÉDICO', 'Recordatorio de control o revisión general.'),
+('DESPARASITACIÓN', 'Aviso para próxima dosis de desparasitación.'),
+('CITA AGENDADA', 'Recordatorio de cita próxima confirmada.'),
+('RENOVACIÓN PLAN SALUD', 'Aviso para renovación de plan médico o membresía.'),
+('ANIVERSARIO MASCOTA', 'Mensaje conmemorativo por el cumpleaños o adopción de la mascota.');
 
 -- ========================================
 -- TABLA: medio_solicitud
@@ -60,11 +85,16 @@ CREATE TABLE tipo_recordatorio (
 -- ========================================
 CREATE TABLE IF NOT EXISTS medio_solicitud (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+INSERT INTO medio_solicitud (nombre, descripcion) VALUES
+('TELÉFONO', 'Solicitud realizada por llamada telefónica.'),
+('WHATSAPP', 'Solicitud recibida mediante mensaje de WhatsApp.'),
+('WEB', 'Solicitud enviada a través del sitio web.'),
+('PRESENCIAL', 'Solicitud directa en mostrador o recepción.'),
+('REDES SOCIALES', 'Solicitud por mensaje de Facebook, Instagram u otra red.');
 
 -- ========================================
 -- TABLA: estado_visita
@@ -73,11 +103,16 @@ CREATE TABLE IF NOT EXISTS medio_solicitud (
 -- ========================================
 CREATE TABLE IF NOT EXISTS estado_visita (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+INSERT INTO estado_visita (nombre, descripcion) VALUES
+('EN PROCESO', 'La visita está en curso o la mascota está siendo atendida.'),
+('FINALIZADA', 'Visita completada y registrada.'),
+('HOSPITALIZADO', 'Mascota internada bajo observación o tratamiento.'),
+('DERIVADA', 'Visita derivada a otra especialidad o veterinario.'),
+('CANCELADA', 'Visita anulada o no realizada.');
 
 -- ========================================
 -- TABLA: tipo_servicios
@@ -86,11 +121,57 @@ CREATE TABLE IF NOT EXISTS estado_visita (
 -- ========================================
 CREATE TABLE IF NOT EXISTS tipo_servicios (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
     activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
 );
+INSERT INTO tipo_servicios (nombre, descripcion) VALUES
+-- ÁREA MÉDICA
+('CONSULTA GENERAL', 'Evaluación médica completa para diagnóstico y orientación del tratamiento.'),
+('CONSULTA ESPECIALIZADA', 'Atención por veterinario especialista en dermatología, oftalmología, odontología, etc.'),
+('VACUNACIÓN', 'Aplicación de vacunas preventivas según plan sanitario.'),
+('DESPARASITACIÓN', 'Administración de antiparasitarios internos o externos según protocolo.'),
+('CONTROL POST-OPERACIÓN', 'Revisión y seguimiento posterior a una intervención quirúrgica.'),
+('CIRUGÍA', 'Procedimientos quirúrgicos programados o de emergencia.'),
+('ECOGRAFÍA', 'Diagnóstico por imagen mediante ultrasonido.'),
+('RADIOGRAFÍA', 'Diagnóstico por imagen mediante rayos X.'),
+('ANÁLISIS DE LABORATORIO', 'Exámenes clínicos, hematológicos y bioquímicos.'),
+('URGENCIAS', 'Atención médica inmediata por accidente o enfermedad repentina.'),
+('HOSPITALIZACIÓN', 'Cuidados médicos continuos y observación de pacientes internados.'),
+
+-- ÁREA ESTÉTICA Y SPA
+('BAÑO Y CORTE', 'Baño completo con shampoo medicado o cosmético y corte según raza.'),
+('BAÑO MEDICADO', 'Baño terapéutico con productos específicos para condiciones dermatológicas.'),
+('CORTE DE UÑAS', 'Limpieza y recorte de uñas de forma segura.'),
+('LIMPIEZA DENTAL', 'Limpieza bucal no invasiva o profilaxis dental veterinaria.'),
+('SPA RELAJANTE', 'Baño aromático, masaje y cepillado profesional para relajación.'),
+('PEINADO Y DESENREDADO', 'Acondicionamiento del pelaje y desenredado profundo.'),
+('TRATAMIENTO CAPILAR', 'Aplicación de mascarillas o tratamientos especiales para el pelaje.'),
+
+-- ÁREA HOSPEDAJE Y CUIDADO
+('HOSPEDAJE DIARIO', 'Alojamiento temporal con alimentación y supervisión veterinaria.'),
+('GUARDERÍA DIURNA', 'Cuidado y recreación durante el día para mascotas activas.'),
+('PASEO CONTROLADO', 'Servicio de paseo en áreas seguras y monitoreadas.'),
+('ALIMENTACIÓN PERSONALIZADA', 'Planes de comida específicos según edad, peso o condición médica.'),
+
+-- ÁREA ADIESTRAMIENTO Y COMPORTAMIENTO
+('ADIESTRAMIENTO BÁSICO', 'Entrenamiento en obediencia y socialización.'),
+('ADIESTRAMIENTO AVANZADO', 'Entrenamiento de conducta, control y refuerzo positivo.'),
+('MODIFICACIÓN DE CONDUCTA', 'Tratamiento de problemas de comportamiento o ansiedad.'),
+
+-- ÁREA DE BIENESTAR Y PREVENCIÓN
+('PLAN DE SALUD ANUAL', 'Programa preventivo con controles, vacunas y beneficios especiales.'),
+('CONTROL DE PESO', 'Evaluación nutricional y seguimiento de peso saludable.'),
+('ASESORÍA NUTRICIONAL', 'Recomendaciones de dieta y suplementos según cada mascota.'),
+
+-- SERVICIOS COMPLEMENTARIOS
+('VENTA DE PRODUCTOS', 'Adquisición de alimentos, accesorios, medicamentos o juguetes.'),
+('RECOJO A DOMICILIO', 'Transporte seguro de la mascota desde o hacia la veterinaria.'),
+('SERVICIO A DOMICILIO', 'Consulta o atención médica veterinaria en el hogar.'),
+('FOTOGRAFÍA DE MASCOTAS', 'Sesión profesional de fotos para mascotas.'),
+('CREMACIÓN Y DESPEDIDA', 'Servicio respetuoso de cremación y ceremonia de despedida.'),
+('ASESORÍA EN ADOPCIÓN', 'Orientación en adopción responsable y seguimiento post-adopción.');
+
 
 -- ========================================
 -- TABLA: ingresos_servicios
@@ -98,11 +179,11 @@ CREATE TABLE IF NOT EXISTS tipo_servicios (
 -- Relaciona al colaborador o veterinario que prestó el servicio.
 -- ========================================
 CREATE TABLE IF NOT EXISTS ingresos_servicios (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
     id_servicio INT NOT NULL,
-    id_colaborador INT,
-    id_veterinario INT,
+    id_colaborador BIGINT,
+    id_veterinario BIGINT,
 	cantidad INT CHECK (cantidad >= 0),
     duracion_min INT CHECK (duracion_min >= 0),
     adicionales VARCHAR(64),
@@ -142,10 +223,10 @@ CREATE INDEX idx_ingresos_servicios_colab_fecha ON ingresos_servicios (id_colabo
 -- Ejemplo: Cita el 2025-08-01 a las 10:00am para consulta médica de la mascota "FIRULAIS".
 -- ========================================
 CREATE TABLE IF NOT EXISTS agenda (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_cliente INT NOT NULL,
-    id_mascota INT NOT NULL,
+    id_cliente BIGINT NOT NULL,
+    id_mascota BIGINT NOT NULL,
     id_tipo_servicio INT NOT NULL,
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
@@ -188,12 +269,12 @@ CREATE INDEX idx_agenda_fecha ON agenda(fecha);
 -- Incluye datos de ingreso, retiro, medio de solicitud, estado y monto abonado.
 -- ========================================
 CREATE TABLE IF NOT EXISTS visitas_ingresos (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_agenda INT NULL,
+    id_agenda BIGINT NULL,
     fecha_ingreso TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
-    id_mascota INT NOT NULL,
-    id_ingreso_servicio INT NOT NULL,
+    id_mascota BIGINT NOT NULL,
+    id_ingreso_servicio BIGINT NOT NULL,
     ubicacion_espacio VARCHAR(10),
     fecha_retiro TIMESTAMP NULL DEFAULT NULL ,
     id_medio_solicitud INT NOT NULL,
@@ -236,9 +317,9 @@ CREATE INDEX idx_visitas_fecha_ingreso ON visitas_ingresos(fecha_ingreso);
 -- Ejemplo: Recordatorio de cita médica enviado al cliente un día antes.
 -- ========================================
 CREATE TABLE IF NOT EXISTS recordatorios_agenda (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_agenda INT NOT NULL,
+    id_agenda BIGINT NOT NULL,
     id_tipo_recordatorio INT NOT NULL DEFAULT 1,				-- 'AGENDA GENERAL'
     fecha_recordatorio DATE NOT NULL,
     hora TIME NULL,

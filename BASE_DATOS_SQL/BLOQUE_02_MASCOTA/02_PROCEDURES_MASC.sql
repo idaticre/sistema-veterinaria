@@ -1,5 +1,4 @@
 -- BLOQUE 02 PROCEDIMIENTOS ALMACENADOS CRUD
-
 USE vet_manada_woof;
 -- ========================================
 -- SP: REGISTRAR_MASCOTA
@@ -153,7 +152,7 @@ proc_main: BEGIN
 
     START TRANSACTION;
 
-    -- 1️⃣ Validar existencia de la mascota
+    -- 1️ Validar existencia de la mascota
     IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
         SET p_mensaje = 'ERROR: Mascota no existe.';
         ROLLBACK; LEAVE proc_main;
@@ -183,7 +182,7 @@ proc_main: BEGIN
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 5️⃣ Validar existencia del estado
+    -- 5️ Validar existencia del estado
     IF NOT EXISTS (SELECT 1 FROM estado_mascota WHERE id = p_id_estado) THEN
         SET p_mensaje = 'ERROR: Estado no válido.';
         ROLLBACK; LEAVE proc_main;
@@ -211,7 +210,7 @@ proc_main: BEGIN
         fecha_modificacion = NOW()
     WHERE id = p_id_mascota;
 
-    -- 7️⃣ Generar mensaje final adaptado al cambio de estado (actualización o eliminación lógica)
+    -- 7️ Generar mensaje final adaptado al cambio de estado (actualización o eliminación lógica)
     IF (SELECT nombre FROM estado_mascota WHERE id = p_id_estado) LIKE 'INACTIVA%' THEN
         SET p_mensaje = CONCAT('Mascota ', v_codigo_mascota, ' desactivada (eliminación lógica).');
     ELSE
@@ -236,13 +235,13 @@ CREATE PROCEDURE registrar_medicamento_mascota (
     IN p_id_via INT,                     
     IN p_dosis VARCHAR(32),              
     IN p_fecha_aplicacion DATE,          
-    IN p_id_colaborador BIGINT,          -- Colaborador que aplicó el medicamento
-    IN p_id_veterinario BIGINT,          -- Veterinario responsable
+    IN p_id_colaborador BIGINT,          
+    IN p_id_veterinario BIGINT,          
     IN p_observaciones VARCHAR(64),      
     OUT p_mensaje VARCHAR(255)           
 )
 proc_main: BEGIN
-    DECLARE v_codigo_mascota VARCHAR(16);
+    DECLARE v_codigo_registro VARCHAR(16);
     DECLARE v_nombre_medicamento VARCHAR(64);
 
     -- Manejo de errores
@@ -254,7 +253,7 @@ proc_main: BEGIN
 
     START TRANSACTION;
 
-    -- 1 Validar existencia de mascota
+    -- 1️⃣ Validar existencia de mascota
     IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
         SET p_mensaje = 'ERROR: Mascota no existente.';
         ROLLBACK; LEAVE proc_main;
@@ -266,13 +265,13 @@ proc_main: BEGIN
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 3️ Validar existencia de vía de aplicación
+    -- 3️⃣ Validar existencia de vía de aplicación
     IF NOT EXISTS (SELECT 1 FROM vias_aplicacion WHERE id = p_id_via) THEN
         SET p_mensaje = 'ERROR: Vía de aplicación no válida.';
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 4️ Validar duplicado (misma mascota, medicamento y fecha)
+    -- 4️⃣ Validar duplicado (misma mascota, medicamento y fecha)
     IF EXISTS (
         SELECT 1 FROM medicamentos_mascota
         WHERE id_mascota = p_id_mascota
@@ -283,11 +282,7 @@ proc_main: BEGIN
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 5️ Obtener datos de referencia para el mensaje final
-    SELECT codigo INTO v_codigo_mascota FROM mascotas WHERE id = p_id_mascota;
-    SELECT nombre INTO v_nombre_medicamento FROM medicamentos WHERE id = p_id_medicamento;
-
-    -- 6️ Insertar nuevo registro
+    -- 5️⃣ Insertar nuevo registro
     INSERT INTO medicamentos_mascota (
         codigo, id_mascota, id_medicamento, id_via, dosis,
         fecha_aplicacion, id_colaborador, id_veterinario, observaciones
@@ -304,10 +299,19 @@ proc_main: BEGIN
         p_observaciones
     );
 
+    -- 6️⃣ Obtener el código del registro insertado
+    SELECT codigo INTO v_codigo_registro 
+    FROM medicamentos_mascota 
+    WHERE id = LAST_INSERT_ID();
+
+    -- 7️⃣ Obtener nombre del medicamento para el mensaje
+    SELECT nombre INTO v_nombre_medicamento FROM medicamentos WHERE id = p_id_medicamento;
+
     COMMIT;
 
-    SET p_mensaje = 
-    CONCAT('Medicamento "', v_nombre_medicamento,'" registrado para la mascota ', v_codigo_mascota, '.');
+    -- 8️⃣ Mensaje final
+    SET p_mensaje = CONCAT('Medicamento "', v_nombre_medicamento,
+                            '" registrado correctamente. Código del registro: ', v_codigo_registro, '.');
 END$$
 DELIMITER ;
 
@@ -374,7 +378,7 @@ proc_main: BEGIN
 
     COMMIT;
 
-    -- 4️⃣ Mensaje final
+    -- 4️ Mensaje final
     IF p_activo = 0 THEN
         SET p_mensaje = CONCAT('Registro ', v_codigo_registro,
                                ' desactivado (eliminación lógica).');
@@ -393,73 +397,43 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS registrar_vacuna_mascota;
 DELIMITER $$
-
 CREATE PROCEDURE registrar_vacuna_mascota(
+    IN p_id_mascota INT,
     IN p_id_vacuna INT,
-    IN p_id_mascota BIGINT,
     IN p_id_via INT,
-    IN p_dosis VARCHAR(32),
     IN p_fecha_aplicacion DATE,
     IN p_durabilidad_anios INT,
     IN p_proxima_dosis DATE,
-    IN p_id_colaborador BIGINT,
-    IN p_id_veterinario BIGINT,
-    IN p_observaciones VARCHAR(128),
-    OUT p_mensaje VARCHAR(255)
+    IN p_id_colaborador INT,
+    OUT p_id_insertado INT,
+    OUT p_mensaje VARCHAR(100)
 )
-proc_main: BEGIN
-    DECLARE v_codigo VARCHAR(16);
-    DECLARE v_nombre_vacuna VARCHAR(64);
-    DECLARE v_nombre_mascota VARCHAR(64);
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
-        SET p_mensaje = 'ERROR: Falló registro de vacuna aplicada. Transacción revertida.';
+        SET p_id_insertado = NULL;
+        SET p_mensaje = 'Error al registrar vacuna.';
     END;
 
     START TRANSACTION;
 
-    -- Validar existencia de vacuna, mascota y vía
-    IF NOT EXISTS (SELECT 1 FROM vacunas WHERE id = p_id_vacuna AND activo = 1) THEN
-        SET p_mensaje = 'ERROR: Vacuna no válida o inactiva.';
-        ROLLBACK; LEAVE proc_main;
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
-        SET p_mensaje = 'ERROR: Mascota no válida.';
-        ROLLBACK; LEAVE proc_main;
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM vias_aplicacion WHERE id = p_id_via) THEN
-        SET p_mensaje = 'ERROR: Vía de aplicación no válida.';
-        ROLLBACK; LEAVE proc_main;
-    END IF;
-
-    -- Generar código único (VAC + ID incremental)
-    SELECT CONCAT('VAC', LPAD(COALESCE(MAX(id),0) + 1, 6, '0'))
-    INTO v_codigo
-    FROM vacunas_mascota;
-
-    -- Obtener nombres para mensaje final
-    SELECT nombre INTO v_nombre_vacuna FROM vacunas WHERE id = p_id_vacuna;
-    SELECT nombre INTO v_nombre_mascota FROM mascotas WHERE id = p_id_mascota;
-
-    -- Insertar registro
     INSERT INTO vacunas_mascota (
-        codigo, id_vacuna, id_mascota, id_via, dosis,
-        fecha_aplicacion, durabilidad_anios, proxima_dosis,
-        id_colaborador, id_veterinario, observaciones, fecha_registro
-    ) VALUES (
-        v_codigo, p_id_vacuna, p_id_mascota, p_id_via, p_dosis,
-        p_fecha_aplicacion, p_durabilidad_anios, p_proxima_dosis,
-        p_id_colaborador, p_id_veterinario, p_observaciones, NOW()
+        id_mascota, id_vacuna, id_via, fecha_aplicacion,
+        durabilidad_anios, proxima_dosis, id_colaborador, activo
+    )
+    VALUES (
+        p_id_mascota, p_id_vacuna, p_id_via, p_fecha_aplicacion,
+        p_durabilidad_anios, p_proxima_dosis, p_id_colaborador, 1
     );
 
-    SET p_mensaje = CONCAT('Vacuna "', v_nombre_vacuna, '" registrada para la mascota "', v_nombre_mascota, '". Código: ', v_codigo);
+    SET p_id_insertado = LAST_INSERT_ID();
+    SET p_mensaje = 'Vacuna registrada correctamente.';
+
     COMMIT;
-END$$
+END $$
 DELIMITER ;
+
 
 
 -- ========================================
@@ -539,8 +513,8 @@ proc_main: BEGIN
 
     -- Eliminación lógica si aplica (si agregas campo activo)
     IF p_activo = 0 THEN
-        UPDATE vacunas_mascota SET fecha_modificacion = NOW() WHERE id = p_id_vacuna_mascota;
-        SET p_mensaje = CONCAT('Vacuna "', v_nombre_vacuna, '" para la mascota "', v_nombre_mascota, '" desactivada (eliminación lógica).');
+        UPDATE vacunas_mascota SET activo = 0, fecha_modificacion = NOW() WHERE id = p_id_vacuna_mascota;
+        SET p_mensaje = CONCAT('Vacuna "', v_nombre_vacuna, '" para la mascota "', v_nombre_mascota, '" desactivada.');
     ELSE
         SET p_mensaje = CONCAT('Vacuna "', v_nombre_vacuna, '" actualizada correctamente. Código: ', v_codigo);
     END IF;
