@@ -240,8 +240,9 @@ export interface Rol {
 }
 
 export interface UsuarioRol {
-  username: string;
+  idUsuario: number;
   rol: string;
+  fechaAsignacion: string;
 }
 
 export interface TipoPersonaJuridica {

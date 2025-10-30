@@ -1,85 +1,144 @@
-.asignar-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 20px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.asignar-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.asignar-tabla {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: sans-serif;
-}
-
-.asignar-tabla th,
-.asignar-tabla td {
-  border: 1px solid #ddd;
-  padding: 12px;
-  text-align: center;
-}
-
-.asignar-tabla th {
-  background-color: #f2f2f2;
-  color: #333;
-}
-
-.asignar-tabla td ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.asignar-tabla td li {
-  background-color: #e9f5ff;
-  margin: 5px 0;
-  padding: 6px 10px;
-  border-radius: 6px;
+.layout-roles {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
-.btn-asignar {
+.header-roles {
+  margin-bottom: 25px;
+}
+
+.header-roles h1 {
+  font-size: 30px; 
+  color: #2c3e50; 
+  margin: 0 0 20px 0;
+  text-align: center;
+  font-family: "Poppins", sans-serif; 
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.tabla-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 20px 0;
+}
+
+.tabla-roles {
+  background-color: white;
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 90%; 
+  max-width: 1200px; 
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tabla-roles thead {
+  background-color: #f8f9fa;
+}
+
+.tabla-roles th {
+  padding: 12px 15px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #000000;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.tabla-roles td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #333;
+}
+
+.tabla-roles tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Badges únicos */
+.badge-rol {
+  display: inline-block;
   background-color: #007bff;
   color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.btn-asignar:hover {
-  background-color: #0056b3;
-}
-
-.btn-eliminar {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-left: 8px;
-}
-
-.btn-eliminar:hover {
-  background-color: #b52a37;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .sin-rol {
-  color: #888;
+  color: #999;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.texto-agregar {
+  color: #666;
+  font-size: 13px;
   font-style: italic;
 }
 
-.select-rol {
-  margin-right: 10px; 
+/* Grupo de asignación único */
+.asignar-grupo {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
+.asignar-grupo .select-rol {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  flex: 1;
+  max-width: 200px;
+}
+
+.asignar-grupo .select-rol:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* Botones específicos */
+.asignar-grupo .btn-eliminar,
+.asignar-grupo .btn-asignar {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.asignar-grupo .btn-eliminar:hover {
+  background-color: #c82333;
+}
+
+.asignar-grupo .btn-asignar {
+  background-color: #28a745;
+  color: white;
+}
+
+.asignar-grupo .btn-asignar:hover {
+  background-color: #218838;
+}
+
+/* Botón eliminar fuera del grupo también */
+.tabla-roles .btn-eliminar {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  background-color: #dc3545;
+  color: white;
+}
+
+.tabla-roles .btn-eliminar:hover {
+  background-color: #c82333;
+}
