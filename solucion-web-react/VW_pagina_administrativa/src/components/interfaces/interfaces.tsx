@@ -117,7 +117,7 @@ export interface ClienteResponse{
 }
 
 export interface ColaboradorResponse{
-    idColaborador: number;
+    id: number;
     codigoColaborador: string;
     idEntidad: number;
     nombre: string;

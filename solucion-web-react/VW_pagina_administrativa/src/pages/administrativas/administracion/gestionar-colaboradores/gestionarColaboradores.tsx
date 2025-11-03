@@ -91,7 +91,7 @@ const gestionarColaboradores: React.FC = () => {
     // Formulario para editar
     const abrirFormularioEditar = (colaborador: ColaboradorResponse) => {
         const editado: ColaboradorRequest = {
-            id: colaborador.idColaborador,                   
+            id: colaborador.id,                   
             nombre: colaborador.nombre,
             sexo: colaborador.sexo === "M" ? "M" : "F",          
             documento: colaborador.documento,
@@ -114,7 +114,6 @@ const gestionarColaboradores: React.FC = () => {
     const guardarColaborador = async () => {
         if (!edicion) return;
         
-
         try {
             if (edicion.id && edicion.id > 0) {
                 const response = await axios.put(`${baseURL}/colaboradores/actualizar/${edicion.id}`, edicion);
@@ -136,8 +135,9 @@ const gestionarColaboradores: React.FC = () => {
     // Eliminar
     const eliminarColaborador = async (id: number) => {
         try {
-            await axios.delete(`${baseURL}/colaboradores/eliminar/${id}`, { data: { id } });
+            await axios.delete(`${baseURL}/colaboradores/eliminar/${id}`);
             listarColaboradores();
+            alert("Eliminación exitosa");
         } catch (error) {
             alert(error);
             console.error("Error al eliminar: ", error);
@@ -154,26 +154,41 @@ const gestionarColaboradores: React.FC = () => {
                         <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del colaborador que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={abrirFormularioNuevo}>Nuevo colaborador</button>
                     </div>
-
-                    <div className="listar-registros">
-                        {filtrado.map((registro) => (
-                            <div className="mostrar-registros" key={registro.idColaborador}>
-                                <span className="texto-de-registro">{registro.codigoColaborador}</span>
-                                <span className="texto-de-registro">{registro.nombre}</span>
-                                <span className="texto-de-registro">{registro.documento}</span>
-                                <span className="texto-de-registro">{registro.telefono}</span>
-                                <span className="texto-de-registro">📅{registro.fechaIngreso}</span>
-                                <div className="listar-opciones-contenedor">
-                                    <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.idColaborador)}><i className="fa-solid fa-ellipsis-vertical"/></div>
-                                    {menuActivoId === registro.idColaborador && (
-                                        <div ref={menuRef} className="menu-opciones-gm">
-                                            <button onClick={() => abrirFormularioEditar(registro)}>✏️ Editar</button>
-                                            <button onClick={() => eliminarColaborador(registro.idColaborador)}>🗑️ Eliminar</button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                    <div className="tabla-wrapper">
+                        <table className="listar-registros">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Documento</th>
+                                    <th>Teléfono</th>
+                                    <th>Fecha de ingreso</th>
+                                    <th>Sexo</th>
+                                    <th>Correo</th>
+                                    <th>Dirección</th>
+                                    <th>Ciudad</th>
+                                    <th>Distrito</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filtrado.map((registro) => (
+                                    <tr key={registro.id}>
+                                        <td>{registro.codigoColaborador}</td>
+                                        <td>{registro.nombre}</td>
+                                        <td>{registro.documento}</td>
+                                        <td>{registro.telefono}</td>
+                                        <td>{registro.fechaIngreso}</td>
+                                        <td>{registro.sexo}</td>
+                                        <td>{registro.correo}</td>
+                                        <td>{registro.direccion}</td>
+                                        <td>{registro.ciudad}</td>
+                                        <td>{registro.distrito}</td>
+                                        <td><button onClick={() => abrirFormularioEditar(registro)}>Editar</button></td>
+                                        <td><button onClick={() => eliminarColaborador(registro.id)}>Eliminar</button></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             </main>

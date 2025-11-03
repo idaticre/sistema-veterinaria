@@ -128,33 +128,40 @@ function gestionarUsuarios() {
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={registrarUsuario}>Registrar usuario</button>
                     </div>
 
-                    <div className="listar-registros">
-                        {filtrado.map((registro) => (
-                            <div className="mostrar-registros" key={registro.ID}>
-                                <span className="texto-de-registro">{registro.CODIGO}</span>
-                                <span className="texto-de-registro">{registro.USERNAME}</span>
-                                <span className="texto-de-registro">{registro.PASSWORD}</span>
-                                <span className="texto-de-registro">{{1: "Inactivo", 2: "Activo", 3: "Suspendido"}[registro.ACTIVO] || "Desconocido"}</span>                                
-                                <span className="texto-de-registro">{registro.FECHA_CREACION}</span>
-                                <span className="texto-de-registro">{ // Arreglar display de la fecha de baja (checar comentario en editarUsuario)
-                                    registro?.FECHA_BAJA === undefined 
-                                        ? ""
-                                        : registro.ACTIVO === 1
-                                            ? `(Inactivo desde ${registro.FECHA_BAJA})`
-                                            : registro.ACTIVO === 3
-                                                ? `(Suspendido desde ${registro.FECHA_BAJA})`
-                                                : "NO_ELIMINAR_ESTO"}</span>
-                                <div className="listar-opciones-contenedor">
-                                    <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.ID)}><i className="fa-solid fa-ellipsis-vertical"/></div>
-                                    {menuActivoId === registro.ID && (
-                                        <div ref={menuRef} className="menu-opciones">
-                                            <button onClick={() => editarUsuario(registro.ID)}>✏️ Editar</button>
-                                            <button onClick={() => eliminarUsuario(registro.ID)}>🗑️ Eliminar</button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                    <div className="tabla-wrapper">
+                        <table className="listar-registros">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Usuario</th>
+                                    <th>Contraseña</th>
+                                    <th>Estado</th>
+                                    <th>Fecha de creación</th>
+                                    <th>Última modificación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filtrado.map((registro) => (
+                                    <tr key={registro.ID}>
+                                        <td>{registro.CODIGO}</td>
+                                        <td>{registro.USERNAME}</td>
+                                        <td>{registro.PASSWORD}</td>
+                                        <td>{{1: "Inactivo", 2: "Activo", 3: "Suspendido"}[registro.ACTIVO] || "Desconocido"}</td>                                
+                                        <td>{registro.FECHA_CREACION}</td>
+                                        <td>{ // Arreglar display de la fecha de baja (checar comentario en editarUsuario)
+                                            registro?.FECHA_BAJA === undefined 
+                                                ? ""
+                                                : registro.ACTIVO === 1
+                                                    ? `(Inactivo desde ${registro.FECHA_BAJA})`
+                                                    : registro.ACTIVO === 3
+                                                        ? `(Suspendido desde ${registro.FECHA_BAJA})`
+                                                        : "NO_ELIMINAR_ESTO"}</td>
+                                        <button onClick={() => editarUsuario(registro.ID)}>Editar</button>
+                                        <button onClick={() => eliminarUsuario(registro.ID)}>Eliminar</button>
+                                    </tr>
+                                ))}
+                            </tbody>                        
+                        </table>
                     </div>
                 </section>
             </main>
@@ -182,5 +189,4 @@ function gestionarUsuarios() {
         </div>        
     )
 }
-/* Checar los comentarios, los errores son generalmente los mismos en los 3 CRUDS. */
 export default gestionarUsuarios
