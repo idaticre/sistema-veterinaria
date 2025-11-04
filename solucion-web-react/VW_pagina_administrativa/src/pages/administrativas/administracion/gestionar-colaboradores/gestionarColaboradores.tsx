@@ -62,8 +62,10 @@ const gestionarColaboradores: React.FC = () => {
             ? respuesta.data
             : respuesta.data.data;
 
-            setColaboradores(lista);
-            setFiltrado(lista);
+            const activos = lista.filter((cliente: ColaboradorResponse) =>cliente.activo === true);
+
+            setColaboradores(activos);
+            setFiltrado(activos);
         } catch (error) {console.error("Error al obtener los colaboradores", error);}
     };
 
