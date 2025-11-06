@@ -9,17 +9,6 @@
   height: 100vh;
 }
 
-/* Contenedor padre del contenido principal*/
-#listar-registros {
-  background-color: #ffffff;
-  padding: 1rem;
-  flex: 1;
-  border-radius: 5px;
-  height: 100%;
-  overflow-y: auto;
-  box-sizing: border-box;
-}
-
 /* Encabezado */
 .encabezado {
   display: flex;
@@ -71,49 +60,65 @@
 }
 .ir-a-goated {background-color: #ff9900;}
 
-/* Lista asistencia */
-.listar-registros {
-  display: flex;
-  flex-direction: column;
-  gap: 4px; /* espacio entre filas */
+
+/* TABLA */
+.GM-table {
+  width: 100%;
+  border-radius: 8px;
 }
 
-.mostrar-registros {
-  display: grid;
-  grid-template-columns: 1fr 2fr 2fr 2fr 2fr auto; 
-  background: #ffffff;
-  border: 1px solid #ddd;
-  padding: 0.8rem 1rem;
-  border-radius: 12px;
-  align-items: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.mostrar-registros:hover {
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-  background: #ff9900;
-}
-
-.texto-de-registro {
-  text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.GM-th {
+  border-bottom: 2px solid #dee2e6;
+  font-size: 13px;
+  white-space: nowrap;
+  padding: 12px 12px 0px 0px;
   white-space: nowrap;
 }
 
-/* Opciones */
-.listar-opciones-contenedor {
-  position: relative;
-  display: inline-block;
-  width: auto;
-  height: auto;
-}
-
-.listar-registro-opciones {
+.GM-tr th:nth-child(1) {width: 110px;}
+.GM-tr th:nth-child(3) {width: 100px;}
+.GM-tr th:nth-child(4) {width: 110px;}
+.GM-tr th:nth-child(5) {width: 100px;}
+.GM-tr th:nth-child(6) {width: 150px}
+.GM-tr th:nth-child(7) {width: 50px;}
+.GM-tr th:nth-child(8) {width: 200px;}
+.GM-tr th:nth-child(12) {width: 150px;}
+.GM-tr td:nth-child(12) {
   display: flex;
-  cursor: pointer;
+  justify-content: center;
 }
 
+.GM-thead {
+  background-color: #f8f9fa;
+}
+
+.GM-td {
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #333;
+}
+
+.boton-verde {
+  background-color: #28a745;
+  margin: 3px;
+}
+.boton-rojo {
+  background-color: #c82333;
+  margin: 3px;
+}
+
+button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: white;
+}
+
+/* Opciones */
 .menu-opciones-gm {
   position: absolute;
   top: 100%;

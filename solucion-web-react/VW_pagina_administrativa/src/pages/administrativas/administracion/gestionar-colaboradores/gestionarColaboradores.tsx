@@ -156,40 +156,61 @@ const gestionarColaboradores: React.FC = () => {
                         <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del colaborador que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={abrirFormularioNuevo}>Nuevo colaborador</button>
                     </div>
-                    <div className="tabla-wrapper">
-                        <table className="listar-registros">
-                            <thead>
-                                <tr>
-                                    <th>Código</th>
-                                    <th>Nombre</th>
-                                    <th>Documento</th>
-                                    <th>Teléfono</th>
-                                    <th>Fecha de ingreso</th>
-                                    <th>Sexo</th>
-                                    <th>Correo</th>
-                                    <th>Dirección</th>
-                                    <th>Ciudad</th>
-                                    <th>Distrito</th>
+                    <div >
+                        <table className="GM-table">
+                            <thead className="GM-thead">
+                                <tr className='GM-tr'>
+                                    <th className="GM-th">Código</th>
+                                    <th className="GM-th">Nombre</th>
+                                    <th className="GM-th">Tipo doc.</th>
+                                    <th className="GM-th">Documento</th>
+                                    <th className="GM-th">Teléfono</th>
+                                    <th className="GM-th">Fecha de ingreso</th>
+                                    <th className="GM-th">Sexo</th>
+                                    <th className="GM-th">Correo</th>
+                                    <th className="GM-th">Dirección</th>
+                                    <th className="GM-th">Ciudad</th>
+                                    <th className="GM-th">Distrito</th>
+                                    <th className="GM-th">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtrado.map((registro) => (
+                                {filtrado.map((registro) => {
+                                    const tiposDocumento: Record<number, string> = {
+                                        1: "DNI",
+                                        2: "RUC",
+                                        3: "Carnet de extranjería",
+                                        4: "Partida de nacimiento",
+                                        5: "Pasaporte",
+                                        6: "Otros",
+                                    };
+
+                                    return (
                                     <tr key={registro.id}>
-                                        <td>{registro.codigoColaborador}</td>
-                                        <td>{registro.nombre}</td>
-                                        <td>{registro.documento}</td>
-                                        <td>{registro.telefono}</td>
-                                        <td>{registro.fechaIngreso}</td>
-                                        <td>{registro.sexo}</td>
-                                        <td>{registro.correo}</td>
-                                        <td>{registro.direccion}</td>
-                                        <td>{registro.ciudad}</td>
-                                        <td>{registro.distrito}</td>
-                                        <td><button onClick={() => abrirFormularioEditar(registro)}>Editar</button></td>
-                                        <td><button onClick={() => eliminarColaborador(registro.id)}>Eliminar</button></td>
+                                        <td className="GM-td">{registro.codigoColaborador}</td>
+                                        <td className="GM-td">{registro.nombre}</td>
+
+                                        {/* Tipo de documento */}
+                                        <td className="GM-td">
+                                        {tiposDocumento[Number(registro.idTipoDocumento)] || "Desconocido"}
+                                        </td>
+
+                                        <td className="GM-td">{registro.documento}</td>
+                                        <td className="GM-td">{registro.telefono}</td>
+                                        <td className="GM-td">{registro.fechaIngreso}</td>
+                                        <td className="GM-td">{registro.sexo}</td>
+                                        <td className="GM-td">{registro.correo}</td>
+                                        <td className="GM-td">{registro.direccion}</td>
+                                        <td className="GM-td">{registro.ciudad}</td>
+                                        <td className="GM-td">{registro.distrito}</td>
+                                        <td className="GM-td">
+                                            <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
+                                            <button className="boton-rojo" onClick={() => eliminarColaborador(registro.id)}>Eliminar</button>
+                                        </td>
                                     </tr>
-                                ))}
-                            </tbody>
+                                    );
+                                })}
+                                </tbody> 
                         </table>
                     </div>
                 </section>
@@ -202,12 +223,10 @@ const gestionarColaboradores: React.FC = () => {
                         <p><strong>Siendo registrado el:</strong> {edicion.fechaIngreso}</p>
                         <input type="text" placeholder="Nombre del colaborador" value={edicion?.nombre || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, nombre: nuevoValor.target.value } : null)}/>
                         <select value={edicion?.sexo ?? "M"} onChange={(e) => setEdicion(edicion ? { ...edicion, sexo: e.target.value as "M" | "F" } : null)}>
-                            <option value="">-- Seleccionar sexo --</option>
                             <option value="M">Masculino</option>
                             <option value="F">Femenino</option>
                         </select>
                         <select value={edicion.idTipoPersonaJuridica} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, idTipoPersonaJuridica: Number(nuevoValor.target.value) } : null)}>
-                            <option value="">-- Seleccionar tipo de persona jurídica--</option>
                             {tiposPersonasJuridicas.map((tipoPersonaJuridica) => (<option key={tipoPersonaJuridica.id} value={tipoPersonaJuridica.id}>{tipoPersonaJuridica.nombre}</option>))}
                         </select>
                         <select value={edicion.idTipoDocumento} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, idTipoDocumento: Number(nuevoValor.target.value) } : null)}>
