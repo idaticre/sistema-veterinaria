@@ -118,7 +118,7 @@ const gestionarColaboradores: React.FC = () => {
         
         try {
             if (edicion.id && edicion.id > 0) {
-                const response = await axios.put(`${baseURL}/colaboradores/actualizar/${edicion.id}`, edicion);
+                const response = await axios.put(`${baseURL}/colaboradores/actualizar`, edicion);
                 console.log("Respuesta backend:", response.data);
             } else {
                 const response = await axios.post(`${baseURL}/colaboradores/registrar`, edicion);
