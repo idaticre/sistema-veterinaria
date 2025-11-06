@@ -62,7 +62,7 @@ const gestionarColaboradores: React.FC = () => {
             ? respuesta.data
             : respuesta.data.data;
 
-            const activos = lista.filter((cliente: ColaboradorResponse) =>cliente.activo === true);
+            const activos = lista.filter((cliente: ColaboradorResponse) => cliente.activo === true);
 
             setColaboradores(activos);
             setFiltrado(activos);
@@ -160,18 +160,18 @@ const gestionarColaboradores: React.FC = () => {
                         <table className="GM-table">
                             <thead className="GM-thead">
                                 <tr className='GM-tr'>
-                                    <th className="GM-th">Código</th>
+                                    <th className="GM-th" style={{width:"110px"}}>Código</th>
                                     <th className="GM-th">Nombre</th>
-                                    <th className="GM-th">Tipo doc.</th>
-                                    <th className="GM-th">Documento</th>
-                                    <th className="GM-th">Teléfono</th>
-                                    <th className="GM-th">Fecha de ingreso</th>
-                                    <th className="GM-th">Sexo</th>
-                                    <th className="GM-th">Correo</th>
+                                    <th className="GM-th" style={{width:"100px"}}>Tipo doc.</th>
+                                    <th className="GM-th" style={{width:"110px"}}>Documento</th>
+                                    <th className="GM-th" style={{width:"100px"}}>Teléfono</th>
+                                    <th className="GM-th" style={{width:"150px"}}>Fecha de ingreso</th>
+                                    <th className="GM-th" style={{width:"50px"}}>Sexo</th>
+                                    <th className="GM-th" style={{width:"200px"}}>Correo</th>
                                     <th className="GM-th">Dirección</th>
                                     <th className="GM-th">Ciudad</th>
                                     <th className="GM-th">Distrito</th>
-                                    <th className="GM-th">Acciones</th>
+                                    <th className="GM-th" style={{width:"150px"}}>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -202,7 +202,7 @@ const gestionarColaboradores: React.FC = () => {
                                         <td className="GM-td">{registro.direccion}</td>
                                         <td className="GM-td">{registro.ciudad}</td>
                                         <td className="GM-td">{registro.distrito}</td>
-                                        <td className="GM-td">
+                                        <td className="GM-td" style={{display:"flex", justifyContent:"center"}}>
                                             <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
                                             <button className="boton-rojo" onClick={() => eliminarColaborador(registro.id)}>Eliminar</button>
                                         </td>
