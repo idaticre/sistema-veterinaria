@@ -190,9 +190,8 @@ const gestionarColaboradores: React.FC = () => {
                                         <td className="GM-td">{registro.codigoColaborador}</td>
                                         <td className="GM-td">{registro.nombre}</td>
 
-                                        {/* Tipo de documento */}
                                         <td className="GM-td">
-                                        {tiposDocumento[Number(registro.idTipoDocumento)] || "Desconocido"}
+                                            {tiposDocumento[Number(registro.idTipoDocumento)] || "Desconocido"}
                                         </td>
 
                                         <td className="GM-td">{registro.documento}</td>
@@ -226,12 +225,30 @@ const gestionarColaboradores: React.FC = () => {
                             <option value="M">Masculino</option>
                             <option value="F">Femenino</option>
                         </select>
-                        <select value={edicion.idTipoPersonaJuridica} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, idTipoPersonaJuridica: Number(nuevoValor.target.value) } : null)}>
-                            {tiposPersonasJuridicas.map((tipoPersonaJuridica) => (<option key={tipoPersonaJuridica.id} value={tipoPersonaJuridica.id}>{tipoPersonaJuridica.nombre}</option>))}
+                        <select value={edicion.idTipoPersonaJuridica} onChange={(nuevoValor) => {
+                            const nuevoId = Number(nuevoValor.target.value);
+                            setEdicion((prev) => prev
+                                    ? {
+                                        ...prev,
+                                        idTipoPersonaJuridica: nuevoId,
+                                        idTipoDocumento: nuevoId === 2 ? 2 : prev.idTipoDocumento, // Si se elige "Jurídica", forzamos RUC (id = 2)
+                                    }
+                                    : null
+                                );
+                            }}>
+                            {tiposPersonasJuridicas.map((tipoPersonaJuridica) => (
+                                <option key={tipoPersonaJuridica.id} value={tipoPersonaJuridica.id}>{tipoPersonaJuridica.nombre}</option>
+                            ))}
                         </select>
-                        <select value={edicion.idTipoDocumento} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, idTipoDocumento: Number(nuevoValor.target.value) } : null)}>
-                            <option value="">-- Seleccionar tipo de documento</option>
-                            {tiposDocumento.map((tipo) => (<option key={tipo.id} value={tipo.id}>{tipo.descripcion}</option>))}
+                        <select value={edicion.idTipoDocumento} onChange={(nuevoValor) =>
+                            setEdicion((prev) =>prev ? { ...prev, idTipoDocumento: Number(nuevoValor.target.value) } : null)}
+                            disabled = {edicion.idTipoPersonaJuridica === 2}>
+                            {tiposDocumento
+                                // Si se selecciona persona jurídica, solo mostramos el RUC como opción
+                                .filter((tipo) => edicion.idTipoPersonaJuridica === 2 ? tipo.id === 2 : true)
+                                .map((tipo) => (
+                                <option key={tipo.id} value={tipo.id}>{tipo.descripcion}</option>
+                                ))}
                         </select>
                         <input type="text" placeholder="Documento" value={edicion.documento} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, documento: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Telefono" value={edicion.telefono} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, telefono: nuevoValor.target.value } : null)}/>
