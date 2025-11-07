@@ -77,7 +77,7 @@ const gestionarUsuarios: React.FC = () => {
         
         try {
             if (edicion.id && edicion.id > 0) {
-                const response = await axios.put(`${baseURL}/usuarios`, edicion);
+                const response = await axios.put(`${baseURL}/usuarios/${edicion.id}`, edicion);
                 console.log("Respuesta backend:", response.data);
             } else {
                 const response = await axios.post(`${baseURL}/usuarios`, edicion);
