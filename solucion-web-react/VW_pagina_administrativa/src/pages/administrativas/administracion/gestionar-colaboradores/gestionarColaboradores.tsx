@@ -189,11 +189,7 @@ const gestionarColaboradores: React.FC = () => {
                                     <tr key={registro.id}>
                                         <td className="GM-td">{registro.codigoColaborador}</td>
                                         <td className="GM-td">{registro.nombre}</td>
-
-                                        <td className="GM-td">
-                                            {tiposDocumento[Number(registro.idTipoDocumento)] || "Desconocido"}
-                                        </td>
-
+                                        <td className="GM-td">{tiposDocumento[Number(registro.idTipoDocumento)] || "Desconocido"}</td>
                                         <td className="GM-td">{registro.documento}</td>
                                         <td className="GM-td">{registro.telefono}</td>
                                         <td className="GM-td">{registro.fechaIngreso}</td>

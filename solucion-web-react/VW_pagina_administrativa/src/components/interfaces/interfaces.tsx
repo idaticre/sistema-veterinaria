@@ -227,7 +227,7 @@ export interface tipo_doc{
 }
 
 export interface Usuario {
-  id: number;
+  id?: number;
   username: string;
   password: string;
   activo: boolean;
