@@ -1,0 +1,229 @@
+:root {
+  --color-principal: #ff9900;
+  --color-principal-hover: #e07b00;
+  --color-borde: #ddd;
+}
+
+/* ================== CONTENEDOR PRINCIPAL ================== */
+#agenda {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+.agenda-container {
+  flex: 1;
+  background: #f5f6fa;
+  border-radius: 12px;
+  padding: 2rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.titulo-agenda {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+/* ================== LAYOUT ================== */
+.agenda-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+}
+
+/* ================== CUADRO CALENDARIO ================== */
+.calendar-container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Hace que el calendario sea más grande */
+.react-calendar {
+  width: 100% !important;
+  max-width: 600px;
+  font-size: 1.1rem;
+  border: none;
+}
+
+/* Días del calendario */
+.react-calendar__month-view__days__day {
+  padding: 1rem 0.6rem;
+}
+
+/* Encabezado (mes y botones) */
+.react-calendar__navigation {
+  margin-bottom: 1rem;
+}
+
+.react-calendar__navigation button {
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Días de la semana */
+.react-calendar__month-view__weekdays {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #333;
+}
+
+/* Días seleccionados */
+.react-calendar__tile--active {
+  background: var(--color-principal) !important;
+  color: #fff !important;
+  border-radius: 8px;
+}
+
+/* Hover */
+.react-calendar__tile:hover {
+  background: rgba(255, 153, 0, 0.2);
+  border-radius: 8px;
+}
+
+/* ================== BOTÓN DE SESIÓN ================== */
+.auth-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.btn-cerrar,
+.btn-agregar {
+  width: 80%;
+  font-size: 1rem;
+  padding: 0.8rem 0;
+}
+
+/* ================== CUADRO EVENTOS ================== */
+.citas-container {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.citas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ================== TARJETAS ================== */
+.cita-card {
+  padding: 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  background: #fff;
+  transition: 0.25s ease;
+}
+.cita-card:hover {
+  background: var(--color-principal);
+  color: #fff;
+  transform: translateY(-3px);
+}
+
+/* ================== BOTONES ================== */
+.btn-agregar, .btn-cerrar {
+  margin-top: 1rem;
+  background: var(--color-principal);
+  color: white;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+.btn-agregar:hover, .btn-cerrar:hover {
+  background: var(--color-principal-hover);
+  transform: scale(1.05);
+}
+
+/* ================== MODAL ================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ================== ENCABEZADO DE EVENTOS ================== */
+.citas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background: #fffaf3;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+/* 🔹 Hace más grande el texto del encabezado */
+.citas-header h3 {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+/* 🔹 Botón “Nuevo evento” más visible */
+.citas-header .btn-agregar {
+  background: var(--color-principal);
+  color: white;
+  font-size: 1.1rem;
+  padding: 0.8rem 1.3rem;
+  border-radius: 10px;
+  transition: 0.2s;
+}
+
+.citas-header .btn-agregar:hover {
+  background: var(--color-principal-hover);
+  transform: scale(1.07);
+}
+
+
+/* ================== RESPONSIVO ================== */
+@media (max-width: 900px) {
+  .agenda-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .react-calendar {
+    max-width: 100%;
+    font-size: 1rem;
+  }
+
+  .btn-cerrar, .btn-agregar {
+    width: 100%;
+  }
+}
