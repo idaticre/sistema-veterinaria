@@ -36,7 +36,6 @@ const gestionarUsuarios: React.FC = () => {
     const listarUsuarios = async () => {
         try {
             const respuesta = await axios.get(`${baseURL}/usuarios`);
-            console.log("Respuesta del backend:", respuesta.data);
             const lista = Array.isArray(respuesta.data)
             ? respuesta.data
             : respuesta.data.data;
@@ -76,18 +75,12 @@ const gestionarUsuarios: React.FC = () => {
         if (!edicion) return;
         
         try {
-            if (edicion.id && edicion.id > 0) {
-                const response = await axios.put(`${baseURL}/usuarios/${edicion.id}`, edicion);
-                console.log("Respuesta backend:", response.data);
-            } else {
-                const response = await axios.post(`${baseURL}/usuarios`, edicion);
-                console.log("Respuesta backend:", response.data);
-            }
+            if (edicion.id && edicion.id > 0) {await axios.put(`${baseURL}/usuarios/${edicion.id}`, edicion);}
+            else {await axios.post(`${baseURL}/usuarios`, edicion);}
             listarUsuarios();
             setEdicion(null);
             setMostrarModal(false);
         } catch (error) {
-            console.log("Datos enviados al backend:", edicion);
             console.error("Error al registrar/actualizar: ", error);
             alert(error);
         }
@@ -119,6 +112,7 @@ const gestionarUsuarios: React.FC = () => {
                         <thead className="GM-thead">
                             <tr className="GM-tr">
                                 <th className="GM-th" style={{width:"150px"}}>Usuario</th>
+                                <th className="GM-th" style={{width:"150px"}}>Colaborador</th>
                                 <th className="GM-th" style={{width:"20px"}}>Acciones</th>
                             </tr>
                         </thead>
@@ -126,6 +120,7 @@ const gestionarUsuarios: React.FC = () => {
                             {filtrado.map((registro) => (
                                 <tr key={registro.id}>
                                     <td className="GM-td">{registro.username}</td>
+                                    <td className="GM-td"></td>
                                     <td className="GM-td">
                                         <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
                                         <button className="boton-rojo" onClick={() => eliminarUsuario(registro.id)}>Eliminar</button>

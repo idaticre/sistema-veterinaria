@@ -47,6 +47,28 @@ export interface ColaboradorRequest{
     foto?: string;
 }
 
+export interface ColaboradorResponse{
+    id: number;
+    codigoColaborador: string;
+    idEntidad: number;
+    nombre: string;
+    sexo: string;
+    documento: string;
+    idTipoPersonaJuridica: number;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    distrito: string;
+    usuario: string;
+    activo: boolean;
+    fechaRegistro: string;
+    fechaIngreso: string;
+    foto?: string;
+    mensaje: string;
+}
+
 export interface HorarioTrabajoRequest{
     id: number;
     idColaborador: number;
@@ -136,28 +158,6 @@ export interface ClienteResponse{
     distrito: string;
     activo: boolean;
     fechaRegistro: string;
-    mensaje: string;
-}
-
-export interface ColaboradorResponse{
-    id: number;
-    codigoColaborador: string;
-    idEntidad: number;
-    nombre: string;
-    sexo: string;
-    documento: string;
-    idTipoPersonaJuridica: number;
-    idTipoDocumento: number;
-    correo: string;
-    telefono: string;
-    direccion: string;
-    ciudad: string;
-    distrito: string;
-    usuario: string;
-    activo: boolean;
-    fechaRegistro: string;
-    fechaIngreso: string;
-    foto?: string;
     mensaje: string;
 }
 
