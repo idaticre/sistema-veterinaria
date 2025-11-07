@@ -91,6 +91,29 @@ export interface veterinarioRequest{
     cmp: string;
 }
 
+
+export interface MascotaRequest {
+  id?: number;
+  nombre: string;
+  sexo?: "M" | "H";
+  idCliente: number;
+  idRaza: number;
+  idEspecie: number;
+  idEstado: number;
+  fechaNacimiento: string;
+  pelaje: string;
+  idTamano: number;
+  idEtapa: number;
+  esterilizado: boolean;
+  alergias: string;
+  peso?: number;
+  chip: boolean;
+  pedigree: boolean;
+  factorDea: boolean;
+  agresividad: boolean;
+  foto: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -250,4 +273,37 @@ export interface TipoPersonaJuridica {
     nombre: string,
     descripcion: string,
     activo: boolean
+}
+
+export interface Razas{
+    id: number;
+    idEspecie: number;
+    nombre: string;
+    activo: boolean;
+}
+
+export interface Especie{
+    id: number;
+    nombre: string;
+    activo: boolean;
+}
+
+export interface Estado_Mascota{
+    id: number;
+    nombre: string;
+    decripcion: string;
+    activo: boolean;
+}
+
+export interface Tamaño_Mascota{
+    id: number;
+    tamaño: string;
+    descripcion: string;
+    activo: boolean;
+}
+
+export interface Etapa_Mascota{
+    id: number;
+    descripcion: string;
+    sctivo: boolean;
 }
