@@ -1,18 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
-import type { UsuarioRequest, UsuarioResponse } from "../../../../components/interfaces/interfaces";
+import type { UsuarioRequest, UsuarioResponse, ColaboradorResponse, ColaboradorRequest } from "../../../../components/interfaces/interfaces";
 import axios from 'axios';
 
 const gestionarUsuarios: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);
     const [busqueda, setBusqueda] = useState("");
-    let [usuarios, setUsuarios] = useState<UsuarioResponse[]>([]);
+    const [usuarios, setUsuarios] = useState<UsuarioResponse[]>([]);
     const [filtrado, setFiltrado] = useState<UsuarioResponse[]>([]);
     const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
     const [mostrarModal, setMostrarModal] = useState(false);
     const [edicion, setEdicion] = useState<UsuarioRequest | null>(null);
+    const [IdColaborador, setIdColaborador] = useState<number>(0);
+    const [colaboradores, setColaboradores] = useState<ColaboradorResponse[]>([]);
     const menuRef = useRef<HTMLDivElement | null>(null);
     const baseURL = "http://localhost:8088/api";
+
+    // Listar colaboradores
+    useEffect(() => {listarColaboradores();}, []);
+    const listarColaboradores = async () => {
+        try {
+            const respuesta = await axios.get(`${baseURL}/colaboradores`);
+            const lista = Array.isArray(respuesta.data)
+            ? respuesta.data
+            : respuesta.data.data;
+
+            const activos = lista.filter((cliente: ColaboradorResponse) => cliente.activo === true);
+            setColaboradores(activos);
+            setFiltrado(activos);
+        } catch (error) {console.error("Error al obtener los colaboradores", error);}
+    };
 
     // Efecto de cerrar ventana
     useEffect(() => {
@@ -120,7 +137,7 @@ const gestionarUsuarios: React.FC = () => {
                             {filtrado.map((registro) => (
                                 <tr key={registro.id}>
                                     <td className="GM-td">{registro.username}</td>
-                                    <td className="GM-td"></td>
+                                    <td className="GM-td"></td> {/* Mostrar colaborador asignado al usuario*/}
                                     <td className="GM-td">
                                         <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
                                         <button className="boton-rojo" onClick={() => eliminarUsuario(registro.id)}>Eliminar</button>
@@ -138,6 +155,12 @@ const gestionarUsuarios: React.FC = () => {
                         <h3>Información de usuario</h3>
                         <input type="text" placeholder="Ingrese un nombre de usuario" value={edicion.username} onChange={(e) => setEdicion(prev => prev ? { ...prev, username: e.target.value } : null)}/>
                         <input type="password" placeholder="Ingrese una contraseña" value={edicion.passwordHash} onChange={(e) => setEdicion(prev => prev ? { ...prev, passwordHash: e.target.value } : null)}/>
+                        <select value={IdColaborador} onChange={(e) => setIdColaborador(Number(e.target.value))} required>
+                            <option value="">Seleccionar colaborador</option>
+                            {colaboradores.map((colaborador) => (
+                                <option key={colaborador.id} value={colaborador.id}>{colaborador.nombre}</option>
+                            ))}
+                        </select>
                         <div className="acciones-de-registro">
                             <button className="boton-verde" onClick={guardarUsuario}>Guardar</button>
                             <button className="boton-rojo" onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
@@ -149,3 +172,7 @@ const gestionarUsuarios: React.FC = () => {
     )
 }
 export default gestionarUsuarios;
+/*
+    1) Falta mostrar el colaborador asignado al usuario
+    2) Falta actualizar el colaborador asignado al usuario
+*/
