@@ -249,10 +249,17 @@ export interface tipo_doc{
     activo: boolean;
 }
 
-export interface Usuario {
+export interface UsuarioResponse {
+  id: number;
+  username: string;
+  passwordHash: string;
+  activo: boolean;
+}
+
+export interface UsuarioRequest {
   id?: number;
   username: string;
-  password: string;
+  passwordHash: string;
   activo: boolean;
 }
 
