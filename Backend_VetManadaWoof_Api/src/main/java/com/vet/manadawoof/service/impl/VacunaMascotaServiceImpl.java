@@ -14,10 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Date;
 import java.util.List;
 
-/**
- * Implementación del servicio de VacunaMascota
- * usando SPs para la creación y actualización.
- */
 @Service
 @RequiredArgsConstructor
 public class VacunaMascotaServiceImpl implements VacunaMascotaService {
@@ -42,31 +38,43 @@ public class VacunaMascotaServiceImpl implements VacunaMascotaService {
     @Transactional
     public VacunaMascotaResponseDTO crearVacunaMascota(VacunaMascotaRequestDTO request) {
         StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("registrar_vacuna_mascota")
-                .registerStoredProcedureParameter("p_id_mascota", Integer.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_id_mascota", Long.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_id_vacuna", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_id_via", Integer.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_dosis", String.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_fecha_aplicacion", Date.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_durabilidad_anios", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_proxima_dosis", Date.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_id_colaborador", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_id_insertado", Integer.class, ParameterMode.OUT)
+                .registerStoredProcedureParameter("p_id_colaborador", Long.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_id_veterinario", Long.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_observaciones", String.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
         
-        // Setear parámetros
         sp.setParameter("p_id_mascota", request.getIdMascota());
         sp.setParameter("p_id_vacuna", request.getIdVacuna());
         sp.setParameter("p_id_via", request.getIdVia());
+        sp.setParameter("p_dosis", request.getDosis());
         sp.setParameter("p_fecha_aplicacion", Date.valueOf(request.getFechaAplicacion()));
         sp.setParameter("p_durabilidad_anios", request.getDurabilidad());
-        sp.setParameter("p_proxima_dosis", Date.valueOf(request.getProxDosis()));
-        sp.setParameter("p_id_colaborador", request.getIdColaborador());
+        sp.setParameter("p_id_colaborador", request.getIdColaborador() != null ? request.getIdColaborador() : null);
+        sp.setParameter("p_id_veterinario", request.getIdVeterinario() != null ? request.getIdVeterinario() : null);
+        sp.setParameter("p_observaciones", request.getObservaciones());
         
         sp.execute();
         
-        Integer idInsertado = (Integer) sp.getOutputParameterValue("p_id_insertado");
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
+        if(mensaje != null && mensaje.startsWith("ERROR:")) {
+            throw new RuntimeException(mensaje);
+        }
         
-        VacunaMascotaEntity entity = entityManager.find(VacunaMascotaEntity.class, idInsertado);
+        // Recuperar el último registro insertado (por mascota y fecha)
+        VacunaMascotaEntity entity = entityManager.createQuery(
+                        "SELECT v FROM VacunaMascotaEntity v WHERE v.mascota.id = :idMascota AND v.fechaAplicacion = :fecha ORDER BY v.id DESC",
+                        VacunaMascotaEntity.class)
+                .setParameter("idMascota", request.getIdMascota())
+                .setParameter("fecha", request.getFechaAplicacion())
+                .setMaxResults(1)
+                .getSingleResult();
+        
         VacunaMascotaResponseDTO response = VacunaMascotaMapper.toResponse(entity);
         response.setMensaje(mensaje);
         
@@ -86,7 +94,6 @@ public class VacunaMascotaServiceImpl implements VacunaMascotaService {
             throw new RuntimeException("ERROR: Registro de vacuna no encontrado.");
         }
         
-        // Recuperar entidades relacionadas
         MascotaEntity mascota = entityManager.find(MascotaEntity.class, request.getIdMascota());
         VacunaEntity vacuna = entityManager.find(VacunaEntity.class, request.getIdVacuna());
         AplicacionViaEntity via = entityManager.find(AplicacionViaEntity.class, request.getIdVia());
@@ -97,14 +104,13 @@ public class VacunaMascotaServiceImpl implements VacunaMascotaService {
                 ? entityManager.find(VeterinarioEntity.class, request.getIdVeterinario())
                 : null;
         
-        // Actualizar entity
         VacunaMascotaMapper.updateEntityFromRequest(request, entity, mascota, vacuna, via, colaborador, veterinario);
         entityManager.merge(entity);
         
         return VacunaMascotaMapper.toResponse(entity);
     }
     
-    // ---------------- ELIMINAR VACUNAS (lógico) ----------------
+    // ---------------- ELIMINAR VACUNA (lógico) ----------------
     @Override
     @Transactional
     public VacunaMascotaResponseDTO eliminarVacuna(Integer id) {
@@ -117,18 +123,16 @@ public class VacunaMascotaServiceImpl implements VacunaMascotaService {
             throw new RuntimeException("ERROR: Registro de vacuna no encontrado.");
         }
         
-        // Llamar al SP para actualizar el registro con activo = 0
         StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("actualizar_vacuna_mascota")
-                .registerStoredProcedureParameter("p_id_vacuna_mascota", Integer.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_id_vacuna_mascota", Long.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_id_vacuna", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_id_mascota", Integer.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_id_mascota", Long.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_id_via", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_dosis", String.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_fecha_aplicacion", java.sql.Date.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_fecha_aplicacion", Date.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_durabilidad_anios", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_proxima_dosis", java.sql.Date.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_id_colaborador", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_id_veterinario", Integer.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_id_colaborador", Long.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_id_veterinario", Long.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_observaciones", String.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_activo", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
@@ -138,13 +142,12 @@ public class VacunaMascotaServiceImpl implements VacunaMascotaService {
         sp.setParameter("p_id_mascota", entity.getMascota().getId());
         sp.setParameter("p_id_via", entity.getVia().getId());
         sp.setParameter("p_dosis", entity.getDosis());
-        sp.setParameter("p_fecha_aplicacion", java.sql.Date.valueOf(entity.getFechaAplicacion()));
+        sp.setParameter("p_fecha_aplicacion", Date.valueOf(entity.getFechaAplicacion()));
         sp.setParameter("p_durabilidad_anios", entity.getDurabilidad());
-        sp.setParameter("p_proxima_dosis", java.sql.Date.valueOf(entity.getProximaDosis()));
         sp.setParameter("p_id_colaborador", entity.getColaborador() != null ? entity.getColaborador().getId() : null);
         sp.setParameter("p_id_veterinario", entity.getVeterinario() != null ? entity.getVeterinario().getId() : null);
         sp.setParameter("p_observaciones", entity.getObservaciones());
-        sp.setParameter("p_activo", 0); // activo = 0 para “eliminación lógica”
+        sp.setParameter("p_activo", 0);
         
         sp.execute();
         
@@ -153,8 +156,9 @@ public class VacunaMascotaServiceImpl implements VacunaMascotaService {
             throw new RuntimeException(mensaje);
         }
         
-        // Recargar entity actualizado
         entityManager.refresh(entity);
-        return VacunaMascotaMapper.toResponse(entity);
+        VacunaMascotaResponseDTO response = VacunaMascotaMapper.toResponse(entity);
+        response.setMensaje(mensaje);
+        return response;
     }
 }

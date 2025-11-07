@@ -1,5 +1,7 @@
+
 -- BLOQUE 02 PROCEDIMIENTOS ALMACENADOS CRUD
-USE vet_manada_woof;
+
+-- USE vet_manada_woof;
 -- ========================================
 -- SP: REGISTRAR_MASCOTA
 -- Registra una nueva mascota validando cliente, duplicados y consistencia de datos.
@@ -99,10 +101,6 @@ proc_main: BEGIN
 
     -- Actualizar código generado
     UPDATE mascotas SET codigo = p_codigo_mascota WHERE id = p_id_mascota;
-
-    -- Crear historia clínica inicial (estado = "Abierta" = 1)
-    INSERT INTO historia_clinica (id_mascota, id_estado, fecha_apertura)
-    VALUES (p_id_mascota, 1, NOW());
 
     SET p_mensaje = CONCAT('Mascota registrada correctamente con código: ', p_codigo_mascota);
 
@@ -243,12 +241,18 @@ CREATE PROCEDURE registrar_medicamento_mascota (
 proc_main: BEGIN
     DECLARE v_codigo_registro VARCHAR(16);
     DECLARE v_nombre_medicamento VARCHAR(64);
+    DECLARE v_nuevo_id BIGINT DEFAULT 0;
+    DECLARE v_sqlstate CHAR(5);
+    DECLARE v_sqlmsg TEXT;
 
-    -- Manejo de errores
+    -- Manejo de errores con detalle real
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_sqlstate = RETURNED_SQLSTATE,
+            v_sqlmsg = MESSAGE_TEXT;
         ROLLBACK;
-        SET p_mensaje = 'ERROR: Falló el registro del medicamento. Transacción revertida.';
+        SET p_mensaje = CONCAT('ERROR SQL: [', v_sqlstate, '] ', v_sqlmsg);
     END;
 
     START TRANSACTION;
@@ -271,7 +275,7 @@ proc_main: BEGIN
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 4️⃣ Validar duplicado (misma mascota, medicamento y fecha)
+    -- 4️⃣ Validar duplicado
     IF EXISTS (
         SELECT 1 FROM medicamentos_mascota
         WHERE id_mascota = p_id_mascota
@@ -282,13 +286,16 @@ proc_main: BEGIN
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 5️⃣ Insertar nuevo registro
+    -- 5️⃣ Calcular próximo ID de forma segura
+    SELECT IFNULL(MAX(id), 0) + 1 INTO v_nuevo_id FROM medicamentos_mascota;
+
+    -- 6️⃣ Insertar nuevo registro
     INSERT INTO medicamentos_mascota (
         codigo, id_mascota, id_medicamento, id_via, dosis,
         fecha_aplicacion, id_colaborador, id_veterinario, observaciones
     )
     VALUES (
-        CONCAT('MEDM', LPAD((SELECT IFNULL(MAX(id), 0) + 1 FROM medicamentos_mascota), 6, '0')),
+        CONCAT('MEDM', LPAD(v_nuevo_id, 6, '0')),
         p_id_mascota,
         p_id_medicamento,
         p_id_via,
@@ -299,21 +306,22 @@ proc_main: BEGIN
         p_observaciones
     );
 
-    -- 6️⃣ Obtener el código del registro insertado
+    -- 7️⃣ Obtener el código insertado
     SELECT codigo INTO v_codigo_registro 
     FROM medicamentos_mascota 
     WHERE id = LAST_INSERT_ID();
 
-    -- 7️⃣ Obtener nombre del medicamento para el mensaje
+    -- 8️⃣ Obtener nombre del medicamento
     SELECT nombre INTO v_nombre_medicamento FROM medicamentos WHERE id = p_id_medicamento;
 
     COMMIT;
 
-    -- 8️⃣ Mensaje final
+    -- 9️⃣ Mensaje final
     SET p_mensaje = CONCAT('Medicamento "', v_nombre_medicamento,
                             '" registrado correctamente. Código del registro: ', v_codigo_registro, '.');
 END$$
 DELIMITER ;
+
 
 
 -- ========================================
@@ -331,8 +339,8 @@ CREATE PROCEDURE actualizar_medicamento_mascota (
     IN p_id_via INT,                     
     IN p_dosis VARCHAR(32),              
     IN p_fecha_aplicacion DATE,          
-    IN p_id_colaborador BIGINT,          -- Colaborador que aplicó el medicamento
-    IN p_id_veterinario BIGINT,          -- Veterinario responsable
+    IN p_id_colaborador BIGINT,          
+    IN p_id_veterinario BIGINT,          
     IN p_observaciones VARCHAR(64),      
     IN p_activo TINYINT,                 
     OUT p_mensaje VARCHAR(255)          
@@ -342,43 +350,56 @@ proc_main: BEGIN
     DECLARE v_codigo_mascota VARCHAR(16);
     DECLARE v_nombre_medicamento VARCHAR(64);
 
-    -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
-        SET p_mensaje = 'ERROR: Falló actualización del medicamento. Transacción revertida.';
+        GET DIAGNOSTICS CONDITION 1 
+            p_mensaje = MESSAGE_TEXT;
     END;
 
     START TRANSACTION;
 
-    -- 1️⃣ Validar existencia del registro
     IF NOT EXISTS (SELECT 1 FROM medicamentos_mascota WHERE id = p_id_registro) THEN
         SET p_mensaje = 'ERROR: Registro no existente.';
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 2️⃣ Obtener datos de referencia
-    SELECT codigo INTO v_codigo_registro FROM medicamentos_mascota WHERE id = p_id_registro;
-    SELECT codigo INTO v_codigo_mascota FROM mascotas WHERE id = p_id_mascota;
-    SELECT nombre INTO v_nombre_medicamento FROM medicamentos WHERE id = p_id_medicamento;
+SELECT 
+    codigo
+INTO v_codigo_registro FROM
+    medicamentos_mascota
+WHERE
+    id = p_id_registro;
+SELECT 
+    codigo
+INTO v_codigo_mascota FROM
+    mascotas
+WHERE
+    id = p_id_mascota;
+SELECT 
+    nombre
+INTO v_nombre_medicamento FROM
+    medicamentos
+WHERE
+    id = p_id_medicamento;
 
-    -- 3️⃣ Actualizar datos generales o estado lógico
-    UPDATE medicamentos_mascota
-    SET id_mascota = p_id_mascota,
-        id_medicamento = p_id_medicamento,
-        id_via = p_id_via,
-        dosis = p_dosis,
-        fecha_aplicacion = p_fecha_aplicacion,
-        id_colaborador = p_id_colaborador,
-        id_veterinario = p_id_veterinario,
-        observaciones = p_observaciones,
-        fecha_modificacion = NOW(),
-        activo = p_activo
-    WHERE id = p_id_registro;
+UPDATE medicamentos_mascota 
+SET 
+    id_mascota = p_id_mascota,
+    id_medicamento = p_id_medicamento,
+    id_via = p_id_via,
+    dosis = p_dosis,
+    fecha_aplicacion = p_fecha_aplicacion,
+    id_colaborador = p_id_colaborador,
+    id_veterinario = p_id_veterinario,
+    observaciones = p_observaciones,
+    fecha_modificacion = NOW(),
+    activo = p_activo
+WHERE
+    id = p_id_registro;
 
     COMMIT;
 
-    -- 4️ Mensaje final
     IF p_activo = 0 THEN
         SET p_mensaje = CONCAT('Registro ', v_codigo_registro,
                                ' desactivado (eliminación lógica).');
@@ -397,43 +418,107 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS registrar_vacuna_mascota;
 DELIMITER $$
+
 CREATE PROCEDURE registrar_vacuna_mascota(
-    IN p_id_mascota INT,
+    IN p_id_mascota BIGINT,
     IN p_id_vacuna INT,
     IN p_id_via INT,
+    IN p_dosis VARCHAR(32),
     IN p_fecha_aplicacion DATE,
     IN p_durabilidad_anios INT,
-    IN p_proxima_dosis DATE,
-    IN p_id_colaborador INT,
-    OUT p_id_insertado INT,
-    OUT p_mensaje VARCHAR(100)
+    IN p_id_colaborador BIGINT,
+    IN p_id_veterinario BIGINT,
+    IN p_observaciones VARCHAR(64),
+    OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc_main: BEGIN
+    DECLARE v_codigo_registro VARCHAR(16);
+    DECLARE v_nombre_vacuna VARCHAR(64);
+    DECLARE v_nuevo_id BIGINT DEFAULT 0;
+    DECLARE v_sqlstate CHAR(5);
+    DECLARE v_sqlmsg TEXT;
+
+    -- Manejo de errores con detalle
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_sqlstate = RETURNED_SQLSTATE,
+            v_sqlmsg = MESSAGE_TEXT;
         ROLLBACK;
-        SET p_id_insertado = NULL;
-        SET p_mensaje = 'Error al registrar vacuna.';
+        SET p_mensaje = CONCAT('ERROR SQL: [', v_sqlstate, '] ', v_sqlmsg);
     END;
 
     START TRANSACTION;
 
+    -- 1️⃣ Validar existencia de mascota
+    IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
+        SET p_mensaje = 'ERROR: Mascota no existente.';
+        ROLLBACK; LEAVE proc_main;
+    END IF;
+
+    -- 2️⃣ Validar existencia de vacuna
+    IF NOT EXISTS (SELECT 1 FROM vacunas WHERE id = p_id_vacuna) THEN
+        SET p_mensaje = 'ERROR: Vacuna no válida.';
+        ROLLBACK; LEAVE proc_main;
+    END IF;
+
+    -- 3️⃣ Validar existencia de vía
+    IF NOT EXISTS (SELECT 1 FROM vias_aplicacion WHERE id = p_id_via) THEN
+        SET p_mensaje = 'ERROR: Vía de aplicación no válida.';
+        ROLLBACK; LEAVE proc_main;
+    END IF;
+
+    -- 4️⃣ Validar duplicado (misma vacuna y fecha)
+    IF EXISTS (
+        SELECT 1 FROM vacunas_mascota
+        WHERE id_mascota = p_id_mascota
+          AND id_vacuna = p_id_vacuna
+          AND fecha_aplicacion = p_fecha_aplicacion
+    ) THEN
+        SET p_mensaje = 'ERROR: Ya existe un registro de esta vacuna en esa fecha.';
+        ROLLBACK; LEAVE proc_main;
+    END IF;
+
+    -- 5️⃣ Calcular nuevo ID para generar código
+    SELECT IFNULL(MAX(id), 0) + 1 INTO v_nuevo_id FROM vacunas_mascota;
+
+    -- 6️⃣ Insertar nuevo registro
     INSERT INTO vacunas_mascota (
-        id_mascota, id_vacuna, id_via, fecha_aplicacion,
-        durabilidad_anios, proxima_dosis, id_colaborador, activo
+        codigo, id_mascota, id_vacuna, id_via, dosis,
+        fecha_aplicacion, durabilidad_anios, proxima_dosis,
+        id_colaborador, id_veterinario, observaciones, activo
     )
     VALUES (
-        p_id_mascota, p_id_vacuna, p_id_via, p_fecha_aplicacion,
-        p_durabilidad_anios, p_proxima_dosis, p_id_colaborador, 1
+        CONCAT('VACM', LPAD(v_nuevo_id, 6, '0')),
+        p_id_mascota,
+        p_id_vacuna,
+        p_id_via,
+        p_dosis,
+        p_fecha_aplicacion,
+        p_durabilidad_anios,
+        DATE_ADD(p_fecha_aplicacion, INTERVAL p_durabilidad_anios YEAR),
+        p_id_colaborador,
+        p_id_veterinario,
+        p_observaciones,
+        1
     );
 
-    SET p_id_insertado = LAST_INSERT_ID();
-    SET p_mensaje = 'Vacuna registrada correctamente.';
+    -- 7️⃣ Obtener código insertado
+    SELECT codigo INTO v_codigo_registro 
+    FROM vacunas_mascota 
+    WHERE id = LAST_INSERT_ID();
+
+    -- 8️⃣ Obtener nombre de la vacuna
+    SELECT nombre INTO v_nombre_vacuna FROM vacunas WHERE id = p_id_vacuna;
 
     COMMIT;
-END $$
-DELIMITER ;
 
+    -- 9️⃣ Mensaje final
+    SET p_mensaje = CONCAT('Vacuna "', v_nombre_vacuna,
+                            '" registrada correctamente. Código del registro: ', v_codigo_registro, '.');
+END$$
+
+DELIMITER ;
 
 
 -- ========================================
@@ -466,18 +551,17 @@ proc_main: BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
         ROLLBACK;
-        SET p_mensaje = 'ERROR: Falló actualización de vacuna aplicada. Transacción revertida.';
+        GET DIAGNOSTICS CONDITION 1 
+            p_mensaje = MESSAGE_TEXT;
     END;
 
     START TRANSACTION;
 
-    -- Validar existencia del registro
     IF NOT EXISTS (SELECT 1 FROM vacunas_mascota WHERE id = p_id_vacuna_mascota) THEN
         SET p_mensaje = 'ERROR: Registro de vacuna no existe.';
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- Validar vacuna y vía
     IF NOT EXISTS (SELECT 1 FROM vacunas WHERE id = p_id_vacuna) THEN
         SET p_mensaje = 'ERROR: Vacuna no válida.';
         ROLLBACK; LEAVE proc_main;
@@ -488,7 +572,6 @@ proc_main: BEGIN
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- Obtener datos informativos
     SELECT codigo INTO v_codigo FROM vacunas_mascota WHERE id = p_id_vacuna_mascota;
     SELECT v.nombre, m.nombre
     INTO v_nombre_vacuna, v_nombre_mascota
@@ -497,7 +580,6 @@ proc_main: BEGIN
     JOIN mascotas m ON vm.id_mascota = m.id
     WHERE vm.id = p_id_vacuna_mascota;
 
-    -- Actualizar registro
     UPDATE vacunas_mascota
     SET id_vacuna = p_id_vacuna,
         id_via = p_id_via,
@@ -511,7 +593,6 @@ proc_main: BEGIN
         fecha_modificacion = NOW()
     WHERE id = p_id_vacuna_mascota;
 
-    -- Eliminación lógica si aplica (si agregas campo activo)
     IF p_activo = 0 THEN
         UPDATE vacunas_mascota SET activo = 0, fecha_modificacion = NOW() WHERE id = p_id_vacuna_mascota;
         SET p_mensaje = CONCAT('Vacuna "', v_nombre_vacuna, '" para la mascota "', v_nombre_mascota, '" desactivada.');

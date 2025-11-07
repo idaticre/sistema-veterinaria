@@ -389,28 +389,74 @@ CREATE INDEX idx_asignacion_colaborador ON asignacion_horarios(id_colaborador);
 -- Índice para facilitar búsquedas por tipo de día en horarios laborales.
 CREATE INDEX idx_asignacion_dia ON asignacion_horarios(id_dia_semana);
 
+
+-- ========================================
+-- TABLA: estado_asistencia
+-- Catálogo de estados posibles de un registro de asistencia.
+-- ========================================
+
+CREATE TABLE estado_asistencia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(255)
+);
+
+-- Carga inicial de estados básicos
+INSERT INTO estado_asistencia (nombre, descripcion) VALUES
+('PENDIENTE', 'Registro creado sin marcar salida aún'),
+('PRESENTE', 'Colaborador marcó entrada'),
+('ALMUERZO', 'Colaborador se encuentra en almuerzo'),
+('COMPLETADO', 'Asistencia completada con salida registrada'),
+('AUSENTE', 'Colaborador no asistió al turno'),
+('JUSTIFICADO', 'Ausencia con justificación registrada');
+
+
 -- ========================================
 -- TABLA: registro_asistencia
 -- Controla los registros diarios de asistencia del personal.
 -- ========================================
-DROP TABLE IF EXISTS registro_asistencia;
-CREATE TABLE registro_asistencia (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    id_colaborador BIGINT NOT NULL UNIQUE,
-    id_horario_base INT NULL, 
-    fecha DATE NOT NULL UNIQUE,
+DROP TABLE IF EXISTS registro_asistencias;
+CREATE TABLE registro_asistencias (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    id_colaborador BIGINT NOT NULL,
+    id_horario_base INT NULL,
+    fecha DATE NOT NULL,
     hora_entrada TIME NULL,
+    hora_lunch_inicio TIME NULL,
+    hora_lunch_fin TIME NULL,
     hora_salida TIME NULL,
+    minutos_trabajados INT NULL,        -- calculado: minutos(hora_salida - hora_entrada) - minutos_lunch
+    minutos_lunch INT NULL,             -- calculado: minutos(hora_lunch_fin - hora_lunch_inicio)
+    tardanza_minutos INT NULL,
+    id_estado_asistencia INT NOT NULL,
     observaciones TEXT,
-    CHECK (hora_salida IS NULL OR hora_salida >= hora_entrada)
+    registro_origen VARCHAR(32) NULL,   -- 'APP', 'BIOMETRICO', 'MANUAL'
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by BIGINT NULL,
+    updated_by BIGINT NULL,
+    CHECK (hora_salida IS NULL OR hora_entrada IS NULL OR hora_salida >= hora_entrada)
 );
 
--- Relación con la tabla de colaboradores
-ALTER TABLE registro_asistencia
-    ADD CONSTRAINT fk_asistencia_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
-    ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE registro_asistencias
+	ADD CONSTRAINT uq_asistencia_colab_fecha UNIQUE (id_colaborador, fecha);
     
--- Índices para optimizar búsquedas frecuentes
-CREATE INDEX idx_asistencia_colaborador ON registro_asistencia(id_colaborador);
+ALTER TABLE registro_asistencias
+    ADD CONSTRAINT fk_asistencia_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+        ON DELETE RESTRICT ON UPDATE CASCADE;
 
-CREATE INDEX idx_asistencia_fecha ON registro_asistencia(fecha);
+ALTER TABLE registro_asistencias
+    ADD CONSTRAINT fk_asistencia_horario FOREIGN KEY (id_horario_base) REFERENCES horarios_base(id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+        
+ALTER TABLE registro_asistencias 
+	ADD CONSTRAINT fk_registro_asistencia_estado FOREIGN KEY (id_estado_asistencia) REFERENCES estado_asistencia (id)
+		ON UPDATE CASCADE ON DELETE RESTRICT;
+
+-- Índice para acelerar las búsquedas o reportes por colaborador
+CREATE INDEX idx_asistencia_colaborador ON registro_asistencias(id_colaborador);
+
+-- Índice para optimizar consultas por fecha (ej. reportes diarios o filtros por rango de fechas)
+CREATE INDEX idx_asistencia_fecha ON registro_asistencias(fecha);
+
+    

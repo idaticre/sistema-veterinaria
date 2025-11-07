@@ -39,14 +39,13 @@ public class MedicamentoMascotaServiceImpl implements MedicamentoMascotaService 
                 .registerStoredProcedureParameter("p_observaciones", String.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
         
-        // Setear parámetros
         sp.setParameter("p_id_mascota", request.getIdMascota());
         sp.setParameter("p_id_medicamento", request.getIdMedicamento());
         sp.setParameter("p_id_via", request.getIdVia());
         sp.setParameter("p_dosis", request.getDosis());
-        sp.setParameter("p_fecha_aplicacion", java.sql.Date.valueOf(request.getFechaAplicacion()));
-        sp.setParameter("p_id_colaborador", request.getIdColaborador());
-        sp.setParameter("p_id_veterinario", request.getIdVeterinario());
+        sp.setParameter("p_fecha_aplicacion", request.getFechaAplicacion() != null ? java.sql.Date.valueOf(request.getFechaAplicacion()) : null);
+        sp.setParameter("p_id_colaborador", request.getIdColaborador() != null ? request.getIdColaborador() : null);
+        sp.setParameter("p_id_veterinario", request.getIdVeterinario() != null ? request.getIdVeterinario() : null);
         sp.setParameter("p_observaciones", request.getObservaciones());
         
         sp.execute();
@@ -56,7 +55,6 @@ public class MedicamentoMascotaServiceImpl implements MedicamentoMascotaService 
             throw new RuntimeException(mensaje);
         }
         
-        // Obtener el último registro insertado (simplificación, SP no devuelve ID)
         MedicamentoMascotaEntity entity = entityManager.createQuery(
                         "SELECT m FROM MedicamentoMascotaEntity m WHERE m.mascota.id = :idMascota AND m.fechaAplicacion = :fecha ORDER BY m.id DESC",
                         MedicamentoMascotaEntity.class)
@@ -81,16 +79,13 @@ public class MedicamentoMascotaServiceImpl implements MedicamentoMascotaService 
             throw new RuntimeException("ERROR: Registro de medicamento no encontrado.");
         }
         
-        // Recuperar entidades relacionadas
         MascotaEntity mascota = entityManager.find(MascotaEntity.class, request.getIdMascota());
         MedicamentoEntity medicamento = entityManager.find(MedicamentoEntity.class, request.getIdMedicamento());
         AplicacionViaEntity via = entityManager.find(AplicacionViaEntity.class, request.getIdVia());
         ColaboradorEntity colaborador = request.getIdColaborador() != null ? entityManager.find(ColaboradorEntity.class, request.getIdColaborador()) : null;
         VeterinarioEntity veterinario = request.getIdVeterinario() != null ? entityManager.find(VeterinarioEntity.class, request.getIdVeterinario()) : null;
         
-        // Actualizar entity
         MedicamentoMascotaMapper.updateEntityFromRequest(request, entity, mascota, medicamento, via, colaborador, veterinario);
-        
         entityManager.merge(entity);
         
         return MedicamentoMascotaMapper.toResponse(entity);
@@ -121,7 +116,6 @@ public class MedicamentoMascotaServiceImpl implements MedicamentoMascotaService 
             throw new RuntimeException("ERROR: Registro de medicamento no encontrado.");
         }
         
-        // Llamar al SP para actualizar el registro con activo = 0
         StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("actualizar_medicamento_mascota")
                 .registerStoredProcedureParameter("p_id_registro", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_id_mascota", Long.class, ParameterMode.IN)
@@ -140,11 +134,11 @@ public class MedicamentoMascotaServiceImpl implements MedicamentoMascotaService 
         sp.setParameter("p_id_medicamento", entity.getMedicamento().getId());
         sp.setParameter("p_id_via", entity.getVia().getId());
         sp.setParameter("p_dosis", entity.getDosis());
-        sp.setParameter("p_fecha_aplicacion", java.sql.Date.valueOf(entity.getFechaAplicacion()));
+        sp.setParameter("p_fecha_aplicacion", entity.getFechaAplicacion() != null ? java.sql.Date.valueOf(entity.getFechaAplicacion()) : null);
         sp.setParameter("p_id_colaborador", entity.getColaborador() != null ? entity.getColaborador().getId() : null);
         sp.setParameter("p_id_veterinario", entity.getVeterinario() != null ? entity.getVeterinario().getId() : null);
         sp.setParameter("p_observaciones", entity.getObservaciones());
-        sp.setParameter("p_activo", 0); // activo = 0 para “eliminación lógica”
+        sp.setParameter("p_activo", 0);
         
         sp.execute();
         
@@ -153,7 +147,6 @@ public class MedicamentoMascotaServiceImpl implements MedicamentoMascotaService 
             throw new RuntimeException(mensaje);
         }
         
-        // Recargar entity actualizado
         entityManager.refresh(entity);
         return MedicamentoMascotaMapper.toResponse(entity);
     }

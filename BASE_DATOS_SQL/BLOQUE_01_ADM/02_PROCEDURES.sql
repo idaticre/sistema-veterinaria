@@ -1186,48 +1186,196 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- PROCEDIMIENTO: registrar_asistencia
--- Inserta o actualiza la asistencia de un colaborador según si ya existe registro del día.
+-- PROCEDIMIENTO: gestionar_asistencia
+-- Controla el registro de asistencia diaria (entrada, almuerzo, salida)
 -- ========================================
-DROP PROCEDURE IF EXISTS registrar_asistencia;
+DROP PROCEDURE IF EXISTS gestionar_asistencia;
 DELIMITER $$
 
-CREATE PROCEDURE registrar_asistencia (
-    IN p_id_colaborador BIGINT,
-    IN p_fecha DATE,
-    IN p_hora_entrada TIME,
-    IN p_hora_salida TIME,
-    IN p_observaciones TEXT,
+CREATE PROCEDURE gestionar_asistencia (
+    IN p_colaborador_id BIGINT,
+    IN p_tipo_marca VARCHAR(10),
     OUT p_mensaje VARCHAR(255)
 )
-proc_main: BEGIN
-    DECLARE v_exist_colab INT;
-    DECLARE v_exist_registro INT;
+proc_asistencia: BEGIN
+    DECLARE v_id_asistencia BIGINT;
+    DECLARE v_fecha_actual DATE;
+    DECLARE v_hora_actual TIME;
+    DECLARE v_id_horario INT;
+    DECLARE v_hora_inicio TIME;
+    DECLARE v_id_estado_presente INT;
+    DECLARE v_id_estado_completado INT;
 
-    -- Validar existencia del colaborador
-    SELECT COUNT(*) INTO v_exist_colab FROM colaboradores WHERE id = p_id_colaborador;
-    IF v_exist_colab = 0 THEN
-        SET p_mensaje = 'ERROR: El colaborador no existe.';
-        LEAVE proc_main;
+    -- Inicializa valores actuales
+    SET v_fecha_actual = CURDATE();
+    SET v_hora_actual = CURTIME();
+
+    -- Obtiene IDs de estados
+    SELECT id INTO v_id_estado_presente FROM estado_asistencia WHERE nombre = 'PRESENTE' LIMIT 1;
+    SELECT id INTO v_id_estado_completado FROM estado_asistencia WHERE nombre = 'COMPLETADO' LIMIT 1;
+
+    -- Valida tipo_marca
+    IF p_tipo_marca NOT IN ('ENTRADA', 'LUNCH_IN', 'LUNCH_OUT', 'SALIDA') THEN
+        SET p_mensaje = 'Tipo de marca inválido.';
+        LEAVE proc_asistencia;
     END IF;
 
-    -- Verificar si ya hay registro en esa fecha
-    SELECT COUNT(*) INTO v_exist_registro
-    FROM registro_asistencia
-    WHERE id_colaborador = p_id_colaborador AND fecha = p_fecha;
+    -- Obtiene el horario asignado según el día actual
+    SELECT ah.id_horario_base, hb.hora_inicio
+    INTO v_id_horario, v_hora_inicio
+    FROM asignacion_horarios ah
+    JOIN horarios_base hb ON hb.id = ah.id_horario_base
+    WHERE ah.id_colaborador = p_colaborador_id
+      AND ah.id_dia_semana = CASE DAYOFWEEK(CURDATE())
+                                WHEN 1 THEN 7
+                                ELSE DAYOFWEEK(CURDATE()) - 1
+                             END
+      AND ah.activo = 1
+    LIMIT 1;
 
-    -- Si ya existe, se actualiza (por ejemplo, para registrar hora de salida)
-    IF v_exist_registro > 0 THEN
-        UPDATE registro_asistencia
-        SET hora_salida = COALESCE(p_hora_salida, hora_salida),
-            observaciones = CONCAT(COALESCE(observaciones, ''), ' ', COALESCE(p_observaciones, ''))
-        WHERE id_colaborador = p_id_colaborador AND fecha = p_fecha;
-        SET p_mensaje = 'Asistencia actualizada correctamente.';
+    -- Verifica si tiene asignación hoy
+    IF v_id_horario IS NULL THEN
+        SET p_mensaje = 'El colaborador no tiene horario asignado para hoy.';
+        LEAVE proc_asistencia;
+    END IF;
+
+    -- Busca si ya tiene un registro hoy
+    SELECT id INTO v_id_asistencia
+    FROM registro_asistencias
+    WHERE id_colaborador = p_colaborador_id
+      AND fecha = v_fecha_actual
+    LIMIT 1;
+
+    -- =====================================
+    -- CASO 1: No hay registro previo → se crea solo si es ENTRADA
+    -- =====================================
+    IF v_id_asistencia IS NULL THEN
+        IF p_tipo_marca = 'ENTRADA' THEN
+            INSERT INTO registro_asistencias (
+                id_colaborador, id_horario_base, fecha, hora_entrada, id_estado_asistencia
+            )
+            VALUES (
+                p_colaborador_id, v_id_horario, v_fecha_actual, v_hora_actual, v_id_estado_presente
+            );
+
+            -- Calcula tardanza si hora_inicio es no nula
+            IF v_hora_inicio IS NOT NULL THEN
+                UPDATE registro_asistencias
+                SET tardanza_minutos = GREATEST(TIMESTAMPDIFF(MINUTE, v_hora_inicio, v_hora_actual), 0)
+                WHERE id = LAST_INSERT_ID();
+            END IF;
+
+            SET p_mensaje = CONCAT('Entrada registrada a las ', v_hora_actual);
+
+        ELSE
+            SET p_mensaje = 'Debe marcar ENTRADA antes de cualquier otro evento.';
+        END IF;
+
+    -- =====================================
+    -- CASO 2: Ya tiene registro → se actualiza según tipo de marca
+    -- =====================================
     ELSE
-        -- Si no existe, se inserta el registro (por ejemplo, al marcar entrada)
-        INSERT INTO registro_asistencia (id_colaborador, fecha, hora_entrada, hora_salida, observaciones)
-        VALUES (p_id_colaborador, p_fecha, p_hora_entrada, p_hora_salida, p_observaciones);
-        SET p_mensaje = 'Asistencia registrada correctamente.';
+        CASE p_tipo_marca
+
+            WHEN 'ENTRADA' THEN
+                SET p_mensaje = 'Ya existe una entrada registrada hoy.';
+
+            WHEN 'LUNCH_IN' THEN
+                UPDATE registro_asistencias
+                SET hora_lunch_inicio = IF(hora_lunch_inicio IS NULL, v_hora_actual, hora_lunch_inicio)
+                WHERE id = v_id_asistencia
+                  AND hora_entrada IS NOT NULL
+                  AND hora_lunch_inicio IS NULL;
+
+                IF ROW_COUNT() > 0 THEN
+                    SET p_mensaje = CONCAT('Inicio de almuerzo registrado a las ', v_hora_actual);
+                ELSE
+                    SET p_mensaje = 'Ya registró inicio de almuerzo o no marcó entrada.';
+                END IF;
+
+            WHEN 'LUNCH_OUT' THEN
+                UPDATE registro_asistencias
+                SET hora_lunch_fin = IF(hora_lunch_fin IS NULL, v_hora_actual, hora_lunch_fin),
+                    minutos_lunch = CASE
+                        WHEN hora_lunch_inicio IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, hora_lunch_inicio, v_hora_actual)
+                        ELSE NULL
+                    END
+                WHERE id = v_id_asistencia
+                  AND hora_lunch_inicio IS NOT NULL
+                  AND hora_lunch_fin IS NULL;
+
+                IF ROW_COUNT() > 0 THEN
+                    SET p_mensaje = CONCAT('Fin de almuerzo registrado a las ', v_hora_actual);
+                ELSE
+                    SET p_mensaje = 'Debe iniciar almuerzo antes de finalizarlo.';
+                END IF;
+
+            WHEN 'SALIDA' THEN
+                UPDATE registro_asistencias
+                SET hora_salida = IF(hora_salida IS NULL, v_hora_actual, hora_salida),
+                    minutos_trabajados = CASE
+                        WHEN hora_entrada IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, hora_entrada, v_hora_actual) - IFNULL(minutos_lunch, 0)
+                        ELSE NULL
+                    END,
+                    id_estado_asistencia = v_id_estado_completado
+                WHERE id = v_id_asistencia
+                  AND hora_entrada IS NOT NULL
+                  AND hora_salida IS NULL;
+
+                IF ROW_COUNT() > 0 THEN
+                    SET p_mensaje = CONCAT('Salida registrada a las ', v_hora_actual);
+                ELSE
+                    SET p_mensaje = 'Ya registró salida o falta marcar entrada.';
+                END IF;
+
+        END CASE;
     END IF;
-END$$
+
+END $$
+
+DELIMITER ;
+
+
+-- ========================================
+-- PROCEDIMIENTO: ver_asistencia_por_rango
+-- Devuelve las asistencias registradas entre dos fechas.
+-- Incluye colaborador, horario asignado y estado.
+-- ========================================
+DROP PROCEDURE IF EXISTS ver_asistencia_por_rango;
+DELIMITER $$
+
+CREATE PROCEDURE ver_asistencia_por_rango (
+    IN p_fecha_inicio DATE,
+    IN p_fecha_fin DATE
+)
+BEGIN
+    -- Valida que el rango sea correcto
+    IF p_fecha_inicio > p_fecha_fin THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'La fecha inicial no puede ser mayor que la final.';
+    END IF;
+
+    SELECT 
+        c.id AS id_colaborador,
+        e.nombre AS colaborador,
+        hb.nombre AS horario,
+        ra.fecha,
+        ra.hora_entrada,
+        ra.hora_lunch_inicio,
+        ra.hora_lunch_fin,
+        ra.hora_salida,
+        ra.minutos_trabajados,
+        ra.minutos_lunch,
+        ra.tardanza_minutos,
+        ea.nombre AS estado_asistencia,
+        ra.observaciones
+    FROM registro_asistencias ra
+    JOIN colaboradores c ON c.id = ra.id_colaborador
+    JOIN entidades e ON e.id = c.id_entidad
+    LEFT JOIN horarios_base hb ON hb.id = ra.id_horario_base
+    LEFT JOIN estado_asistencia ea ON ea.id = ra.id_estado_asistencia
+    WHERE ra.fecha BETWEEN p_fecha_inicio AND p_fecha_fin
+    ORDER BY ra.fecha DESC, colaborador ASC;
+END $$
+
 DELIMITER ;

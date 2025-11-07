@@ -352,7 +352,7 @@ CREATE TABLE IF NOT EXISTS horarios_base (
 -- ========================================
 INSERT INTO horarios_base (nombre, descripcion, hora_inicio, hora_fin)
 VALUES 
-('Horario estándar', 'Lunes a sábado de 9:00 a 18:00', '09:00:00', '18:00:00'),
+('Horario Normal', 'Lunes a sábado de 9:00 a 18:00', '09:00:00', '18:00:00'),
 ('Turno mañana', 'Lunes a sábado de 8:00 a 13:00', '08:00:00', '13:00:00'),
 ('Turno tarde', 'Lunes a sábado de 13:00 a 18:00', '13:00:00', '18:00:00'),
 ('Turno completo', 'Lunes a sábado de 8:00 a 17:00', '08:00:00', '17:00:00'),
@@ -389,31 +389,76 @@ CREATE INDEX idx_asignacion_colaborador ON asignacion_horarios(id_colaborador);
 -- Índice para facilitar búsquedas por tipo de día en horarios laborales.
 CREATE INDEX idx_asignacion_dia ON asignacion_horarios(id_dia_semana);
 
+
+-- ========================================
+-- TABLA: estado_asistencia
+-- Catálogo de estados posibles de un registro de asistencia.
+-- ========================================
+
+CREATE TABLE estado_asistencia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(255)
+);
+
+-- Carga inicial de estados básicos
+INSERT INTO estado_asistencia (nombre, descripcion) VALUES
+('PENDIENTE', 'Registro creado sin marcar salida aún'),
+('PRESENTE', 'Colaborador marcó entrada'),
+('ALMUERZO', 'Colaborador se encuentra en almuerzo'),
+('COMPLETADO', 'Asistencia completada con salida registrada'),
+('AUSENTE', 'Colaborador no asistió al turno'),
+('JUSTIFICADO', 'Ausencia con justificación registrada');
+
+
 -- ========================================
 -- TABLA: registro_asistencia
 -- Controla los registros diarios de asistencia del personal.
 -- ========================================
-DROP TABLE IF EXISTS registro_asistencia;
-CREATE TABLE registro_asistencia (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    id_colaborador BIGINT NOT NULL UNIQUE,
-    id_horario_base INT NULL, 
-    fecha DATE NOT NULL UNIQUE,
+DROP TABLE IF EXISTS registro_asistencias;
+CREATE TABLE registro_asistencias (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    id_colaborador BIGINT NOT NULL,
+    id_horario_base INT NULL,
+    fecha DATE NOT NULL,
     hora_entrada TIME NULL,
+    hora_lunch_inicio TIME NULL,
+    hora_lunch_fin TIME NULL,
     hora_salida TIME NULL,
+    minutos_trabajados INT NULL,        -- calculado: minutos(hora_salida - hora_entrada) - minutos_lunch
+    minutos_lunch INT NULL,             -- calculado: minutos(hora_lunch_fin - hora_lunch_inicio)
+    tardanza_minutos INT NULL,
+    id_estado_asistencia INT NOT NULL,
     observaciones TEXT,
-    CHECK (hora_salida IS NULL OR hora_salida >= hora_entrada)
+    registro_origen VARCHAR(32) NULL,   -- 'APP', 'BIOMETRICO', 'MANUAL'
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by BIGINT NULL,
+    updated_by BIGINT NULL,
+    CHECK (hora_salida IS NULL OR hora_entrada IS NULL OR hora_salida >= hora_entrada)
 );
 
--- Relación con la tabla de colaboradores
-ALTER TABLE registro_asistencia
-    ADD CONSTRAINT fk_asistencia_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
-    ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE registro_asistencias
+	ADD CONSTRAINT uq_asistencia_colab_fecha UNIQUE (id_colaborador, fecha);
     
--- Índices para optimizar búsquedas frecuentes
-CREATE INDEX idx_asistencia_colaborador ON registro_asistencia(id_colaborador);
+ALTER TABLE registro_asistencias
+    ADD CONSTRAINT fk_asistencia_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
+        ON DELETE RESTRICT ON UPDATE CASCADE;
 
-CREATE INDEX idx_asistencia_fecha ON registro_asistencia(fecha);
+ALTER TABLE registro_asistencias
+    ADD CONSTRAINT fk_asistencia_horario FOREIGN KEY (id_horario_base) REFERENCES horarios_base(id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+        
+ALTER TABLE registro_asistencias 
+	ADD CONSTRAINT fk_registro_asistencia_estado FOREIGN KEY (id_estado_asistencia) REFERENCES estado_asistencia (id)
+		ON UPDATE CASCADE ON DELETE RESTRICT;
+
+-- Índice para acelerar las búsquedas o reportes por colaborador
+CREATE INDEX idx_asistencia_colaborador ON registro_asistencias(id_colaborador);
+
+-- Índice para optimizar consultas por fecha (ej. reportes diarios o filtros por rango de fechas)
+CREATE INDEX idx_asistencia_fecha ON registro_asistencias(fecha);
+
     
 -- =============================================================================================================================================
 -- =============================================================================================================================================
@@ -945,8 +990,7 @@ CREATE INDEX idx_vacuna_mascota_vacuna ON vacunas_mascota(id_vacuna);
 -- ========================================
 CREATE TABLE IF NOT EXISTS canales_comunicacion (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    nombre VARCHAR(32) NOT NULL UNIQUE,
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    nombre VARCHAR(32) NOT NULL UNIQUE
 );
 INSERT INTO canales_comunicacion (nombre) VALUES
 ('WHATSAPP'),
@@ -963,8 +1007,7 @@ INSERT INTO canales_comunicacion (nombre) VALUES
 CREATE TABLE IF NOT EXISTS medios_pago (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) NOT NULL UNIQUE,
-    descripcion VARCHAR(128),
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    descripcion VARCHAR(128)
 );
 INSERT INTO medios_pago (nombre, descripcion) VALUES
 ('EFECTIVO', 'Pago directo en caja.'),
@@ -983,8 +1026,7 @@ INSERT INTO medios_pago (nombre, descripcion) VALUES
 CREATE TABLE IF NOT EXISTS estado_agenda (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) NOT NULL UNIQUE,
-    descripcion VARCHAR(128),
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    descripcion VARCHAR(128)
 );
 INSERT INTO estado_agenda (nombre, descripcion) VALUES
 ('PENDIENTE', 'Cita registrada en espera de confirmación.'),
@@ -1002,8 +1044,7 @@ INSERT INTO estado_agenda (nombre, descripcion) VALUES
 CREATE TABLE tipo_recordatorio (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(64) NOT NULL UNIQUE,
-    descripcion VARCHAR(128),
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    descripcion VARCHAR(128)
 );
 INSERT INTO tipo_recordatorio (nombre, descripcion) VALUES
 ('VACUNACIÓN', 'Recordatorio para aplicación o refuerzo de vacunas.'),
@@ -1021,8 +1062,7 @@ INSERT INTO tipo_recordatorio (nombre, descripcion) VALUES
 CREATE TABLE IF NOT EXISTS medio_solicitud (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) NOT NULL UNIQUE,
-    descripcion VARCHAR(128),
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    descripcion VARCHAR(128)
 );
 INSERT INTO medio_solicitud (nombre, descripcion) VALUES
 ('TELÉFONO', 'Solicitud realizada por llamada telefónica.'),
@@ -1032,47 +1072,18 @@ INSERT INTO medio_solicitud (nombre, descripcion) VALUES
 ('REDES SOCIALES', 'Solicitud por mensaje de Facebook, Instagram u otra red.');
 
 -- ========================================
--- TABLA: estado_visita
--- Estados posibles de una visita física a la veterinaria.
--- Ejemplo: EN PROCESO, FINALIZADA, HOSPITALIZADO.
--- ========================================
-CREATE TABLE IF NOT EXISTS estado_visita (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nombre VARCHAR(32) NOT NULL UNIQUE,
-    descripcion VARCHAR(128),
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
-);
-INSERT INTO estado_visita (nombre, descripcion) VALUES
-('EN PROCESO', 'La visita está en curso o la mascota está siendo atendida.'),
-('FINALIZADA', 'Visita completada y registrada.'),
-('HOSPITALIZADO', 'Mascota internada bajo observación o tratamiento.'),
-('DERIVADA', 'Visita derivada a otra especialidad o veterinario.'),
-('CANCELADA', 'Visita anulada o no realizada.');
-
--- ========================================
--- TABLA: tipo_servicios
+-- TABLA: servicios
 -- Catálogo de servicios que ofrece la veterinaria.
--- Ejemplo: CONSULTA GENERAL, VACUNACIÓN, BAÑO, CIRUGÍA.
 -- ========================================
-CREATE TABLE IF NOT EXISTS tipo_servicios (
+CREATE TABLE IF NOT EXISTS servicios (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) NOT NULL UNIQUE,
-    descripcion VARCHAR(128),
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    descripcion VARCHAR(128)
 );
-INSERT INTO tipo_servicios (nombre, descripcion) VALUES
+INSERT INTO servicios (nombre, descripcion) VALUES
 -- ÁREA MÉDICA
-('CONSULTA GENERAL', 'Evaluación médica completa para diagnóstico y orientación del tratamiento.'),
-('CONSULTA ESPECIALIZADA', 'Atención por veterinario especialista en dermatología, oftalmología, odontología, etc.'),
 ('VACUNACIÓN', 'Aplicación de vacunas preventivas según plan sanitario.'),
 ('DESPARASITACIÓN', 'Administración de antiparasitarios internos o externos según protocolo.'),
-('CONTROL POST-OPERACIÓN', 'Revisión y seguimiento posterior a una intervención quirúrgica.'),
-('CIRUGÍA', 'Procedimientos quirúrgicos programados o de emergencia.'),
-('ECOGRAFÍA', 'Diagnóstico por imagen mediante ultrasonido.'),
-('RADIOGRAFÍA', 'Diagnóstico por imagen mediante rayos X.'),
-('ANÁLISIS DE LABORATORIO', 'Exámenes clínicos, hematológicos y bioquímicos.'),
-('URGENCIAS', 'Atención médica inmediata por accidente o enfermedad repentina.'),
-('HOSPITALIZACIÓN', 'Cuidados médicos continuos y observación de pacientes internados.'),
 
 -- ÁREA ESTÉTICA Y SPA
 ('BAÑO Y CORTE', 'Baño completo con shampoo medicado o cosmético y corte según raza.'),
@@ -1089,72 +1100,15 @@ INSERT INTO tipo_servicios (nombre, descripcion) VALUES
 ('PASEO CONTROLADO', 'Servicio de paseo en áreas seguras y monitoreadas.'),
 ('ALIMENTACIÓN PERSONALIZADA', 'Planes de comida específicos según edad, peso o condición médica.'),
 
--- ÁREA ADIESTRAMIENTO Y COMPORTAMIENTO
-('ADIESTRAMIENTO BÁSICO', 'Entrenamiento en obediencia y socialización.'),
-('ADIESTRAMIENTO AVANZADO', 'Entrenamiento de conducta, control y refuerzo positivo.'),
-('MODIFICACIÓN DE CONDUCTA', 'Tratamiento de problemas de comportamiento o ansiedad.'),
-
--- ÁREA DE BIENESTAR Y PREVENCIÓN
-('PLAN DE SALUD ANUAL', 'Programa preventivo con controles, vacunas y beneficios especiales.'),
-('CONTROL DE PESO', 'Evaluación nutricional y seguimiento de peso saludable.'),
-('ASESORÍA NUTRICIONAL', 'Recomendaciones de dieta y suplementos según cada mascota.'),
-
 -- SERVICIOS COMPLEMENTARIOS
 ('VENTA DE PRODUCTOS', 'Adquisición de alimentos, accesorios, medicamentos o juguetes.'),
 ('RECOJO A DOMICILIO', 'Transporte seguro de la mascota desde o hacia la veterinaria.'),
-('SERVICIO A DOMICILIO', 'Consulta o atención médica veterinaria en el hogar.'),
-('FOTOGRAFÍA DE MASCOTAS', 'Sesión profesional de fotos para mascotas.'),
-('CREMACIÓN Y DESPEDIDA', 'Servicio respetuoso de cremación y ceremonia de despedida.'),
-('ASESORÍA EN ADOPCIÓN', 'Orientación en adopción responsable y seguimiento post-adopción.');
-
-
--- ========================================
--- TABLA: ingresos_servicios
--- Registra los servicios realizados, su costo, responsable y observaciones.
--- Relaciona al colaborador o veterinario que prestó el servicio.
--- ========================================
-CREATE TABLE IF NOT EXISTS ingresos_servicios (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_servicio INT NOT NULL,
-    id_colaborador BIGINT,
-    id_veterinario BIGINT,
-	cantidad INT CHECK (cantidad >= 0),
-    duracion_min INT CHECK (duracion_min >= 0),
-    adicionales VARCHAR(64),
-    observaciones VARCHAR(64),
-    precio_unitario DECIMAL(10,2) CHECK (precio_unitario >= 0),
-    subtotal DECIMAL(10,2) CHECK (subtotal >= 0),
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-ALTER TABLE ingresos_servicios
-    ADD CONSTRAINT fk_ingreso_servicio FOREIGN KEY (id_servicio) REFERENCES tipo_servicios(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_ingreso_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_ingreso_vet FOREIGN KEY (id_veterinario) REFERENCES colaboradores(id)
-        ON DELETE SET NULL ON UPDATE CASCADE;
-
--- Índice para acelerar las búsquedas por tipo de servicio
--- (consultas de todos los ingresos de un servicio específico).
-CREATE INDEX idx_ingresos_servicios_servicio ON ingresos_servicios(id_servicio);
-
--- Índice para búsquedas rápidas por colaborador
--- (reportes de servicios atendidos por un colaborador).
-CREATE INDEX idx_ingresos_servicios_colab ON ingresos_servicios(id_colaborador);
-
--- Índice para búsquedas rápidas por veterinario
--- (reportes de servicios atendidos por un veterinario).
-CREATE INDEX idx_ingresos_servicios_vet ON ingresos_servicios(id_veterinario);
-
--- Índice compuesto para reportes de servicios
--- por colaborador y rango de fechas.
-CREATE INDEX idx_ingresos_servicios_colab_fecha ON ingresos_servicios (id_colaborador, fecha_registro);
+('SERVICIO A DOMICILIO', 'Consulta o atención médica veterinaria en el hogar.');
 
 -- ========================================
 -- TABLA: agenda
 -- Agenda de citas programadas entre cliente, mascota y servicio.
--- Incluye fecha, hora, duración estimada en minutos y observaciones.
+-- Incluye fecha, hora, duración estimada en minutos, observaciones y abono inicial.
 -- Ejemplo: Cita el 2025-08-01 a las 10:00am para consulta médica de la mascota "FIRULAIS".
 -- ========================================
 CREATE TABLE IF NOT EXISTS agenda (
@@ -1162,87 +1116,113 @@ CREATE TABLE IF NOT EXISTS agenda (
     codigo VARCHAR(16) NOT NULL UNIQUE,
     id_cliente BIGINT NOT NULL,
     id_mascota BIGINT NOT NULL,
-    id_tipo_servicio INT NOT NULL,
+    id_medio_solicitud INT NULL,
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
     duracion_estimada_min INT CHECK (duracion_estimada_min >= 0),
+    abono_inicial DECIMAL(10,2) DEFAULT 0 CHECK (abono_inicial >= 0), -- 50
+    total_cita DECIMAL(10,2) DEFAULT 0 CHECK (total_cita >= 0), -- de la cita completa es decir uno o mas servicios
     id_estado INT NOT NULL, 
     observaciones VARCHAR(256),
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 ALTER TABLE agenda
     ADD CONSTRAINT fk_agenda_cliente FOREIGN KEY (id_cliente) REFERENCES clientes(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_agenda_medio FOREIGN KEY (id_medio_solicitud) REFERENCES medio_solicitud(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_agenda_mascota FOREIGN KEY (id_mascota) REFERENCES mascotas(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_agenda_servicio FOREIGN KEY (id_tipo_servicio) REFERENCES tipo_servicios(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_agenda_estado FOREIGN KEY (id_estado) REFERENCES estado_agenda(id)
         ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- Índice para búsquedas rápidas de citas por cliente.
+-- Índice para búsquedas rápidas de citas por cliente
 CREATE INDEX idx_agenda_cliente ON agenda(id_cliente);
 
--- Índice para búsquedas rápidas de citas por mascota.
+-- Índice para búsquedas rápidas de citas por mascota
 CREATE INDEX idx_agenda_mascota ON agenda(id_mascota);
 
 -- Índice para filtrar o agrupar citas según el estado
--- (pendiente, atendida, cancelada, etc.).
 CREATE INDEX idx_agenda_estado ON agenda(id_estado);
 
--- Índice compuesto para consultar las citas de un cliente
--- en un rango de fechas (consultas comunes en reportes y agenda).
+-- Índice compuesto para consultar las citas de un cliente en un rango de fechas
 CREATE INDEX idx_agenda_cliente_fecha ON agenda (id_cliente, fecha);
 
--- Índice para consultas directas por fecha de cita (cuando no filtra por cliente, sino por calendario).
+-- Índice para consultas directas por fecha de cita (calendario)
 CREATE INDEX idx_agenda_fecha ON agenda(fecha);
 
 -- ========================================
--- TABLA: visitas_ingresos
--- Controla ingresos físicos de mascotas por hospitalización o servicios extendidos.
--- Incluye datos de ingreso, retiro, medio de solicitud, estado y monto abonado.
+-- TABLA: ingresos_servicios
+-- Registra los servicios realizados, su costo, responsable y observaciones.
 -- ========================================
-CREATE TABLE IF NOT EXISTS visitas_ingresos (
+CREATE TABLE IF NOT EXISTS ingresos_servicios (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
-    id_agenda BIGINT NULL,
-    fecha_ingreso TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
-    id_mascota BIGINT NOT NULL,
-    id_ingreso_servicio BIGINT NOT NULL,
-    ubicacion_espacio VARCHAR(10),
-    fecha_retiro TIMESTAMP NULL DEFAULT NULL ,
-    id_medio_solicitud INT NOT NULL,
-    id_estado INT NOT NULL,
-    total DECIMAL(10,2) CHECK (total >= 0),
-    CHECK (fecha_retiro IS NULL OR fecha_retiro >= fecha_ingreso),
-    observaciones VARCHAR(255)
+    id_agenda BIGINT NOT NULL,
+    id_servicio INT NOT NULL,
+    id_colaborador BIGINT,
+    id_veterinario BIGINT,
+	cantidad INT CHECK (cantidad >= 0),
+    duracion_min INT CHECK (duracion_min >= 0),
+    adicionales VARCHAR(64),
+    observaciones VARCHAR(64),
+    valor_servicio DECIMAL(10,2) NOT NULL CHECK (valor_servicio >= 0),
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-ALTER TABLE visitas_ingresos
-    ADD CONSTRAINT fk_visita_mascota FOREIGN KEY (id_mascota) REFERENCES mascotas(id)
+ALTER TABLE ingresos_servicios
+	ADD CONSTRAINT fk_ingreso_agenda FOREIGN KEY (id_agenda) REFERENCES agenda(id)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_ingreso_servicio FOREIGN KEY (id_servicio) REFERENCES servicios(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_visita_ingreso FOREIGN KEY (id_ingreso_servicio) REFERENCES ingresos_servicios(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_visita_agenda FOREIGN KEY (id_agenda) REFERENCES agenda(id)
+    ADD CONSTRAINT fk_ingreso_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_visita_medio FOREIGN KEY (id_medio_solicitud) REFERENCES medio_solicitud(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_visita_estado FOREIGN KEY (id_estado) REFERENCES estado_visita(id)
+    ADD CONSTRAINT fk_ingreso_vet FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- Índices con comentarios
+-- consultas de todos los ingresos de un servicio específico
+CREATE INDEX idx_ingresos_servicios_servicio ON ingresos_servicios(id_servicio); 
+-- reportes de servicios atendidos por un colaborador
+CREATE INDEX idx_ingresos_servicios_colab ON ingresos_servicios(id_colaborador);
+-- reportes de servicios atendidos por un veterinario 
+CREATE INDEX idx_ingresos_servicios_vet ON ingresos_servicios(id_veterinario); 
+-- reportes de servicios por colaborador y rango de fechas
+CREATE INDEX idx_ingresos_servicios_colab_fecha ON ingresos_servicios (id_colaborador, fecha_registro); 
+
+-- ========================================
+-- TABLA: agenda_pagos
+-- Registra pagos o abonos realizados para citas agendadas.
+-- Permite vincular un abono a la cita antes de generar la factura formal.
+-- Incluye fecha, monto y medio de pago.
+-- ========================================
+CREATE TABLE IF NOT EXISTS agenda_pagos (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
+    id_agenda BIGINT NOT NULL,
+    id_medio_pago INT NOT NULL,
+    id_usuario INT NULL,
+    monto DECIMAL(10,2) NOT NULL CHECK (monto > 0), 
+    fecha_pago DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    observaciones VARCHAR(128)
+);
+
+ALTER TABLE agenda_pagos
+    ADD CONSTRAINT fk_agendapago_agenda FOREIGN KEY (id_agenda) REFERENCES agenda(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_agendapago_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_agendapago_mediopago FOREIGN KEY (id_medio_pago) REFERENCES medios_pago(id)
         ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- Índice para consultas rápidas de visitas por mascota.
-CREATE INDEX idx_visitas_mascota ON visitas_ingresos(id_mascota);
+-- Índice para consultas rápidas de pagos de una cita
+CREATE INDEX idx_agendapagos_agenda ON agenda_pagos(id_agenda);
 
--- Índice para consultas rápidas por estado de la visita
--- (pendiente, en proceso, finalizada).
-CREATE INDEX idx_visitas_estado ON visitas_ingresos(id_estado);
+-- Índice para filtrar pagos por medio de pago
+CREATE INDEX idx_agendapagos_mediopago ON agenda_pagos(id_medio_pago);
 
--- Índice compuesto para filtrar visitas por mascota y estado
--- (muy útil en listados de hospitalizaciones activas por mascota).
-CREATE INDEX idx_visitas_mascota_estado ON visitas_ingresos (id_mascota, id_estado);
-
--- Índice para reportes o búsquedas de ingresos por fecha
--- (muy útil para filtrar visitas del día, semana o mes actual).
-CREATE INDEX idx_visitas_fecha_ingreso ON visitas_ingresos(fecha_ingreso);
+-- Índice para consultas por fecha de pago (útil para reportes o conciliaciones internas)
+CREATE INDEX idx_agendapagos_fecha ON agenda_pagos(fecha_pago);
 
 -- ========================================
 -- TABLA: recordatorios_agenda
@@ -1254,7 +1234,7 @@ CREATE TABLE IF NOT EXISTS recordatorios_agenda (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
     id_agenda BIGINT NOT NULL,
-    id_tipo_recordatorio INT NOT NULL DEFAULT 1,				-- 'AGENDA GENERAL'
+    id_tipo_recordatorio INT NOT NULL DEFAULT 1,
     fecha_recordatorio DATE NOT NULL,
     hora TIME NULL,
     mensaje TEXT NOT NULL,
@@ -1263,12 +1243,12 @@ CREATE TABLE IF NOT EXISTS recordatorios_agenda (
     fecha_envio DATETIME NULL
 );
 ALTER TABLE recordatorios_agenda
-	ADD CONSTRAINT fk_recordatorio_tipo FOREIGN KEY (id_tipo_recordatorio) REFERENCES tipo_recordatorio(id)
+    ADD CONSTRAINT fk_recordatorio_tipo FOREIGN KEY (id_tipo_recordatorio) REFERENCES tipo_recordatorio(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_recordatorio_agenda FOREIGN KEY (id_agenda) REFERENCES agenda(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-	ADD CONSTRAINT fk_recordatorio_canal FOREIGN KEY (id_canal_comunicacion) REFERENCES canales_comunicacion(id)
-		ON DELETE SET NULL ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_recordatorio_canal FOREIGN KEY (id_canal_comunicacion) REFERENCES canales_comunicacion(id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- Índice para búsquedas rápidas de recordatorios asociados a una cita específica.
 CREATE INDEX idx_recordatorio_agenda ON recordatorios_agenda(id_agenda);
@@ -1327,8 +1307,7 @@ INSERT INTO estado_historia_clinica (nombre, descripcion) VALUES
 CREATE TABLE IF NOT EXISTS tipos_archivo_clinico (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) UNIQUE NOT NULL,
-    descripcion VARCHAR(128),
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    descripcion VARCHAR(128)
 );
 INSERT INTO tipos_archivo_clinico (nombre, descripcion) VALUES
 -- IMÁGENES DIAGNÓSTICAS
@@ -1380,7 +1359,6 @@ CREATE TABLE IF NOT EXISTS historia_clinica (
     id_mascota BIGINT NOT NULL,
     id_colaborador BIGINT NULL,
     id_veterinario BIGINT NULL,
-    id_visita BIGINT NULL,
     motivo_consulta VARCHAR(128) NULL,
     diagnostico TEXT NULL,
     tratamiento TEXT NULL,
@@ -1397,9 +1375,7 @@ ALTER TABLE historia_clinica
         ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_hist_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_hist_vet FOREIGN KEY (id_veterinario) REFERENCES colaboradores(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_hist_visita FOREIGN KEY (id_visita) REFERENCES visitas_ingresos(id)
+    ADD CONSTRAINT fk_hist_vet FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
 	ADD CONSTRAINT fk_hist_estado FOREIGN KEY (id_estado) REFERENCES estado_historia_clinica(id)
         ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -1411,10 +1387,6 @@ CREATE INDEX idx_historia_clinica_mascota ON historia_clinica(id_mascota);
 -- Índice para consultas que agrupan o filtran por veterinario responsable.
 -- Muy útil si se generan reportes de actividades por veterinario.
 CREATE INDEX idx_historia_clinica_veterinario ON historia_clinica(id_veterinario);
-
--- Índice para búsquedas rápidas de historias clínicas por visita
--- (facilita obtener todos los registros asociados a una hospitalización).
-CREATE INDEX idx_historia_clinica_visita ON historia_clinica(id_visita);
 
 -- Índice para facilitar búsquedas cronológicas
 -- (permite ordenar o filtrar historias clínicas por fecha de atención,

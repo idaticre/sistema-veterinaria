@@ -1080,11 +1080,6 @@ BEGIN
             SET MESSAGE_TEXT = 'Horario base no válido o inactivo.';
     END IF;
 
-    -- (Opcional pero recomendable) Limpia asignaciones previas del colaborador
-    -- para evitar residuos de horarios antiguos o diferentes configuraciones
-    DELETE FROM asignacion_horarios
-    WHERE id_colaborador = p_id_colaborador;
-
     -- Bucle de lunes (1) a sábado (6)
     WHILE v_dia <= 6 DO
         INSERT INTO asignacion_horarios (
@@ -1186,50 +1181,200 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- PROCEDIMIENTO: registrar_asistencia
--- Inserta o actualiza la asistencia de un colaborador según si ya existe registro del día.
+-- PROCEDIMIENTO: gestionar_asistencia
+-- Controla el registro de asistencia diaria (entrada, almuerzo, salida)
 -- ========================================
-DROP PROCEDURE IF EXISTS registrar_asistencia;
+DROP PROCEDURE IF EXISTS gestionar_asistencia;
 DELIMITER $$
 
-CREATE PROCEDURE registrar_asistencia (
-    IN p_id_colaborador BIGINT,
-    IN p_fecha DATE,
-    IN p_hora_entrada TIME,
-    IN p_hora_salida TIME,
-    IN p_observaciones TEXT,
+CREATE PROCEDURE gestionar_asistencia (
+    IN p_colaborador_id BIGINT,
+    IN p_tipo_marca VARCHAR(10),
     OUT p_mensaje VARCHAR(255)
 )
-proc_main: BEGIN
-    DECLARE v_exist_colab INT;
-    DECLARE v_exist_registro INT;
+proc_asistencia: BEGIN
+    DECLARE v_id_asistencia BIGINT;
+    DECLARE v_fecha_actual DATE;
+    DECLARE v_hora_actual TIME;
+    DECLARE v_id_horario INT;
+    DECLARE v_hora_inicio TIME;
+    DECLARE v_id_estado_presente INT;
+    DECLARE v_id_estado_completado INT;
 
-    -- Validar existencia del colaborador
-    SELECT COUNT(*) INTO v_exist_colab FROM colaboradores WHERE id = p_id_colaborador;
-    IF v_exist_colab = 0 THEN
-        SET p_mensaje = 'ERROR: El colaborador no existe.';
-        LEAVE proc_main;
+    -- Inicializa valores actuales
+    SET v_fecha_actual = CURDATE();
+    SET v_hora_actual = CURTIME();
+
+    -- Obtiene IDs de estados
+    SELECT id INTO v_id_estado_presente FROM estado_asistencia WHERE nombre = 'PRESENTE' LIMIT 1;
+    SELECT id INTO v_id_estado_completado FROM estado_asistencia WHERE nombre = 'COMPLETADO' LIMIT 1;
+
+    -- Valida tipo_marca
+    IF p_tipo_marca NOT IN ('ENTRADA', 'LUNCH_IN', 'LUNCH_OUT', 'SALIDA') THEN
+        SET p_mensaje = 'Tipo de marca inválido.';
+        LEAVE proc_asistencia;
     END IF;
 
-    -- Verificar si ya hay registro en esa fecha
-    SELECT COUNT(*) INTO v_exist_registro
-    FROM registro_asistencia
-    WHERE id_colaborador = p_id_colaborador AND fecha = p_fecha;
+    -- Obtiene el horario asignado según el día actual
+    SELECT ah.id_horario_base, hb.hora_inicio
+    INTO v_id_horario, v_hora_inicio
+    FROM asignacion_horarios ah
+    JOIN horarios_base hb ON hb.id = ah.id_horario_base
+    WHERE ah.id_colaborador = p_colaborador_id
+      AND ah.id_dia_semana = CASE DAYOFWEEK(CURDATE())
+                                WHEN 1 THEN 7
+                                ELSE DAYOFWEEK(CURDATE()) - 1
+                             END
+      AND ah.activo = 1
+    LIMIT 1;
 
-    -- Si ya existe, se actualiza (por ejemplo, para registrar hora de salida)
-    IF v_exist_registro > 0 THEN
-        UPDATE registro_asistencia
-        SET hora_salida = COALESCE(p_hora_salida, hora_salida),
-            observaciones = CONCAT(COALESCE(observaciones, ''), ' ', COALESCE(p_observaciones, ''))
-        WHERE id_colaborador = p_id_colaborador AND fecha = p_fecha;
-        SET p_mensaje = 'Asistencia actualizada correctamente.';
+    -- Verifica si tiene asignación hoy
+    IF v_id_horario IS NULL THEN
+        SET p_mensaje = 'El colaborador no tiene horario asignado para hoy.';
+        LEAVE proc_asistencia;
+    END IF;
+
+    -- Busca si ya tiene un registro hoy
+    SELECT id INTO v_id_asistencia
+    FROM registro_asistencias
+    WHERE id_colaborador = p_colaborador_id
+      AND fecha = v_fecha_actual
+    LIMIT 1;
+
+    -- =====================================
+    -- CASO 1: No hay registro previo → se crea solo si es ENTRADA
+    -- =====================================
+    IF v_id_asistencia IS NULL THEN
+        IF p_tipo_marca = 'ENTRADA' THEN
+            INSERT INTO registro_asistencias (
+                id_colaborador, id_horario_base, fecha, hora_entrada, id_estado_asistencia
+            )
+            VALUES (
+                p_colaborador_id, v_id_horario, v_fecha_actual, v_hora_actual, v_id_estado_presente
+            );
+
+            -- Calcula tardanza si hora_inicio es no nula
+            IF v_hora_inicio IS NOT NULL THEN
+                UPDATE registro_asistencias
+                SET tardanza_minutos = GREATEST(TIMESTAMPDIFF(MINUTE, v_hora_inicio, v_hora_actual), 0)
+                WHERE id = LAST_INSERT_ID();
+            END IF;
+
+            SET p_mensaje = CONCAT('Entrada registrada a las ', v_hora_actual);
+
+        ELSE
+            SET p_mensaje = 'Debe marcar ENTRADA antes de cualquier otro evento.';
+        END IF;
+
+    -- =====================================
+    -- CASO 2: Ya tiene registro → se actualiza según tipo de marca
+    -- =====================================
     ELSE
-        -- Si no existe, se inserta el registro (por ejemplo, al marcar entrada)
-        INSERT INTO registro_asistencia (id_colaborador, fecha, hora_entrada, hora_salida, observaciones)
-        VALUES (p_id_colaborador, p_fecha, p_hora_entrada, p_hora_salida, p_observaciones);
-        SET p_mensaje = 'Asistencia registrada correctamente.';
+        CASE p_tipo_marca
+
+            WHEN 'ENTRADA' THEN
+                SET p_mensaje = 'Ya existe una entrada registrada hoy.';
+
+            WHEN 'LUNCH_IN' THEN
+                UPDATE registro_asistencias
+                SET hora_lunch_inicio = IF(hora_lunch_inicio IS NULL, v_hora_actual, hora_lunch_inicio)
+                WHERE id = v_id_asistencia
+                  AND hora_entrada IS NOT NULL
+                  AND hora_lunch_inicio IS NULL;
+
+                IF ROW_COUNT() > 0 THEN
+                    SET p_mensaje = CONCAT('Inicio de almuerzo registrado a las ', v_hora_actual);
+                ELSE
+                    SET p_mensaje = 'Ya registró inicio de almuerzo o no marcó entrada.';
+                END IF;
+
+            WHEN 'LUNCH_OUT' THEN
+                UPDATE registro_asistencias
+                SET hora_lunch_fin = IF(hora_lunch_fin IS NULL, v_hora_actual, hora_lunch_fin),
+                    minutos_lunch = CASE
+                        WHEN hora_lunch_inicio IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, hora_lunch_inicio, v_hora_actual)
+                        ELSE NULL
+                    END
+                WHERE id = v_id_asistencia
+                  AND hora_lunch_inicio IS NOT NULL
+                  AND hora_lunch_fin IS NULL;
+
+                IF ROW_COUNT() > 0 THEN
+                    SET p_mensaje = CONCAT('Fin de almuerzo registrado a las ', v_hora_actual);
+                ELSE
+                    SET p_mensaje = 'Debe iniciar almuerzo antes de finalizarlo.';
+                END IF;
+
+            WHEN 'SALIDA' THEN
+                UPDATE registro_asistencias
+                SET hora_salida = IF(hora_salida IS NULL, v_hora_actual, hora_salida),
+                    minutos_trabajados = CASE
+                        WHEN hora_entrada IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, hora_entrada, v_hora_actual) - IFNULL(minutos_lunch, 0)
+                        ELSE NULL
+                    END,
+                    id_estado_asistencia = v_id_estado_completado
+                WHERE id = v_id_asistencia
+                  AND hora_entrada IS NOT NULL
+                  AND hora_salida IS NULL;
+
+                IF ROW_COUNT() > 0 THEN
+                    SET p_mensaje = CONCAT('Salida registrada a las ', v_hora_actual);
+                ELSE
+                    SET p_mensaje = 'Ya registró salida o falta marcar entrada.';
+                END IF;
+
+        END CASE;
     END IF;
-END$$
+
+END $$
+
+DELIMITER ;
+
+
+-- ========================================
+-- PROCEDIMIENTO: ver_asistencia_por_rango
+-- Devuelve las asistencias registradas entre dos fechas.
+-- Incluye colaborador, horario asignado y estado.
+-- ========================================
+DROP PROCEDURE IF EXISTS ver_asistencia_por_rango;
+DELIMITER $$
+
+CREATE PROCEDURE ver_asistencia_por_rango (
+    IN p_fecha_inicio DATE,
+    IN p_fecha_fin DATE,
+    IN p_id_estado INT 
+)
+BEGIN
+    -- Valida que el rango sea correcto
+    IF p_fecha_inicio > p_fecha_fin THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'La fecha inicial no puede ser mayor que la final.';
+    END IF;
+
+    SELECT 
+        c.id AS id_colaborador,
+        e.nombre AS colaborador,
+        hb.nombre AS horario,
+        ra.fecha,
+        ra.hora_entrada,
+        ra.hora_lunch_inicio,
+        ra.hora_lunch_fin,
+        ra.hora_salida,
+        ra.minutos_trabajados,
+        ra.minutos_lunch,
+        ra.tardanza_minutos,
+        ea.nombre AS estado_asistencia,
+        ra.observaciones
+    FROM registro_asistencias ra
+    JOIN colaboradores c ON c.id = ra.id_colaborador
+    JOIN entidades e ON e.id = c.id_entidad
+    LEFT JOIN horarios_base hb ON hb.id = ra.id_horario_base
+    LEFT JOIN estado_asistencia ea ON ea.id = ra.id_estado_asistencia
+    WHERE ra.fecha BETWEEN p_fecha_inicio AND p_fecha_fin
+		AND (p_id_estado IS NULL OR ra.id_estado_asistencia = p_id_estado)
+    ORDER BY ra.fecha DESC, colaborador ASC;
+END $$
+
 DELIMITER ;
 
 -- ===========================================================================================================================================
@@ -1238,7 +1383,7 @@ DELIMITER ;
 
 -- BLOQUE 02 PROCEDIMIENTOS ALMACENADOS CRUD
 
-USE vet_manada_woof;
+-- USE vet_manada_woof;
 -- ========================================
 -- SP: REGISTRAR_MASCOTA
 -- Registra una nueva mascota validando cliente, duplicados y consistencia de datos.
@@ -1478,12 +1623,18 @@ CREATE PROCEDURE registrar_medicamento_mascota (
 proc_main: BEGIN
     DECLARE v_codigo_registro VARCHAR(16);
     DECLARE v_nombre_medicamento VARCHAR(64);
+    DECLARE v_nuevo_id BIGINT DEFAULT 0;
+    DECLARE v_sqlstate CHAR(5);
+    DECLARE v_sqlmsg TEXT;
 
-    -- Manejo de errores
+    -- Manejo de errores con detalle real
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_sqlstate = RETURNED_SQLSTATE,
+            v_sqlmsg = MESSAGE_TEXT;
         ROLLBACK;
-        SET p_mensaje = 'ERROR: Falló el registro del medicamento. Transacción revertida.';
+        SET p_mensaje = CONCAT('ERROR SQL: [', v_sqlstate, '] ', v_sqlmsg);
     END;
 
     START TRANSACTION;
@@ -1506,7 +1657,7 @@ proc_main: BEGIN
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 4️⃣ Validar duplicado (misma mascota, medicamento y fecha)
+    -- 4️⃣ Validar duplicado
     IF EXISTS (
         SELECT 1 FROM medicamentos_mascota
         WHERE id_mascota = p_id_mascota
@@ -1517,13 +1668,16 @@ proc_main: BEGIN
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 5️⃣ Insertar nuevo registro
+    -- 5️⃣ Calcular próximo ID de forma segura
+    SELECT IFNULL(MAX(id), 0) + 1 INTO v_nuevo_id FROM medicamentos_mascota;
+
+    -- 6️⃣ Insertar nuevo registro
     INSERT INTO medicamentos_mascota (
         codigo, id_mascota, id_medicamento, id_via, dosis,
         fecha_aplicacion, id_colaborador, id_veterinario, observaciones
     )
     VALUES (
-        CONCAT('MEDM', LPAD((SELECT IFNULL(MAX(id), 0) + 1 FROM medicamentos_mascota), 6, '0')),
+        CONCAT('MEDM', LPAD(v_nuevo_id, 6, '0')),
         p_id_mascota,
         p_id_medicamento,
         p_id_via,
@@ -1534,21 +1688,22 @@ proc_main: BEGIN
         p_observaciones
     );
 
-    -- 6️⃣ Obtener el código del registro insertado
+    -- 7️⃣ Obtener el código insertado
     SELECT codigo INTO v_codigo_registro 
     FROM medicamentos_mascota 
     WHERE id = LAST_INSERT_ID();
 
-    -- 7️⃣ Obtener nombre del medicamento para el mensaje
+    -- 8️⃣ Obtener nombre del medicamento
     SELECT nombre INTO v_nombre_medicamento FROM medicamentos WHERE id = p_id_medicamento;
 
     COMMIT;
 
-    -- 8️⃣ Mensaje final
+    -- 9️⃣ Mensaje final
     SET p_mensaje = CONCAT('Medicamento "', v_nombre_medicamento,
                             '" registrado correctamente. Código del registro: ', v_codigo_registro, '.');
 END$$
 DELIMITER ;
+
 
 
 -- ========================================
@@ -1566,8 +1721,8 @@ CREATE PROCEDURE actualizar_medicamento_mascota (
     IN p_id_via INT,                     
     IN p_dosis VARCHAR(32),              
     IN p_fecha_aplicacion DATE,          
-    IN p_id_colaborador BIGINT,          -- Colaborador que aplicó el medicamento
-    IN p_id_veterinario BIGINT,          -- Veterinario responsable
+    IN p_id_colaborador BIGINT,          
+    IN p_id_veterinario BIGINT,          
     IN p_observaciones VARCHAR(64),      
     IN p_activo TINYINT,                 
     OUT p_mensaje VARCHAR(255)          
@@ -1577,43 +1732,56 @@ proc_main: BEGIN
     DECLARE v_codigo_mascota VARCHAR(16);
     DECLARE v_nombre_medicamento VARCHAR(64);
 
-    -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
-        SET p_mensaje = 'ERROR: Falló actualización del medicamento. Transacción revertida.';
+        GET DIAGNOSTICS CONDITION 1 
+            p_mensaje = MESSAGE_TEXT;
     END;
 
     START TRANSACTION;
 
-    -- 1️⃣ Validar existencia del registro
     IF NOT EXISTS (SELECT 1 FROM medicamentos_mascota WHERE id = p_id_registro) THEN
         SET p_mensaje = 'ERROR: Registro no existente.';
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- 2️⃣ Obtener datos de referencia
-    SELECT codigo INTO v_codigo_registro FROM medicamentos_mascota WHERE id = p_id_registro;
-    SELECT codigo INTO v_codigo_mascota FROM mascotas WHERE id = p_id_mascota;
-    SELECT nombre INTO v_nombre_medicamento FROM medicamentos WHERE id = p_id_medicamento;
+SELECT 
+    codigo
+INTO v_codigo_registro FROM
+    medicamentos_mascota
+WHERE
+    id = p_id_registro;
+SELECT 
+    codigo
+INTO v_codigo_mascota FROM
+    mascotas
+WHERE
+    id = p_id_mascota;
+SELECT 
+    nombre
+INTO v_nombre_medicamento FROM
+    medicamentos
+WHERE
+    id = p_id_medicamento;
 
-    -- 3️⃣ Actualizar datos generales o estado lógico
-    UPDATE medicamentos_mascota
-    SET id_mascota = p_id_mascota,
-        id_medicamento = p_id_medicamento,
-        id_via = p_id_via,
-        dosis = p_dosis,
-        fecha_aplicacion = p_fecha_aplicacion,
-        id_colaborador = p_id_colaborador,
-        id_veterinario = p_id_veterinario,
-        observaciones = p_observaciones,
-        fecha_modificacion = NOW(),
-        activo = p_activo
-    WHERE id = p_id_registro;
+UPDATE medicamentos_mascota 
+SET 
+    id_mascota = p_id_mascota,
+    id_medicamento = p_id_medicamento,
+    id_via = p_id_via,
+    dosis = p_dosis,
+    fecha_aplicacion = p_fecha_aplicacion,
+    id_colaborador = p_id_colaborador,
+    id_veterinario = p_id_veterinario,
+    observaciones = p_observaciones,
+    fecha_modificacion = NOW(),
+    activo = p_activo
+WHERE
+    id = p_id_registro;
 
     COMMIT;
 
-    -- 4️ Mensaje final
     IF p_activo = 0 THEN
         SET p_mensaje = CONCAT('Registro ', v_codigo_registro,
                                ' desactivado (eliminación lógica).');
@@ -1632,41 +1800,106 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS registrar_vacuna_mascota;
 DELIMITER $$
+
 CREATE PROCEDURE registrar_vacuna_mascota(
-    IN p_id_mascota INT,
+    IN p_id_mascota BIGINT,
     IN p_id_vacuna INT,
     IN p_id_via INT,
+    IN p_dosis VARCHAR(32),
     IN p_fecha_aplicacion DATE,
     IN p_durabilidad_anios INT,
-    IN p_proxima_dosis DATE,
-    IN p_id_colaborador INT,
-    OUT p_id_insertado INT,
-    OUT p_mensaje VARCHAR(100)
+    IN p_id_colaborador BIGINT,
+    IN p_id_veterinario BIGINT,
+    IN p_observaciones VARCHAR(64),
+    OUT p_mensaje VARCHAR(255)
 )
-BEGIN
+proc_main: BEGIN
+    DECLARE v_codigo_registro VARCHAR(16);
+    DECLARE v_nombre_vacuna VARCHAR(64);
+    DECLARE v_nuevo_id BIGINT DEFAULT 0;
+    DECLARE v_sqlstate CHAR(5);
+    DECLARE v_sqlmsg TEXT;
+
+    -- Manejo de errores con detalle
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_sqlstate = RETURNED_SQLSTATE,
+            v_sqlmsg = MESSAGE_TEXT;
         ROLLBACK;
-        SET p_id_insertado = NULL;
-        SET p_mensaje = 'Error al registrar vacuna.';
+        SET p_mensaje = CONCAT('ERROR SQL: [', v_sqlstate, '] ', v_sqlmsg);
     END;
 
     START TRANSACTION;
 
+    -- 1️⃣ Validar existencia de mascota
+    IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
+        SET p_mensaje = 'ERROR: Mascota no existente.';
+        ROLLBACK; LEAVE proc_main;
+    END IF;
+
+    -- 2️⃣ Validar existencia de vacuna
+    IF NOT EXISTS (SELECT 1 FROM vacunas WHERE id = p_id_vacuna) THEN
+        SET p_mensaje = 'ERROR: Vacuna no válida.';
+        ROLLBACK; LEAVE proc_main;
+    END IF;
+
+    -- 3️⃣ Validar existencia de vía
+    IF NOT EXISTS (SELECT 1 FROM vias_aplicacion WHERE id = p_id_via) THEN
+        SET p_mensaje = 'ERROR: Vía de aplicación no válida.';
+        ROLLBACK; LEAVE proc_main;
+    END IF;
+
+    -- 4️⃣ Validar duplicado (misma vacuna y fecha)
+    IF EXISTS (
+        SELECT 1 FROM vacunas_mascota
+        WHERE id_mascota = p_id_mascota
+          AND id_vacuna = p_id_vacuna
+          AND fecha_aplicacion = p_fecha_aplicacion
+    ) THEN
+        SET p_mensaje = 'ERROR: Ya existe un registro de esta vacuna en esa fecha.';
+        ROLLBACK; LEAVE proc_main;
+    END IF;
+
+    -- 5️⃣ Calcular nuevo ID para generar código
+    SELECT IFNULL(MAX(id), 0) + 1 INTO v_nuevo_id FROM vacunas_mascota;
+
+    -- 6️⃣ Insertar nuevo registro
     INSERT INTO vacunas_mascota (
-        id_mascota, id_vacuna, id_via, fecha_aplicacion,
-        durabilidad_anios, proxima_dosis, id_colaborador, activo
+        codigo, id_mascota, id_vacuna, id_via, dosis,
+        fecha_aplicacion, durabilidad_anios, proxima_dosis,
+        id_colaborador, id_veterinario, observaciones, activo
     )
     VALUES (
-        p_id_mascota, p_id_vacuna, p_id_via, p_fecha_aplicacion,
-        p_durabilidad_anios, p_proxima_dosis, p_id_colaborador, 1
+        CONCAT('VACM', LPAD(v_nuevo_id, 6, '0')),
+        p_id_mascota,
+        p_id_vacuna,
+        p_id_via,
+        p_dosis,
+        p_fecha_aplicacion,
+        p_durabilidad_anios,
+        DATE_ADD(p_fecha_aplicacion, INTERVAL p_durabilidad_anios YEAR),
+        p_id_colaborador,
+        p_id_veterinario,
+        p_observaciones,
+        1
     );
 
-    SET p_id_insertado = LAST_INSERT_ID();
-    SET p_mensaje = 'Vacuna registrada correctamente.';
+    -- 7️⃣ Obtener código insertado
+    SELECT codigo INTO v_codigo_registro 
+    FROM vacunas_mascota 
+    WHERE id = LAST_INSERT_ID();
+
+    -- 8️⃣ Obtener nombre de la vacuna
+    SELECT nombre INTO v_nombre_vacuna FROM vacunas WHERE id = p_id_vacuna;
 
     COMMIT;
-END $$
+
+    -- 9️⃣ Mensaje final
+    SET p_mensaje = CONCAT('Vacuna "', v_nombre_vacuna,
+                            '" registrada correctamente. Código del registro: ', v_codigo_registro, '.');
+END$$
+
 DELIMITER ;
 
 
@@ -1700,18 +1933,17 @@ proc_main: BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
         ROLLBACK;
-        SET p_mensaje = 'ERROR: Falló actualización de vacuna aplicada. Transacción revertida.';
+        GET DIAGNOSTICS CONDITION 1 
+            p_mensaje = MESSAGE_TEXT;
     END;
 
     START TRANSACTION;
 
-    -- Validar existencia del registro
     IF NOT EXISTS (SELECT 1 FROM vacunas_mascota WHERE id = p_id_vacuna_mascota) THEN
         SET p_mensaje = 'ERROR: Registro de vacuna no existe.';
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- Validar vacuna y vía
     IF NOT EXISTS (SELECT 1 FROM vacunas WHERE id = p_id_vacuna) THEN
         SET p_mensaje = 'ERROR: Vacuna no válida.';
         ROLLBACK; LEAVE proc_main;
@@ -1722,7 +1954,6 @@ proc_main: BEGIN
         ROLLBACK; LEAVE proc_main;
     END IF;
 
-    -- Obtener datos informativos
     SELECT codigo INTO v_codigo FROM vacunas_mascota WHERE id = p_id_vacuna_mascota;
     SELECT v.nombre, m.nombre
     INTO v_nombre_vacuna, v_nombre_mascota
@@ -1731,7 +1962,6 @@ proc_main: BEGIN
     JOIN mascotas m ON vm.id_mascota = m.id
     WHERE vm.id = p_id_vacuna_mascota;
 
-    -- Actualizar registro
     UPDATE vacunas_mascota
     SET id_vacuna = p_id_vacuna,
         id_via = p_id_via,
@@ -1745,7 +1975,6 @@ proc_main: BEGIN
         fecha_modificacion = NOW()
     WHERE id = p_id_vacuna_mascota;
 
-    -- Eliminación lógica si aplica (si agregas campo activo)
     IF p_activo = 0 THEN
         UPDATE vacunas_mascota SET activo = 0, fecha_modificacion = NOW() WHERE id = p_id_vacuna_mascota;
         SET p_mensaje = CONCAT('Vacuna "', v_nombre_vacuna, '" para la mascota "', v_nombre_mascota, '" desactivada.');
