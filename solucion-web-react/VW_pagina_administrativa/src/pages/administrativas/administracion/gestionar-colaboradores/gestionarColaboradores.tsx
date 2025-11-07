@@ -62,8 +62,10 @@ const gestionarColaboradores: React.FC = () => {
             ? respuesta.data
             : respuesta.data.data;
 
-            setColaboradores(lista);
-            setFiltrado(lista);
+            const activos = lista.filter((cliente: ColaboradorResponse) => cliente.activo === true);
+
+            setColaboradores(activos);
+            setFiltrado(activos);
         } catch (error) {console.error("Error al obtener los colaboradores", error);}
     };
 
@@ -91,7 +93,7 @@ const gestionarColaboradores: React.FC = () => {
     // Formulario para editar
     const abrirFormularioEditar = (colaborador: ColaboradorResponse) => {
         const editado: ColaboradorRequest = {
-            id: colaborador.idColaborador,                   
+            id: colaborador.id,                   
             nombre: colaborador.nombre,
             sexo: colaborador.sexo === "M" ? "M" : "F",          
             documento: colaborador.documento,
@@ -114,10 +116,9 @@ const gestionarColaboradores: React.FC = () => {
     const guardarColaborador = async () => {
         if (!edicion) return;
         
-
         try {
             if (edicion.id && edicion.id > 0) {
-                const response = await axios.put(`${baseURL}/colaboradores/actualizar/${edicion.id}`, edicion);
+                const response = await axios.put(`${baseURL}/colaboradores/actualizar`, edicion);
                 console.log("Respuesta backend:", response.data);
             } else {
                 const response = await axios.post(`${baseURL}/colaboradores/registrar`, edicion);
@@ -136,8 +137,9 @@ const gestionarColaboradores: React.FC = () => {
     // Eliminar
     const eliminarColaborador = async (id: number) => {
         try {
-            await axios.delete(`${baseURL}/colaboradores/eliminar/${id}`, { data: { id } });
+            await axios.delete(`${baseURL}/colaboradores/eliminar/${id}`);
             listarColaboradores();
+            alert("Eliminación exitosa");
         } catch (error) {
             alert(error);
             console.error("Error al eliminar: ", error);
@@ -154,26 +156,57 @@ const gestionarColaboradores: React.FC = () => {
                         <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del colaborador que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={abrirFormularioNuevo}>Nuevo colaborador</button>
                     </div>
+                    <div >
+                        <table className="GM-table">
+                            <thead className="GM-thead">
+                                <tr className='GM-tr'>
+                                    <th className="GM-th" style={{width:"110px"}}>Código</th>
+                                    <th className="GM-th">Nombre</th>
+                                    <th className="GM-th" style={{width:"100px"}}>Tipo doc.</th>
+                                    <th className="GM-th" style={{width:"110px"}}>Documento</th>
+                                    <th className="GM-th" style={{width:"100px"}}>Teléfono</th>
+                                    <th className="GM-th" style={{width:"150px"}}>Fecha de ingreso</th>
+                                    <th className="GM-th" style={{width:"50px"}}>Sexo</th>
+                                    <th className="GM-th" style={{width:"200px"}}>Correo</th>
+                                    <th className="GM-th">Dirección</th>
+                                    <th className="GM-th">Ciudad</th>
+                                    <th className="GM-th">Distrito</th>
+                                    <th className="GM-th" style={{width:"150px"}}>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filtrado.map((registro) => {
+                                    const tiposDocumento: Record<number, string> = {
+                                        1: "DNI",
+                                        2: "RUC",
+                                        3: "Carnet de extranjería",
+                                        4: "Partida de nacimiento",
+                                        5: "Pasaporte",
+                                        6: "Otros",
+                                    };
 
-                    <div className="listar-registros">
-                        {filtrado.map((registro) => (
-                            <div className="mostrar-registros" key={registro.idColaborador}>
-                                <span className="texto-de-registro">{registro.codigoColaborador}</span>
-                                <span className="texto-de-registro">{registro.nombre}</span>
-                                <span className="texto-de-registro">{registro.documento}</span>
-                                <span className="texto-de-registro">{registro.telefono}</span>
-                                <span className="texto-de-registro">📅{registro.fechaIngreso}</span>
-                                <div className="listar-opciones-contenedor">
-                                    <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.idColaborador)}><i className="fa-solid fa-ellipsis-vertical"/></div>
-                                    {menuActivoId === registro.idColaborador && (
-                                        <div ref={menuRef} className="menu-opciones-gm">
-                                            <button onClick={() => abrirFormularioEditar(registro)}>✏️ Editar</button>
-                                            <button onClick={() => eliminarColaborador(registro.idColaborador)}>🗑️ Eliminar</button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                                    return (
+                                    <tr key={registro.id}>
+                                        <td className="GM-td">{registro.codigoColaborador}</td>
+                                        <td className="GM-td">{registro.nombre}</td>
+                                        <td className="GM-td">{tiposDocumento[Number(registro.idTipoDocumento)] || "Desconocido"}</td>
+                                        <td className="GM-td">{registro.documento}</td>
+                                        <td className="GM-td">{registro.telefono}</td>
+                                        <td className="GM-td">{registro.fechaIngreso}</td>
+                                        <td className="GM-td">{registro.sexo}</td>
+                                        <td className="GM-td">{registro.correo}</td>
+                                        <td className="GM-td">{registro.direccion}</td>
+                                        <td className="GM-td">{registro.ciudad}</td>
+                                        <td className="GM-td">{registro.distrito}</td>
+                                        <td className="GM-td" style={{display:"flex", justifyContent:"center"}}>
+                                            <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
+                                            <button className="boton-rojo" onClick={() => eliminarColaborador(registro.id)}>Eliminar</button>
+                                        </td>
+                                    </tr>
+                                    );
+                                })}
+                                </tbody> 
+                        </table>
                     </div>
                 </section>
             </main>
@@ -185,17 +218,33 @@ const gestionarColaboradores: React.FC = () => {
                         <p><strong>Siendo registrado el:</strong> {edicion.fechaIngreso}</p>
                         <input type="text" placeholder="Nombre del colaborador" value={edicion?.nombre || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, nombre: nuevoValor.target.value } : null)}/>
                         <select value={edicion?.sexo ?? "M"} onChange={(e) => setEdicion(edicion ? { ...edicion, sexo: e.target.value as "M" | "F" } : null)}>
-                            <option value="">-- Seleccionar sexo --</option>
                             <option value="M">Masculino</option>
                             <option value="F">Femenino</option>
                         </select>
-                        <select value={edicion.idTipoPersonaJuridica} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, idTipoPersonaJuridica: Number(nuevoValor.target.value) } : null)}>
-                            <option value="">-- Seleccionar tipo de persona jurídica--</option>
-                            {tiposPersonasJuridicas.map((tipoPersonaJuridica) => (<option key={tipoPersonaJuridica.id} value={tipoPersonaJuridica.id}>{tipoPersonaJuridica.nombre}</option>))}
+                        <select value={edicion.idTipoPersonaJuridica} onChange={(nuevoValor) => {
+                            const nuevoId = Number(nuevoValor.target.value);
+                            setEdicion((prev) => prev
+                                    ? {
+                                        ...prev,
+                                        idTipoPersonaJuridica: nuevoId,
+                                        idTipoDocumento: nuevoId === 2 ? 2 : prev.idTipoDocumento, // Si se elige "Jurídica", forzamos RUC (id = 2)
+                                    }
+                                    : null
+                                );
+                            }}>
+                            {tiposPersonasJuridicas.map((tipoPersonaJuridica) => (
+                                <option key={tipoPersonaJuridica.id} value={tipoPersonaJuridica.id}>{tipoPersonaJuridica.nombre}</option>
+                            ))}
                         </select>
-                        <select value={edicion.idTipoDocumento} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, idTipoDocumento: Number(nuevoValor.target.value) } : null)}>
-                            <option value="">-- Seleccionar tipo de documento</option>
-                            {tiposDocumento.map((tipo) => (<option key={tipo.id} value={tipo.id}>{tipo.descripcion}</option>))}
+                        <select value={edicion.idTipoDocumento} onChange={(nuevoValor) =>
+                            setEdicion((prev) =>prev ? { ...prev, idTipoDocumento: Number(nuevoValor.target.value) } : null)}
+                            disabled = {edicion.idTipoPersonaJuridica === 2}>
+                            {tiposDocumento
+                                // Si se selecciona persona jurídica, solo mostramos el RUC como opción
+                                .filter((tipo) => edicion.idTipoPersonaJuridica === 2 ? tipo.id === 2 : true)
+                                .map((tipo) => (
+                                <option key={tipo.id} value={tipo.id}>{tipo.descripcion}</option>
+                                ))}
                         </select>
                         <input type="text" placeholder="Documento" value={edicion.documento} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, documento: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Telefono" value={edicion.telefono} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, telefono: nuevoValor.target.value } : null)}/>

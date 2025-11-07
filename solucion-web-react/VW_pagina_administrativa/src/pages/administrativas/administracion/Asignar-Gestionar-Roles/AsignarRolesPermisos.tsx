@@ -13,7 +13,6 @@ const AsignarRolesPermisos: React.FC = () => {
 
   const baseURL = "http://localhost:8088/api";
 
-  //Cargar usuarios, roles y relaciones actuales
   useEffect(() => {
     obtenerUsuarios();
     obtenerRoles();
@@ -35,7 +34,6 @@ const AsignarRolesPermisos: React.FC = () => {
     setUsuariosRoles(res.data.data);
   };
 
-  //Asignar rol
   const asignarRol = async (idUsuario: number) => {
     const idRol = rolSeleccionado[idUsuario];
     if (!idRol) return alert("Selecciona un rol primero");
@@ -47,13 +45,13 @@ const AsignarRolesPermisos: React.FC = () => {
       });
       alert("Rol asignado correctamente ✅");
       obtenerUsuariosRoles();
+      setRolSeleccionado({ ...rolSeleccionado, [idUsuario]: 0 });
     } catch (error) {
       alert("Error al asignar el rol ❌");
       console.error(error);
     }
   };
-  
-  //Eliminar rol
+
   const eliminarRol = async (idUsuario: number, idRol: number) => {
     try {
       await axios.delete(`${baseURL}/usuarios-roles/eliminar`, {
@@ -67,9 +65,20 @@ const AsignarRolesPermisos: React.FC = () => {
     }
   };
 
-  //Obtener roles de un usuario
-  const rolesDeUsuario = (username: string) => {
-    return usuariosRoles.filter((ur) => ur.username === username).map((ur) => ur.rol);
+  const rolesDeUsuario = (idUsuario: number) => {
+    return usuariosRoles.filter((ur) => ur.idUsuario === idUsuario);
+  };
+
+  const formatearFecha = (fechaStr: string) => {
+    const fecha = new Date(fechaStr);
+    return fecha.toLocaleDateString("es-PE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
   };
 
   return (
@@ -77,75 +86,122 @@ const AsignarRolesPermisos: React.FC = () => {
       <Br_administrativa onMinimizeChange={setMinimizado} />
 
       <main className={`contenido-roles ${minimizado ? "minimize" : ""}`}>
-        <div className="asignar-container">
-          <h2>Gestionar Roles</h2>
-          <div className="tabla-wrapper">
-            <table className="asignar-tabla">
-              <thead>
-                <tr>
-                  <th>Usuario</th>
-                  <th>Roles Asignados</th>
-                  <th>Asignar Nuevo Rol</th>
-                </tr>
-              </thead>
-              <tbody>
-                {usuarios.map((usuario) => {
-                  const rolesUsuario = rolesDeUsuario(usuario.username);
-                  return (
-                    <tr key={usuario.id}>
-                      <td>{usuario.username}</td>
-                      <td>
-                        {rolesUsuario.length > 0 ? (
-                          <ul className="lista-roles">
-                            {rolesUsuario.map((rolNombre) => {
-                              const rolObj = roles.find((r) => r.nombre === rolNombre);
-                              return (
-                                <li key={rolNombre}>
-                                  <span className="rol-nombre">{rolNombre}</span>
-                                  {rolObj && (
-                                    <button
-                                      className="btn-eliminar"
-                                      onClick={() => eliminarRol(usuario.id, rolObj.id)}
-                                    >
-                                      Eliminar
-                                    </button>
-                                  )}
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        ) : (
-                          <span className="sin-rol">Sin rol asignado</span>
-                        )}
-                      </td>
+        <div className="header-roles">
+          <h1>Gestión de Roles y Permisos</h1>
+        </div>
 
+        <div className="tabla-wrapper">
+          <table className="tabla-roles">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Rol Asignado</th>
+                <th>Fecha de Asignación</th>
+                <th>Asignar Rol</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuarios.map((usuario) => {
+                const rolesUsuario = rolesDeUsuario(usuario.id);
+                const maxRoles = 4;
+                const puedeAsignarMas = rolesUsuario.length < maxRoles;
+
+                if (rolesUsuario.length === 0) {
+                  return (
+                    <tr key={`${usuario.id}-sin-rol`}>
+                      <td>{usuario.username}</td>
+                      <td><span className="sin-rol">Sin rol asignado</span></td>
+                      <td>-</td>
                       <td>
-                        <select
-                          className="select-rol"
-                          onChange={(e) =>
-                            setRolSeleccionado({
-                              ...rolSeleccionado,
-                              [usuario.id]: parseInt(e.target.value)
-                            })
-                          }
-                        >
-                          <option value="">Seleccione un rol</option>
-                          {roles.map((rol) => (
-                            <option key={rol.id} value={rol.id}>
-                              {rol.nombre}
-                            </option>
-                          ))}
-                        </select>
-                        <button className="btn-asignar" onClick={() => asignarRol(usuario.id)}>
-                          Asignar
-                        </button>
+                        <div className="asignar-grupo">
+                          <select
+                            className="select-rol"
+                            value={rolSeleccionado[usuario.id] || ""}
+                            onChange={(e) =>
+                              setRolSeleccionado({
+                                ...rolSeleccionado,
+                                [usuario.id]: parseInt(e.target.value)
+                              })
+                            }
+                          >
+                            <option value="">Seleccione un rol</option>
+                            {roles.map((rol) => (
+                              <option key={rol.id} value={rol.id}>
+                                {rol.nombre}
+                              </option>
+                            ))}
+                          </select>
+                          <button className="btn-asignar" onClick={() => asignarRol(usuario.id)}>
+                            Asignar
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
+                }
+
+                return rolesUsuario.map((usuarioRol, index) => {
+                  const rolObj = roles.find((r) => r.nombre === usuarioRol.rol);
+
+                  return (
+                    <tr key={`${usuario.id}-${usuarioRol.rol}`}>
+                      {index === 0 && (
+                        <td rowSpan={puedeAsignarMas ? rolesUsuario.length + 1 : rolesUsuario.length}>
+                          {usuario.username}
+                        </td>
+                      )}
+                      <td><span className="badge-rol">{usuarioRol.rol}</span></td>
+                      <td>{formatearFecha(usuarioRol.fechaAsignacion)}</td>
+                      <td>
+                        {rolObj && (
+                          <button
+                            className="btn-eliminar"
+                            onClick={() => eliminarRol(usuario.id, rolObj.id)}
+                          >
+                            Eliminar Rol
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                }).concat(
+                  puedeAsignarMas ? (
+                    <tr key={`${usuario.id}-asignar`}>
+                      <td colSpan={2}>
+                        <span className="texto-agregar">
+                          Agregar otro rol ({rolesUsuario.length}/{maxRoles})
+                        </span>
+                      </td>
+                      <td>
+                        <div className="asignar-grupo">
+                          <select
+                            className="select-rol"
+                            value={rolSeleccionado[usuario.id] || ""}
+                            onChange={(e) =>
+                              setRolSeleccionado({
+                                ...rolSeleccionado,
+                                [usuario.id]: parseInt(e.target.value)
+                              })
+                            }
+                          >
+                            <option value="">Seleccione un rol</option>
+                            {roles.map((rol) => (
+                              <option key={rol.id} value={rol.id}>
+                                {rol.nombre}
+                              </option>
+                            ))}
+                          </select>
+                          <button className="btn-asignar" onClick={() => asignarRol(usuario.id)}>
+                            Asignar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : []
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </main>
     </div>

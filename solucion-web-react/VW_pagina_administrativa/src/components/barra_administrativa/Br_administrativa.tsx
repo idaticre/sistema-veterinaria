@@ -147,10 +147,8 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={agendaRef} className="submenu">
-                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Agenda general</Link></li>
-                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Tiempo estimado</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Recordatorios</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Sala de espera</Link></li>
+                                    <li>
+                            <Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
                                 </ul>
                             </li>
                             <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 
@@ -226,7 +224,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 </Link>
                                 <ul ref={seguridadRef   } className="submenu">
                                     <li><Link to="/administracion/administracion/gestionar_usuarios" className="sub_opcion">Usuarios del sistema</Link></li>
-                                    <li><Link to="/administracion/administracion/Asignar_roles_y_permisos" className="sub_opcion">Asignar y Gestionar Roles</Link></li>
+                                    <li><Link to="/administracion/administracion/Asignar_roles_y_permisos" className="sub_opcion">Asignar y gestionar roles</Link></li>
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Copia de seguridad</Link></li>
                                 </ul>
                             </li>

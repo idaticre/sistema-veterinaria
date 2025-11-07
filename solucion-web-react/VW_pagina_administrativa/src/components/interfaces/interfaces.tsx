@@ -117,7 +117,7 @@ export interface ClienteResponse{
 }
 
 export interface ColaboradorResponse{
-    idColaborador: number;
+    id: number;
     codigoColaborador: string;
     idEntidad: number;
     nombre: string;
@@ -227,7 +227,7 @@ export interface tipo_doc{
 }
 
 export interface Usuario {
-  id: number;
+  id?: number;
   username: string;
   password: string;
   activo: boolean;
@@ -240,8 +240,9 @@ export interface Rol {
 }
 
 export interface UsuarioRol {
-  username: string;
+  idUsuario: number;
   rol: string;
+  fechaAsignacion: string;
 }
 
 export interface TipoPersonaJuridica {

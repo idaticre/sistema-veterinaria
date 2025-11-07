@@ -1,17 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
-import "./styles.css"
 import { Link } from "react-router-dom";
-
-interface Usuario {
-    ID: number,
-    CODIGO: string,
-    USERNAME: string,
-    PASSWORD: string,
-    ACTIVO: number,
-    FECHA_CREACION: string,
-    FECHA_BAJA?: string
-}
+import type { Usuario } from "../../../../components/interfaces/interfaces";
+import axios from 'axios';
 
 function gestionarUsuarios() {
     const [minimizado, setMinimizado] = useState(false);
@@ -22,34 +13,9 @@ function gestionarUsuarios() {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [edicion, setEdicion] = useState<Usuario | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const baseURL = "http://localhost:8088/api";
 
-
-    useEffect(() => {
-        fetch("https://localhost:8088/api/usuarios")
-    })
-
-    useEffect(() => {
-        const ejemplo = [
-            {ID: 1, CODIGO: "CODIGO1", USERNAME: "USUARIO1", PASSWORD: "CONTRASEÑA1", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
-            {ID: 2, CODIGO: "CODIGO2", USERNAME: "USUARIO2", PASSWORD: "CONTRASEÑA2", ACTIVO: 2, FECHA_CREACION: "12-12-12"},
-            {ID: 3, CODIGO: "CODIGO3", USERNAME: "USUARIO3", PASSWORD: "CONTRASEÑA3", ACTIVO: 2, FECHA_CREACION: "12-12-12"},  
-        ];
-        setUsuarios(ejemplo);
-        setFiltrado(ejemplo);
-    }, []);
-
-    useEffect(() => {
-        const lista = usuarios.filter(value => value.USERNAME.toLocaleLowerCase().includes(busqueda.toLowerCase()));
-        setFiltrado(lista);
-    }, [busqueda, usuarios]);
-
-    const eliminarUsuario = (ID: number) => {
-        const registros = usuarios.filter(valor => valor.ID !== ID);
-        setUsuarios(registros);
-        setFiltrado(registros);
-        setMenuActivoId(null);
-    }
-    
+    // Efecto de cerrar ventana
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
         if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -60,61 +26,86 @@ function gestionarUsuarios() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const registrarUsuario = () => {
+    // Filtra por búsqueda
+    useEffect(() => {
+        const lista = usuarios.filter(value => value.username.toLowerCase().includes(busqueda.toLowerCase()));
+        setFiltrado(lista);
+    }, [busqueda, usuarios]);
+
+    // Listar
+    useEffect(() => {listarUsuarios();}, []);
+    const listarUsuarios = async () => {
+        try {
+            const respuesta = await axios.get(`${baseURL}/usuarios`);
+            console.log("Respuesta del backend:", respuesta.data);
+            const lista = Array.isArray(respuesta.data)
+            ? respuesta.data
+            : respuesta.data.data;
+
+            const activos = lista.filter((cliente: Usuario) => cliente.activo === true);
+
+            setUsuarios(activos);
+            setFiltrado(activos);
+        } catch (error) {console.error("Error al obtener los usuarios", error);}
+    };
+
+    // Formulario nuevo y vacío
+    const abrirFormularioNuevo = () => {
         const nuevo: Usuario = {
-            ID: usuarios.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
-            CODIGO: "",
-            USERNAME: "",
-            PASSWORD: "",
-            ACTIVO: 2,
-            FECHA_CREACION: new Date().toISOString().split("T")[0],
-            FECHA_BAJA: ""
+            username: "",
+            password: "",
+            activo: true
         }
         setEdicion(nuevo);
         setMostrarModal(true);
-    }
+    };
 
-    const editarUsuario = (ID: number) => {
-        const usuarioEditado = usuarios.find(usuario => usuario.ID === ID);
-        if (usuarioEditado) {
-            setEdicion(usuarioEditado);
-            setMostrarModal(true);
+    // Formulario para editar
+    const abrirFormularioEditar = (usuario: Usuario) => {
+        const editado: Usuario = {
+            id: usuario.id,                   
+            username: usuario.username,
+            password: usuario.password,
+            activo: usuario.activo,      
         }
-    }
+        setEdicion(editado);
+        setMostrarModal(true);
+    };
 
-    const guardarUsuario = () => {
+    // Guardar
+    const guardarUsuario = async () => {
         if (!edicion) return;
-        if (!edicion.USERNAME.trim()) {alert("El nombre de usuario es obligatorio"); return;}
-        if (!edicion.PASSWORD.trim()) {alert("La contraseña es obligatoria"); return;}
-        if (!edicion.ACTIVO) {alert("Debes seleccionar un estado (Activo/Inactivo/Suspendido)"); return;}
         
-        // Madre para actualizar la vaina de la fecha de baja ALERTA, NO FUNCIONA = ESTÁ EN DESARROLLO
-        let actualizado = { ...edicion };
-        if (actualizado.ACTIVO === 1 || actualizado.ACTIVO === 3) {
-            if (!actualizado.FECHA_BAJA) {actualizado.FECHA_BAJA = new Date().toISOString().split("T")[0];}} 
-        else if (actualizado.ACTIVO === 2) {actualizado.FECHA_BAJA = "";}
-
-        {/* Todo lo demás */}
-        const existe = usuarios.some(usuario => usuario.ID === edicion.ID);
-        if (existe) {
-            const registros = usuarios.map(usuario => usuario.ID === edicion.ID ? edicion : usuario);
-            setUsuarios(registros);
-            setFiltrado(registros);
-        } else {
-            const nuevo: Usuario = {
-                ...edicion,
-                ID: usuarios.length + 1, // ALERTA "ERROR DE DUPLICADOS", NO USAR ESTO CUANDO CONECTEMOS LA BASE DE DATOS, DEJA QUE EL BACKEND EN return ASIGNE EL ID (para pruebas locales está bien)
-                CODIGO: edicion.CODIGO || "CODIGO0", // CODIGO está siendo generado manualmente, editar cuando se conecte la base de datos para cumplir con la COMPOUND KEY
-                FECHA_CREACION: new Date().toISOString().split("T")[0],
-            };
-            const registros = [...usuarios, nuevo];
-            setUsuarios(registros);
-            setFiltrado(registros);
+        try {
+            if (edicion.id && edicion.id > 0) {
+                const response = await axios.put(`${baseURL}/usuarios/actualizar`, edicion);
+                console.log("Respuesta backend:", response.data);
+            } else {
+                const response = await axios.post(`${baseURL}/usuarios/registrar`, edicion);
+                console.log("Respuesta backend:", response.data);
+            }
+            listarUsuarios();
+            setEdicion(null);
+            setMostrarModal(false);
+        } catch (error) {
+            console.log("Datos enviados al backend:", edicion);
+            console.error("Error al registrar/actualizar: ", error);
+            alert(error);
         }
-
-        setEdicion(null);
-        setMostrarModal(false);
     }
+
+    // Eliminar
+    const eliminarUsuario = async (id: number) => {
+        try {
+            await axios.delete(`${baseURL}/usuarios/eliminar/${id}`);
+            listarUsuarios();
+            alert("Eliminación exitosa");
+        } catch (error) {
+            alert(error);
+            console.error("Error al eliminar: ", error);
+        }
+    }
+
 
     return (
         <div id="cuerpo-main">
@@ -128,33 +119,25 @@ function gestionarUsuarios() {
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={registrarUsuario}>Registrar usuario</button>
                     </div>
 
-                    <div className="listar-registros">
-                        {filtrado.map((registro) => (
-                            <div className="mostrar-registros" key={registro.ID}>
-                                <span className="texto-de-registro">{registro.CODIGO}</span>
-                                <span className="texto-de-registro">{registro.USERNAME}</span>
-                                <span className="texto-de-registro">{registro.PASSWORD}</span>
-                                <span className="texto-de-registro">{{1: "Inactivo", 2: "Activo", 3: "Suspendido"}[registro.ACTIVO] || "Desconocido"}</span>                                
-                                <span className="texto-de-registro">{registro.FECHA_CREACION}</span>
-                                <span className="texto-de-registro">{ // Arreglar display de la fecha de baja (checar comentario en editarUsuario)
-                                    registro?.FECHA_BAJA === undefined 
-                                        ? ""
-                                        : registro.ACTIVO === 1
-                                            ? `(Inactivo desde ${registro.FECHA_BAJA})`
-                                            : registro.ACTIVO === 3
-                                                ? `(Suspendido desde ${registro.FECHA_BAJA})`
-                                                : "NO_ELIMINAR_ESTO"}</span>
-                                <div className="listar-opciones-contenedor">
-                                    <div className="listar-registro-opciones" onClick={() => setMenuActivoId(registro.ID)}><i className="fa-solid fa-ellipsis-vertical"/></div>
-                                    {menuActivoId === registro.ID && (
-                                        <div ref={menuRef} className="menu-opciones">
-                                            <button onClick={() => editarUsuario(registro.ID)}>✏️ Editar</button>
-                                            <button onClick={() => eliminarUsuario(registro.ID)}>🗑️ Eliminar</button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                    <div className="tabla-wrapper">
+                        <table className="listar-registros">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Contraseña</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filtrado.map((registro) => (
+                                    <tr key={registro.id}>
+                                        <td></td>
+                                        <button onClick={() => abrirFormularioEditar(registro)}>Editar</button>
+                                        <button onClick={() => eliminarUsuario(registro.id)}>Eliminar</button>
+                                    </tr>
+                                ))}
+                            </tbody>                        
+                        </table>
                     </div>
                 </section>
             </main>
@@ -182,5 +165,4 @@ function gestionarUsuarios() {
         </div>        
     )
 }
-/* Checar los comentarios, los errores son generalmente los mismos en los 3 CRUDS. */
 export default gestionarUsuarios
