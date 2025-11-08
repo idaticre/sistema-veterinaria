@@ -30,7 +30,7 @@ public class ColaboradorResponseDTO {
     private String distrito;
     
     // Datos específicos del colaborador
-    private String usuario;
+    private Integer usuario;
     private Boolean activo;
     private LocalDateTime fechaRegistro;
     private LocalDate fechaIngreso;

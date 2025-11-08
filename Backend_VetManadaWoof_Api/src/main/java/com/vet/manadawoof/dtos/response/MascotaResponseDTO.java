@@ -77,4 +77,8 @@ public class MascotaResponseDTO {
     
     // Fecha de última modificación del registro
     private LocalDateTime fechaModificacion;
+    
+    // Relaciones adicionales (necesarias para el mapper y el servicio)
+    private Long idColaborador;
+    private Long idVeterinario;
 }

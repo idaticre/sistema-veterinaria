@@ -22,40 +22,37 @@ public class ClienteRestController {
     public ResponseEntity<ApiResponse<ClienteResponseDTO>> registrar(@RequestBody ClienteRequestDTO dto) {
         ClienteResponseDTO response = service.registrar(dto);
         if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(false, response.getMensaje(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, response.getMensaje(), null));
         }
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(true, response.getMensaje(), response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response.getMensaje(), response));
     }
     
-    @PutMapping("/actualizar")
-    public ResponseEntity<ApiResponse<ClienteResponseDTO>> actualizar(@RequestBody ClienteRequestDTO dto) {
-        ClienteResponseDTO response = service.actualizar(dto);
+    @PutMapping("/actualizar/{id}")
+    public ResponseEntity<ApiResponse<ClienteResponseDTO>> actualizar(@PathVariable Long id, @RequestBody ClienteRequestDTO dto) {
+        // Usamos el id del path para actualizar
+        ClienteResponseDTO response = service.actualizar(id, dto);
+        
+        // Revisar mensaje de error
         if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(false, response.getMensaje(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, response.getMensaje(), null));
         }
-        return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+        // Respuesta exitosa
+        return ResponseEntity.ok(new ApiResponse<>(true, "Actualización exitosa", response));
     }
+    
     
     // Listar todos los clientes
     @GetMapping
     public ResponseEntity<ApiResponse<List<ClienteResponseDTO>>> listar() {
         List<ClienteResponseDTO> clientes = service.listar();
-        return ResponseEntity.ok(new ApiResponse<>(
-                true, "Lista de clientes", clientes));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lista de clientes", clientes));
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ClienteResponseDTO>> obtenerPorId(@PathVariable Long id) {
-        ClienteResponseDTO cliente = service.obtenerPorId(id);
-        if(cliente == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(false, "Cliente no encontrado", null));
-        }
-        return ResponseEntity.ok(new ApiResponse<>(
-                true, "Cliente encontrado", cliente));
+        ClienteResponseDTO cliente = service.obtenerPorId(id); if(cliente == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, "Cliente no encontrado", null));
+        } return ResponseEntity.ok(new ApiResponse<>(true, "Cliente encontrado", cliente));
     }
     
     @DeleteMapping("/eliminar/{id}")
@@ -63,15 +60,10 @@ public class ClienteRestController {
         try {
             ClienteResponseDTO response = service.eliminar(id);
             if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ApiResponse<>(false, response.getMensaje(), null));
-            }
-            return ResponseEntity.ok(
-                    new ApiResponse<>(true, response.getMensaje(), response)
-            );
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, response.getMensaje(), null));
+            } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
         }
     }
     

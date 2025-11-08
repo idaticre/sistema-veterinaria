@@ -62,13 +62,31 @@ public class MascotaRestController {
     }
     
     // Actualizar los datos de una mascota existente
-    // PUT /api/mascotas/actualizar
-    @PutMapping("/actualizar")
-    public ResponseEntity<ApiResponse<MascotaResponseDTO>> actualizar(@Valid @RequestBody MascotaRequestDTO dto) {
-        MascotaResponseDTO actualizada = mascotaService.actualizarMascota(dto); // Llamar al servicio para actualizar
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ApiResponse<>(true, "Mascota actualizada correctamente", actualizada));
+// PUT /api/mascotas/actualizar/{id}
+    @PutMapping("/actualizar/{id}")
+    public ResponseEntity<ApiResponse<MascotaResponseDTO>> actualizar(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody MascotaRequestDTO dto
+    ) {
+        try {
+            // Llamamos al servicio para actualizar
+            MascotaResponseDTO actualizada = mascotaService.actualizarMascota(id, dto);
+            
+            // Devolvemos la respuesta exitosa
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ApiResponse<>(true, "Mascota actualizada correctamente", actualizada));
+            
+        } catch (RuntimeException e) {
+            // Si ocurre un error (ej: no encontrada, datos inválidos)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, e.getMessage()));
+        } catch (Exception e) {
+            // Error inesperado (para debugging o casos extremos)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Error interno al actualizar la mascota: " + e.getMessage()));
+        }
     }
+    
     
     // Eliminar (lógica) una mascota por ID
     // DELETE /api/mascotas/eliminar/{id}

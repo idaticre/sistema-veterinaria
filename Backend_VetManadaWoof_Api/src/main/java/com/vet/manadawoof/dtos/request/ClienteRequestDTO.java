@@ -8,11 +8,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClienteRequestDTO {
-    
-    // --- Identificador del cliente (solo para actualización) ---
+    // id clientes solo para actualización
     private Long id;
     
-    // Para update, no se expone al frontend
     private Long idEntidad;
     
     // --- Datos de clasificación ---
@@ -46,6 +44,8 @@ public class ClienteRequestDTO {
     private String ciudad;
     private String distrito;
     
-    // --- Estado ---
+    // Representante aplicable si es persona jurídica
+    private String representante;
+    
     private Boolean activo;
 }

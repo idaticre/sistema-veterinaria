@@ -3,126 +3,130 @@ package com.vet.manadawoof.mapper;
 import com.vet.manadawoof.dtos.request.MascotaRequestDTO;
 import com.vet.manadawoof.dtos.response.MascotaResponseDTO;
 import com.vet.manadawoof.entity.*;
+import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+/**
+ * Mapper manual para la entidad Mascota, adaptado a los DTOs existentes.
+ * - toResponse: Entity -> MascotaResponseDTO
+ * - toRequest:  Entity -> MascotaRequestDTO (útil para prellenado / eliminación lógica)
+ * - updateEntityFromRequest: MascotaRequestDTO + relaciones cargadas -> MascotaEntity
+ * <p>
+ * No cambia los DTOs; mapea exactamente las propiedades tal como están definidas.
+ */
+@Component
 public class MascotaMapper {
     
-    // Convierte Entity -> ResponseDTO
-    public static MascotaResponseDTO toResponse(MascotaEntity entity) {
-        // Retornar null si no hay entity
-        if(entity == null) return null;
+    // ENTITY -> RESPONSE DTO
+    
+    public MascotaResponseDTO toResponse(MascotaEntity e) {
+        if(e == null) return null;
         
         return MascotaResponseDTO.builder()
-                .id(entity.getId()) // ID interno
-                .codigo(entity.getCodigo()) // Código único
-                .nombre(entity.getNombre()) // Nombre de la mascota
-                .sexo(entity.getSexo()) // Sexo: M/H/O
-                .fechaNacimiento(entity.getFechaNacimiento()) // Fecha de nacimiento
-                .pelaje(entity.getPelaje()) // Pelaje
-                .esterilizado(entity.getEsterilizado()) // Esterilizado
-                .alergias(entity.getAlergias()) // Alergias
-                .peso(entity.getPeso()) // Peso
-                .chip(entity.getChip()) // Tiene chip?
-                .pedigree(entity.getPedigree()) // Tiene pedigree?
-                .factorDea(entity.getFactorDea()) // Factor DEA
-                .agresividad(entity.getAgresividad()) // Agresividad
-                .foto(entity.getFoto()) // Foto (URL o path)
-                .fechaRegistro(entity.getFechaRegistro()) // Fecha de registro
-                .fechaModificacion(entity.getFechaModificacion()) // Fecha última modificación
-                // Relaciones solo IDs
-                .idCliente(entity.getCliente() != null ? entity.getCliente().getId() : null) // ID cliente
-                .idRaza(entity.getRaza() != null ? entity.getRaza().getId() : null) // ID raza
-                .idEspecie(entity.getEspecie() != null ? entity.getEspecie().getId() : null) // ID especie
-                .idEstado(entity.getEstado() != null ? entity.getEstado().getId() : null) // ID estado
-                .idTamano(entity.getTamano() != null ? entity.getTamano().getId() : null) // ID tamaño
-                .idEtapa(entity.getEtapa() != null ? entity.getEtapa().getId() : null) // ID etapa
+                .id(e.getId())
+                .codigo(e.getCodigo())
+                .nombre(e.getNombre())
+                .sexo(e.getSexo())
+                .idCliente(e.getCliente() != null ? e.getCliente().getId() : null)
+                .idRaza(e.getRaza() != null ? e.getRaza().getId() : null)
+                .idEspecie(e.getEspecie() != null ? e.getEspecie().getId() : null)
+                .idEstado(e.getEstado() != null ? e.getEstado().getId() : null)
+                .idTamano(e.getTamano() != null ? e.getTamano().getId() : null)
+                .idEtapa(e.getEtapa() != null ? e.getEtapa().getId() : null)
+                .fechaNacimiento(e.getFechaNacimiento())
+                .pelaje(e.getPelaje())
+                .esterilizado(e.getEsterilizado())
+                .alergias(e.getAlergias())
+                .peso(e.getPeso() != null ? e.getPeso() : BigDecimal.ZERO)
+                .chip(e.getChip())
+                .pedigree(e.getPedigree())
+                .factorDea(e.getFactorDea())
+                .agresividad(e.getAgresividad())
+                .foto(e.getFoto())
+                .fechaRegistro(e.getFechaRegistro())
+                .fechaModificacion(e.getFechaModificacion())
+                .idColaborador(e.getColaborador() != null ? e.getColaborador().getId() : null)
+                .idVeterinario(e.getVeterinario() != null ? e.getVeterinario().getId() : null)
                 .build();
     }
     
-    // Actualiza los campos de la Entity desde el RequestDTO
-    // Solo actualiza relaciones si no son null para no sobreescribir datos existentes
-    public static void updateEntityFromRequest(
-            MascotaRequestDTO request, MascotaEntity entity,
-            ClienteEntity cliente, RazaEntity raza, EspecieEntity especie,
-            EstadoMascotaEntity estado, TamanoMascEntity tamano,
-            EtapaVidaEntity etapa, ColaboradorEntity colaborador,
+    // -------------------------------
+    // ENTITY -> REQUEST DTO
+    // -------------------------------
+    public MascotaRequestDTO toRequest(MascotaEntity e) {
+        if(e == null) return null;
+        
+        return MascotaRequestDTO.builder()
+                .id(e.getId())
+                .nombre(e.getNombre())
+                .sexo(e.getSexo())
+                .idCliente(e.getCliente() != null ? e.getCliente().getId() : null)
+                .idRaza(e.getRaza() != null ? e.getRaza().getId() : null)
+                .idEspecie(e.getEspecie() != null ? e.getEspecie().getId() : null)
+                .idEstado(e.getEstado() != null ? e.getEstado().getId() : null)
+                .fechaNacimiento(e.getFechaNacimiento())
+                .pelaje(e.getPelaje())
+                .idTamano(e.getTamano() != null ? e.getTamano().getId() : null)
+                .idEtapa(e.getEtapa() != null ? e.getEtapa().getId() : null)
+                .esterilizado(e.getEsterilizado())
+                .alergias(e.getAlergias())
+                .peso(e.getPeso() != null ? e.getPeso() : BigDecimal.ZERO)
+                .chip(e.getChip())
+                .pedigree(e.getPedigree())
+                .factorDea(e.getFactorDea())
+                .agresividad(e.getAgresividad())
+                .foto(e.getFoto())
+                .idColaborador(e.getColaborador() != null ? e.getColaborador().getId() : null)
+                .idVeterinario(e.getVeterinario() != null ? e.getVeterinario().getId() : null)
+                .build();
+    }
+    
+    // -------------------------------
+    // REQUEST DTO + ENTIDADES RELACIONADAS -> ENTITY
+    // (para crear o actualizar; las entidades relacionadas deben estar cargadas en el service)
+    // -------------------------------
+    public void updateEntityFromRequest(
+            MascotaRequestDTO dto,
+            MascotaEntity entity,
+            ClienteEntity cliente,
+            RazaEntity raza,
+            EspecieEntity especie,
+            EstadoMascotaEntity estado,
+            TamanoMascEntity tamano,
+            EtapaVidaEntity etapa,
+            ColaboradorEntity colaborador,
             VeterinarioEntity veterinario
     ) {
+        if(dto == null || entity == null) return;
         
-        // Campos simples
-        // Nombre
-        if(request.getNombre() != null) entity.setNombre(request.getNombre());
-        // Sexo
-        if(request.getSexo() != null) entity.setSexo(request.getSexo());
-        // Fecha nacimiento
-        if(request.getFechaNacimiento() != null) entity.setFechaNacimiento(request.getFechaNacimiento());
-        // Pelaje
-        if(request.getPelaje() != null) entity.setPelaje(request.getPelaje());
+        // Campos simples (solo si no son null en el request — service decide qué enviar)
+        if(dto.getNombre() != null) entity.setNombre(dto.getNombre());
+        if(dto.getSexo() != null) entity.setSexo(dto.getSexo());
+        if(dto.getFechaNacimiento() != null) entity.setFechaNacimiento(dto.getFechaNacimiento());
+        if(dto.getPelaje() != null) entity.setPelaje(dto.getPelaje());
+        if(dto.getEsterilizado() != null) entity.setEsterilizado(dto.getEsterilizado());
+        if(dto.getAlergias() != null) entity.setAlergias(dto.getAlergias());
+        if(dto.getPeso() != null) entity.setPeso(dto.getPeso());
+        if(dto.getChip() != null) entity.setChip(dto.getChip());
+        if(dto.getPedigree() != null) entity.setPedigree(dto.getPedigree());
+        if(dto.getFactorDea() != null) entity.setFactorDea(dto.getFactorDea());
+        if(dto.getAgresividad() != null) entity.setAgresividad(dto.getAgresividad());
+        if(dto.getFoto() != null) entity.setFoto(dto.getFoto());
         
-        // Esterilizado
-        if(request.getEsterilizado() != null) entity.setEsterilizado(request.getEsterilizado());
-        // Alergias
-        if(request.getAlergias() != null) entity.setAlergias(request.getAlergias());
-        // Peso
-        if(request.getPeso() != null) entity.setPeso(request.getPeso());
-        // Chip
-        if(request.getChip() != null) entity.setChip(request.getChip());
-        // Pedigree
-        if(request.getPedigree() != null) entity.setPedigree(request.getPedigree());
-        // Factor DEA
-        if(request.getFactorDea() != null) entity.setFactorDea(request.getFactorDea());
-        // Agresividad
-        if(request.getAgresividad() != null) entity.setAgresividad(request.getAgresividad());
-        // Foto
-        if(request.getFoto() != null) entity.setFoto(request.getFoto());
-        
-        // Relaciones: solo set si no son null
-        // Cliente
+        // Relaciones: el service debe haber cargado/obtenido estas entidades (o null si no aplica)
         if(cliente != null) entity.setCliente(cliente);
-        // Raza
         if(raza != null) entity.setRaza(raza);
-        // Especie
         if(especie != null) entity.setEspecie(especie);
-        // Estado
         if(estado != null) entity.setEstado(estado);
-        // Tamaño
         if(tamano != null) entity.setTamano(tamano);
-        // Etapa de vida
         if(etapa != null) entity.setEtapa(etapa);
-        // Colaborador asignado
         if(colaborador != null) entity.setColaborador(colaborador);
-        // Veterinario asignado
         if(veterinario != null) entity.setVeterinario(veterinario);
+        
+        // NOTA: campos fechaRegistro/fechaModificacion los maneja la capa de persistencia (antes/after persist)
+        // Si quieres que el mapper toque fechaModificacion, hazlo explícito aquí (no lo hago por defecto).
     }
-    
-    
-    // Convierte Entity -> RequestDTO (para reutilizar en actualizaciones)
-    public static MascotaRequestDTO toRequest(MascotaEntity entity) {
-        if(entity == null) return null;
-        
-        MascotaRequestDTO dto = new MascotaRequestDTO();
-        dto.setId(entity.getId());
-        dto.setNombre(entity.getNombre());
-        dto.setSexo(entity.getSexo());
-        dto.setFechaNacimiento(entity.getFechaNacimiento());
-        dto.setPelaje(entity.getPelaje());
-        dto.setEsterilizado(entity.getEsterilizado());
-        dto.setAlergias(entity.getAlergias());
-        dto.setPeso(entity.getPeso());
-        dto.setChip(entity.getChip());
-        dto.setPedigree(entity.getPedigree());
-        dto.setFactorDea(entity.getFactorDea());
-        dto.setAgresividad(entity.getAgresividad());
-        dto.setFoto(entity.getFoto());
-        
-        // Relaciones por ID
-        dto.setIdCliente(entity.getCliente() != null ? entity.getCliente().getId() : null);
-        dto.setIdRaza(entity.getRaza() != null ? entity.getRaza().getId() : null);
-        dto.setIdEspecie(entity.getEspecie() != null ? entity.getEspecie().getId() : null);
-        dto.setIdEstado(entity.getEstado() != null ? entity.getEstado().getId() : null);
-        dto.setIdTamano(entity.getTamano() != null ? entity.getTamano().getId() : null);
-        dto.setIdEtapa(entity.getEtapa() != null ? entity.getEtapa().getId() : null);
-        
-        return dto;
-    }
-    
 }

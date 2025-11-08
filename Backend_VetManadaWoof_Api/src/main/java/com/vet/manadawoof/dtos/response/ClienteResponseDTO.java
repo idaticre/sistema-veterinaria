@@ -9,11 +9,20 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClienteResponseDTO {
-
+    
+    // ------------------ Cliente ------------------
     private Long id;
+    
+    // código generado en tabla
     private String codigoCliente;
-
-    // Datos de entidad
+    
+    private Boolean activo;
+    
+    // fecha de registro en clientes
+    private LocalDateTime fechaRegistro;
+    
+    // ------------------ Entidad ------------------
+    // id de tabla entidades
     private Long idEntidad;
     private String nombre;
     private String sexo;
@@ -25,11 +34,8 @@ public class ClienteResponseDTO {
     private String direccion;
     private String ciudad;
     private String distrito;
-
-    // Datos específicos
-    private Boolean activo;
-    private LocalDateTime fechaRegistro;
-
-    // fallback de SP
+    private String representante;
+    private LocalDateTime fechaRegistroEntidad;
+    
     private String mensaje;
 }
