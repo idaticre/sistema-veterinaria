@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
-import { Link } from "react-router-dom";
-import type { Usuario } from "../../../../components/interfaces/interfaces";
+import type { UsuarioRequest, UsuarioResponse, ColaboradorResponse, ColaboradorRequest } from "../../../../components/interfaces/interfaces";
 import axios from 'axios';
 
-function gestionarUsuarios() {
+const gestionarUsuarios: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);
     const [busqueda, setBusqueda] = useState("");
-    const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-    const [filtrado, setFiltrado] = useState<Usuario[]>([]);
+    const [usuarios, setUsuarios] = useState<UsuarioResponse[]>([]);
+    const [filtrado, setFiltrado] = useState<UsuarioResponse[]>([]);
     const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
     const [mostrarModal, setMostrarModal] = useState(false);
-    const [edicion, setEdicion] = useState<Usuario | null>(null);
+    const [edicion, setEdicion] = useState<UsuarioRequest | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
     const baseURL = "http://localhost:8088/api";
 
@@ -32,17 +31,16 @@ function gestionarUsuarios() {
         setFiltrado(lista);
     }, [busqueda, usuarios]);
 
-    // Listar
+    // Listar usuarios (Response)
     useEffect(() => {listarUsuarios();}, []);
     const listarUsuarios = async () => {
         try {
             const respuesta = await axios.get(`${baseURL}/usuarios`);
-            console.log("Respuesta del backend:", respuesta.data);
             const lista = Array.isArray(respuesta.data)
             ? respuesta.data
             : respuesta.data.data;
 
-            const activos = lista.filter((cliente: Usuario) => cliente.activo === true);
+            const activos = lista.filter((cliente: UsuarioResponse) => cliente.activo === true);
 
             setUsuarios(activos);
             setFiltrado(activos);
@@ -51,9 +49,9 @@ function gestionarUsuarios() {
 
     // Formulario nuevo y vacío
     const abrirFormularioNuevo = () => {
-        const nuevo: Usuario = {
+        const nuevo: UsuarioRequest = {
             username: "",
-            password: "",
+            passwordHash: "",
             activo: true
         }
         setEdicion(nuevo);
@@ -61,11 +59,11 @@ function gestionarUsuarios() {
     };
 
     // Formulario para editar
-    const abrirFormularioEditar = (usuario: Usuario) => {
-        const editado: Usuario = {
-            id: usuario.id,                   
+    const abrirFormularioEditar = (usuario: UsuarioResponse) => {
+        const editado: UsuarioRequest = {
+            id: usuario.id,
             username: usuario.username,
-            password: usuario.password,
+            passwordHash: usuario.passwordHash,
             activo: usuario.activo,      
         }
         setEdicion(editado);
@@ -75,29 +73,22 @@ function gestionarUsuarios() {
     // Guardar
     const guardarUsuario = async () => {
         if (!edicion) return;
-        
         try {
-            if (edicion.id && edicion.id > 0) {
-                const response = await axios.put(`${baseURL}/usuarios/actualizar`, edicion);
-                console.log("Respuesta backend:", response.data);
-            } else {
-                const response = await axios.post(`${baseURL}/usuarios/registrar`, edicion);
-                console.log("Respuesta backend:", response.data);
-            }
+            if (edicion.id && edicion.id > 0) {await axios.put(`${baseURL}/usuarios/${edicion.id}`, edicion);}
+            else {await axios.post(`${baseURL}/usuarios`, edicion);}
             listarUsuarios();
             setEdicion(null);
             setMostrarModal(false);
         } catch (error) {
-            console.log("Datos enviados al backend:", edicion);
             console.error("Error al registrar/actualizar: ", error);
-            alert(error);
+            alert("Ocurrió un error al guardar el usuario.");
         }
-    }
+    };
 
     // Eliminar
     const eliminarUsuario = async (id: number) => {
         try {
-            await axios.delete(`${baseURL}/usuarios/eliminar/${id}`);
+            await axios.delete(`${baseURL}/usuarios/${id}`);
             listarUsuarios();
             alert("Eliminación exitosa");
         } catch (error) {
@@ -105,7 +96,6 @@ function gestionarUsuarios() {
             console.error("Error al eliminar: ", error);
         }
     }
-
 
     return (
         <div id="cuerpo-main">
@@ -115,54 +105,48 @@ function gestionarUsuarios() {
                     <div className="encabezado"><h2>Lista de usuarios</h2></div>
                     <div className="goated">
                         <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del usuario que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
-                        <Link className="boton-goated ir-a-goated animacion-goated" to="/administracion/administracion/gestionar_colaboradores">Regresar</Link>
-                        <button className="boton-goated anadir-a-goated animacion-goated" onClick={registrarUsuario}>Registrar usuario</button>
+                        <button className="boton-goated anadir-a-goated animacion-goated" onClick={abrirFormularioNuevo}>Registrar usuario</button>
                     </div>
-
-                    <div className="tabla-wrapper">
-                        <table className="listar-registros">
-                            <thead>
-                                <tr>
-                                    <th>Usuario</th>
-                                    <th>Contraseña</th>
-                                    <th>Estado</th>
+                    <table className="GM-table">
+                        <thead className="GM-thead">
+                            <tr className="GM-tr">
+                                <th className="GM-th" style={{width:"150px"}}>Usuario</th>
+                                <th className="GM-th" style={{width:"20px"}}>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtrado.map((registro) => (
+                                <tr key={registro.id}>
+                                    <td className="GM-td">{registro.username}</td>
+                                    <td className="GM-td">
+                                        <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
+                                        <button className="boton-rojo" onClick={() => eliminarUsuario(registro.id)}>Eliminar</button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {filtrado.map((registro) => (
-                                    <tr key={registro.id}>
-                                        <td></td>
-                                        <button onClick={() => abrirFormularioEditar(registro)}>Editar</button>
-                                        <button onClick={() => eliminarUsuario(registro.id)}>Eliminar</button>
-                                    </tr>
-                                ))}
-                            </tbody>                        
-                        </table>
-                    </div>
+                            ))}
+                        </tbody>
+                    </table>
                 </section>
             </main>
-
+            
             {mostrarModal && edicion && (
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
                         <h3>Información de usuario</h3>
-                        <p><strong>Siendo creado el:</strong> {edicion.FECHA_CREACION}</p>
-                        <select value={edicion?.ACTIVO || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ACTIVO: Number(nuevoValor.target.value) } : null)}>
-                            <option value="">-- Selecciona estado --</option>
-                            <option value="1">Inactivo</option>
-                            <option value="2">Activo</option>
-                            <option value="3">Suspendido</option>
-                        </select>
-                        <input type="text" placeholder="Ingrese el nuevo nombre de usuario" value={edicion.USERNAME} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, USERNAME: nuevoValor.target.value } : null)}/>
-                        <input type="password" placeholder="Ingrese una contraseña" value={edicion.PASSWORD} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, PASSWORD: nuevoValor.target.value } : null)}/> {/* Añadir mostrar contraseña*/}
+                        <input type="text" placeholder="Ingrese un nombre de usuario" value={edicion.username} onChange={(e) => setEdicion(prev => prev ? { ...prev, username: e.target.value } : null)}/>
+                        <input type="password" placeholder="Ingrese una contraseña" value={edicion.passwordHash} onChange={(e) => setEdicion(prev => prev ? { ...prev, passwordHash: e.target.value } : null)}/>
                         <div className="acciones-de-registro">
-                            <button onClick={guardarUsuario}>Guardar</button>
-                            <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
+                            <button className="boton-verde" onClick={guardarUsuario}>Guardar</button>
+                            <button style={{background:"#c82333"}} onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
                         </div>
                     </div>
                 </div>
             )}
-        </div>        
+        </div>    
     )
 }
-export default gestionarUsuarios
+export default gestionarUsuarios;
+/*
+    1) Falta mostrar el colaborador asignado al usuario
+    2) Falta actualizar el colaborador asignado al usuario
+*/

@@ -20,6 +20,21 @@ main.minimize{
     padding: 1rem;
 }
 
+.formulario_superior {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.form_super_datos{
+    width: 60%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
 /* Estilos generales del sistema */
 
         /* Encabezado de formularios */
@@ -128,8 +143,8 @@ main.minimize{
 
         /* Sección de foto de perfil */
         .profile-photo {
-            width: 150px;
-            height: 150px;
+            width: 200px;
+            height: 200px;
             background: #f8f9fa;
             border-radius: 50%;
             border: 3px solid #e9ecef;
@@ -150,14 +165,15 @@ main.minimize{
 
         .photo-section-form {
             display: flex;
+            width: 30%;
             flex-direction: column;
             align-items: center;
             gap: 15px;
             min-width: 200px;
             padding: 20px;
-            background: #f8f9fa;
+            background: #eee69e;
             border-radius: 12px;
-            margin-top: 50px;
+            margin-left: 50px ;
         }
 
         /* Botón de envío */
@@ -181,7 +197,7 @@ main.minimize{
 
         .photo-upload-text {
             font-size: 14px;
-            color: #ff9900;
+            color: #044bda;
             text-decoration: none;
             text-align: center;
             font-weight: 500;
@@ -247,66 +263,67 @@ main.minimize{
         }
 
         /* Sección de información del dueño */
-        .owner-info {
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-
-        .owner-info h4 {
-            color: #666;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
+        /* 🔍 Contenedor general del buscador */
         .owner-search {
+            position: relative;
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            flex-direction: column;
+            width: 100%;
+            max-width: 400px;
         }
 
-        .owner-search input {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #e9ecef;
+        /* Caja de texto del buscador */
+        .owner-search input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
             border-radius: 6px;
+            font-size: 15px;
+            transition: border 0.2s, box-shadow 0.2s;
         }
 
-        .search-btn {
-            padding: 10px 20px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
+        .owner-search input[type="text"]:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
+            outline: none;
         }
 
-
-        .owner-details {
-            display: none;
-            padding: 15px;
+        /* Lista desplegable */
+        .suggestions-list {
+            position: absolute;
+            top: 100%; /* Justo debajo del input */
+            left: 0;
+            width: 100%;
             background: white;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            max-height: 180px; /* Altura máxima con scroll */
+            overflow-y: auto;
+            z-index: 1000;
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .owner-details.show {
-            display: block;
+        /* Cada opción */
+        .suggestions-list li {
+            padding: 10px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
-        .owner-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .owner-item strong {
+        /* Efecto hover */
+        .suggestions-list li:hover {
+            background: #f0f8f0;
             color: #333;
-            font-weight: 500;
         }
 
-        .owner-item span {
-            color: #666;
+        /* Cuando no hay resultados */
+        .suggestions-list.empty {
+            text-align: center;
+            color: #777;
+            font-style: italic;
         }

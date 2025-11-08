@@ -3,6 +3,7 @@ import Br_administrativa from '../../../../components/barra_administrativa/Br_ad
 import "./styles.css";
 import type { ColaboradorRequest, ColaboradorResponse, tipo_doc, TipoPersonaJuridica } from "../../../../components/interfaces/interfaces";
 import axios from 'axios';
+import { Link } from "react-router-dom";
 
 const gestionarColaboradores: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);
@@ -16,7 +17,13 @@ const gestionarColaboradores: React.FC = () => {
     const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
     const baseURL = "http://localhost:8088/api";
-    
+    /* 
+        De forma similar a mostrarModal && edicion, usaremos consts para mostrar de forma extensiva la información de un colaborador mediante un
+        tercer botón "Más..." uwu
+    */
+    const [masInformacion, setMasInformacion] = useState<ColaboradorResponse | null>(null);
+    const [mostrarModalInformativo, setMostrarModalInformativo] = useState(false);
+
     // Obtener tipos de documentos
     useEffect(() => {obtenerTiposDocumento();}, []);
     const obtenerTiposDocumento = async () => {
@@ -57,13 +64,11 @@ const gestionarColaboradores: React.FC = () => {
     const listarColaboradores = async () => {
         try {
             const respuesta = await axios.get(`${baseURL}/colaboradores`);
-            console.log("Respuesta del backend:", respuesta.data);
             const lista = Array.isArray(respuesta.data)
             ? respuesta.data
             : respuesta.data.data;
 
             const activos = lista.filter((cliente: ColaboradorResponse) => cliente.activo === true);
-
             setColaboradores(activos);
             setFiltrado(activos);
         } catch (error) {console.error("Error al obtener los colaboradores", error);}
@@ -117,18 +122,12 @@ const gestionarColaboradores: React.FC = () => {
         if (!edicion) return;
         
         try {
-            if (edicion.id && edicion.id > 0) {
-                const response = await axios.put(`${baseURL}/colaboradores/actualizar`, edicion);
-                console.log("Respuesta backend:", response.data);
-            } else {
-                const response = await axios.post(`${baseURL}/colaboradores/registrar`, edicion);
-                console.log("Respuesta backend:", response.data);
-            }
+            if (edicion.id && edicion.id > 0) {await axios.put(`${baseURL}/colaboradores/actualizar`, edicion);} 
+            else {await axios.post(`${baseURL}/colaboradores/registrar`, edicion);}
             listarColaboradores();
             setEdicion(null);
             setMostrarModal(false);
         } catch (error) {
-            console.log("Datos enviados al backend:", edicion);
             console.error("Error al registrar/actualizar: ", error);
             alert(error);
         }
@@ -146,6 +145,32 @@ const gestionarColaboradores: React.FC = () => {
         }
     }
 
+    // Botón amarillo: ver más información
+    const verMasInformacion = (colaborador: ColaboradorResponse) => {
+        const fullInfo: ColaboradorResponse = {
+            id: colaborador.id,
+            codigoColaborador: colaborador.codigoColaborador,
+            idEntidad: colaborador.idEntidad,
+            nombre: colaborador.nombre,
+            sexo: colaborador.sexo,
+            documento: colaborador.documento,
+            idTipoPersonaJuridica: colaborador.idTipoPersonaJuridica,
+            idTipoDocumento: colaborador.idTipoDocumento,
+            correo: colaborador.correo,
+            telefono: colaborador.telefono,
+            direccion: colaborador.direccion,
+            ciudad: colaborador.ciudad,
+            distrito: colaborador.distrito,
+            usuario: colaborador.usuario,
+            activo: colaborador.activo,
+            fechaRegistro: colaborador.fechaRegistro,
+            fechaIngreso: colaborador.fechaIngreso,
+            mensaje: colaborador.mensaje         
+        }
+        setMasInformacion(fullInfo);
+        setMostrarModalInformativo(true);
+    }
+    
     return (
         <div id="cuerpo-main">
             <Br_administrativa onMinimizeChange={setMinimizado}/>
@@ -156,65 +181,58 @@ const gestionarColaboradores: React.FC = () => {
                         <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del colaborador que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={abrirFormularioNuevo}>Nuevo colaborador</button>
                     </div>
-                    <div >
-                        <table className="GM-table">
-                            <thead className="GM-thead">
-                                <tr className='GM-tr'>
-                                    <th className="GM-th" style={{width:"110px"}}>Código</th>
-                                    <th className="GM-th">Nombre</th>
-                                    <th className="GM-th" style={{width:"100px"}}>Tipo doc.</th>
-                                    <th className="GM-th" style={{width:"110px"}}>Documento</th>
-                                    <th className="GM-th" style={{width:"100px"}}>Teléfono</th>
-                                    <th className="GM-th" style={{width:"150px"}}>Fecha de ingreso</th>
-                                    <th className="GM-th" style={{width:"50px"}}>Sexo</th>
-                                    <th className="GM-th" style={{width:"200px"}}>Correo</th>
-                                    <th className="GM-th">Dirección</th>
-                                    <th className="GM-th">Ciudad</th>
-                                    <th className="GM-th">Distrito</th>
-                                    <th className="GM-th" style={{width:"150px"}}>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filtrado.map((registro) => {
-                                    const tiposDocumento: Record<number, string> = {
-                                        1: "DNI",
-                                        2: "RUC",
-                                        3: "Carnet de extranjería",
-                                        4: "Partida de nacimiento",
-                                        5: "Pasaporte",
-                                        6: "Otros",
-                                    };
+                    <table className="GM-table">
+                        <thead className="GM-thead">
+                            <tr className='GM-tr'>
+                                <th className="GM-th" style={{width:"110px"}}>Código</th>
+                                <th className="GM-th">Nombre</th>
+                                <th className="GM-th" style={{width:"100px"}}>Tipo doc.</th>
+                                <th className="GM-th" style={{width:"110px"}}>Documento</th>
+                                <th className="GM-th" style={{width:"100px"}}>Teléfono</th>
+                                <th className="GM-th" style={{width:"150px"}}>Fecha de ingreso</th>
+                                <th className="GM-th" style={{width:"200px"}}>Correo</th>
+                                <th className="GM-th">Dirección</th>
+                                <th className="GM-th" style={{width:"150px"}}>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtrado.map((registro) => {
+                                const tiposDocumento: Record<number, string> = {
+                                    1: "DNI",
+                                    2: "RUC",
+                                    3: "Carnet de extranjería",
+                                    4: "Partida de nacimiento",
+                                    5: "Pasaporte",
+                                    6: "Otros",
+                                };
 
-                                    return (
-                                    <tr key={registro.id}>
-                                        <td className="GM-td">{registro.codigoColaborador}</td>
-                                        <td className="GM-td">{registro.nombre}</td>
-                                        <td className="GM-td">{tiposDocumento[Number(registro.idTipoDocumento)] || "Desconocido"}</td>
-                                        <td className="GM-td">{registro.documento}</td>
-                                        <td className="GM-td">{registro.telefono}</td>
-                                        <td className="GM-td">{registro.fechaIngreso}</td>
-                                        <td className="GM-td">{registro.sexo}</td>
-                                        <td className="GM-td">{registro.correo}</td>
-                                        <td className="GM-td">{registro.direccion}</td>
-                                        <td className="GM-td">{registro.ciudad}</td>
-                                        <td className="GM-td">{registro.distrito}</td>
-                                        <td className="GM-td" style={{display:"flex", justifyContent:"center"}}>
-                                            <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
-                                            <button className="boton-rojo" onClick={() => eliminarColaborador(registro.id)}>Eliminar</button>
-                                        </td>
-                                    </tr>
-                                    );
-                                })}
-                                </tbody> 
-                        </table>
-                    </div>
+                                return (
+                                <tr key={registro.id}>
+                                    <td className="GM-td">{registro.codigoColaborador}</td>
+                                    <td className="GM-td">{registro.nombre}</td>
+                                    <td className="GM-td">{tiposDocumento[Number(registro.idTipoDocumento)] || "Desconocido"}</td>
+                                    <td className="GM-td">{registro.documento}</td>
+                                    <td className="GM-td">{registro.telefono}</td>
+                                    <td className="GM-td">{registro.fechaIngreso}</td>
+                                    <td className="GM-td">{registro.correo}</td>
+                                    <td className="GM-td">{registro.direccion}</td>
+                                    <td className="GM-td" style={{display:"flex", justifyContent:"center"}}>
+                                        <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
+                                        <button className="boton-amarillo" onClick={() => verMasInformacion(registro)}>Más...</button>
+                                        <button className="boton-rojo" onClick={() => eliminarColaborador(registro.id)}>Eliminar</button>
+                                    </td>
+                                </tr>
+                                );
+                            })}
+                            </tbody> 
+                    </table>
                 </section>
             </main>
             
             {mostrarModal && edicion && (
                 <div className="ventana-overlay">
                     <div className="contenido-ventana">
-                        <h3>Información del colaborador</h3>
+                        <h3>Editando colaborador</h3>
                         <p><strong>Siendo registrado el:</strong> {edicion.fechaIngreso}</p>
                         <input type="text" placeholder="Nombre del colaborador" value={edicion?.nombre || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, nombre: nuevoValor.target.value } : null)}/>
                         <select value={edicion?.sexo ?? "M"} onChange={(e) => setEdicion(edicion ? { ...edicion, sexo: e.target.value as "M" | "F" } : null)}>
@@ -255,8 +273,24 @@ const gestionarColaboradores: React.FC = () => {
                         
                         <div className="acciones-de-registro">
                             <button onClick={guardarColaborador}>Guardar</button>
-                            <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
+                            <button style={{background:"#c82333"}} onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {mostrarModalInformativo && masInformacion && (
+                <div className="ventana-overlay">
+                    <div className="contenido-ventana">
+                        <h3>Información de {masInformacion.nombre}</h3>
+                        <div className="info-extensiva"><strong>Sexo: </strong>{masInformacion.sexo === "M" ? "Masculino" : "Femenino"}</div>
+                        <div className="info-extensiva"><strong>Ciudad: </strong>{masInformacion.ciudad}</div>
+                        <div className="info-extensiva"><strong>Distrito: </strong>{masInformacion.distrito}</div>
+                        <div className="info-extensiva"><strong>Usuario: </strong> {masInformacion.usuario && masInformacion.usuario.trim() !== "" ? masInformacion.usuario 
+                        : <span style={{ color: "gray", fontStyle: "italic" }}>Sin usuario. <Link to="/administracion/administracion/gestionar_usuarios" className="asignar-a">Asignar</Link></span>}</div>
+                    </div>
+                    <div className="acciones-de-registro">
+                        <button onClick={() => { setMostrarModalInformativo(false); setMasInformacion(null); }}>Cerrar</button>                        
                     </div>
                 </div>
             )}

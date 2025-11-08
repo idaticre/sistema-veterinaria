@@ -47,6 +47,28 @@ export interface ColaboradorRequest{
     foto?: string;
 }
 
+export interface ColaboradorResponse{
+    id: number;
+    codigoColaborador: string;
+    idEntidad: number;
+    nombre: string;
+    sexo: string;
+    documento: string;
+    idTipoPersonaJuridica: number;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    distrito: string;
+    usuario: string;
+    activo: boolean;
+    fechaRegistro: string;
+    fechaIngreso: string;
+    foto?: string;
+    mensaje: string;
+}
+
 export interface HorarioTrabajoRequest{
     id: number;
     idColaborador: number;
@@ -91,6 +113,29 @@ export interface veterinarioRequest{
     cmp: string;
 }
 
+
+export interface MascotaRequest {
+  id?: number;
+  nombre: string;
+  sexo?: "M" | "H";
+  idCliente: number;
+  idRaza: number;
+  idEspecie: number;
+  idEstado: number;
+  fechaNacimiento: string;
+  pelaje: string;
+  idTamano: number;
+  idEtapa: number;
+  esterilizado: boolean;
+  alergias: string;
+  peso?: number;
+  chip: boolean;
+  pedigree: boolean;
+  factorDea: boolean;
+  agresividad: boolean;
+  foto: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -113,28 +158,6 @@ export interface ClienteResponse{
     distrito: string;
     activo: boolean;
     fechaRegistro: string;
-    mensaje: string;
-}
-
-export interface ColaboradorResponse{
-    id: number;
-    codigoColaborador: string;
-    idEntidad: number;
-    nombre: string;
-    sexo: string;
-    documento: string;
-    idTipoPersonaJuridica: number;
-    idTipoDocumento: number;
-    correo: string;
-    telefono: string;
-    direccion: string;
-    ciudad: string;
-    distrito: string;
-    usuario: string;
-    activo: boolean;
-    fechaRegistro: string;
-    fechaIngreso: string;
-    foto?: string;
     mensaje: string;
 }
 
@@ -226,10 +249,17 @@ export interface tipo_doc{
     activo: boolean;
 }
 
-export interface Usuario {
+export interface UsuarioResponse {
+  id: number;
+  username: string;
+  passwordHash: string;
+  activo: boolean;
+}
+
+export interface UsuarioRequest {
   id?: number;
   username: string;
-  password: string;
+  passwordHash: string;
   activo: boolean;
 }
 
@@ -250,4 +280,37 @@ export interface TipoPersonaJuridica {
     nombre: string,
     descripcion: string,
     activo: boolean
+}
+
+export interface Razas{
+    id: number;
+    idEspecie: number;
+    nombre: string;
+    activo: boolean;
+}
+
+export interface Especie{
+    id: number;
+    nombre: string;
+    activo: boolean;
+}
+
+export interface Estado_Mascota{
+    id: number;
+    nombre: string;
+    decripcion: string;
+    activo: boolean;
+}
+
+export interface Tamaño_Mascota{
+    id: number;
+    tamaño: string;
+    descripcion: string;
+    activo: boolean;
+}
+
+export interface Etapa_Mascota{
+    id: number;
+    descripcion: string;
+    sctivo: boolean;
 }

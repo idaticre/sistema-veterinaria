@@ -18,12 +18,10 @@ interface IndicadorGeneral {
   valor: number;
   unidad: string;
   tendencia: 'subida' | 'bajada' | 'neutral';
-  porcentaje_cambio: number;
   icono: string;
 }
 
 const DashboardAdministrativo: React.FC = () => {
-  const [periodo, setPeriodo] = useState<'dia' | 'semana' | 'mes'>('mes');
   const [minimizado, setMinimizado] = useState(false);
   
   const [indicadoresGenerales] = useState<IndicadorGeneral[]>([
@@ -32,7 +30,6 @@ const DashboardAdministrativo: React.FC = () => {
       valor: 247,
       unidad: 'servicios',
       tendencia: 'subida',
-      porcentaje_cambio: 12.5,
       icono: '📊'
     },
     {
@@ -40,7 +37,6 @@ const DashboardAdministrativo: React.FC = () => {
       valor: 94,
       unidad: '%',
       tendencia: 'subida',
-      porcentaje_cambio: 3.2,
       icono: '✅'
     },
     {
@@ -48,17 +44,8 @@ const DashboardAdministrativo: React.FC = () => {
       valor: 18,
       unidad: 'pendientes',
       tendencia: 'bajada',
-      porcentaje_cambio: -5.8,
       icono: '⏳'
     },
-    {
-      titulo: 'Satisfacción Cliente',
-      valor: 4.7,
-      unidad: '/ 5.0',
-      tendencia: 'subida',
-      porcentaje_cambio: 2.1,
-      icono: '⭐'
-    }
   ]);
 
   const [colaboradores] = useState<Colaborador[]>([
@@ -124,13 +111,6 @@ const DashboardAdministrativo: React.FC = () => {
     return 'bajo';
   };
 
-  const getColorCalificacion = (calificacion: number): string => {
-    if (calificacion >= 4.5) return 'excelente';
-    if (calificacion >= 4.0) return 'bueno';
-    if (calificacion >= 3.5) return 'regular';
-    return 'bajo';
-  };
-
   return (
     <div className="layout-dashboard">
       <Br_administrativa onMinimizeChange={setMinimizado} />
@@ -141,26 +121,6 @@ const DashboardAdministrativo: React.FC = () => {
             <div className="header-content">
               <h1>Dashboard Administrativo</h1>
               <p className="subtitle">Panel de control y seguimiento del personal - Manada Woof</p>
-            </div>
-            <div className="periodo-selector">
-              <button
-                className={`btn-periodo ${periodo === 'dia' ? 'active' : ''}`}
-                onClick={() => setPeriodo('dia')}
-              >
-                Hoy
-              </button>
-              <button
-                className={`btn-periodo ${periodo === 'semana' ? 'active' : ''}`}
-                onClick={() => setPeriodo('semana')}
-              >
-                Semana
-              </button>
-              <button
-                className={`btn-periodo ${periodo === 'mes' ? 'active' : ''}`}
-                onClick={() => setPeriodo('mes')}
-              >
-                Mes
-              </button>
             </div>
           </div>
 
@@ -173,12 +133,6 @@ const DashboardAdministrativo: React.FC = () => {
                   <div className="indicador-valor">
                     {indicador.valor}
                     <span className="indicador-unidad">{indicador.unidad}</span>
-                  </div>
-                  <div className={`indicador-tendencia ${indicador.tendencia}`}>
-                    {indicador.tendencia === 'subida' && '↗'}
-                    {indicador.tendencia === 'bajada' && '↘'}
-                    {indicador.tendencia === 'neutral' && '→'}
-                    <span>{Math.abs(indicador.porcentaje_cambio)}%</span>
                   </div>
                 </div>
               </div>
@@ -238,12 +192,7 @@ const DashboardAdministrativo: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="metrica-item">
-                      <div className="metrica-label">Calificación</div>
-                      <div className={`metrica-calificacion ${getColorCalificacion(colaborador.calificacion_promedio)}`}>
-                        ⭐ {colaborador.calificacion_promedio.toFixed(1)}
-                      </div>
-                    </div>
+                    
                   </div>
                 </div>
               ))}
@@ -279,12 +228,7 @@ const DashboardAdministrativo: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="metrica-item">
-                          <div className="metrica-label">Calificación</div>
-                          <div className={`metrica-calificacion ${getColorCalificacion(colaborador.calificacion_promedio)}`}>
-                            ⭐ {colaborador.calificacion_promedio.toFixed(1)}
-                          </div>
-                        </div>
+                        
                       </div>
                     </div>
                   ))}
