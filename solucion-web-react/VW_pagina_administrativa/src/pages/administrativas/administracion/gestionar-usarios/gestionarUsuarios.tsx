@@ -11,25 +11,8 @@ const gestionarUsuarios: React.FC = () => {
     const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
     const [mostrarModal, setMostrarModal] = useState(false);
     const [edicion, setEdicion] = useState<UsuarioRequest | null>(null);
-    const [IdColaborador, setIdColaborador] = useState<number>(0);
-    const [colaboradores, setColaboradores] = useState<ColaboradorResponse[]>([]);
     const menuRef = useRef<HTMLDivElement | null>(null);
     const baseURL = "http://localhost:8088/api";
-
-    // Listar colaboradores
-    useEffect(() => {listarColaboradores();}, []);
-    const listarColaboradores = async () => {
-        try {
-            const respuesta = await axios.get(`${baseURL}/colaboradores`);
-            const lista = Array.isArray(respuesta.data)
-            ? respuesta.data
-            : respuesta.data.data;
-
-            const activos = lista.filter((cliente: ColaboradorResponse) => cliente.activo === true);
-            setColaboradores(activos);
-            setFiltrado(activos);
-        } catch (error) {console.error("Error al obtener los colaboradores", error);}
-    };
 
     // Efecto de cerrar ventana
     useEffect(() => {
@@ -48,7 +31,7 @@ const gestionarUsuarios: React.FC = () => {
         setFiltrado(lista);
     }, [busqueda, usuarios]);
 
-    // Listar
+    // Listar usuarios (Response)
     useEffect(() => {listarUsuarios();}, []);
     const listarUsuarios = async () => {
         try {
@@ -90,7 +73,6 @@ const gestionarUsuarios: React.FC = () => {
     // Guardar
     const guardarUsuario = async () => {
         if (!edicion) return;
-        
         try {
             if (edicion.id && edicion.id > 0) {await axios.put(`${baseURL}/usuarios/${edicion.id}`, edicion);}
             else {await axios.post(`${baseURL}/usuarios`, edicion);}
@@ -99,9 +81,9 @@ const gestionarUsuarios: React.FC = () => {
             setMostrarModal(false);
         } catch (error) {
             console.error("Error al registrar/actualizar: ", error);
-            alert(error);
+            alert("Ocurrió un error al guardar el usuario.");
         }
-    }
+    };
 
     // Eliminar
     const eliminarUsuario = async (id: number) => {
@@ -129,7 +111,6 @@ const gestionarUsuarios: React.FC = () => {
                         <thead className="GM-thead">
                             <tr className="GM-tr">
                                 <th className="GM-th" style={{width:"150px"}}>Usuario</th>
-                                <th className="GM-th" style={{width:"150px"}}>Colaborador</th>
                                 <th className="GM-th" style={{width:"20px"}}>Acciones</th>
                             </tr>
                         </thead>
@@ -137,7 +118,6 @@ const gestionarUsuarios: React.FC = () => {
                             {filtrado.map((registro) => (
                                 <tr key={registro.id}>
                                     <td className="GM-td">{registro.username}</td>
-                                    <td className="GM-td"></td> {/* Mostrar colaborador asignado al usuario*/}
                                     <td className="GM-td">
                                         <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
                                         <button className="boton-rojo" onClick={() => eliminarUsuario(registro.id)}>Eliminar</button>
@@ -155,15 +135,9 @@ const gestionarUsuarios: React.FC = () => {
                         <h3>Información de usuario</h3>
                         <input type="text" placeholder="Ingrese un nombre de usuario" value={edicion.username} onChange={(e) => setEdicion(prev => prev ? { ...prev, username: e.target.value } : null)}/>
                         <input type="password" placeholder="Ingrese una contraseña" value={edicion.passwordHash} onChange={(e) => setEdicion(prev => prev ? { ...prev, passwordHash: e.target.value } : null)}/>
-                        <select value={IdColaborador} onChange={(e) => setIdColaborador(Number(e.target.value))} required>
-                            <option value="">Seleccionar colaborador</option>
-                            {colaboradores.map((colaborador) => (
-                                <option key={colaborador.id} value={colaborador.id}>{colaborador.nombre}</option>
-                            ))}
-                        </select>
                         <div className="acciones-de-registro">
                             <button className="boton-verde" onClick={guardarUsuario}>Guardar</button>
-                            <button className="boton-rojo" onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
+                            <button style={{background:"#c82333"}} onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
                         </div>
                     </div>
                 </div>

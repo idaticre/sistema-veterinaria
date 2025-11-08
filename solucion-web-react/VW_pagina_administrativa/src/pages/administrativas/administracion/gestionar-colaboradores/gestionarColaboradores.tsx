@@ -273,7 +273,7 @@ const gestionarColaboradores: React.FC = () => {
                         
                         <div className="acciones-de-registro">
                             <button onClick={guardarColaborador}>Guardar</button>
-                            <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
+                            <button style={{background:"#c82333"}} onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
                         </div>
                     </div>
                 </div>
