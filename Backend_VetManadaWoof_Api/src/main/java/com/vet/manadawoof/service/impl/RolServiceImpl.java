@@ -25,7 +25,7 @@ public class RolServiceImpl implements RolService {
     @Transactional
     public RolEntity actualizarRol(Integer id, RolEntity rol) {
         RolEntity existente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado con id " + id));
+                .orElseThrow(() -> new RuntimeException("RolEntity no encontrado con id " + id));
 
         existente.setNombre(rol.getNombre());
         existente.setDescripcion(rol.getDescripcion());
@@ -37,7 +37,7 @@ public class RolServiceImpl implements RolService {
     @Transactional
     public void eliminarRol(Integer id) {
         RolEntity existente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado con id " + id));
+                .orElseThrow(() -> new RuntimeException("RolEntity no encontrado con id " + id));
         repository.delete(existente);
     }
 
@@ -45,7 +45,7 @@ public class RolServiceImpl implements RolService {
     @Transactional
     public RolEntity obtenerPorId(Integer id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado con id " + id));
+                .orElseThrow(() -> new RuntimeException("RolEntity no encontrado con id " + id));
     }
 
     @Override

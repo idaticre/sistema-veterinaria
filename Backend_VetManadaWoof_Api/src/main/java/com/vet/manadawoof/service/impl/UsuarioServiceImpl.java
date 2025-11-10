@@ -25,7 +25,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public UsuarioEntity actualizarUsuario(Integer id, UsuarioEntity usuario) {
         UsuarioEntity existente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id " + id));
+                .orElseThrow(() -> new RuntimeException("UsuarioEntity no encontrado con id " + id));
 
         existente.setUsername(usuario.getUsername());
         existente.setPasswordHash(usuario.getPasswordHash());
@@ -38,7 +38,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public void eliminarUsuario(Integer id) {
         UsuarioEntity existente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id " + id));
+                .orElseThrow(() -> new RuntimeException("UsuarioEntity no encontrado con id " + id));
         repository.delete(existente);
     }
 
@@ -52,6 +52,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional(readOnly = true)
     public UsuarioEntity obtenerUsuarioPorId(Integer id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id " + id));
+                .orElseThrow(() -> new RuntimeException("UsuarioEntity no encontrado con id " + id));
     }
 }

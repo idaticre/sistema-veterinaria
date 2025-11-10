@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/login")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
-public class loginController {
+public class LoginController {
         
     private final LoginService loginService ;
     
@@ -33,7 +33,7 @@ public class loginController {
            ));
        }else{
            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-               "message", "Usuario o contraseña incorrectos",
+               "message", "UsuarioEntity o contraseña incorrectos",
                "success", false
             ));
        }

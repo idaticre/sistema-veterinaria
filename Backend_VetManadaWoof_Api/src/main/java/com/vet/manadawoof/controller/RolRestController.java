@@ -34,7 +34,7 @@ public class RolRestController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         service.eliminarRol(id);
-        return ResponseEntity.ok("Rol eliminado correctamente");
+        return ResponseEntity.ok("RolEntity eliminado correctamente");
     }
 
     @GetMapping

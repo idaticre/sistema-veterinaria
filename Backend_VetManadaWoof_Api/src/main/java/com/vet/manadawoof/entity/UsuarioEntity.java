@@ -1,47 +1,58 @@
+// entity/UsuarioEntity.java
 package com.vet.manadawoof.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
-import java.io.Serializable;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 @Entity
 @Table(name = "usuarios")
-public class UsuarioEntity implements Serializable {
-
+public class UsuarioEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 32, nullable = false, unique = true)
+    @Column(unique = true, nullable = false, length = 32)
     private String username;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(nullable = false, length = 128)
     private String passwordHash;
 
-    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
-    @JdbcTypeCode(SqlTypes.BIT)
-    private Boolean activo;
+    @Column(columnDefinition = "TINYINT(1)")
+    private boolean activo;
 
-    // Relaciones
-    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<ColaboradorEntity> colaboradores;
+    private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaBaja;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JoinTable(
-            name = "usuarios_roles",
-            joinColumns = @JoinColumn(name = "id_usuario"),
-            inverseJoinColumns = @JoinColumn(name = "id_rol")
-    )
-    private List<RolEntity> roles;
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<UsuarioRol> usuarioRoles = new HashSet<>();
+
+    // Constructor, getters y setters
+    public UsuarioEntity() {
+        this.fechaCreacion = LocalDateTime.now();
+    }
+
+    // Getters y Setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+
+    public Boolean getActivo() { return activo; }
+    public void setActivo(Boolean activo) { this.activo = activo; }
+
+    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+
+    public LocalDateTime getFechaBaja() { return fechaBaja; }
+    public void setFechaBaja(LocalDateTime fechaBaja) { this.fechaBaja = fechaBaja; }
+
+    public Set<UsuarioRol> getUsuarioRoles() { return usuarioRoles; }
+    public void setUsuarioRoles(Set<UsuarioRol> usuarioRoles) { this.usuarioRoles = usuarioRoles; }
 }
