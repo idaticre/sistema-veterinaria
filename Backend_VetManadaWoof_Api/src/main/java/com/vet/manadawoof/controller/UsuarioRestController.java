@@ -34,7 +34,7 @@ public class UsuarioRestController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         service.eliminarUsuario(id);
-        return ResponseEntity.ok("Usuario eliminado correctamente");
+        return ResponseEntity.ok("UsuarioEntity eliminado correctamente");
     }
 
     @GetMapping

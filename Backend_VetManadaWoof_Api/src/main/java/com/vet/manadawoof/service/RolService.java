@@ -1,6 +1,7 @@
 package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.RolEntity;
+
 import java.util.List;
 
 public interface RolService {

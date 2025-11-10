@@ -49,7 +49,7 @@ public class ColaboradorRequestDTO {
     private String distrito;
     
     // Datos específicos de colaborador
-    @NotNull(message = "Usuario es obligatorio")
+    @NotNull(message = "UsuarioEntity es obligatorio")
     private Integer idUsuario;
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
