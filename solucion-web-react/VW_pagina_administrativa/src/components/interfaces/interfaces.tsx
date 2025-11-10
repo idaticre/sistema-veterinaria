@@ -41,7 +41,7 @@ export interface ColaboradorRequest{
     direccion:string;
     ciudad: string;
     distrito: string;
-    idUsuario?: number;
+    idUsuario?: number | null;
     activo: boolean;
     fechaIngreso: string;
     foto?: string;
@@ -61,7 +61,7 @@ export interface ColaboradorResponse{
     direccion: string;
     ciudad: string;
     distrito: string;
-    usuario: string;
+    usuario: number;    // es un ID aunque el nombre no lo diga
     activo: boolean;
     fechaRegistro: string;
     fechaIngreso: string;
