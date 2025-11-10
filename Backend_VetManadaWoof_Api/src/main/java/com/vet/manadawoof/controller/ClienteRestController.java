@@ -28,9 +28,9 @@ public class ClienteRestController {
     }
     
     @PutMapping("/actualizar/{id}")
-    public ResponseEntity<ApiResponse<ClienteResponseDTO>> actualizar(@PathVariable Long id, @RequestBody ClienteRequestDTO dto) {
+    public ResponseEntity<ApiResponse<ClienteResponseDTO>> actualizar(@PathVariable("id") Long idCliente, @RequestBody ClienteRequestDTO dto) {
         // Usamos el id del path para actualizar
-        ClienteResponseDTO response = service.actualizar(id, dto);
+        ClienteResponseDTO response = service.actualizar(idCliente, dto);
         
         // Revisar mensaje de error
         if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
@@ -49,16 +49,16 @@ public class ClienteRestController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ClienteResponseDTO>> obtenerPorId(@PathVariable Long id) {
-        ClienteResponseDTO cliente = service.obtenerPorId(id); if(cliente == null) {
+    public ResponseEntity<ApiResponse<ClienteResponseDTO>> obtenerPorId(@PathVariable("id") Long idCliente) {
+        ClienteResponseDTO cliente = service.obtenerPorId(idCliente); if(cliente == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, "Cliente no encontrado", null));
         } return ResponseEntity.ok(new ApiResponse<>(true, "Cliente encontrado", cliente));
     }
     
     @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<ApiResponse<ClienteResponseDTO>> eliminar(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ClienteResponseDTO>> eliminar(@PathVariable("id") Long idCliente) {
         try {
-            ClienteResponseDTO response = service.eliminar(id);
+            ClienteResponseDTO response = service.eliminar(idCliente);
             if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, response.getMensaje(), null));
             } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));

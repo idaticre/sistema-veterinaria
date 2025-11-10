@@ -83,7 +83,6 @@ main_block: BEGIN
 END$$
 DELIMITER ;
 
-
 -- ========================================
 -- SP: REGISTRAR_ENTIDAD_BASE
 -- Inserta una nueva entidad con datos generales en la tabla 'entidades',
@@ -591,6 +590,9 @@ CREATE PROCEDURE registrar_cliente (
     IN p_direccion VARCHAR(128),
     IN p_ciudad VARCHAR(64),
     IN p_distrito VARCHAR(64),
+    IN p_representante VARCHAR(128),
+    OUT p_id_entidad BIGINT,
+    OUT p_id_cliente BIGINT,
     OUT p_codigo_entidad VARCHAR(20),
     OUT p_codigo_cliente VARCHAR(20),
     OUT p_mensaje VARCHAR(255)
@@ -601,7 +603,7 @@ proc_main: BEGIN
     DECLARE v_mensaje_entidad VARCHAR(255);
     DECLARE v_id_cliente BIGINT DEFAULT NULL;
 
-    -- Llamar al SP base (sin id_tipo_entidad)
+    -- Llamar al SP base (crear o recuperar entidad)
     CALL registrar_entidad_base(
         p_id_tipo_persona_juridica,
         p_nombre,
@@ -613,7 +615,7 @@ proc_main: BEGIN
         p_direccion,
         p_ciudad,
         p_distrito,
-        NULL,                    -- representante NULL para cliente
+        p_representante,
         v_id_entidad,
         v_codigo_entidad_local,
         v_mensaje_entidad
@@ -623,30 +625,39 @@ proc_main: BEGIN
     SET p_codigo_entidad = v_codigo_entidad_local;
     SET p_mensaje = v_mensaje_entidad;
 
-    -- Si no se creó la entidad, salir
+    -- Si no se obtuvo la entidad, salir
     IF v_id_entidad IS NULL THEN
         LEAVE proc_main;
     END IF;
 
-    -- Si ya existe rol Cliente para esa entidad, devolver código existente
+    -- Verificar si ya existe cliente
     IF EXISTS (SELECT 1 FROM clientes WHERE id_entidad = v_id_entidad) THEN
-        SELECT codigo INTO p_codigo_cliente FROM clientes WHERE id_entidad = v_id_entidad LIMIT 1;
+        SELECT id, codigo INTO v_id_cliente, p_codigo_cliente 
+        FROM clientes WHERE id_entidad = v_id_entidad LIMIT 1;
         SET p_mensaje = CONCAT('La entidad ya está registrada como Cliente. Código Cliente: ', p_codigo_cliente);
+        SET p_id_cliente = v_id_cliente;
+        SET p_id_entidad = v_id_entidad;
         LEAVE proc_main;
     END IF;
 
-    -- Insertar en clientes (codigo se genera luego)
+    -- Crear cliente si no existe
     INSERT INTO clientes (id_entidad, codigo) VALUES (v_id_entidad, NULL);
     SET v_id_cliente = LAST_INSERT_ID();
 
+    -- Generar código cliente
+    SET p_codigo_cliente = CONCAT('CLI', LPAD(v_id_cliente, 6, '0'));
     UPDATE clientes
-    SET codigo = CONCAT('CLI', LPAD(v_id_cliente, 6, '0'))
+    SET codigo = p_codigo_cliente
     WHERE id = v_id_cliente;
 
-    SET p_codigo_cliente = CONCAT('CLI', LPAD(v_id_cliente, 6, '0'));
+    -- Salidas finales
+    SET p_id_entidad = v_id_entidad;
+    SET p_id_cliente = v_id_cliente;
     SET p_mensaje = CONCAT('Cliente registrado correctamente. Código Cliente: ', p_codigo_cliente);
+
 END$$
 DELIMITER ;
+
 
 -- ========================================
 -- SP: ACTUALIZAR_CLIENTE
@@ -666,6 +677,7 @@ CREATE PROCEDURE actualizar_cliente (
     IN p_direccion VARCHAR(128),
     IN p_ciudad VARCHAR(64),
     IN p_distrito VARCHAR(64),
+    IN p_representante VARCHAR(255),
     IN p_activo TINYINT,
     OUT p_mensaje VARCHAR(255)
 )
@@ -687,7 +699,7 @@ proc_main: BEGIN
         p_direccion,
         p_ciudad,
         p_distrito,
-        NULL,
+        p_representante,
         p_activo,
         v_mensaje_entidad
     );

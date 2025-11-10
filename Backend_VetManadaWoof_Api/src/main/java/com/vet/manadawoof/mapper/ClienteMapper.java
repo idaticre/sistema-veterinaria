@@ -22,28 +22,32 @@ public class ClienteMapper {
     
     // ---------------- CONVERTIR FILAS SQL A DTO ----------------
     public ClienteResponseDTO toDto(Object[] entRow, Object[] cliRow, String mensaje) {
-        Long idEntidad = ((Number) entRow[0]).longValue();
+        if(entRow == null || cliRow == null) return null;
+        
+        Long idEntidad = toLong(entRow[0]);
         
         return ClienteResponseDTO.builder()
                 // Datos cliente
-                .id(((Number) cliRow[0]).longValue())
-                .codigoCliente((String) cliRow[1])
-                .activo(cliRow[2] != null ? ((Number) cliRow[2]).intValue() == 1 : true)
+                .id(toLong(cliRow[0]))
+                .codigoCliente(cliRow[1] != null ? cliRow[1].toString() : null)
+                .activo(cliRow[2] != null ? toBoolean(cliRow[2]) : true)
                 .fechaRegistro(parseFecha(cliRow[3]))
                 
                 // Datos entidad
                 .idEntidad(idEntidad)
-                .nombre((String) entRow[2])
+                .nombre(entRow[2] != null ? entRow[2].toString() : null)
                 .sexo(entRow[3] != null ? entRow[3].toString() : null)
-                .documento((String) entRow[4])
-                .idTipoPersonaJuridica(entRow[5] != null ? ((Number) entRow[5]).intValue() : null)
-                .idTipoDocumento(entRow[6] != null ? ((Number) entRow[6]).intValue() : null)
-                .correo((String) entRow[7])
-                .telefono((String) entRow[8])
-                .direccion((String) entRow[9])
-                .ciudad((String) entRow[10])
-                .distrito((String) entRow[11])
-                .representante((String) entRow[12])
+                .documento(entRow[4] != null ? entRow[4].toString() : null)
+                .idTipoPersonaJuridica(entRow[5] != null ? toInt(entRow[5]) : null)
+                .idTipoDocumento(entRow[6] != null ? toInt(entRow[6]) : null)
+                .correo(entRow[7] != null ? entRow[7].toString() : null)
+                .telefono(entRow[8] != null ? entRow[8].toString() : null)
+                .direccion(entRow[9] != null ? entRow[9].toString() : null)
+                .ciudad(entRow[10] != null ? entRow[10].toString() : null)
+                .distrito(entRow[11] != null ? entRow[11].toString() : null)
+                .representante(entRow[12] != null ? entRow[12].toString() : null)
+                .activo(entRow[13] != null ? toBoolean(entRow[13]) : true)
+                .fechaRegistroEntidad(parseFecha(entRow[14]))
                 .mensaje(mensaje)
                 .build();
     }
@@ -52,14 +56,12 @@ public class ClienteMapper {
     public ClienteEntity toEntity(ClienteRequestDTO dto) {
         ClienteEntity entity = new ClienteEntity();
         
-        // Relación con Entidad
         if(dto.getIdEntidad() != null) {
             EntidadEntity entidad = new EntidadEntity();
             entidad.setId(dto.getIdEntidad());
             entity.setEntidad(entidad);
         }
         
-        // Asignar campos simples
         entity.setActivo(dto.getActivo() != null ? dto.getActivo() : true);
         
         return entity;
@@ -67,29 +69,55 @@ public class ClienteMapper {
     
     // ---------------- CONVERTIR FILAS COMPLETAS (JOIN) A DTO ----------------
     public ClienteResponseDTO toFullDto(Object[] row) {
+        if(row == null) return null;
+        
         return ClienteResponseDTO.builder()
-                .id(row[0] != null ? ((Number) row[0]).longValue() : null)
+                .id(toLong(row[0]))                           // c.id
                 .codigoCliente(row[1] != null ? row[1].toString() : null)
-                .activo(row[2] != null ? ((Number) row[2]).intValue() == 1 : true)
-                .idEntidad(row[3] != null ? ((Number) row[3]).longValue() : null)
-                .nombre(row[5] != null ? row[5].toString() : null)
-                .sexo(row[6] != null ? row[6].toString() : null)
-                .documento(row[7] != null ? row[7].toString() : null)
-                .idTipoPersonaJuridica(row[8] != null ? ((Number) row[8]).intValue() : null)
-                .idTipoDocumento(row[9] != null ? ((Number) row[9]).intValue() : null)
-                .correo(row[10] != null ? row[10].toString() : null)
-                .telefono(row[11] != null ? row[11].toString() : null)
-                .direccion(row[12] != null ? row[12].toString() : null)
-                .ciudad(row[13] != null ? row[13].toString() : null)
-                .distrito(row[14] != null ? row[14].toString() : null)
-                .representante(row[15] != null ? row[15].toString() : null)
-                .fechaRegistro(parseFecha(row[17]))
+                .activo(toBoolean(row[2]))
+                .fechaRegistro(parseFecha(row[3]))
+                .idEntidad(toLong(row[4]))                     // e.id
+                .nombre(row[6] != null ? row[6].toString() : null)
+                .sexo(row[7] != null ? row[7].toString() : null)
+                .documento(row[8] != null ? row[8].toString() : null)
+                .idTipoPersonaJuridica(toInt(row[9]))
+                .idTipoDocumento(toInt(row[10]))
+                .correo(row[11] != null ? row[11].toString() : null)
+                .telefono(row[12] != null ? row[12].toString() : null)
+                .direccion(row[13] != null ? row[13].toString() : null)
+                .ciudad(row[14] != null ? row[14].toString() : null)
+                .distrito(row[15] != null ? row[15].toString() : null)
+                .representante(row[16] != null ? row[16].toString() : null)
+                .fechaRegistroEntidad(parseFecha(row[18]))
                 .mensaje("Operación exitosa")
                 .build();
     }
     
-    // Variante extendida del mapeo completo (entidad + cliente)
+    // Variante extendida para SP + mensaje
     public ClienteResponseDTO toFullDto(Object[] entRow, Object[] cliRow, String mensaje) {
         return toDto(entRow, cliRow, mensaje);
+    }
+    
+    // ---------------- MÉTODOS DE CONVERSIÓN SEGURA ----------------
+    private Long toLong(Object value) {
+        if(value == null) return null;
+        if(value instanceof Number) return ((Number) value).longValue();
+        if(value instanceof String s && s.matches("\\d+")) return Long.parseLong(s);
+        return null;
+    }
+    
+    private Integer toInt(Object value) {
+        if(value == null) return null;
+        if(value instanceof Number) return ((Number) value).intValue();
+        if(value instanceof String s && s.matches("\\d+")) return Integer.parseInt(s);
+        return null;
+    }
+    
+    private Boolean toBoolean(Object value) {
+        if(value == null) return true; // activo por defecto
+        if(value instanceof Boolean) return (Boolean) value;
+        if(value instanceof Number) return ((Number) value).intValue() == 1;
+        if(value instanceof String s) return s.equals("1") || s.equalsIgnoreCase("true");
+        return true;
     }
 }

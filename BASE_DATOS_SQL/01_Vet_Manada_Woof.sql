@@ -1165,8 +1165,7 @@ CREATE TABLE IF NOT EXISTS ingresos_servicios (
     id_veterinario BIGINT,
 	cantidad INT CHECK (cantidad >= 0),
     duracion_min INT CHECK (duracion_min >= 0),
-    adicionales VARCHAR(64),
-    observaciones VARCHAR(64),
+    observaciones VARCHAR(128),
     valor_servicio DECIMAL(10,2) NOT NULL CHECK (valor_servicio >= 0),
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

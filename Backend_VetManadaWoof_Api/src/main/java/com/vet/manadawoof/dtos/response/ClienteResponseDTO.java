@@ -24,6 +24,7 @@ public class ClienteResponseDTO {
     // ------------------ Entidad ------------------
     // id de tabla entidades
     private Long idEntidad;
+    private String codigoEntidad;
     private String nombre;
     private String sexo;
     private String documento;

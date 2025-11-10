@@ -32,9 +32,9 @@ public class ColaboradorRestController {
                 .body(new ApiResponse<>(true, response.getMensaje(), response));
     }
     
-    /**
-     * Actualizar colaborador
-     **/
+    
+    // Actualizar colaborador
+    
     @PutMapping("/actualizar")
     public ResponseEntity<ApiResponse<ColaboradorResponseDTO>> actualizar(@RequestBody ColaboradorRequestDTO dto) {
         ColaboradorResponseDTO response = service.actualizar(dto);

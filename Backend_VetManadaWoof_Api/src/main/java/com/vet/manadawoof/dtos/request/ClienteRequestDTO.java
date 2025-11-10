@@ -8,44 +8,59 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClienteRequestDTO {
-    // id clientes solo para actualización
-    private Long id;
     
-    private Long idEntidad;
+    // --- IDs para operaciones específicas ---
+    private Long id;           // Solo para actualizar
+    private Long idEntidad;    // Solo para actualizar
     
-    // --- Datos de clasificación ---
-    @NotNull(message = "Tipo de persona jurídica es obligatorio")
+    // --- Clasificación ---
+    @NotNull(message = "El tipo de persona jurídica es obligatorio")
     private Integer idTipoPersonaJuridica;
     
-    @NotNull(message = "Tipo de documento es obligatorio")
+    @NotNull(message = "El tipo de documento es obligatorio")
     private Integer idTipoDocumento;
     
-    // --- Identificación personal ---
-    @NotBlank(message = "Nombre es obligatorio")
-    @Size(max = 128, message = "Nombre no debe superar 128 caracteres")
+    // --- Identificación ---
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 128, message = "El nombre no debe superar los 128 caracteres")
     private String nombre;
     
-    @Pattern(regexp = "^[MF]$", message = "El sexo debe ser M o F")
+    /**
+     * Sexo del cliente (M o F).
+     * Puede venir en minúscula, el sistema tomará el primer carácter.
+     */
+    @Pattern(regexp = "^[MFmf]$", message = "El sexo debe ser M o F")
     private String sexo;
     
     @NotBlank(message = "El documento es obligatorio")
-    @Size(max = 20, message = "Documento no debe superar 20 caracteres")
+    @Size(max = 20, message = "El documento no debe superar los 20 caracteres")
     private String documento;
     
     // --- Contacto ---
-    @Email(message = "Correo inválido")
+    @Email(message = "El correo no es válido")
+    @Size(max = 128, message = "El correo no debe superar los 128 caracteres")
     private String correo;
     
-    @Size(max = 15, message = "Teléfono no debe superar 15 caracteres")
+    @Size(max = 15, message = "El teléfono no debe superar los 15 caracteres")
     private String telefono;
     
     // --- Ubicación ---
+    @Size(max = 255, message = "La dirección no debe superar los 255 caracteres")
     private String direccion;
+    
+    @Size(max = 100, message = "La ciudad no debe superar los 100 caracteres")
     private String ciudad;
+    
+    @Size(max = 100, message = "El distrito no debe superar los 100 caracteres")
     private String distrito;
     
-    // Representante aplicable si es persona jurídica
+    // Representante Campo opcional
+    // Se usará solo si el tipo de persona jurídica lo requiere.
+    
+    @Size(max = 128, message = "El representante no debe superar los 128 caracteres")
     private String representante;
     
-    private Boolean activo;
+    // --- Estado Por defecto activo al crear. Puede usarse en actualización.
+    
+    private Boolean activo = true;
 }
