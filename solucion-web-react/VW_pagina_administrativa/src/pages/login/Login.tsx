@@ -29,9 +29,9 @@ function Login() {
         console.log("Login exitoso:", data.username);
 
         // Guarda los datos en localStorage o si quiero que sea mientras la pestaña este abierta sessionStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("usuario", data.username);
-        localStorage.setItem("roles", JSON.stringify(data.roles));
+        sessionStorage.setItem("token", data.token);
+        sessionStorage.setItem("usuario", data.username);
+        sessionStorage.setItem("roles", JSON.stringify(data.roles));
 
         navigate("/administracion/home");
       } else {

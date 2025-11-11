@@ -34,58 +34,60 @@ import Parametros_y_promociones from './pages/administrativas/administracion/par
 import AsignarRolesPermisos from './pages/administrativas/administracion/Asignar-Gestionar-Roles/AsignarRolesPermisos';
 
 import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
+import RutaProtegida from './components/proteccion_momentanea/IPRT';
 
 function App() {
+
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/administracion/login" replace />} />
       
       {/* Login */}
       <Route path='/administracion/login' element={<Login/>} />
+      <Route element={<RutaProtegida />}>
+        {/* Inicio de administración */}
+        <Route path='/administracion/home'  element={<Admin_index/>}/>
 
-      {/* Inicio de administración */}
-      <Route path='/administracion/home'  element={<Admin_index/>}/>
+        {/* Clientes */}
+        <Route path='/administracion/cliente/lista' element={<Lst_clientes/>}/>
+        <Route path='/administracion/cliente/registro' element ={<Regis_dueños/>} />
+        
+        {/* Mascotas */}
+        <Route path='/administracion/mascotas/registro' element={<Mascotas/>}/>
+        <Route path='/administracion/mascotas/especies_razas' element={<Especies_razas/>}/>
+        <Route path='/administracion/mascotas/registrar_salida_mascota' element={<RegistrarSalidaMascota />}/>
+        <Route path='/administracion/mascotas/lista' element={<Lst_mascotas/>}/>
+        <Route path='/administracion/mascotas/vacunas' element={<Vacunas/>}/>
 
-      {/* Clientes */}
-      <Route path='/administracion/cliente/lista' element={<Lst_clientes/>}/>
-      <Route path='/administracion/cliente/registro' element ={<Regis_dueños/>} />
-      
-      {/* Mascotas */}
-      <Route path='/administracion/mascotas/registro' element={<Mascotas/>}/>
-      <Route path='/administracion/mascotas/especies_razas' element={<Especies_razas/>}/>
-      <Route path='/administracion/mascotas/registrar_salida_mascota' element={<RegistrarSalidaMascota />}/>
-      <Route path='/administracion/mascotas/lista' element={<Lst_mascotas/>}/>
-      <Route path='/administracion/mascotas/vacunas' element={<Vacunas/>}/>
+        {/* Historial médico */}
 
-      {/* Historial médico */}
+        {/* Servicios*/}
+        <Route path='/administracion/servicios' element={<Servicios/>}/>      
 
-      {/* Servicios*/}
-      <Route path='/administracion/servicios' element={<Servicios/>}/>      
-
-      {/* Agenda */}
-      <Route path='/administracion/agenda/Agenda_general' element={<Agenda_general />} />
+        {/* Agenda */}
+        <Route path='/administracion/agenda/Agenda_general' element={<Agenda_general />} />
 
 
-      {/* Distribución */}
+        {/* Distribución */}
 
-      {/* Ventas */}
+        {/* Ventas */}
 
-      {/* Reportes e informes */}
+        {/* Reportes e informes */}
 
-      {/* Administración */}
-      <Route path='/administracion/administracion/gestionar_colaboradores' element={<Gestionar_colaboradores/>}/>
-      <Route path='/administracion/administracion/gestionar_usuarios' element={<Gestionar_usuarios/>}/>
-      <Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}/>
-      <Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>
-      <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>
-      <Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>
+        {/* Administración */}
+        <Route path='/administracion/administracion/gestionar_colaboradores' element={<Gestionar_colaboradores/>}/>
+        <Route path='/administracion/administracion/gestionar_usuarios' element={<Gestionar_usuarios/>}/>
+        <Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}/>
+        <Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>
+        <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>
+        <Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>
 
-      {/* Aquí van las nuevas páginas administrativas */}
-      <Route path='/administracion/administracion/dashboard_administrativo' element={<DashboardAdministrativo/>}/>
+        {/* Aquí van las nuevas páginas administrativas */}
+        <Route path='/administracion/administracion/dashboard_administrativo' element={<DashboardAdministrativo/>}/>
 
-      {/* Seguridad y mantenimiento */}
-      <Route path='/administracion/administracion/Asignar_roles_y_permisos' element={<AsignarRolesPermisos/>}/>
-      
+        {/* Seguridad y mantenimiento */}
+        <Route path='/administracion/administracion/Asignar_roles_y_permisos' element={<AsignarRolesPermisos/>}/>
+      </Route>
     </Routes>
   )
 }
