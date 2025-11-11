@@ -54,7 +54,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
                         .requestMatchers(HttpMethod.POST,"/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA", "AUXILIAR GROMERS")
                         .requestMatchers(HttpMethod.GET,"/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
-                                .requestMatchers("/api/colaboradores/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
+                        .requestMatchers("/api/colaboradores/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
+                        .requestMatchers(HttpMethod.GET,"/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
+                        .requestMatchers("/api/colaboradores/**").hasAnyAuthority("ADMINISTRADOR GENERAL")
 
 
                         // Todos los demás endpoints requieren autenticación
