@@ -2,6 +2,10 @@
   --color-principal: #ff9900;
   --color-principal-hover: #e07b00;
   --color-borde: #ddd;
+  --color-verde-claro: #6fdc6f;
+  --color-celeste: #a7e0ff;
+  --color-rojo: #e74c3c;
+  --color-rojo-hover: #c0392b;
 }
 
 /* ================== CONTENEDOR PRINCIPAL ================== */
@@ -46,7 +50,7 @@
   width: 100%;
 }
 
-/* Hace que el calendario sea más grande */
+/* Calendario */
 .react-calendar {
   width: 100% !important;
   max-width: 600px;
@@ -77,32 +81,96 @@
   color: #333;
 }
 
-/* Días seleccionados */
+/* ================== FIX Y ESTILOS CALENDARIO ================== */
+.react-calendar__tile {
+  color: #333 !important;
+  background-color: #fff !important;
+  border-radius: 8px;
+  transition: 0.2s ease;
+}
+
+.react-calendar__tile abbr {
+  color: #333 !important;
+}
+
+/* 🔹 Día actual → amarillo suave */
+.react-calendar__tile--now {
+  background: #ffeaa7 !important;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.react-calendar__tile--now abbr {
+  color: #000 !important;
+}
+
+/* 🔹 Día seleccionado → verde claro */
 .react-calendar__tile--active {
-  background: var(--color-principal) !important;
+  background: var(--color-verde-claro) !important;
   color: #fff !important;
   border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0,0,0,0.15);
+  transform: scale(1.05);
 }
 
-/* Hover */
+/* 🔹 Hover → celeste */
 .react-calendar__tile:hover {
-  background: rgba(255, 153, 0, 0.2);
+  background: var(--color-celeste) !important;
   border-radius: 8px;
+  color: #000 !important;
+  cursor: pointer;
 }
 
-/* ================== BOTÓN DE SESIÓN ================== */
-.auth-buttons {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
+/* 🔹 Días fuera del mes */
+.react-calendar__month-view__days__day--neighboringMonth abbr {
+  color: #bbb !important;
 }
 
-.btn-cerrar,
+/* ================== BOTONES ================== */
+.btn-agregar, .btn-cerrar {
+  margin-top: 1rem;
+  color: white;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+/* 🔹 Nuevo evento e Iniciar sesión → verde */
 .btn-agregar {
-  width: 80%;
-  font-size: 1rem;
-  padding: 0.8rem 0;
+  background: var(--color-verde-claro);
+}
+.btn-agregar:hover {
+  background: #58c958;
+  transform: scale(1.05);
+}
+
+/* 🔹 Cerrar sesión → rojo */
+.btn-cerrar {
+  background: var(--color-rojo);
+}
+.btn-cerrar:hover {
+  background: var(--color-rojo-hover);
+  transform: scale(1.05);
+}
+
+/* 🔹 Botón eliminar → rojo */
+.btn-eliminar {
+  background: var(--color-rojo);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-eliminar:hover {
+  background: var(--color-rojo-hover);
+  transform: scale(1.05);
 }
 
 /* ================== CUADRO EVENTOS ================== */
@@ -129,27 +197,42 @@
   background: #fff;
   transition: 0.25s ease;
 }
+
+/* 🔹 Hover sobre evento registrado → celeste */
 .cita-card:hover {
-  background: var(--color-principal);
-  color: #fff;
+  background: var(--color-celeste);
+  color: #000;
   transform: translateY(-3px);
 }
 
-/* ================== BOTONES ================== */
-.btn-agregar, .btn-cerrar {
-  margin-top: 1rem;
-  background: var(--color-principal);
-  color: white;
-  padding: 0.6rem 1rem;
+/* 🔴 Estilo para botones dentro de las tarjetas (editar / eliminar) */
+.cita-card .acciones button {
   border: none;
   border-radius: 8px;
-  cursor: pointer;
+  padding: 6px 10px;
   font-weight: bold;
-  transition: 0.2s;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.btn-agregar:hover, .btn-cerrar:hover {
-  background: var(--color-principal-hover);
-  transform: scale(1.05);
+
+/* ✏️ Botón editar → verde */
+.cita-card .acciones button:first-child {
+  background-color: #1130ff;
+  color: white;
+}
+.cita-card .acciones button:first-child:hover {
+  background-color: #005ba0;
+  transform: scale(1.1);
+}
+
+/* 🗑️ Botón eliminar → rojo */
+.cita-card .acciones button:last-child {
+  background-color: #ff4d4d;
+  color: white !important;
+}
+.cita-card .acciones button:last-child:hover {
+  background-color: #e63939;
+  transform: scale(1.1);
 }
 
 /* ================== MODAL ================== */
@@ -188,7 +271,7 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
-/* 🔹 Hace más grande el texto del encabezado */
+
 .citas-header h3 {
   font-size: 1.6rem;
   font-weight: bold;
@@ -196,9 +279,9 @@
   margin: 0;
 }
 
-/* 🔹 Botón “Nuevo evento” más visible */
+
 .citas-header .btn-agregar {
-  background: var(--color-principal);
+  background: var(--color-verde-claro);
   color: white;
   font-size: 1.1rem;
   padding: 0.8rem 1.3rem;
@@ -207,10 +290,27 @@
 }
 
 .citas-header .btn-agregar:hover {
-  background: var(--color-principal-hover);
+  background: #58c958;
   transform: scale(1.07);
 }
 
+/* 🌟 Botón "Nueva cita" mejorado */
+.btn-agregar-linda {
+  background: linear-gradient(135deg, #6fdc6f, #4caf50);
+  color: white;
+  font-size: 1.1rem;
+  padding: 0.8rem 1.4rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+.btn-agregar-linda:hover {
+  background: linear-gradient(135deg, #58c958, #43a047);
+  transform: scale(1.08);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
 
 /* ================== RESPONSIVO ================== */
 @media (max-width: 900px) {
