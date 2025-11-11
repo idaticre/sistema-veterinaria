@@ -161,6 +161,30 @@ export interface ClienteResponse{
     mensaje: string;
 }
 
+export interface MascotaResponse{
+    id?: number;
+    codigo: string;
+    nombre: string;
+    sexo: "M" | "H";
+    idCliente: number;
+    idRaza: number;
+    idEspecie: number;
+    idEstado: number;
+    idTamano: number;
+    idEtapa: number;
+    fechaNacimiento: string;
+    pelaje: string;
+    esterilizado: boolean;
+    alergias: string;
+    peso?: number;
+    chip: boolean;
+    pedigree: boolean;
+    factorDea: boolean;
+    agresividad: boolean;
+    foto: string;
+    fechaModificacion: string;
+}
+
 export interface EntidadResponse{
     id: number;
     codigo: string;
@@ -313,4 +337,9 @@ export interface Etapa_Mascota{
     id: number;
     descripcion: string;
     sctivo: boolean;
+}
+
+export interface dueñoNom{
+    id: number;
+    nombre?: string; 
 }

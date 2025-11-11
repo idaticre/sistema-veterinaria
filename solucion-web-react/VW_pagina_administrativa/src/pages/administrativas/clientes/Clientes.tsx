@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import './clientes.css';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import IST from '../../../components/proteccion_momentanea/IST';
+import { Link, useNavigate } from 'react-router-dom';
 import type { ClienteResponse } from '../../../components/interfaces/interfaces';
 
 
@@ -12,10 +12,11 @@ function Lst_clientes() {
   const [filtrados, setFiltrados] = useState<ClienteResponse[]>([]);
   const [clientes, setClientes] = useState<ClienteResponse[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteResponse | null>(null);
-
+  const navigate = useNavigate();
   
   useEffect(() => {
-    axios.get("http://localhost:8088/api/clientes")
+
+    IST.get("/clientes")
       .then(res => {
         console.log("clientes:", res.data);
         const lista = res.data.data;
@@ -27,6 +28,12 @@ function Lst_clientes() {
       })
       .catch(err => {
         console.error("Error en la carga de datos", err);
+
+        if (err.response && err.response.status === 401) {
+          alert("Tu sesión ha expirado. Inicia sesión nuevamente.");
+          localStorage.clear();
+          navigate("/login")
+        }
       });
   }, []);
 
@@ -35,7 +42,7 @@ function Lst_clientes() {
 
     if (!window.confirm("¿Seguro que deseas eliminar este cliente?")) return;
 
-    axios.delete(`http://localhost:8088/api/clientes/eliminar/${id}`)
+    IST.delete(`/clientes/eliminar/${id}`)
       .then(() => {
         const actualizados = clientes.filter(e => e.id !== id);
         setClientes(actualizados);

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import './regis_mascotas.css';
-import type { Razas, Especie, MascotaRequest, ClienteResponse, Estado_Mascota, Tamaño_Mascota, Etapa_Mascota } from '../../../components/interfaces/interfaces';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import type { Razas, Especie, MascotaRequest, ClienteResponse, Estado_Mascota, Tamaño_Mascota, Etapa_Mascota, MascotaResponse } from '../../../components/interfaces/interfaces';
+import IST from '../../../components/proteccion_momentanea/IST';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function Regis_mascotas() {
     const [minimizado, setMinimizado] = useState(false);
@@ -14,6 +14,7 @@ function Regis_mascotas() {
     const [estadoMascota, setEstadoMascota] = useState<Estado_Mascota[]>([]);
     const [tamañosMascota, setTamañosMascota] = useState<Tamaño_Mascota[]>([]);
     const [etapaMascota, setEtapaMascota] = useState<Etapa_Mascota[]>([]);
+
     const [nombre, setNombre] = useState("");
     const [sexo, setSexo] = useState<"M" | "H" | undefined>(undefined);
     const [idCliente, setIdCliente] = useState<number>(0);
@@ -37,18 +38,21 @@ function Regis_mascotas() {
     const [resultados, setResultados] = useState<ClienteResponse[]>([]);
     const [duenoSeleccionado, setDuenoSeleccionado] = useState<ClienteResponse | null>(null);
 
+    const location = useLocation();
+    const mascotaSelecc = location.state?.mascotaSeleccionado as MascotaResponse | undefined;
+
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
         try {
             const [resRazas, resEspecies, resTamaños, resEtapasV, resEstadosM, resDueños] = await Promise.all([
-            axios.get("http://localhost:8088/api/razas"),
-            axios.get("http://localhost:8088/api/especies"),
-            axios.get("http://localhost:8088/api/tamanos"),
-            axios.get("http://localhost:8088/api/etapasVida"),
-            axios.get("http://localhost:8088/api/estado-mascota"),
-            axios.get("http://localhost:8088/api/clientes"), // esto se cambiara a futuro
+            IST.get("/razas"),
+            IST.get("/especies"),
+            IST.get("/tamanos"),
+            IST.get("/etapasVida"),
+            IST.get("/estado-mascota"),
+            IST.get("/clientes"), // esto se cambiara a futuro
             ]);
 
             setRazas(resRazas.data);
@@ -65,10 +69,32 @@ function Regis_mascotas() {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        if (mascotaSelecc) {
+            setNombre(mascotaSelecc.nombre || "");
+            setSexo(mascotaSelecc.sexo as "M" | "H" | undefined);
+            setIdRaza(mascotaSelecc.idRaza || 0);
+            setIdEspecie(mascotaSelecc.idEspecie || 0);
+            setIdEstado(mascotaSelecc.idEstado || 0);
+            setFechaNacimiento(mascotaSelecc.fechaNacimiento || "");
+            setPelaje(mascotaSelecc.pelaje || "");
+            setIdTamaño(mascotaSelecc.idTamano || 0);
+            setIdEtapa(mascotaSelecc.idEtapa || 0);
+            setEsterilizado(mascotaSelecc.esterilizado || false);
+            setAlergias(mascotaSelecc.alergias || "");
+            setPeso(mascotaSelecc.peso || undefined);
+            setChip(mascotaSelecc.chip || false);
+            setPedigree(mascotaSelecc.pedigree || false);
+            setFactorDea(mascotaSelecc.factorDea || false);
+            setAgresividad(mascotaSelecc.agresividad || false);
+            setFoto(mascotaSelecc.foto || "");
+        }
+    }, [mascotaSelecc]);
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const fileName = `${nombre || "mascota"}_${Date.now()}_${file.name}`; // nombre único simulado
+            const fileName = `${nombre || "mascota"}_${Date.now()}`; // nombre único simulado
             const fakePath = `/guardados/mascotas/${fileName}`; // ruta simulada dentro del public
 
             const reader = new FileReader();
@@ -104,16 +130,28 @@ function Regis_mascotas() {
         foto,
         };
 
-        console.log("Mascota a registrar:", nuevaMascota);
-
-        try {
-        const res = await axios.post("http://localhost:8088/api/mascotas/crear", nuevaMascota);
-        alert("Mascota registrada correctamente ✅");
-        console.log("Respuesta del servidor:", res.data);
-        navigate("/administracion/mascotas/lista"); 
-        } catch (err) {
-        console.error("Error al registrar mascota:", err);
-        alert("Error al registrar mascota ❌");
+        if(mascotaSelecc){
+            IST.put(`/mascotas/actualizar/${mascotaSelecc.id}`, nuevaMascota)
+            .then(res => {
+            console.log("cliente actualizado:", res.data);
+            alert("Mascota actualizada correctamente ✅");
+            navigate("/administracion/mascotas/lista"); 
+            })
+            .catch(err => {
+            console.error("Error al actualizar mascota", err);
+            alert("Error al actualizar mascota ❌");
+            });
+        }else{
+            IST.post("/mascotas/crear", nuevaMascota)
+            .then(res => {
+                console.log("Respuesta del servidor:", res.data);
+                alert("Mascota registrada correctamente ✅");
+                navigate("/administracion/mascotas/lista"); 
+            })
+            .catch(err => {
+                console.error("Error al registrar mascota:", err);
+                alert("Error al registrar mascota ❌");
+            });
         }
     };
 
@@ -144,6 +182,20 @@ function Regis_mascotas() {
                                 <div className="form-main">
                                     <div className="form-fields">
                                         <form id="pet-form" onSubmit={handleSubmit} >
+                                            {mascotaSelecc && (
+                                                <div className="form-row">
+                                                    <div className="form-group">
+                                                        <label>ID</label>
+                                                        <input type="text" value={mascotaSelecc.codigo} disabled readOnly/>
+                                                    </div>
+                                                    <div className='form-group'>
+                                                        <label>Fecha de resgitro</label>
+                                                        <input type="text" value={
+                                                        mascotaSelecc.fechaModificacion ? 
+                                                        `${mascotaSelecc.fechaModificacion.slice(11, 16)}  del  ${mascotaSelecc.fechaModificacion.split('T')[0]}` : '' } disabled readOnly/>
+                                                    </div>
+                                                </div>
+                                            )}
                                             <div className="form-grid">
                                                 <section className='formulario_superior'>
                                                     <div className='form_super_datos'>
@@ -176,11 +228,6 @@ function Regis_mascotas() {
                                                                 ))}
                                                             </select>
                                                         </div>
-                                                                
-                                                        {/*<div className="form-group">
-                                                            <label htmlFor="color">Color Principal</label>
-                                                            <input type="color" id="color" name="color" value="#8B4513" className="pet-color"/>
-                                                        </div>*/}
                                                                 
                                                         <div className="form-group">
                                                             <label htmlFor="weight">Peso (kg)</label>
@@ -349,7 +396,7 @@ function Regis_mascotas() {
                                                 )}
                                             </div>
                                                     
-                                            <button type="submit" className="submit-btn">Registrar Mascota</button>
+                                            <button type="submit" className="submit-btn">{mascotaSelecc? "Actualizar" : "Guardar"}</button>
                                         </form>
                                     </div>
                                 </div>

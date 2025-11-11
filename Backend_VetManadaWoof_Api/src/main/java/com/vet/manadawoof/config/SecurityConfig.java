@@ -13,6 +13,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -30,6 +35,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
@@ -46,9 +52,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/por_definir/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO")
                         .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
-                        .requestMatchers(HttpMethod.POST,"/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA")
-                        .requestMatchers(HttpMethod.GET,"/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
-                                .requestMatchers("/api/colaboradores/**").hasAnyAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers(HttpMethod.POST,"/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA", "AUXILIAR GROMERS")
+                        .requestMatchers(HttpMethod.GET,"/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
+                                .requestMatchers("/api/colaboradores/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
 
 
                         // Todos los demás endpoints requieren autenticación
@@ -58,6 +64,19 @@ public class SecurityConfig {
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/", configuration);
+        return source;
     }
 
     @Bean

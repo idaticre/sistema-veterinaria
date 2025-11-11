@@ -3,7 +3,7 @@ import Br_administrativa from '../../../components/barra_administrativa/Br_admin
 import './regis_dueños.css'
 import type { tipo_doc, ClienteResponse, ClienteResquest } from '../../../components/interfaces/interfaces';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import IST from '../../../components/proteccion_momentanea/IST';
 
 function regis_dueños() {
   const [minimizado, setMinimizado] = useState(false);
@@ -27,7 +27,7 @@ function regis_dueños() {
 
 
   useEffect(() => {
-    axios.get("http://localhost:8088/api/tipo-documento")
+    IST.get("/tipo-documento")
     .then(res => {
       setTipDoc(res.data);
     })
@@ -71,7 +71,7 @@ function regis_dueños() {
     };
 
     if (clienteSelecc) {
-      axios.put("http://localhost:8088/api/clientes/actualizar", nuevoCliente)
+      IST.put(`/clientes/actualizar/${clienteSelecc.id}`, nuevoCliente)
         .then(res => {
           console.log("cliente actualizado:", res.data);
           alert("Cliente actualizado correctamente ✅");
@@ -82,7 +82,7 @@ function regis_dueños() {
           alert("Error al actualizar cliente ❌");
         });
     } else {
-      axios.post("http://localhost:8088/api/clientes/registrar", nuevoCliente)
+      IST.post("/clientes/registrar", nuevoCliente)
         .then(res => {
           console.log("cliente creado:", res.data);
           alert("Entidad registrada correctamente ✅");
@@ -136,7 +136,7 @@ function regis_dueños() {
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="dni">Tipo persona juridica</label>
-                      <select value={idTipoPersonaJuridica} onChange={(e) => setIdTipoPersonaJuridica(Number(e.target.value))}>
+                      <select value={idTipoPersonaJuridica} onChange={(e) => setIdTipoPersonaJuridica(Number(e.target.value))} required>
                         <option value="0" disabled>Elija la persona</option>
                         <option value="1">Natural</option>
                         <option value="2">Jurídica</option>
@@ -144,7 +144,7 @@ function regis_dueños() {
                     </div>
                     <div className="form-group">
                       <label htmlFor="nombre">Nombre</label>
-                      <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+                      <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
                     </div>
                   </div>
                   <div className="form-group full-width">
