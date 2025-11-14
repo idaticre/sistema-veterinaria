@@ -23,6 +23,7 @@ import RegistrarSalidaMascota from './pages/administrativas/mascotas/RegistrarSa
 import Servicios from './pages/administrativas/servicios/servicios';
 
 import Agenda_general from './pages/administrativas/agenda/Agenda_general';
+import EditarCita from './pages/administrativas/agenda/EditarAgendas/EditarCita';
 
 import Gestionar_colaboradores from  './pages/administrativas/administracion/gestionar-colaboradores/gestionarColaboradores'
 import Gestionar_usuarios from  './pages/administrativas/administracion/gestionar-usarios/gestionarUsuarios'
@@ -66,7 +67,7 @@ function App() {
 
         {/* Agenda */}
         <Route path='/administracion/agenda/Agenda_general' element={<Agenda_general />} />
-
+        <Route path='/administracion/agenda/EditarCita' element={<EditarCita />} />
 
         {/* Distribución */}
 

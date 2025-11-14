@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
-import { Link } from 'react-router-dom';
+import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import "./vacunas.css"
 import type { Especialidad } from '../../../components/interfaces/interfaces';
-import axios from 'axios';
+import IST from '../../../components/proteccion_momentanea/IST';
 
 function Vacunas() {
   const [minimizado, setMinimizado] = useState(false);
@@ -16,7 +15,7 @@ function Vacunas() {
   const [id, setId] = useState<number | undefined>(undefined);
 
  useEffect(() => {
-    axios.get("http://localhost:8088/api/especialidades")
+    IST.get("http://localhost:8088/api/especialidades")
     .then(res => {
       setEspecialidades(res.data);
     })
@@ -31,7 +30,7 @@ function Vacunas() {
     const especialidad: Especialidad = { id, nombre, activo };
 
     if (id !== undefined) {
-      axios.put("http://localhost:8088/api/especialidades", especialidad)
+      IST.put("http://localhost:8088/api/especialidades", especialidad)
         .then(res => {
           setEspecialidades(
             especialidades.map(e => e.id === id ? res.data : e)
@@ -40,7 +39,7 @@ function Vacunas() {
         })
         .catch(err => console.error("Error al editar", err));
     } else {
-      axios.post("http://localhost:8088/api/especialidades", especialidad)
+      IST.post("http://localhost:8088/api/especialidades", especialidad)
         .then(res => {
           setEspecialidades([...especialidades, res.data]);
           limpiarFormulario();
@@ -72,7 +71,7 @@ function Vacunas() {
       return;
     }
 
-    axios.delete(`http://localhost:8088/api/especialidades/${id}`)
+    IST.delete(`http://localhost:8088/api/especialidades/${id}`)
       .then(() => {
         setEspecialidades(especialidades.filter(e => e.id !== id));
       })

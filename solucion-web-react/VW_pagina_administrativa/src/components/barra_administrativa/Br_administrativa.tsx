@@ -144,11 +144,11 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <Link to="" className="enlace_opcion">
                                     <i className="fa-solid fa-calendar-days"></i>
                                     <span>Agenda</span>
-                                    <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    <i className={`fa-solid ${openMenu === "agenda" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={agendaRef} className="submenu">
-                                    <li>
-                            <Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
+                                    <li><Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
+                                    <li><Link to="/administracion/agenda/EditarCita" className="sub_opcion">Editar cita</Link></li>
                                 </ul>
                             </li>
                             <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 
