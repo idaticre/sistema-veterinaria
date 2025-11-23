@@ -1,6 +1,10 @@
 package com.vet.manadawoof.dtos.request;
 
-import lombok.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -9,9 +13,13 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class FiltroAsistenciaRequestDTO {
+    @NotNull(message = "Fecha inicio es obligatoria")
     private LocalDate fechaInicio;
+    
+    @NotNull(message = "Fecha fin es obligatoria")
     private LocalDate fechaFin;
     
-    // opcional para filtrar por estado si luego lo implementas
+    private Long idColaborador;
+    
     private Integer idEstado;
 }

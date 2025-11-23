@@ -87,14 +87,14 @@ public class EspecieServiceImpl implements EspecieService {
      * @return Lista completa de especies.
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<EspecieEntity> listar() {
         return repository.findAll();
     }
     
     // Obtiene una especialidad específica por su ID.
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public EspecieEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Especie no encontrada"));

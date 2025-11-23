@@ -62,7 +62,7 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
      * Lista todos los usuarios con los roles asignados (muestra nombres, no IDs).
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<UsuarioRolResponseDTO> listar() {
         List<Object[]> results = entityManager.createNativeQuery(
                         "SELECT u.id, u.username, r.nombre, ur.fecha_asignacion " +
@@ -86,7 +86,7 @@ public class UsuarioRolServiceImpl implements UsuarioRolService {
      * Lista los roles asignados a un usuario específico (muestra nombres).
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<UsuarioRolResponseDTO> listarPorUsuario(Integer idUsuario) {
         List<Object[]> results = entityManager.createNativeQuery(
                         "SELECT u.id, u.username, r.nombre, ur.fecha_asignacion" +

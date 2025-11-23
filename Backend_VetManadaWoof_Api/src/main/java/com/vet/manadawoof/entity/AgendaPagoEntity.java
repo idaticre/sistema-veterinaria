@@ -7,8 +7,11 @@ import java.io.Serializable;
 
 @Builder
 @AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "agenda_pagos", indexes = {
         @Index(name = "idx_agendapagos_agenda", columnList = "id_agenda"),
@@ -17,6 +20,7 @@ import java.io.Serializable;
 })
 public class AgendaPagoEntity implements Serializable {
     
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

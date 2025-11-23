@@ -1,25 +1,29 @@
 package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.dtos.request.AsignacionHorarioRequestDTO;
-import com.vet.manadawoof.dtos.response.ApiResponse;
-import com.vet.manadawoof.dtos.response.AsignacionHorarioResponseDTO;
+import com.vet.manadawoof.dtos.request.GestionDiaEspecialRequestDTO;
+import com.vet.manadawoof.dtos.request.GestionRangoRequestDTO;
+import com.vet.manadawoof.dtos.response.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AsignacionHorarioService {
+    // CRUD básico
+    AsignacionHorarioResponseDTO crearAsignacion(AsignacionHorarioRequestDTO request);
     
-    // Asigna o actualiza un horario para un colaborador en un día específico
-    ApiResponse<AsignacionHorarioResponseDTO> asignarHorarioDia(AsignacionHorarioRequestDTO dto);
+    AsignacionHorarioResponseDTO actualizarAsignacion(Long id, AsignacionHorarioRequestDTO request);
     
-    // Desasigna (desactiva) un horario para un colaborador en un día específico
-    ApiResponse<AsignacionHorarioResponseDTO> desasignarHorarioDia(AsignacionHorarioRequestDTO dto);
+    void eliminarAsignacion(Long id);
     
-    // Asigna un mismo horario para toda la semana laboral (lunes a sábado)
-    ApiResponse<List<AsignacionHorarioResponseDTO>> asignarHorarioSemana(AsignacionHorarioRequestDTO dto);
+    GestionDiaEspecialResponseDTO gestionarDiaEspecial(GestionDiaEspecialRequestDTO request);
     
-    // Desasigna todos los horarios de lunes a sábado para un colaborador
-    ApiResponse<String> desasignarHorarioSemana(Long idColaborador);
+    GestionRangoResponseDTO gestionarRangoFechas(GestionRangoRequestDTO request);
     
-    // Lista todas las asignaciones de horarios existentes
-    ApiResponse<List<AsignacionHorarioResponseDTO>> listarAsignaciones();
+    List<HistorialHorarioResponseDTO> consultarHistorialHorarios(Long idColaborador, Integer idDiaSemana);
+    
+    List<HorarioVigenteResponseDTO> verHorariosVigentes(Long idColaborador);
+    
+    Map<String, Object> resumenHorariosColaborador(Long idColaborador);
+    
 }

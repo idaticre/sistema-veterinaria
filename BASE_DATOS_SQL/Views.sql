@@ -1,4 +1,6 @@
 USE vet_manada_woof;
+
+
 CREATE OR REPLACE VIEW vista_asistencia_hoy AS
 SELECT 
   c.id AS id_colaborador,
@@ -22,3 +24,7 @@ WHERE ah.id_dia_semana = CASE DAYOFWEEK(CURDATE())
                             ELSE DAYOFWEEK(CURDATE()) - 1
                          END
   AND ah.activo = 1;
+
+
+ALTER TABLE horarios_base 
+ADD CONSTRAINT uq_nombre_descanso UNIQUE (nombre);

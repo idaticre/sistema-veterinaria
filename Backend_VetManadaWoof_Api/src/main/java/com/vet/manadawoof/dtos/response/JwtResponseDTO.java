@@ -1,3 +1,4 @@
+/*
 package com.vet.manadawoof.dtos.response;
 
 // dtos/JwtResponseDTO.java
@@ -33,4 +34,4 @@ public class JwtResponseDTO {
 
     public List<String> getRoles() { return roles; }
     public void setRoles(List<String> roles) { this.roles = roles; }
-}
+}*/

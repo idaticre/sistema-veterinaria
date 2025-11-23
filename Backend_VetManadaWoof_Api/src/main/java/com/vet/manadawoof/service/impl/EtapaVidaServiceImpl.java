@@ -60,14 +60,14 @@ public class EtapaVidaServiceImpl implements EtapaVidaService {
     
     // Listar todas las etapas registradas
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<EtapaVidaEntity> listar() {
         return repository.findAll();
     }
     
     // Obtener una etapa por su ID
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public EtapaVidaEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Etapa no encontrada"));

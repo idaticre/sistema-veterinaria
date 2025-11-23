@@ -340,6 +340,8 @@ proc_main: BEGIN
     WHERE id = v_id_colaborador;
 
     SET p_codigo_colaborador = CONCAT('COL', LPAD(v_id_colaborador, 6, '0'));
+
+    
     SET p_mensaje = CONCAT('Colaborador registrado correctamente. Código Colaborador: ', p_codigo_colaborador);
 END$$
 DELIMITER ;
@@ -998,376 +1000,725 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- PROCEDURE: asignar_horario_dia
--- Asigna un horario base específico a un colaborador en un día determinado.
--- Si ya existe una asignación para ese día, la actualiza.
+-- PROCEDIMIENTO: gestionar_horarios_rango
+-- Aplica acción HORARIO/DESCANSO/DESASIGNAR en un rango de fechas para un colaborador
 -- ========================================
-DROP PROCEDURE IF EXISTS asignar_horario_dia;
+DROP PROCEDURE IF EXISTS gestionar_asignar_rango;
+
 DELIMITER $$
 
-CREATE PROCEDURE asignar_horario_dia (
-    IN p_id_colaborador BIGINT,
-    IN p_id_horario_base INT,
-    IN p_id_dia_semana INT
+CREATE PROCEDURE gestionar_asignar_rango(
+    IN p_id_colaborador   BIGINT,
+    IN p_fecha_inicio     DATE,
+    IN p_fecha_fin        DATE,
+    IN p_tipo_accion      VARCHAR(20),
+    IN p_id_horario_base  INT,
+    IN p_id_usuario       BIGINT,
+    IN p_motivo           VARCHAR(255)
 )
-BEGIN
-    -- Manejador de errores SQL genérico
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Error al asignar horario diario.';
-    END;
+proc_label: BEGIN
+    -- Declaración de variables
+    DECLARE v_fecha_actual   DATE DEFAULT p_fecha_inicio;
+    DECLARE v_dia_semana_id  INT;
+    DECLARE v_id_asignacion  BIGINT DEFAULT NULL;
+    DECLARE v_id_detalle     BIGINT DEFAULT NULL;
+    DECLARE v_hora_inicio    TIME DEFAULT NULL;
+    DECLARE v_hora_fin       TIME DEFAULT NULL;
+    DECLARE v_horario_creado BOOLEAN DEFAULT FALSE;
 
+    -- Normalizar tipo de acción
+    SET p_tipo_accion = UPPER(TRIM(p_tipo_accion));
+
+    -- Validación de parámetros obligatorios
+    IF p_id_colaborador IS NULL OR p_fecha_inicio IS NULL OR p_fecha_fin IS NULL THEN
+        SELECT 'ERROR' AS status, 'Faltan parametros obligatorios' AS mensaje;
+        LEAVE proc_label;
+    END IF;
+
+    -- Validación de rango de fechas
+    IF p_fecha_fin < p_fecha_inicio THEN
+        SELECT 'ERROR' AS status, 'Rango de fechas invalido' AS mensaje;
+        LEAVE proc_label;
+    END IF;
+
+    -- Validación de tipo de acción
+    IF p_tipo_accion NOT IN ('ASIGNAR_HORARIO', 'ASIGNAR_DESCANSO', 'RESTAURAR_BASE') THEN
+        SELECT 'ERROR' AS status, 'Accion invalida. Use: ASIGNAR_HORARIO, ASIGNAR_DESCANSO o RESTAURAR_BASE' AS mensaje;
+        LEAVE proc_label;
+    END IF;
+
+    -- Validación específica para ASIGNAR_HORARIO
+    IF p_tipo_accion = 'ASIGNAR_HORARIO' AND (p_id_horario_base IS NULL OR p_id_horario_base <= 0) THEN
+        SELECT 'ERROR' AS status, 'Debe proporcionar un ID de horario base valido' AS mensaje;
+        LEAVE proc_label;
+    END IF;
+
+    -- Verificar que el horario base existe
+    IF NOT EXISTS(SELECT 1 FROM horarios_base WHERE id = p_id_horario_base) THEN
+        SELECT 'ERROR' AS status, CONCAT('El horario base ID ', p_id_horario_base, ' no existe') AS mensaje;
+        LEAVE proc_label;
+    END IF;
+
+    -- Inicio de transacción
     START TRANSACTION;
 
-    -- Validación: colaborador existente
-    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Colaborador no existe.';
-    END IF;
+    -- Bucle por cada fecha en el rango
+    WHILE v_fecha_actual <= p_fecha_fin DO
+        -- Calcular día de la semana (1=Lunes, 7=Domingo)
+        SET v_dia_semana_id = CASE DAYOFWEEK(v_fecha_actual) 
+                                WHEN 1 THEN 7 
+                                ELSE DAYOFWEEK(v_fecha_actual) - 1 
+                              END;
 
-    -- Validación: horario activo
-    IF NOT EXISTS (SELECT 1 FROM horarios_base WHERE id = p_id_horario_base AND activo = 1) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Horario base no válido o inactivo.';
-    END IF;
+        -- Buscar asignación de horario base activa
+        SELECT ah.id INTO v_id_asignacion
+        FROM asignacion_horarios ah
+        WHERE ah.id_colaborador = p_id_colaborador
+          AND ah.id_dia_semana = v_dia_semana_id
+          AND ah.activo = 1
+          AND v_fecha_actual BETWEEN ah.fecha_inicio_vigencia 
+                                AND COALESCE(ah.fecha_fin_vigencia, '9999-12-31')
+        ORDER BY ah.fecha_inicio_vigencia DESC 
+        LIMIT 1;
 
-    -- Validación: día válido
-    IF NOT EXISTS (SELECT 1 FROM dias_semana WHERE id = p_id_dia_semana) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Día de semana no válido.';
-    END IF;
+        -- ✅ NUEVO: Si NO existe asignación base, crearla automáticamente
+        IF v_id_asignacion IS NULL THEN
+            INSERT INTO asignacion_horarios (
+                id_colaborador,
+                id_horario_base,
+                id_dia_semana,
+                fecha_inicio_vigencia,
+                fecha_fin_vigencia,
+                motivo_cambio,
+                activo
+            ) VALUES (
+                p_id_colaborador,
+                p_id_horario_base,
+                v_dia_semana_id,
+                v_fecha_actual,
+                NULL,
+                CONCAT('Auto-creado por gestionar_asignar_rango: ', COALESCE(p_motivo, 'Sin motivo')),
+                1
+            );
+            
+            SET v_id_asignacion = LAST_INSERT_ID();
+            SET v_horario_creado = TRUE;
+        END IF;
 
-    -- Inserta o actualiza la asignación existente según la clave única (colaborador + día)
-    INSERT INTO asignacion_horarios (
-        id_colaborador, id_horario_base, id_dia_semana, fecha_asignacion, activo
-    )
-    VALUES (
-        p_id_colaborador, p_id_horario_base, p_id_dia_semana, NOW(), 1
-    )
-    ON DUPLICATE KEY UPDATE
-        id_horario_base = VALUES(id_horario_base),
-        fecha_asignacion = NOW(),
-        activo = 1;
+        -- Validar que no exista registro de asistencia
+        IF EXISTS(SELECT 1 FROM registro_asistencias 
+                  WHERE id_colaborador = p_id_colaborador 
+                    AND fecha = v_fecha_actual) THEN
+            ROLLBACK;
+            SELECT 'ERROR' AS status, 
+                   CONCAT('Ya existe registro de asistencia para el dia ', DATE_FORMAT(v_fecha_actual, '%d/%m/%Y')) AS mensaje;
+            LEAVE proc_label;
+        END IF;
 
-    COMMIT;
-END$$
-DELIMITER ;
+        -- Buscar si existe detalle de excepción
+        SELECT id_detalle INTO v_id_detalle
+        FROM asignacion_horarios_detalle
+        WHERE id_asignacion = v_id_asignacion 
+          AND fecha = v_fecha_actual;
 
--- ========================================
--- PROCEDURE: asignar_horario_semana
--- Asigna un mismo horario base a todos los días laborales (lunes a sábado)
--- de un colaborador. Si ya existen asignaciones, se actualizan.
--- ========================================
-DROP PROCEDURE IF EXISTS asignar_horario_semana;
-DELIMITER $$
+        -- Ejecutar acción según tipo
+        IF p_tipo_accion = 'RESTAURAR_BASE' THEN
+            -- RESTAURAR BASE: Eliminar excepción
+            IF v_id_detalle IS NOT NULL THEN
+                DELETE FROM asignacion_horarios_detalle 
+                WHERE id_detalle = v_id_detalle;
+            END IF;
 
-CREATE PROCEDURE asignar_horario_semana (
-    IN p_id_colaborador BIGINT,
-    IN p_id_horario_base INT
-)
-BEGIN
-    DECLARE v_dia INT DEFAULT 1; -- Contador de días (lunes a sábado)
+        ELSEIF p_tipo_accion = 'ASIGNAR_DESCANSO' THEN
+            -- ASIGNAR DESCANSO: Crear o actualizar con horas NULL
+            IF v_id_detalle IS NULL THEN
+                INSERT INTO asignacion_horarios_detalle(
+                    id_asignacion, fecha, hora_inicio, hora_fin, es_excepcion
+                )
+                VALUES(
+                    v_id_asignacion, v_fecha_actual, NULL, NULL, 1
+                );
+            ELSE
+                UPDATE asignacion_horarios_detalle 
+                SET hora_inicio = NULL, 
+                    hora_fin = NULL, 
+                    es_excepcion = 1 
+                WHERE id_detalle = v_id_detalle;
+            END IF;
 
-    -- Manejador de errores SQL genérico
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Error al asignar horario semanal.';
-    END;
+        ELSEIF p_tipo_accion = 'ASIGNAR_HORARIO' THEN
+            -- ASIGNAR HORARIO: Crear o actualizar con horario específico
+            -- Obtener horario del horario base
+            SELECT hora_inicio, hora_fin 
+            INTO v_hora_inicio, v_hora_fin 
+            FROM horarios_base 
+            WHERE id = p_id_horario_base;
 
-    START TRANSACTION;
+            -- Validar que no sea horario de descanso
+            IF v_hora_inicio IS NULL THEN
+                ROLLBACK;
+                SELECT 'ERROR' AS status, 
+                       'El horario seleccionado es un horario de descanso' AS mensaje;
+                LEAVE proc_label;
+            END IF;
 
-    -- Validación: colaborador existente
-    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Colaborador no existe.';
-    END IF;
+            -- Insertar o actualizar detalle
+            IF v_id_detalle IS NULL THEN
+                INSERT INTO asignacion_horarios_detalle(
+                    id_asignacion, fecha, hora_inicio, hora_fin, es_excepcion
+                )
+                VALUES(
+                    v_id_asignacion, v_fecha_actual, v_hora_inicio, v_hora_fin, 1
+                );
+            ELSE
+                UPDATE asignacion_horarios_detalle 
+                SET hora_inicio = v_hora_inicio, 
+                    hora_fin = v_hora_fin, 
+                    es_excepcion = 1 
+                WHERE id_detalle = v_id_detalle;
+            END IF;
+        END IF;
 
-    -- Validación: horario activo
-    IF NOT EXISTS (SELECT 1 FROM horarios_base WHERE id = p_id_horario_base AND activo = 1) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Horario base no válido o inactivo.';
-    END IF;
-
-    -- Bucle de lunes (1) a sábado (6)
-    WHILE v_dia <= 6 DO
-        INSERT INTO asignacion_horarios (
-            id_colaborador, id_horario_base, id_dia_semana, fecha_asignacion, activo
-        )
-        VALUES (
-            p_id_colaborador, p_id_horario_base, v_dia, NOW(), 1
-        )
-        ON DUPLICATE KEY UPDATE
-            id_horario_base = VALUES(id_horario_base),
-            fecha_asignacion = NOW(),
-            activo = 1;
-        SET v_dia = v_dia + 1;
+        -- Avanzar al siguiente día
+        SET v_fecha_actual = DATE_ADD(v_fecha_actual, INTERVAL 1 DAY);
+        SET v_id_asignacion = NULL; -- Reset para el siguiente día
     END WHILE;
 
+    -- Confirmar transacción
     COMMIT;
-END$$
-DELIMITER ;
 
+    -- Mensaje de éxito
+    SELECT 'OK' AS status,
+           CONCAT(
+               CASE p_tipo_accion
+                   WHEN 'RESTAURAR_BASE'   THEN 'Horario base restaurado'
+                   WHEN 'ASIGNAR_DESCANSO' THEN 'Descanso asignado'
+                   WHEN 'ASIGNAR_HORARIO'  THEN 'Horario asignado'
+               END,
+               ' del ', DATE_FORMAT(p_fecha_inicio, '%d/%m/%Y'),
+               ' al ', DATE_FORMAT(p_fecha_fin, '%d/%m/%Y'),
+               IF(v_horario_creado, ' (horarios base creados automaticamente)', '')
+           ) AS mensaje;
+
+END$$
+
+DELIMITER ;
 -- ========================================
--- PROCEDURE: desasignar_horario_dia
--- Desactiva (sin eliminar) la asignación de horario
--- para un colaborador en un día específico.
+-- PROCEDIMIENTO: gestionar_dia_especial
+-- Controla la asignacion, desasignacion o un descanso por dia
 -- ========================================
-DROP PROCEDURE IF EXISTS desasignar_horario_dia;
+DROP PROCEDURE IF EXISTS gestionar_dia_especial;
 DELIMITER $$
 
-CREATE PROCEDURE desasignar_horario_dia (
+CREATE PROCEDURE gestionar_dia_especial(
     IN p_id_colaborador BIGINT,
-    IN p_id_dia_semana INT
+    IN p_fecha          DATE,
+    IN p_tipo_accion    VARCHAR(20),  -- 'HORARIO', 'DESCANSO', 'DESASIGNAR'
+    IN p_hora_inicio    TIME,
+    IN p_hora_fin       TIME,
+    IN p_id_usuario     BIGINT
 )
-BEGIN
+gestionDia: BEGIN
+    DECLARE v_id_asignacion       BIGINT DEFAULT NULL;
+    DECLARE v_detalle_existente   BIGINT DEFAULT NULL;
+    DECLARE v_asistencia_existente BIGINT DEFAULT NULL;
+    DECLARE v_tipo_accion         VARCHAR(20);
+    DECLARE v_dia_semana          INT;
+    DECLARE v_nombre_dia          VARCHAR(20);
+    DECLARE v_error_msg           VARCHAR(500);
+
+    -- Handlers
+    DECLARE CONTINUE HANDLER FOR NOT FOUND BEGIN END;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Error al desasignar horario diario.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error interno en gestionar_dia_especial.';
     END;
 
-    START TRANSACTION;
+    -- ========================================
+    -- VALIDACIONES INICIALES
+    -- ========================================
+    SET v_tipo_accion = UPPER(TRIM(p_tipo_accion));
 
-    -- Validación: colaborador existente
-    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Colaborador no existe.';
+    IF v_tipo_accion NOT IN ('HORARIO','DESCANSO','DESASIGNAR') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Acción inválida. Use: HORARIO, DESCANSO o DESASIGNAR.';
     END IF;
 
-    -- Validación: día válido
-    IF NOT EXISTS (SELECT 1 FROM dias_semana WHERE id = p_id_dia_semana) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Día de semana no válido.';
+    IF p_id_colaborador IS NULL OR p_fecha IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Faltan datos obligatorios (colaborador, fecha).';
     END IF;
 
-    -- Desactivar la asignación existente
-    UPDATE asignacion_horarios
-    SET activo = 0, fecha_asignacion = NOW()
-    WHERE id_colaborador = p_id_colaborador
-      AND id_dia_semana = p_id_dia_semana;
-
-    COMMIT;
-END$$
-DELIMITER ;
-
--- ========================================
--- PROCEDURE: desasignar_horario_semana
--- Desactiva (sin eliminar) todas las asignaciones de horario
--- para un colaborador de lunes a sábado.
--- ========================================
-DROP PROCEDURE IF EXISTS desasignar_horario_semana;
-DELIMITER $$
-
-CREATE PROCEDURE desasignar_horario_semana (
-    IN p_id_colaborador BIGINT
-)
-BEGIN
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Error al desasignar horario semanal.';
-    END;
-
-    START TRANSACTION;
-
-    -- Validación: colaborador existente
-    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Colaborador no existe.';
+    IF v_tipo_accion = 'HORARIO' THEN
+        IF p_hora_inicio IS NULL OR p_hora_fin IS NULL THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Para acción HORARIO se requieren hora_inicio y hora_fin.';
+        END IF;
+        IF p_hora_fin <= p_hora_inicio THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'hora_fin debe ser mayor que hora_inicio.';
+        END IF;
     END IF;
 
-    -- Desactivar todas las asignaciones (lunes a sábado)
-    UPDATE asignacion_horarios
-    SET activo = 0, fecha_asignacion = NOW()
-    WHERE id_colaborador = p_id_colaborador
-      AND id_dia_semana BETWEEN 1 AND 6;
+    -- ========================================
+    -- OBTENER DÍA DE LA SEMANA
+    -- ========================================
+    SET v_dia_semana = CASE DAYOFWEEK(p_fecha)
+                           WHEN 1 THEN 7          -- Domingo
+                           ELSE DAYOFWEEK(p_fecha) - 1
+                       END;
 
-    COMMIT;
-END$$
-DELIMITER ;
+    SELECT nombre INTO v_nombre_dia
+    FROM dias_semana
+    WHERE id = v_dia_semana;
 
--- ========================================
--- PROCEDIMIENTO: gestionar_asistencia
--- Controla el registro de asistencia diaria (entrada, almuerzo, salida)
--- ========================================
-DROP PROCEDURE IF EXISTS gestionar_asistencia;
-DELIMITER $$
-
-CREATE PROCEDURE gestionar_asistencia (
-    IN p_colaborador_id BIGINT,
-    IN p_tipo_marca VARCHAR(10),
-    OUT p_mensaje VARCHAR(255)
-)
-proc_asistencia: BEGIN
-    DECLARE v_id_asistencia BIGINT;
-    DECLARE v_fecha_actual DATE;
-    DECLARE v_hora_actual TIME;
-    DECLARE v_id_horario INT;
-    DECLARE v_hora_inicio TIME;
-    DECLARE v_id_estado_presente INT;
-    DECLARE v_id_estado_completado INT;
-
-    -- Inicializa valores actuales
-    SET v_fecha_actual = CURDATE();
-    SET v_hora_actual = CURTIME();
-
-    -- Obtiene IDs de estados
-    SELECT id INTO v_id_estado_presente FROM estado_asistencia WHERE nombre = 'PRESENTE' LIMIT 1;
-    SELECT id INTO v_id_estado_completado FROM estado_asistencia WHERE nombre = 'COMPLETADO' LIMIT 1;
-
-    -- Valida tipo_marca
-    IF p_tipo_marca NOT IN ('ENTRADA', 'LUNCH_IN', 'LUNCH_OUT', 'SALIDA') THEN
-        SET p_mensaje = 'Tipo de marca inválido.';
-        LEAVE proc_asistencia;
-    END IF;
-
-    -- Obtiene el horario asignado según el día actual
-    SELECT ah.id_horario_base, hb.hora_inicio
-    INTO v_id_horario, v_hora_inicio
+    -- ========================================
+    -- BUSCAR ASIGNACIÓN BASE ACTIVA
+    -- ========================================
+    SELECT ah.id INTO v_id_asignacion
     FROM asignacion_horarios ah
-    JOIN horarios_base hb ON hb.id = ah.id_horario_base
-    WHERE ah.id_colaborador = p_colaborador_id
-      AND ah.id_dia_semana = CASE DAYOFWEEK(CURDATE())
-                                WHEN 1 THEN 7
-                                ELSE DAYOFWEEK(CURDATE()) - 1
-                             END
+    WHERE ah.id_colaborador = p_id_colaborador
+      AND ah.id_dia_semana = v_dia_semana
+      AND ah.fecha_inicio_vigencia <= p_fecha
+      AND (ah.fecha_fin_vigencia IS NULL OR ah.fecha_fin_vigencia >= p_fecha)
       AND ah.activo = 1
     LIMIT 1;
 
-    -- Verifica si tiene asignación hoy
-    IF v_id_horario IS NULL THEN
-        SET p_mensaje = 'El colaborador no tiene horario asignado para hoy.';
-        LEAVE proc_asistencia;
+    IF v_id_asignacion IS NULL THEN
+        SET v_error_msg = CONCAT('No existe horario base asignado para ', v_nombre_dia, ' (', DATE_FORMAT(p_fecha, '%d/%m/%Y'), ')');
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg;
     END IF;
 
-    -- Busca si ya tiene un registro hoy
-    SELECT id INTO v_id_asistencia
-    FROM registro_asistencias
-    WHERE id_colaborador = p_colaborador_id
-      AND fecha = v_fecha_actual
+    -- ========================================
+    -- VERIFICAR DETALLE EXISTENTE
+    -- ========================================
+    SELECT id_detalle INTO v_detalle_existente
+    FROM asignacion_horarios_detalle
+    WHERE id_asignacion = v_id_asignacion
+      AND fecha = p_fecha
     LIMIT 1;
 
-    -- =====================================
-    -- CASO 1: No hay registro previo → se crea solo si es ENTRADA
-    -- =====================================
-    IF v_id_asistencia IS NULL THEN
-        IF p_tipo_marca = 'ENTRADA' THEN
-            INSERT INTO registro_asistencias (
-                id_colaborador, id_horario_base, fecha, hora_entrada, id_estado_asistencia
-            )
-            VALUES (
-                p_colaborador_id, v_id_horario, v_fecha_actual, v_hora_actual, v_id_estado_presente
-            );
+    -- ========================================
+    -- VERIFICAR ASISTENCIA YA REGISTRADA
+    -- ========================================
+    SELECT id INTO v_asistencia_existente
+    FROM registro_asistencias
+    WHERE id_colaborador = p_id_colaborador
+      AND fecha = p_fecha
+    LIMIT 1;
 
-            -- Calcula tardanza si hora_inicio es no nula
-            IF v_hora_inicio IS NOT NULL THEN
-                UPDATE registro_asistencias
-                SET tardanza_minutos = GREATEST(TIMESTAMPDIFF(MINUTE, v_hora_inicio, v_hora_actual), 0)
-                WHERE id = LAST_INSERT_ID();
-            END IF;
+    IF v_asistencia_existente IS NOT NULL THEN
+        SET v_error_msg = CONCAT('No se puede modificar el día ', DATE_FORMAT(p_fecha, '%d/%m/%Y'), ': ya existe asistencia registrada.');
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg;
+    END IF;
 
-            SET p_mensaje = CONCAT('Entrada registrada a las ', v_hora_actual);
+    -- ========================================
+    -- INICIAR TRANSACCIÓN
+    -- ========================================
+    START TRANSACTION;
 
+    -- ========================================
+    -- ACCIÓN: DESASIGNAR (eliminar excepción)
+    -- ========================================
+    IF v_tipo_accion = 'DESASIGNAR' THEN
+        IF v_detalle_existente IS NOT NULL THEN
+            DELETE FROM asignacion_horarios_detalle WHERE id_detalle = v_detalle_existente;
+            COMMIT;
+            SELECT 'OK' AS status, 'Excepción eliminada - vuelve al horario base' AS mensaje;
+            LEAVE gestionDia;
         ELSE
-            SET p_mensaje = 'Debe marcar ENTRADA antes de cualquier otro evento.';
+            COMMIT;
+            SELECT 'OK' AS status, 'No había excepción - ya usa horario base' AS mensaje;
+            LEAVE gestionDia;
+        END IF;
+    END IF;
+
+    -- ========================================
+    -- ACCIÓN: DESCANSO
+    -- ========================================
+    IF v_tipo_accion = 'DESCANSO' THEN
+        IF v_detalle_existente IS NULL THEN
+            INSERT INTO asignacion_horarios_detalle (id_asignacion, fecha, hora_inicio, hora_fin, es_excepcion)
+            VALUES (v_id_asignacion, p_fecha, NULL, NULL, 1);
+        ELSE
+            UPDATE asignacion_horarios_detalle
+            SET hora_inicio = NULL,
+                hora_fin    = NULL,
+                es_excepcion = 1,
+                actualizado_en = NOW()
+            WHERE id_detalle = v_detalle_existente;
         END IF;
 
-    -- =====================================
-    -- CASO 2: Ya tiene registro → se actualiza según tipo de marca
-    -- =====================================
-    ELSE
-        CASE p_tipo_marca
-
-            WHEN 'ENTRADA' THEN
-                SET p_mensaje = 'Ya existe una entrada registrada hoy.';
-
-            WHEN 'LUNCH_IN' THEN
-                UPDATE registro_asistencias
-                SET hora_lunch_inicio = IF(hora_lunch_inicio IS NULL, v_hora_actual, hora_lunch_inicio)
-                WHERE id = v_id_asistencia
-                  AND hora_entrada IS NOT NULL
-                  AND hora_lunch_inicio IS NULL;
-
-                IF ROW_COUNT() > 0 THEN
-                    SET p_mensaje = CONCAT('Inicio de almuerzo registrado a las ', v_hora_actual);
-                ELSE
-                    SET p_mensaje = 'Ya registró inicio de almuerzo o no marcó entrada.';
-                END IF;
-
-            WHEN 'LUNCH_OUT' THEN
-                UPDATE registro_asistencias
-                SET hora_lunch_fin = IF(hora_lunch_fin IS NULL, v_hora_actual, hora_lunch_fin),
-                    minutos_lunch = CASE
-                        WHEN hora_lunch_inicio IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, hora_lunch_inicio, v_hora_actual)
-                        ELSE NULL
-                    END
-                WHERE id = v_id_asistencia
-                  AND hora_lunch_inicio IS NOT NULL
-                  AND hora_lunch_fin IS NULL;
-
-                IF ROW_COUNT() > 0 THEN
-                    SET p_mensaje = CONCAT('Fin de almuerzo registrado a las ', v_hora_actual);
-                ELSE
-                    SET p_mensaje = 'Debe iniciar almuerzo antes de finalizarlo.';
-                END IF;
-
-            WHEN 'SALIDA' THEN
-                UPDATE registro_asistencias
-                SET hora_salida = IF(hora_salida IS NULL, v_hora_actual, hora_salida),
-                    minutos_trabajados = CASE
-                        WHEN hora_entrada IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, hora_entrada, v_hora_actual) - IFNULL(minutos_lunch, 0)
-                        ELSE NULL
-                    END,
-                    id_estado_asistencia = v_id_estado_completado
-                WHERE id = v_id_asistencia
-                  AND hora_entrada IS NOT NULL
-                  AND hora_salida IS NULL;
-
-                IF ROW_COUNT() > 0 THEN
-                    SET p_mensaje = CONCAT('Salida registrada a las ', v_hora_actual);
-                ELSE
-                    SET p_mensaje = 'Ya registró salida o falta marcar entrada.';
-                END IF;
-
-        END CASE;
+        COMMIT;
+        SELECT 'OK' AS status, 'Descanso registrado correctamente' AS mensaje;
+        LEAVE gestionDia;
     END IF;
 
-END $$
+    -- ========================================
+    -- ACCIÓN: HORARIO PERSONALIZADO
+    -- ========================================
+    IF v_tipo_accion = 'HORARIO' THEN
+        IF v_detalle_existente IS NULL THEN
+            INSERT INTO asignacion_horarios_detalle (id_asignacion, fecha, hora_inicio, hora_fin, es_excepcion)
+            VALUES (v_id_asignacion, p_fecha, p_hora_inicio, p_hora_fin, 1);
+        ELSE
+            UPDATE asignacion_horarios_detalle
+            SET hora_inicio = p_hora_inicio,
+                hora_fin    = p_hora_fin,
+                es_excepcion = 1,
+                actualizado_en = NOW()
+            WHERE id_detalle = v_detalle_existente;
+        END IF;
 
+        COMMIT;
+        SELECT 'OK' AS status, 
+               CONCAT('Horario personalizado ', TIME_FORMAT(p_hora_inicio,'%H:%i'), '-', TIME_FORMAT(p_hora_fin,'%H:%i'), ' asignado') AS mensaje;
+        LEAVE gestionDia;
+    END IF;
+
+END gestionDia$$
 DELIMITER ;
-
-
 -- ========================================
--- PROCEDIMIENTO: ver_asistencia_por_rango
--- Devuelve las asistencias registradas entre dos fechas.
--- Incluye colaborador, horario asignado y estado.
+-- CONSULTAR HISTORIAL DE CAMBIOS
+-- Ver todos los cambios de horario de un colaborador
 -- ========================================
-DROP PROCEDURE IF EXISTS ver_asistencia_por_rango;
+DROP PROCEDURE IF EXISTS consultar_historial_horarios;
 DELIMITER $$
 
-CREATE PROCEDURE ver_asistencia_por_rango (
-    IN p_fecha_inicio DATE,
-    IN p_fecha_fin DATE,
-    IN p_id_estado INT 
+CREATE PROCEDURE consultar_historial_horarios (
+    IN p_id_colaborador BIGINT,
+    IN p_id_dia_semana INT          -- NULL = todos los días
 )
 BEGIN
-    -- Valida que el rango sea correcto
-    IF p_fecha_inicio > p_fecha_fin THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'La fecha inicial no puede ser mayor que la final.';
-    END IF;
+    SELECT 
+        ah.id,
+        c.id AS id_colaborador,
+        e.nombre AS colaborador,
+        ds.nombre AS dia,
+        hb.nombre AS horario,
+        CONCAT(
+            TIME_FORMAT(hb.hora_inicio, '%H:%i'), 
+            ' - ', 
+            TIME_FORMAT(hb.hora_fin, '%H:%i')
+        ) AS rango_horario,
+        DATE_FORMAT(ah.fecha_inicio_vigencia, '%d/%m/%Y') AS desde,
+        IFNULL(DATE_FORMAT(ah.fecha_fin_vigencia, '%d/%m/%Y'), 'ACTUAL') AS hasta,
+        DATEDIFF(
+            IFNULL(ah.fecha_fin_vigencia, CURDATE()), 
+            ah.fecha_inicio_vigencia
+        ) AS dias_vigencia,
+        ah.motivo_cambio,
+        IF(ah.activo = 1, 'ACTIVO', 'INACTIVO') AS estado,
+        DATE_FORMAT(ah.fecha_asignacion, '%d/%m/%Y %H:%i') AS fecha_registro
+    FROM asignacion_horarios ah
+    JOIN colaboradores c ON c.id = ah.id_colaborador
+    JOIN entidades e ON e.id = c.id_entidad
+    JOIN dias_semana ds ON ds.id = ah.id_dia_semana
+    JOIN horarios_base hb ON hb.id = ah.id_horario_base
+    WHERE ah.id_colaborador = p_id_colaborador
+      AND (p_id_dia_semana IS NULL OR ah.id_dia_semana = p_id_dia_semana)
+    ORDER BY ah.fecha_inicio_vigencia DESC, ds.orden;
+END$$
+DELIMITER ;
 
+-- ========================================
+-- VER HORARIOS VIGENTES ACTUALES
+-- Muestra qué horario tiene cada colaborador AHORA
+-- ========================================
+DROP PROCEDURE IF EXISTS ver_horarios_vigentes;
+DELIMITER $$
+
+CREATE PROCEDURE ver_horarios_vigentes (
+    IN p_id_colaborador BIGINT
+)
+BEGIN
     SELECT 
         c.id AS id_colaborador,
         e.nombre AS colaborador,
+        ds.nombre AS dia,
         hb.nombre AS horario,
-        ra.fecha,
+        CASE 
+            WHEN hb.hora_inicio IS NULL THEN 'DESCANSO'
+            ELSE CONCAT(
+                TIME_FORMAT(hb.hora_inicio, '%H:%i'), 
+                ' - ', 
+                TIME_FORMAT(hb.hora_fin, '%H:%i')
+            )
+        END AS rango,
+        DATE_FORMAT(ah.fecha_inicio_vigencia, '%d/%m/%Y') AS vigente_desde,
+        DATEDIFF(CURDATE(), ah.fecha_inicio_vigencia) AS dias_con_este_horario,
+        CASE 
+            WHEN ah.fecha_fin_vigencia IS NULL THEN 'INDEFINIDO'
+            ELSE DATE_FORMAT(ah.fecha_fin_vigencia, '%d/%m/%Y')
+        END AS vigente_hasta
+    FROM asignacion_horarios ah
+    JOIN colaboradores c ON c.id = ah.id_colaborador
+    JOIN entidades e ON e.id = c.id_entidad
+    JOIN dias_semana ds ON ds.id = ah.id_dia_semana
+    JOIN horarios_base hb ON hb.id = ah.id_horario_base
+    WHERE ah.activo = 1
+      -- Muestra horarios vigentes HOY (con o sin fecha fin)
+      AND ah.fecha_inicio_vigencia <= CURDATE()
+      AND (ah.fecha_fin_vigencia IS NULL OR ah.fecha_fin_vigencia >= CURDATE())
+      AND (p_id_colaborador IS NULL OR c.id = p_id_colaborador)
+    ORDER BY e.nombre, ds.orden;
+END$$
+DELIMITER ;
+-- ========================================
+-- RESUMEN DE HORARIOS POR COLABORADOR
+-- Vista consolidada de la semana completa
+-- ========================================
+DROP PROCEDURE IF EXISTS resumen_horarios_colaborador;
+DELIMITER $$
+
+CREATE PROCEDURE resumen_horarios_colaborador (
+    IN p_id_colaborador BIGINT
+)
+BEGIN
+    SELECT 
+        c.id,
+        e.nombre AS colaborador,
+        MAX(CASE WHEN ds.id = 1 THEN hb.nombre END) AS lunes,
+        MAX(CASE WHEN ds.id = 2 THEN hb.nombre END) AS martes,
+        MAX(CASE WHEN ds.id = 3 THEN hb.nombre END) AS miercoles,
+        MAX(CASE WHEN ds.id = 4 THEN hb.nombre END) AS jueves,
+        MAX(CASE WHEN ds.id = 5 THEN hb.nombre END) AS viernes,
+        MAX(CASE WHEN ds.id = 6 THEN hb.nombre END) AS sabado,
+        MAX(CASE WHEN ds.id = 7 THEN hb.nombre END) AS domingo
+    FROM colaboradores c
+    JOIN entidades e ON e.id = c.id_entidad
+    LEFT JOIN asignacion_horarios ah ON ah.id_colaborador = c.id 
+        AND ah.activo = 1 
+        AND ah.fecha_fin_vigencia IS NULL
+    LEFT JOIN dias_semana ds ON ds.id = ah.id_dia_semana
+    LEFT JOIN horarios_base hb ON hb.id = ah.id_horario_base
+    WHERE c.id = p_id_colaborador
+    GROUP BY c.id, e.nombre;
+END$$
+DELIMITER ;
+
+-- ========================================
+-- PROCEDIMIENTO: gestionar_asistencia_automatica
+-- Registra marcaciones con asignación automática del horario vigente
+-- ========================================
+DROP PROCEDURE IF EXISTS gestionar_asistencia;
+DELIMITER $$
+CREATE PROCEDURE gestionar_asistencia(
+    IN p_colaborador_id BIGINT,
+    IN p_fecha DATE,
+    IN p_hora TIME,
+    IN p_tipo_movimiento VARCHAR(20),
+    OUT p_mensaje VARCHAR(500),
+    OUT p_success TINYINT(1),
+    OUT p_tardanza_minutos INT,
+    OUT p_estado_final VARCHAR(50)
+)
+BEGIN
+    DECLARE v_dia_semana_id INT;
+    DECLARE v_horario_base_id INT;
+    DECLARE v_hora_inicio TIME;
+    DECLARE v_tolerancia_min INT DEFAULT 0;
+    DECLARE v_minutos_lunch_std INT DEFAULT 60;
+    DECLARE v_id_registro BIGINT DEFAULT NULL;
+    DECLARE v_est_presente INT;
+    DECLARE v_est_tardanza INT;
+    DECLARE v_est_completado INT;
+    DECLARE v_est_descanso INT;
+    DECLARE v_entrada TIME DEFAULT NULL;
+    DECLARE v_lunch_in TIME DEFAULT NULL;
+    DECLARE v_lunch_out TIME DEFAULT NULL;
+    DECLARE v_salida TIME DEFAULT NULL;
+    DECLARE v_tolerancia_time TIME;
+    DECLARE v_es_tarde BOOLEAN DEFAULT FALSE;
+    DECLARE v_lunch_real INT DEFAULT 60;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET p_success = 0, p_mensaje = 'Error interno';
+        SELECT p_mensaje, p_success, 0 AS p_tardanza_minutos, '' AS p_estado_final;
+    END;
+
+    START TRANSACTION;
+
+    SET v_dia_semana_id = WEEKDAY(p_fecha) + 1;
+
+    SELECT id INTO v_est_presente FROM estado_asistencia WHERE nombre = 'PRESENTE' LIMIT 1;
+    SELECT id INTO v_est_tardanza FROM estado_asistencia WHERE nombre = 'TARDANZA' LIMIT 1;
+    SELECT id INTO v_est_completado FROM estado_asistencia WHERE nombre = 'COMPLETADO' LIMIT 1;
+    SELECT id INTO v_est_descanso FROM estado_asistencia WHERE nombre = 'DESCANSO_SEMANAL' LIMIT 1;
+
+    SELECT ah.id_horario_base, hb.hora_inicio, COALESCE(hb.minutos_tolerancia_entrada,0), COALESCE(hb.minutos_lunch,60)
+      INTO v_horario_base_id, v_hora_inicio, v_tolerancia_min, v_minutos_lunch_std
+      FROM asignacion_horarios ah
+      JOIN horarios_base hb ON hb.id = ah.id_horario_base
+     WHERE ah.id_colaborador = p_colaborador_id
+       AND ah.id_dia_semana = v_dia_semana_id
+       AND ah.activo = 1
+       AND p_fecha BETWEEN ah.fecha_inicio_vigencia AND COALESCE(ah.fecha_fin_vigencia,'9999-12-31')
+     ORDER BY ah.fecha_inicio_vigencia DESC LIMIT 1;
+
+    IF v_horario_base_id IS NULL THEN
+        IF NOT EXISTS (SELECT 1 FROM registro_asistencias WHERE id_colaborador = p_colaborador_id AND fecha = p_fecha) THEN
+            INSERT INTO registro_asistencias(id_colaborador, fecha, id_estado_asistencia, observaciones)
+            VALUES (p_colaborador_id, p_fecha, v_est_descanso, 'Descanso semanal programado');
+        END IF;
+        SET p_success = 0, p_mensaje = 'Día de descanso programado', p_estado_final = 'DESCANSO_SEMANAL';
+        COMMIT;
+        SELECT p_mensaje, p_success, 0 AS p_tardanza_minutos, p_estado_final;
+    ELSE
+
+        SELECT id, hora_entrada, hora_lunch_inicio, hora_lunch_fin, hora_salida
+          INTO v_id_registro, v_entrada, v_lunch_in, v_lunch_out, v_salida
+          FROM registro_asistencias
+         WHERE id_colaborador = p_colaborador_id AND fecha = p_fecha;
+
+        IF v_id_registro IS NULL THEN
+            INSERT INTO registro_asistencias(id_colaborador, fecha, id_horario_base, id_estado_asistencia)
+            VALUES (p_colaborador_id, p_fecha, v_horario_base_id, v_est_presente);
+            SET v_id_registro = LAST_INSERT_ID();
+        END IF;
+
+        SET v_tolerancia_time = SEC_TO_TIME(v_tolerancia_min * 60);
+        SET p_tardanza_minutos = 0;
+        SET v_lunch_real = v_minutos_lunch_std;
+
+        CASE UPPER(p_tipo_movimiento)
+            WHEN 'ENTRADA' THEN
+                IF v_entrada IS NOT NULL THEN
+                    SET p_mensaje = 'Ya hay entrada registrada hoy';
+                ELSE
+                    IF p_hora > ADDTIME(v_hora_inicio, v_tolerancia_time) THEN
+                        SET v_es_tarde = TRUE;
+                        SET p_tardanza_minutos = TIMESTAMPDIFF(MINUTE, ADDTIME(v_hora_inicio, v_tolerancia_time), p_hora);
+                    END IF;
+                    UPDATE registro_asistencias SET
+                        hora_entrada = p_hora,
+                        tardanza_minutos = p_tardanza_minutos,
+                        id_estado_asistencia = IF(v_es_tarde, v_est_tardanza, v_est_presente)
+                    WHERE id = v_id_registro;
+                    SET p_mensaje = IF(v_es_tarde, CONCAT('Entrada con ', p_tardanza_minutos, ' min de tardanza'), 'Entrada puntual');
+                END IF;
+
+            WHEN 'LUNCH_IN' THEN
+                IF v_lunch_in IS NOT NULL THEN
+                    SET p_mensaje = 'Ya inició almuerzo hoy';
+                ELSEIF v_entrada IS NULL THEN
+                    SET p_success = 0, p_mensaje = 'Debe marcar entrada primero';
+                    ROLLBACK;
+                    SELECT p_mensaje, p_success, 0 AS p_tardanza_minutos, '' AS p_estado_final;
+                ELSE
+                    UPDATE registro_asistencias SET hora_lunch_inicio = p_hora WHERE id = v_id_registro;
+                    SET p_mensaje = 'Inicio de almuerzo registrado';
+                END IF;
+
+            WHEN 'LUNCH_OUT' THEN
+                IF v_lunch_out IS NOT NULL THEN
+                    SET p_mensaje = 'Ya finalizó almuerzo hoy';
+                ELSEIF v_lunch_in IS NULL THEN
+                    SET p_success = 0, p_mensaje = 'Debe iniciar almuerzo primero';
+                    ROLLBACK;
+                    SELECT p_mensaje, p_success, 0 AS p_tardanza_minutos, '' AS p_estado_final;
+                ELSE
+                    SET v_lunch_real = TIMESTAMPDIFF(MINUTE, hora_lunch_inicio, p_hora);
+                    UPDATE registro_asistencias SET hora_lunch_fin = p_hora, minutos_lunch = v_lunch_real WHERE id = v_id_registro;
+                    SET p_mensaje = 'Fin de almuerzo registrado';
+                END IF;
+
+            WHEN 'SALIDA' THEN
+                IF v_salida IS NOT NULL THEN
+                    SET p_mensaje = 'Ya registró salida hoy';
+                ELSEIF v_entrada IS NULL THEN
+                    SET p_success = 0, p_mensaje = 'No puede salir sin entrada';
+                    ROLLBACK;
+                    SELECT p_mensaje, p_success, 0 AS p_tardanza_minutos, '' AS p_estado_final;
+                ELSE
+					IF v_lunch_in IS NOT NULL AND v_lunch_out IS NOT NULL THEN
+						SET v_lunch_real = TIMESTAMPDIFF(MINUTE, v_lunch_in, v_lunch_out);
+					ELSEIF v_lunch_in IS NOT NULL AND v_lunch_out IS NULL THEN
+						SET v_lunch_real = v_minutos_lunch_std;  -- 60 minutos o lo que tenga el horario
+					END IF;
+                    UPDATE registro_asistencias SET
+                        hora_salida = p_hora,
+                        minutos_trabajados = TIMESTAMPDIFF(MINUTE, v_entrada, p_hora) - v_lunch_real,
+                        minutos_lunch = v_lunch_real,
+                        id_estado_asistencia = v_est_completado
+                    WHERE id = v_id_registro;
+                    SET p_mensaje = 'Salida registrada - Jornada completada';
+                    SET p_estado_final = 'COMPLETADO';
+                END IF;
+
+            ELSE
+                SET p_success = 0, p_mensaje = 'Tipo de movimiento inválido';
+                ROLLBACK;
+                SELECT p_mensaje, p_success, 0 AS p_tardanza_minutos, '' AS p_estado_final;
+        END CASE;
+
+        SET p_success = 1;
+        COMMIT;
+
+        SELECT p_mensaje, p_success, p_tardanza_minutos, COALESCE(p_estado_final, '') AS p_estado_final;
+
+    END IF;
+
+END$$
+DELIMITER ;
+
+-- ========================================
+-- SP: Reporte de asistencias por rango de fechas (el que te faltaba)
+-- ========================================
+DROP PROCEDURE IF EXISTS ver_asistencia_por_rango;
+DELIMITER $$
+CREATE PROCEDURE ver_asistencia_por_rango(
+    IN p_fecha_inicio DATE,
+    IN p_fecha_fin DATE,
+    IN p_id_colaborador BIGINT, 
+    IN p_id_estado INT           
+)
+BEGIN
+    WITH RECURSIVE calendario AS (
+        SELECT p_fecha_inicio AS fecha
+        UNION ALL
+        SELECT fecha + INTERVAL 1 DAY
+        FROM calendario
+        WHERE fecha + INTERVAL 1 DAY <= p_fecha_fin
+    ),
+    horarios_vigentes AS (
+        SELECT 
+            col.id AS id_colaborador,
+            CONCAT(col.nombres, ' ', col.apellidos) AS colaborador,
+            cal.fecha,
+            CASE DAYOFWEEK(cal.fecha) WHEN 1 THEN 7 ELSE DAYOFWEEK(cal.fecha)-1 END AS id_dia_semana,
+            ds.nombre AS dia_semana,
+            ah.id_horario_base,
+            hb.nombre AS horario_programado,
+            hb.hora_inicio,
+            hb.hora_fin,
+            COALESCE(hd.hora_inicio, hb.hora_inicio) AS hora_inicio_real,
+            COALESCE(hd.hora_fin, hb.hora_fin) AS hora_fin_real,
+            IF(hb.id IS NULL OR (hd.hora_inicio IS NULL AND hd.hora_fin IS NULL), 1, 0) AS es_descanso
+        FROM colaboradores col
+        CROSS JOIN calendario cal
+        LEFT JOIN dias_semana ds ON ds.id = WEEKDAY(cal.fecha)+1
+        LEFT JOIN asignacion_horarios ah ON ah.id_colaborador = col.id
+            AND ah.id_dia_semana = WEEKDAY(cal.fecha)+1
+            AND ah.activo = 1
+            AND cal.fecha BETWEEN ah.fecha_inicio_vigencia AND COALESCE(ah.fecha_fin_vigencia, '9999-12-31')
+            AND ah.fecha_inicio_vigencia = (
+                SELECT MAX(ah2.fecha_inicio_vigencia) 
+                FROM asignacion_horarios ah2 
+                WHERE ah2.id_colaborador = col.id 
+                  AND ah2.id_dia_semana = WEEKDAY(cal.fecha)+1
+                  AND ah2.activo = 1
+                  AND cal.fecha >= ah2.fecha_inicio_vigencia
+            )
+        LEFT JOIN horarios_base hb ON hb.id = ah.id_horario_base
+        LEFT JOIN asignacion_horarios_detalle hd ON hd.id_asignacion = ah.id AND hd.fecha = cal.fecha
+        WHERE (p_id_colaborador IS NULL OR col.id = p_id_colaborador)
+    )
+    SELECT 
+        hv.id_colaborador,
+        hv.colaborador,
+        hv.fecha,
+        hv.dia_semana,
+        IF(hv.es_descanso=1, 'Descanso', hv.horario_programado) AS horario,
         ra.hora_entrada,
         ra.hora_lunch_inicio,
         ra.hora_lunch_fin,
@@ -1375,20 +1726,21 @@ BEGIN
         ra.minutos_trabajados,
         ra.minutos_lunch,
         ra.tardanza_minutos,
-        ea.nombre AS estado_asistencia,
+        COALESCE(ea.nombre, 
+            IF(hv.es_descanso=1, 'DESCANSO_SEMANAL',
+                IF(ra.id IS NULL, 'PENDIENTE', 'PRESENTE')
+            )
+        ) AS estado,
+        hv.hora_inicio_real AS programada_inicio,
+        hv.hora_fin_real AS programada_fin,
         ra.observaciones
-    FROM registro_asistencias ra
-    JOIN colaboradores c ON c.id = ra.id_colaborador
-    JOIN entidades e ON e.id = c.id_entidad
-    LEFT JOIN horarios_base hb ON hb.id = ra.id_horario_base
+    FROM horarios_vigentes hv
+    LEFT JOIN registro_asistencias ra ON ra.id_colaborador = hv.id_colaborador AND ra.fecha = hv.fecha
     LEFT JOIN estado_asistencia ea ON ea.id = ra.id_estado_asistencia
-    WHERE ra.fecha BETWEEN p_fecha_inicio AND p_fecha_fin
-		AND (p_id_estado IS NULL OR ra.id_estado_asistencia = p_id_estado)
-    ORDER BY ra.fecha DESC, colaborador ASC;
-END $$
-
+    WHERE (p_id_estado IS NULL OR ra.id_estado_asistencia = p_id_estado)
+    ORDER BY hv.fecha DESC, hv.colaborador;
+END$$
 DELIMITER ;
-
 -- ===========================================================================================================================================
 -- ===========================================================================================================================================
 -- ===========================================================================================================================================
@@ -2002,8 +2354,6 @@ DELIMITER ;
 -- ===========================================================================================================================================
 -- ===========================================================================================================================================
 -- BLOQUE 04 PROCEDIMIENTOS ALMACENADOS CRUD
-
--- USE vet_manada_woof;
 
 -- ========================================
 -- SP: REGISTRAR_HISTORIA_CLINICA

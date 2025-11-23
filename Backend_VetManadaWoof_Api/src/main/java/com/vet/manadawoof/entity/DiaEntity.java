@@ -3,33 +3,38 @@ package com.vet.manadawoof.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "dias_semana")
 public class DiaEntity implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
-    @Column(length = 32, nullable = false, unique = true)
+    @Column(length = 20, nullable = false, unique = true)
     private String nombre;
     
-    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
-    @JdbcTypeCode(SqlTypes.BIT)
-    private Boolean activo;
+    @Column(nullable = false, unique = true)
+    private Integer orden;
+    
+    @OneToMany(mappedBy = "dia")
+    @JsonIgnore
+    private List<HorarioBaseRolEntity> horarioBaseRoles;
     
     @OneToMany(mappedBy = "dia")
     @JsonIgnore
     private List<AsignacionHorarioEntity> asignaciones;
-    
 }

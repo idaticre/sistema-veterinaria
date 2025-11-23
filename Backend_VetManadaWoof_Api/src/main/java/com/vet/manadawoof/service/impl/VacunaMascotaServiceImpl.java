@@ -25,7 +25,7 @@ public class VacunaMascotaServiceImpl implements VacunaMascotaService {
     
     // ---------------- LISTAR VACUNAS ----------------
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<VacunaMascotaResponseDTO> listarVacunasMascota() {
         List<VacunaMascotaEntity> lista = repository.findAll();
         return lista.stream()

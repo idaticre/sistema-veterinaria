@@ -67,7 +67,7 @@ public class MedicamentoServiceImpl implements MedicamentoService {
     
     // Obtener medicamento por ID
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public MedicamentoEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vacuna no encontrada"));

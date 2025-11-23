@@ -3,22 +3,22 @@ package com.vet.manadawoof.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * Entity que representa el historial de medicamentos aplicados a una mascota.
- * Cada registro contiene referencia a mascota, medicamento, vía de aplicación,
- * dosis, fecha, colaborador y veterinario responsable, observaciones y estado lógico.
- */
-@Entity
-@Table(name = "medicamentos_mascota")
-@Data
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MedicamentoMascotaEntity {
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name = "medicamentos_mascota")
+public class MedicamentoMascotaEntity implements Serializable {
     
+    private static final long serialVersionUID = 1L;
     // ID interno autoincremental
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

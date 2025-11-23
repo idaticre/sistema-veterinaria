@@ -1,26 +1,24 @@
 package com.vet.manadawoof.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * Entity que representa el historial de vacunas aplicadas a una mascota.
- * Cada registro contiene referencia a mascota, vacuna, vía de aplicación,
- * dosis, fecha, colaborador y veterinario responsable, observaciones y estado lógico.
- */
-@Entity
-@Table(name = "vacunas_mascota")
-@Data
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class VacunaMascotaEntity {
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name = "vacunas_mascota")
+
+public class VacunaMascotaEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
     
     // ID interno autoincremental
     @Id

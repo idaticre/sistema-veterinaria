@@ -1,26 +1,24 @@
 package com.vet.manadawoof.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 
-/**
- * Entidad que representa las vías de aplicación de medicamentos.
- */
 @Builder
 @AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "vias_aplicacion")
 public class AplicacionViaEntity implements Serializable {
     
+    private static final long serialVersionUID = 1L;
     // Identificador único de la vía de aplicación
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -12,29 +12,29 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TipoPersonaJuridicaServiceImpl implements TipoPersonaJuridicaService {
-
+    
     private final TipoPersonaJuridicaRepository repository;
-
+    
     @Override
     @Transactional
     public TipoPersonaJuridicaEntity crearTipoPersonaJuridica(TipoPersonaJuridicaEntity tipo) {
         return repository.save(tipo);
     }
-
+    
     @Override
     @Transactional
     public TipoPersonaJuridicaEntity actualizarTipoPersonaJuridica(Integer id, TipoPersonaJuridicaEntity tipo) {
         TipoPersonaJuridicaEntity existente = repository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Tipo persona jurídica no encontrado con id " + id));
-
+        
         existente.setNombre(tipo.getNombre());
         existente.setDescripcion(tipo.getDescripcion());
         existente.setActivo(tipo.getActivo());
-
+        
         return repository.save(existente);
     }
-
+    
     @Override
     @Transactional
     public void eliminarTipoPersonaJuridica(Integer id) {
@@ -43,15 +43,15 @@ public class TipoPersonaJuridicaServiceImpl implements TipoPersonaJuridicaServic
                         new RuntimeException("Tipo persona jurídica no encontrado con id " + id));
         repository.delete(existente);
     }
-
+    
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TipoPersonaJuridicaEntity> listarTiposPersonaJuridica() {
         return repository.findAll();
     }
-
+    
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TipoPersonaJuridicaEntity obtenerTipoPersonaJuridicaPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() ->

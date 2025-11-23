@@ -111,7 +111,7 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     
     // Lista todos los colaboradores con los datos generales de su entidad asociada.
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ColaboradorResponseDTO> listar() {
         List<Object[]> results = entityManager.createNativeQuery(
                         "SELECT c.id, c.codigo, c.id_entidad, c.fecha_ingreso, e.fecha_registro, " +
