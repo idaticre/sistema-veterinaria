@@ -6,7 +6,10 @@ import java.time.*;
 
 /**
  * DTO que representa un registro de asistencia de un colaborador.
- * Se utiliza para enviar datos al frontend sin exponer la entidad.
+ * <p>
+ * Este DTO sirve para DOS propósitos:
+ * 1. Respuesta de registrar() - incluye success, mensaje, tardanza
+ * 2. Respuesta de verAsistenciaPorRango() - incluye colaborador, horario, estado
  */
 @Data
 @AllArgsConstructor
@@ -14,45 +17,47 @@ import java.time.*;
 @Builder
 public class RegistroAsistenciaResponseDTO {
     
-    // ID del colaborador
+    // ========================================
+    // CAMPOS PARA registrar() - Del SP gestionar_asistencia
+    // ========================================
+    private Boolean success;
+    private String mensaje;
+    private Integer tardanzaMinutos;
+    private String estadoFinal;
+    private LocalTime horaMarcacion;
+    private String tipoMarca;
+    
+    // ========================================
+    // CAMPOS PARA verAsistenciaPorRango() - Del SP ver_asistencia_por_rango
+    // ========================================
     private Long idColaborador;
-    
-    // Nombre colaborador
     private String colaborador;
-    
-    // Nombre del horario asignado (opcional)
     private String horario;
-    
-    // Fecha del registro
     private LocalDate fecha;
+    private String diaSemana;  // Opcional, si tu SP lo retorna
     
-    // Hora de entrada
+    // Marcaciones del día
     private LocalTime horaEntrada;
-    
-    // Inicio del almuerzo
     private LocalTime horaLunchInicio;
-    
-    // Fin del almuerzo
     private LocalTime horaLunchFin;
-    
-    // Hora de salida
     private LocalTime horaSalida;
     
-    // Minutos trabajados (calculado)
+    // Cálculos
     private Integer minutosTrabajados;
-    
-    // Minutos de almuerzo
     private Integer minutosLunch;
     
-    // Estado del registro (referencia a la tabla estado_asistencia)
-    private String estadoAsistencia;
+    // Estado
+    private String estadoAsistencia;     // Nombre del estado (PRESENTE, TARDANZA, etc.)
+    private Integer idEstadoAsistencia;  // ID del estado
     
-    private Integer tardanzaMinutos;
-    
-    
-    // Observaciones opcionales
+    // Otros
     private String observaciones;
-    
-    // Origen del registro: 'APP', 'BIOMETRICO', 'MANUAL'
     private String registroOrigen;
+    
+    // Horario programado (del horario base o excepción)
+    private LocalTime horaProgramadaInicio;
+    private LocalTime horaProgramadaFin;
+    
+    // Campos adicionales para registrar()
+    private String nombreColaborador;  // Para registrar()
 }

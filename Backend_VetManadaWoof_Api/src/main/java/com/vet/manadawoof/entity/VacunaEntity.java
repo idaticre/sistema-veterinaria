@@ -2,22 +2,24 @@ package com.vet.manadawoof.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "vacunas")
 public class VacunaEntity implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
     
     // Identificador único de la vacuna
     @Id

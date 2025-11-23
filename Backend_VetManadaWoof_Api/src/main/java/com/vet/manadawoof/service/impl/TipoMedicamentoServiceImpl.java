@@ -53,14 +53,14 @@ public class TipoMedicamentoServiceImpl implements TipoMedicamentoService {
     
     // Lista todos los tipos de medicamentos
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TipoMedicamentoEntity> listar() {
         return repository.findAll();
     }
     
     // Obtiene un tipo de medicamento por su ID
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TipoMedicamentoEntity obtenerPorId(Integer id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Tipo de medicamento no encontrado"));
     }

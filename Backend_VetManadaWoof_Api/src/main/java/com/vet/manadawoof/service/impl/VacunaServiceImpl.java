@@ -56,13 +56,13 @@ public class VacunaServiceImpl implements VacunaService {
     }
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<VacunaEntity> listar() {
         return repository.findAll();
     }
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public VacunaEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vacuna no encontrada"));

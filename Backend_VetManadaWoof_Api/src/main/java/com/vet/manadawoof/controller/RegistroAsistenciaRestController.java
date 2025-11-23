@@ -2,16 +2,16 @@ package com.vet.manadawoof.controller;
 
 import com.vet.manadawoof.dtos.request.FiltroAsistenciaRequestDTO;
 import com.vet.manadawoof.dtos.request.RegistrarAsistenciaRequestDTO;
+import com.vet.manadawoof.dtos.response.ApiResponseWithMetadata;
 import com.vet.manadawoof.dtos.response.RegistroAsistenciaResponseDTO;
-import com.vet.manadawoof.dtos.response.ApiResponse;
 import com.vet.manadawoof.service.RegistroAsistenciaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173")
@@ -23,31 +23,100 @@ public class RegistroAsistenciaRestController {
     private final RegistroAsistenciaService service;
     
     /**
-     * Registrar o actualizar la asistencia de un colaborador
+     * Registrar marca de asistencia (entrada, lunch, salida...)
      */
     @PostMapping("/registrar")
-    public ResponseEntity<ApiResponse<String>> registrarAsistencia(@Valid @RequestBody RegistrarAsistenciaRequestDTO request
+    public ResponseEntity<ApiResponseWithMetadata<RegistroAsistenciaResponseDTO>> registrarAsistencia(
+            @Valid @RequestBody RegistrarAsistenciaRequestDTO request
     ) {
-        
-        String mensaje = service.registrar(request);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, mensaje));
+        try {
+            RegistroAsistenciaResponseDTO resultado = service.registrar(request);
+            
+            var metadata = ApiResponseWithMetadata.Metadata.builder()
+                    .timestamp(Instant.now().toEpochMilli())
+                    .version("1.0")
+                    .operation("gestionar_asistencia")
+                    .totalRecords(1)
+                    .build();
+            
+            var response = ApiResponseWithMetadata.<RegistroAsistenciaResponseDTO> builder()
+                    .success(true)
+                    .message(resultado.getMensaje())
+                    .data(resultado)
+                    .metadata(metadata)
+                    .build();
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            var metadata = ApiResponseWithMetadata.Metadata.builder()
+                    .timestamp(Instant.now().toEpochMilli())
+                    .version("1.0")
+                    .operation("gestionar_asistencia")
+                    .totalRecords(0)
+                    .build();
+            
+            var response = ApiResponseWithMetadata.<RegistroAsistenciaResponseDTO> builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .data(null)
+                    .metadata(metadata)
+                    .build();
+            
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(response);
+        }
     }
     
     /**
-     * Consultar asistencias por rango de fechas
-     * Ejemplo: /api/asistencias?fechaInicio=2025-10-01&fechaFin=2025-10-07
+     * Reporte completo de asistencias por rango de fechas
+     * Ahora soporta filtro opcional por colaborador
      */
     @PostMapping("/rango")
-    public ResponseEntity<ApiResponse<List<RegistroAsistenciaResponseDTO>>> verAsistenciaPorRango(@RequestBody FiltroAsistenciaRequestDTO filtro
+    public ResponseEntity<ApiResponseWithMetadata<List<RegistroAsistenciaResponseDTO>>> verAsistenciaPorRango(
+            @Valid @RequestBody FiltroAsistenciaRequestDTO filtro
     ) {
+        List<RegistroAsistenciaResponseDTO> lista = service.verAsistenciaPorRango(
+                filtro.getFechaInicio(),
+                filtro.getFechaFin(),
+                filtro.getIdColaborador(),
+                filtro.getIdEstado()
+        );
         
-        List<RegistroAsistenciaResponseDTO> lista = service.verAsistenciaPorRango(filtro.getFechaInicio(), filtro.getFechaFin(),
-                
-                // puede ser null
-                filtro.getIdEstado());
+        // Calcular estadísticas
+        long totalPresentes = lista.stream()
+                .filter(r -> "PRESENTE".equals(r.getEstadoAsistencia())
+                        || "COMPLETADO".equals(r.getEstadoAsistencia()))
+                .count();
         
-        return ResponseEntity.ok(new ApiResponse<>(true, "Lista de asistencias obtenida correctamente", lista));
+        long totalTardanzas = lista.stream()
+                .filter(r -> "TARDANZA".equals(r.getEstadoAsistencia()))
+                .count();
+        
+        long totalDescansos = lista.stream()
+                .filter(r -> "DESCANSO_SEMANAL".equals(r.getEstadoAsistencia()))
+                .count();
+        
+        var metadata = ApiResponseWithMetadata.Metadata.builder()
+                .timestamp(Instant.now().toEpochMilli())
+                .version("1.0")
+                .operation("ver_asistencia_por_rango")
+                .totalRecords(lista.size())
+                .build();
+        
+        String mensaje = String.format(
+                "Registros obtenidos: %d total | %d presentes | %d tardanzas | %d descansos",
+                lista.size(), totalPresentes, totalTardanzas, totalDescansos
+        );
+        
+        var response = ApiResponseWithMetadata.<List<RegistroAsistenciaResponseDTO>> builder()
+                .success(true)
+                .message(mensaje)
+                .data(lista)
+                .metadata(metadata)
+                .build();
+        
+        return ResponseEntity.ok(response);
     }
-    
-    
 }

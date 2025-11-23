@@ -64,14 +64,14 @@ public class TipoRecordatorioServiceImpl implements TipoRecordatorioService {
     
     // Lista todos los tipos de recordatorio registrados.
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TipoRecordatorioEntity> listar() {
         return repository.findAll();
     }
     
     // Obtiene un tipo de recordatorio específico por su ID.
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TipoRecordatorioEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tipo de recordatorio no encontrado"));

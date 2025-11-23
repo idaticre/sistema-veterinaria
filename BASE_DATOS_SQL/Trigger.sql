@@ -18,3 +18,28 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+
+
+-- COPIAR AUTOMÁTICAMENTE HORARIOS DEL ROL
+    IF EXISTS (SELECT 1 FROM colaboradores WHERE id = v_id_colaborador AND id_rol IS NOT NULL) THEN
+        INSERT INTO asignacion_horarios (
+            id_colaborador,
+            id_horario_base,
+            id_dia_semana,
+            fecha_inicio_vigencia,
+            motivo_cambio,
+            activo
+        )
+        SELECT 
+            v_id_colaborador,
+            hbr.id_horario_base,
+            hbr.id_dia_semana,
+            p_fecha_ingreso,
+            CONCAT('Copia automática del rol al ingresar'),
+            1
+        FROM horarios_base_roles hbr
+        WHERE hbr.id_rol = (SELECT id_rol FROM colaboradores WHERE id = v_id_colaborador)
+        ON DUPLICATE KEY UPDATE activo = 1;  -- por si algún día se vuelve a ejecutar
+    END IF;

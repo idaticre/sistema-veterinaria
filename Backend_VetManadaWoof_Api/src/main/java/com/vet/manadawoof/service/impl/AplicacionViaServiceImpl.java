@@ -64,14 +64,14 @@ public class AplicacionViaServiceImpl implements AplicacionViaService {
     
     // Lista todas las vías de aplicación
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<AplicacionViaEntity> listar() {
         return repository.findAll();
     }
     
     // Obtiene una vía de aplicación por su ID
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public AplicacionViaEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vía de aplicación no encontrada"));

@@ -85,7 +85,7 @@ public class RazaServiceImpl implements RazaService {
      * @return Lista completa de razas.
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RazaEntity> listar() {
         return repository.findAll();
     }
@@ -99,7 +99,7 @@ public class RazaServiceImpl implements RazaService {
      */
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public RazaEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Raza no encontrada"));

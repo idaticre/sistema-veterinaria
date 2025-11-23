@@ -7,15 +7,17 @@ import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 
-// Entidad de estados de mascota
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "estado_mascota")
 public class EstadoMascotaEntity implements Serializable {
-    
+    private static final long serialVersionUID = 1L;
     // ID autogenerado
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -64,14 +64,14 @@ public class EstadoAgendaServiceImpl implements EstadoAgendaService {
     
     // Lista todos los estados de agenda registrados.
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<EstadoAgendaEntity> listar() {
         return repository.findAll();
     }
     
     // Obtiene un estado de agenda específico por su ID.
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public EstadoAgendaEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Estado de agenda no encontrado"));

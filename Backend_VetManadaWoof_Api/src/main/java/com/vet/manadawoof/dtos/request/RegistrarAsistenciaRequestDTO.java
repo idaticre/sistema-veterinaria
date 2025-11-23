@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class RegistrarAsistenciaRequestDTO {
-    private Integer idColaborador;
+    private Long idColaborador;
     
     // ENTRADA, LUNCH_IN, LUNCH_OUT, SALIDA
     private TipoMarca tipoMarca;

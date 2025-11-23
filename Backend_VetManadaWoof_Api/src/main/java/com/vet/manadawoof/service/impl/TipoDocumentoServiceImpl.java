@@ -12,27 +12,27 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TipoDocumentoServiceImpl implements TipoDocumentoService {
-
+    
     private final TipoDocumentoRepository repository;
-
+    
     @Override
     @Transactional
     public TipoDocumentoEntity crearTdoc(TipoDocumentoEntity tipoDocumento) {
         return repository.save(tipoDocumento);
     }
-
+    
     @Override
     @Transactional
     public TipoDocumentoEntity actualizarTdoc(Integer id, TipoDocumentoEntity tipoDocumento) {
         TipoDocumentoEntity existente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado con id " + id));
-
+        
         existente.setDescripcion(tipoDocumento.getDescripcion());
         existente.setActivo(tipoDocumento.getActivo());
-
+        
         return repository.save(existente);
     }
-
+    
     @Override
     @Transactional
     public void eliminarTdoc(Integer id) {
@@ -40,15 +40,15 @@ public class TipoDocumentoServiceImpl implements TipoDocumentoService {
                 .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado con id " + id));
         repository.delete(existente);
     }
-
+    
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TipoDocumentoEntity> listarTdoc() {
         return repository.findAll();
     }
-
+    
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TipoDocumentoEntity obtenerTdocPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado con id " + id));
