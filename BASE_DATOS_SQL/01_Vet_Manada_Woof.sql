@@ -2,7 +2,7 @@
 -- BASE DE DATOS: vet_manada_woof
 -- Este script contiene la definición inicial de la base de datos
 -- =========================================================
-
+select * from agenda;
 -- ========================================
 -- 0. Creación de la Base de Datos
 -- ========================================
@@ -1488,13 +1488,3 @@ CREATE INDEX idx_historia_archivos_historia ON historia_clinica_archivos(id_hist
 -- Útil para vistas o filtros en la interfaz de archivos clínicos.
 CREATE INDEX idx_archivo_tipo ON historia_clinica_archivos(id_t_archivo);
 
-UPDATE usuarios SET password_hash = '$2a$10$irrHhasoJrgjaO2P42qZtulg.GzGUhZJvzD8.k9.YmphePrzuSBXy' WHERE username = 'caja_milo';
-
-INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES
-(1, 2), -- admin también es VETERINARIO
-(1, 3); -- admin también es RECEPCIONISTA
-
-INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES
-(1, 1), -- admin -> ADMIN
-(2, 2), -- juan -> VETERINARIO
-(3, 4); -- maria -> CLIENTE
