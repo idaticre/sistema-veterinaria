@@ -63,14 +63,14 @@ public class CanalComunicacionServiceImpl implements CanalComunicacionService {
     // Lista todos los canales de comunicación registrados.
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<CanalComunicacionEntity> listar() {
         return repository.findAll();
     }
     
     // Obtiene un canal de comunicación específico por su ID.
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CanalComunicacionEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Canal de comunicación no encontrado"));

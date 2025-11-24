@@ -27,13 +27,9 @@ public class TamanoMascServiceImpl implements TamanoMascService {
     @Override
     @Transactional
     public TamanoMascEntity crear(TamanoMascEntity entity) {
-        repository.findAll().stream()
-                .filter(e -> e.getTamano().equalsIgnoreCase(entity.getTamano()))
-                .findFirst()
-                .ifPresent(e -> {
-                    throw new RuntimeException("Tamaño ya existe");
-                });
-        return repository.save(entity);
+        repository.findAll().stream().filter(e -> e.getTamano().equalsIgnoreCase(entity.getTamano())).findFirst().ifPresent(e -> {
+            throw new RuntimeException("Tamaño ya existe");
+        }); return repository.save(entity);
     }
     
     /**
@@ -47,18 +43,13 @@ public class TamanoMascServiceImpl implements TamanoMascService {
     @Override
     @Transactional
     public TamanoMascEntity actualizar(TamanoMascEntity entity) {
-        TamanoMascEntity existente = repository.findById(entity.getId())
-                .orElseThrow(() -> new RuntimeException("Tamaño no encontrado"));
+        TamanoMascEntity existente = repository.findById(entity.getId()).orElseThrow(() -> new RuntimeException("Tamaño no encontrado"));
         
-        repository.findAll().stream()
-                .filter(e -> e.getTamano().equalsIgnoreCase(entity.getTamano()) && ! e.getId().equals(entity.getId()))
-                .findFirst()
-                .ifPresent(e -> {
-                    throw new RuntimeException("Otro tamaño con ese nombre ya existe");
-                });
+        repository.findAll().stream().filter(e -> e.getTamano().equalsIgnoreCase(entity.getTamano()) && ! e.getId().equals(entity.getId())).findFirst().ifPresent(e -> {
+            throw new RuntimeException("Otro tamaño con ese nombre ya existe");
+        });
         
-        existente.setTamano(entity.getTamano());
-        existente.setActivo(entity.getActivo());
+        existente.setTamano(entity.getTamano()); existente.setActivo(entity.getActivo());
         return repository.save(existente);
     }
     
@@ -75,16 +66,14 @@ public class TamanoMascServiceImpl implements TamanoMascService {
     public String eliminar(Integer id) {
         if(! repository.existsById(id)) {
             throw new RuntimeException("Tamaño no encontrado");
-        }
-        repository.deleteById(id);
-        return "Tamaño eliminado correctamente";
+        } repository.deleteById(id); return "Tamaño eliminado correctamente";
     }
     
     /**
      * @return Lista completa.
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<TamanoMascEntity> listar() {
         return repository.findAll();
     }
@@ -96,9 +85,8 @@ public class TamanoMascServiceImpl implements TamanoMascService {
      */
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TamanoMascEntity obtenerPorId(Integer id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tamaño no encontrada"));
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Tamaño no encontrada"));
     }
 }

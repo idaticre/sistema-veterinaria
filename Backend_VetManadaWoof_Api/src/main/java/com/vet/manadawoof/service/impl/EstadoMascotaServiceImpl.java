@@ -50,14 +50,14 @@ public class EstadoMascotaServiceImpl implements EstadoMascotaService {
     
     // Listar estados
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<EstadoMascotaEntity> listar() {
         return repository.findAll();
     }
     
     // Obtener estado por ID
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public EstadoMascotaEntity obtenerPorId(Integer id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Vacuna no encontrada"));
     }

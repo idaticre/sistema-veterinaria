@@ -93,7 +93,7 @@ public class MedicamentoMascotaServiceImpl implements MedicamentoMascotaService 
     
     // ---------------- LISTAR MEDICAMENTOS ----------------
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<MedicamentoMascotaResponseDTO> listarMedicamentosMascota() {
         List<MedicamentoMascotaEntity> lista = entityManager.createQuery("SELECT m FROM MedicamentoMascotaEntity m", MedicamentoMascotaEntity.class)
                 .getResultList();

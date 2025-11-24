@@ -4,18 +4,22 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "mascotas")
-@Data
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MascotaEntity {
-    
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name = "mascotas")
+public class MascotaEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
     // ID interno de la mascota
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

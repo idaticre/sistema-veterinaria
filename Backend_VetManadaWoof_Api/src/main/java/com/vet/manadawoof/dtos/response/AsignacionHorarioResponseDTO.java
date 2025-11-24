@@ -1,7 +1,11 @@
 package com.vet.manadawoof.dtos.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -11,16 +15,15 @@ import java.time.LocalDateTime;
 public class AsignacionHorarioResponseDTO {
     private Long id;
     private Long idColaborador;
+    private String nombreColaborador;
     private Integer idHorarioBase;
-    private Integer idDia;
+    private String nombreHorarioBase;
+    private Integer idDiaSemana;
+    private String nombreDia;
+    private Integer ordenDia;
+    private LocalDate fechaInicioVigencia;
+    private LocalDate fechaFinVigencia;
+    private String motivoCambio;
     private LocalDateTime fechaAsignacion;
     private Boolean activo;
-    
-    // Nombres legibles para frontend
-    private String colaborador;
-    private String horario;
-    private String dia;
-    
-    // fallback para operaciones tipo SP
-    private String mensaje;
 }

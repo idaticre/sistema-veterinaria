@@ -1,25 +1,24 @@
 package com.vet.manadawoof.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 
-/**
- * Entidad que representa los tipos de medicamento.
- */
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "medicamento_tipo")
 public class TipoMedicamentoEntity implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
     
     // Identificador único del tipo de medicamento
     @Id

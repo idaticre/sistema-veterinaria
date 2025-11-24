@@ -6,13 +6,18 @@ import lombok.*;
 import java.io.Serializable;
 
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "ingresos_servicios", indexes = {
         @Index(name = "idx_ingresos_servicios_servicio", columnList = "id_servicio"), @Index(name = "idx_ingresos_servicios_colab", columnList = "id_colaborador"), @Index(name = "idx_ingresos_servicios_vet", columnList = "id_veterinario"), @Index(name = "idx_ingresos_servicios_colab_fecha", columnList = "id_colaborador, fecha_registro")})
 public class IngresoServicioEntity implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

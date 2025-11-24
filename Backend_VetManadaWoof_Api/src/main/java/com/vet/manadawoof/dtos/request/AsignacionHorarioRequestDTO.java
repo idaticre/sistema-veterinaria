@@ -1,8 +1,12 @@
 package com.vet.manadawoof.dtos.request;
 
-import lombok.*;
-
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -10,14 +14,19 @@ import jakarta.validation.constraints.NotNull;
 @NoArgsConstructor
 public class AsignacionHorarioRequestDTO {
     
-    @NotNull(message = "ID de colaborador es obligatorio")
+    @NotNull(message = "El ID del colaborador es obligatorio")
     private Long idColaborador;
     
-    @NotNull(message = "ID de horario base es obligatorio")
+    @NotNull(message = "El ID del horario base es obligatorio")
     private Integer idHorarioBase;
     
-    @NotNull(message = "ID de día es obligatorio")
-    private Integer idDia;
+    @NotNull(message = "El ID del día es obligatorio")
+    private Integer idDiaSemana;
     
-    private Boolean activo; // opcional, por defecto true
+    @NotNull(message = "La fecha de inicio de vigencia es obligatoria")
+    private LocalDate fechaInicioVigencia;
+    
+    private LocalDate fechaFinVigencia;
+    
+    private String motivoCambio;
 }

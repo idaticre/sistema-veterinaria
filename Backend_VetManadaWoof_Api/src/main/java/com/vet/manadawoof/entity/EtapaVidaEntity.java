@@ -8,12 +8,17 @@ import org.hibernate.type.SqlTypes;
 import java.io.Serializable;
 
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "etapas_vida")
 public class EtapaVidaEntity implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
     
     // Identificador único de la etapa de vida
     @Id

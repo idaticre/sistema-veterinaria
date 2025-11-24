@@ -9,13 +9,17 @@ import java.util.List;
 
 @Builder
 @AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "agenda", indexes = {
         @Index(name = "idx_agenda_cliente", columnList = "id_cliente"), @Index(name = "idx_agenda_mascota", columnList = "id_mascota"), @Index(name = "idx_agenda_estado", columnList = "id_estado"), @Index(name = "idx_agenda_cliente_fecha", columnList = "id_cliente, fecha"), @Index(name = "idx_agenda_fecha", columnList = "fecha")})
 public class AgendaEntity implements Serializable {
     
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

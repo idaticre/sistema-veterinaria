@@ -1,42 +1,34 @@
 package com.vet.manadawoof.mapper;
 
 import com.vet.manadawoof.dtos.response.RegistroAsistenciaResponseDTO;
-import com.vet.manadawoof.entity.RegistroAsistenciaEntity;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.sql.Time;
+import java.time.LocalTime;
 
-/**
- * Mapper para convertir entidades de RegistroAsistencia a DTOs de respuesta.
- */
+@Component
 public class RegistroAsistenciaMapper {
     
-    /**
-     * Convierte una entidad a DTO.
-     */
-    public static RegistroAsistenciaResponseDTO toDTO(RegistroAsistenciaEntity entity) {
-        if(entity == null) return null;
-        
-        return RegistroAsistenciaResponseDTO.builder()
-                .idColaborador(entity.getColaborador().getId())
-                .horario(entity.getHorarioBase() != null ? entity.getHorarioBase().getNombre() : null)
-                .fecha(entity.getFecha())
-                .horaEntrada(entity.getHoraEntrada())
-                .horaLunchInicio(entity.getHoraLunchInicio())
-                .horaLunchFin(entity.getHoraLunchFin())
-                .horaSalida(entity.getHoraSalida())
-                .estadoAsistencia(entity.getEstadoAsistencia() != null
-                        ? entity.getEstadoAsistencia().getNombre()
-                        : null)
-                .build();
+    
+    public RegistroAsistenciaResponseDTO toResponseDTO(Object[] row) {
+        return RegistroAsistenciaResponseDTO.builder().idColaborador(row[0] != null ? ((Number) row[0]).longValue() : null).colaborador((String) row[1]).fecha(row[2] != null ? ((java.sql.Date) row[2]).toLocalDate() : null).diaSemana((String) row[3]).horario((String) row[4]).horaEntrada(toLocalTime(row[5])).horaLunchInicio(toLocalTime(row[6])).horaLunchFin(toLocalTime(row[7])).horaSalida(toLocalTime(row[8])).minutosTrabajados(toInteger(row[9])).minutosLunch(toInteger(row[10])).tardanzaMinutos(toInteger(row[11])).estadoAsistencia((String) row[12]).horaProgramadaInicio(toLocalTime(row[13])).horaProgramadaFin(toLocalTime(row[14])).observaciones((String) row[15]).build();
     }
     
     /**
-     * Convierte una lista de entidades a lista de DTOs.
+     * Convierte java.sql.Time a LocalTime
      */
-    public static List<RegistroAsistenciaResponseDTO> toDTOList(List<RegistroAsistenciaEntity> entities) {
-        return entities.stream()
-                .map(RegistroAsistenciaMapper :: toDTO)
-                .collect(Collectors.toList());
+    private LocalTime toLocalTime(Object obj) {
+        if(obj == null) return null; if(obj instanceof Time) {
+            return ((Time) obj).toLocalTime();
+        } return null;
+    }
+    
+    /**
+     * Convierte Number a Integer de forma segura
+     */
+    private Integer toInteger(Object obj) {
+        if(obj == null) return null; if(obj instanceof Number) {
+            return ((Number) obj).intValue();
+        } return null;
     }
 }

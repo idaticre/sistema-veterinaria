@@ -88,7 +88,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
      * @return Lista completa de especialidades.
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<EspecialidadEntity> listarEspecialidades() {
         return repository.findAll();
     }
@@ -101,7 +101,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
      * @throws RuntimeException Si no se encuentra la especialidad.
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public EspecialidadEntity obtenerPorId(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
