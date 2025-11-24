@@ -37,7 +37,7 @@ public class MascotaServiceImpl implements MascotaService {
                 .registerStoredProcedureParameter("p_id_etapa", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_esterilizado", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_alergias", String.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("p_peso", Double.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("p_peso", java.math.BigDecimal.class, ParameterMode.IN) // cambio de tipo de variable por error de declaracion
                 .registerStoredProcedureParameter("p_chip", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_pedigree", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("p_factor_dea", Integer.class, ParameterMode.IN)

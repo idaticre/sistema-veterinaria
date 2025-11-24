@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import "./br_administrativa.css" 
 import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 type MenuKey = "cliente" | "mascotas" | "distribucion" | "venta" | "informe" | "administracion" | "seguridad" | "agenda" | null;
 
 interface BrProps {
@@ -22,17 +22,18 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
     const adminRef = useRef<HTMLUListElement | null>(null);
     const seguridadRef = useRef<HTMLUListElement | null>(null);
     const agendaRef = useRef<HTMLUListElement | null>(null);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+useEffect(() => {
+        const token = sessionStorage.getItem("token"); // sessionStorage, no localStorage
         if (!token) {
-        window.location.href = "/login";
+            navigate("/administracion/home", { replace: true });
         }
-    }, []);
+    }, [navigate]);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("nombreUsuario");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("nombreUsuario");
     };
 
     const toggleMinimizado = () => {

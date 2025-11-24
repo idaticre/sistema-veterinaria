@@ -46,18 +46,57 @@ public class SecurityConfig {
                         // Endpoints públicos
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
 
                         // Endpoints que requieren roles específicos
-                        .requestMatchers("/api/por_definir/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO")
-                        .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
-                        .requestMatchers(HttpMethod.POST,"/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA", "AUXILIAR GROMERS")
+
+                        //Permisos de solo Admin
+                        .requestMatchers("/api/asignaciones/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/colaboradores/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/dias/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/empresas/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/entidades/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/estado-asistencia/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/horarios-trabajo/**").hasAuthority("ADMINISTRADOR GENERAL")
+
+                        //Permisos del Auxiliar Caja
+
+                        .requestMatchers(HttpMethod.POST,"/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA","ADMINISTRADOR GENERAL")
+                        .requestMatchers(HttpMethod.POST,"/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR CAJA")
+                        // (pendiente por hacer)
+                        .requestMatchers("/api/clientes/listar_solo_con_nombreymascota").hasAnyAuthority("AUXILIAR CAJA","ADMINISTRADOR GENERAL")
+                        // Permisos del Auxiliar Gromers
+
                         .requestMatchers(HttpMethod.GET,"/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
-                                .requestMatchers("/api/colaboradores/**").hasAnyAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/estados-agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
+                        .requestMatchers("/api/estados-mascota/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
+                        //.requestMatchers(HttpMethod.GET,"/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
 
 
-                        // Todos los demás endpoints requieren autenticación
+                        // Permisos que todavia no han sido definido quienes seran los responsables
+                        .requestMatchers("/api/canales-comunicacion/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/especialidades/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/especies/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/etapasVida/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/medicamentos-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/medicamentos/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/medios-pago/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/medios-solicitud/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/proveedores/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/razas/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/asistencias/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/roles/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/servicios/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/tamanos/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/tipo-documento/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/tipoMedicamento/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/tipo-persona-juridica/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/tipos-recordatorio/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/usuarios/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/usuarios-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/vacunas-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/vacunas/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/veterinarios/**").hasAuthority("ADMINISTRADOR GENERAL")
+
                         .anyRequest().authenticated()
                 );
 
