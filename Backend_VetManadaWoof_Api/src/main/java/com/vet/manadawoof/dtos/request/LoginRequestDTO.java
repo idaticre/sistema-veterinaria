@@ -1,4 +1,4 @@
-/*
+
 package com.vet.manadawoof.dtos.request;
 
 // dtos/LoginRequestDTO.java
@@ -25,4 +25,4 @@ public class LoginRequestDTO {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-}*/
+}

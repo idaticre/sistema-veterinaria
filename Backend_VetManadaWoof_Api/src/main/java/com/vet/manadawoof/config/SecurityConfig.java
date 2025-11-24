@@ -47,7 +47,6 @@ public class SecurityConfig {
                         // Endpoints públicos
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-<<<<<<< HEAD
 
                         // Endpoints que requieren roles específicos
 
@@ -68,7 +67,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/clientes/listar_solo_con_nombreymascota").hasAnyAuthority("AUXILIAR CAJA","ADMINISTRADOR GENERAL")
                         // Permisos del Auxiliar Gromers
 
-=======
                         .requestMatchers("/api/public/**").permitAll()
                         
                         // Endpoints que requieren roles específicos
@@ -77,14 +75,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
 
                         .requestMatchers(HttpMethod.POST,"/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA", "AUXILIAR GROMERS")
->>>>>>> f8392b9df396ad876a129fdadc95d0dc016576a9
                         .requestMatchers(HttpMethod.GET,"/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
                         .requestMatchers("/api/estados-agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
                         .requestMatchers("/api/estados-mascota/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
                         //.requestMatchers(HttpMethod.GET,"/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
 
-
-<<<<<<< HEAD
                         // Permisos que todavia no han sido definido quienes seran los responsables
                         .requestMatchers("/api/canales-comunicacion/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/especialidades/**").hasAuthority("ADMINISTRADOR GENERAL")
@@ -110,7 +105,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/vacunas/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/veterinarios/**").hasAuthority("ADMINISTRADOR GENERAL")
 
-=======
 
                         .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA")
                         .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
@@ -119,7 +113,7 @@ public class SecurityConfig {
                         
 
                         // Todos los demás endpoints requieren autenticación
->>>>>>> f8392b9df396ad876a129fdadc95d0dc016576a9
+
                         .anyRequest().authenticated()
                 );
         

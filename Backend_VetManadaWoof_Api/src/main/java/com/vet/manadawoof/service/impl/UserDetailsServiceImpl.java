@@ -1,4 +1,4 @@
-/*
+
 package com.vet.manadawoof.service.impl;
 
 import com.vet.manadawoof.entity.UsuarioEntity;
@@ -48,4 +48,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .build();
     }
 }
-*/
+

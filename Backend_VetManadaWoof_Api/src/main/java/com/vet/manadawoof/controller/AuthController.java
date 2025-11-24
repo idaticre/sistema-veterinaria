@@ -1,4 +1,4 @@
-/*
+
 package com.vet.manadawoof.controller;
 
 import com.vet.manadawoof.dtos.response.JwtResponseDTO;
@@ -69,4 +69,4 @@ public class AuthController {
         return ResponseEntity.status(401).body("Token inválido");
     }
 }
-*/
+

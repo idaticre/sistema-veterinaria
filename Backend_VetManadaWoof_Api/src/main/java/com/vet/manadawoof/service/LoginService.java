@@ -1,4 +1,4 @@
-/*
+
 package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.UsuarioEntity;
@@ -29,4 +29,3 @@ public class LoginService {
         return Optional.empty();
     }
 }
-*/
