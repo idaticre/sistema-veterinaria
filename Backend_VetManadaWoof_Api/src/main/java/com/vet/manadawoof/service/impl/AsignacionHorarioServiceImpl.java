@@ -176,7 +176,7 @@ public class AsignacionHorarioServiceImpl implements AsignacionHorarioService {
     
     // CONSULTAS
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<HistorialHorarioResponseDTO> consultarHistorialHorarios(Long idColaborador, Integer idDiaSemana) {
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("consultar_historial_horarios");
         query.registerStoredProcedureParameter("p_id_colaborador", Long.class, ParameterMode.IN);
@@ -204,7 +204,7 @@ public class AsignacionHorarioServiceImpl implements AsignacionHorarioService {
     }
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<HorarioVigenteResponseDTO> verHorariosVigentes(Long idColaborador) {
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("ver_horarios_vigentes");
         query.registerStoredProcedureParameter("p_id_colaborador", Long.class, ParameterMode.IN);
@@ -234,7 +234,7 @@ public class AsignacionHorarioServiceImpl implements AsignacionHorarioService {
     }
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Map<String, Object> resumenHorariosColaborador(Long idColaborador) {
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("resumen_horarios_colaborador");
         query.registerStoredProcedureParameter("p_id_colaborador", Long.class, ParameterMode.IN);

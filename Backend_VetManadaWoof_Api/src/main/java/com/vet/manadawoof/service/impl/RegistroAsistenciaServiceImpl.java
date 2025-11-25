@@ -23,66 +23,73 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RegistroAsistenciaServiceImpl implements RegistroAsistenciaService {
-    private final EntityManager em;
+    
     private final RegistroAsistenciaMapper mapper;
     private final ColaboradorRepository colaboradorRepository;
     private final RegistroAsistenciaRepository registroRepository;
+    private final EntityManager entityManager;
     
     @Override
-    @Transactional
+    @Transactional(readOnly = false)
     public RegistroAsistenciaResponseDTO registrar(RegistrarAsistenciaRequestDTO request) {
-        LocalDate fechaActual = LocalDate.now(); LocalTime horaActual = LocalTime.now();
+        LocalDate hoy = LocalDate.now();
+        LocalTime horaActual = LocalTime.now();
         
-        try {
-            StoredProcedureQuery query = em.createStoredProcedureQuery("gestionar_asistencia");
-            
-            // Parámetros IN
-            query.registerStoredProcedureParameter("p_colaborador_id", Long.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("p_fecha", Date.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("p_hora", Time.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("p_tipo_movimiento", String.class, ParameterMode.IN);
-            
-            // Parámetros OUT
-            query.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
-            query.registerStoredProcedureParameter("p_success", Integer.class, ParameterMode.OUT);
-            query.registerStoredProcedureParameter("p_tardanza_minutos", Integer.class, ParameterMode.OUT);
-            query.registerStoredProcedureParameter("p_estado_final", String.class, ParameterMode.OUT);
-            
-            query.setParameter("p_colaborador_id", request.getIdColaborador());
-            query.setParameter("p_fecha", Date.valueOf(fechaActual));
-            query.setParameter("p_hora", Time.valueOf(horaActual));
-            query.setParameter("p_tipo_movimiento", request.getTipoMarca().name());
-            
-            query.execute();
-            
-            // Extraer parámetros OUT
-            Integer successInt = (Integer) query.getOutputParameterValue("p_success");
-            Boolean success = successInt != null && successInt == 1;
-            String mensaje = (String) query.getOutputParameterValue("p_mensaje");
-            Integer tardanzaMinutos = (Integer) query.getOutputParameterValue("p_tardanza_minutos");
-            String estadoFinal = (String) query.getOutputParameterValue("p_estado_final");
-            
-            if(! success) {
-                throw new IllegalArgumentException(mensaje != null ? mensaje : "Error al registrar asistencia");
-            }
-            
-            // Obtener datos del colaborador
-            ColaboradorEntity colaborador = colaboradorRepository.findById(request.getIdColaborador()).orElseThrow(() -> new RuntimeException("Colaborador no encontrado"));
-            
-            // Obtener registro actualizado de la BD
-            var registroActual = registroRepository.findByColaboradorIdAndFecha(request.getIdColaborador(), fechaActual).orElse(null);
-            
-            return RegistroAsistenciaResponseDTO.builder().success(true).mensaje(mensaje != null ? mensaje : "Registro exitoso").tardanzaMinutos(tardanzaMinutos != null ? tardanzaMinutos : 0).estadoFinal(estadoFinal != null ? estadoFinal : "").fecha(fechaActual).horaMarcacion(horaActual).tipoMarca(request.getTipoMarca().name()).idColaborador(request.getIdColaborador()).nombreColaborador(colaborador.getEntidad().getNombre()).horaEntrada(registroActual != null ? registroActual.getHoraEntrada() : null).horaLunchInicio(registroActual != null ? registroActual.getHoraLunchInicio() : null).horaLunchFin(registroActual != null ? registroActual.getHoraLunchFin() : null).horaSalida(registroActual != null ? registroActual.getHoraSalida() : null).minutosTrabajados(registroActual != null ? registroActual.getMinutosTrabajados() : null).minutosLunch(registroActual != null ? registroActual.getMinutosLunch() : null).build();
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Error al registrar asistencia: " + e.getMessage(), e);
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("gestionar_asistencia");
+        
+        // Registrar parámetros
+        query.registerStoredProcedureParameter("p_colaborador_id", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_fecha", java.sql.Date.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_hora", java.sql.Time.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_tipo_movimiento", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
+        query.registerStoredProcedureParameter("p_success", Integer.class, ParameterMode.OUT);
+        query.registerStoredProcedureParameter("p_tardanza_minutos", Integer.class, ParameterMode.OUT);
+        query.registerStoredProcedureParameter("p_estado_final", String.class, ParameterMode.OUT);
+        
+        // Setear valores
+        query.setParameter("p_colaborador_id", request.getIdColaborador());
+        query.setParameter("p_fecha", java.sql.Date.valueOf(hoy));
+        query.setParameter("p_hora", java.sql.Time.valueOf(horaActual));
+        query.setParameter("p_tipo_movimiento", request.getTipoMarca().name());
+        
+        query.execute();
+        
+        @SuppressWarnings("unchecked")
+        List<Object[]> resultList = query.getResultList();
+        
+        if(resultList == null || resultList.isEmpty()) {
+            throw new RuntimeException("No se recibió respuesta del procedimiento");
         }
+        
+        Object[] row = resultList.get(0);
+        String horaMarcacionStr = row[6] != null ? row[6].toString() : null;
+        LocalTime horaMarcacion = null;
+        if(horaMarcacionStr != null) {
+            try {
+                horaMarcacion = LocalTime.parse(horaMarcacionStr);
+            } catch (Exception e) {
+                // Si viene en formato HH:mm:ss, parsear correctamente
+                horaMarcacion = LocalTime.parse(horaMarcacionStr,
+                        java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
+            }
+        }
+        return RegistroAsistenciaResponseDTO.builder()
+                .mensaje(row[0] != null ? row[0].toString() : "Sin mensaje")
+                .success(row[1] != null && ((Number) row[1]).intValue() == 1)
+                .tardanzaMinutos(row[2] != null ? ((Number) row[2]).intValue() : 0)
+                .estadoFinal(row[3] != null ? row[3].toString() : "")
+                .idColaborador(row[4] != null ? ((Number) row[4]).longValue() : null)
+                .colaborador(row[5] != null ? row[5].toString() : "Desconocido")
+                .horaMarcacion(horaMarcacion)
+                .tipoMarca(row[7] != null ? row[7].toString() : null)
+                .build();
     }
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RegistroAsistenciaResponseDTO> verAsistenciaPorRango(LocalDate fechaInicio, LocalDate fechaFin, Long idColaborador, Integer idEstado) {
-        StoredProcedureQuery query = em.createStoredProcedureQuery("ver_asistencia_por_rango");
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("ver_asistencia_por_rango");
         
         query.registerStoredProcedureParameter("p_fecha_inicio", Date.class, ParameterMode.IN);
         query.registerStoredProcedureParameter("p_fecha_fin", Date.class, ParameterMode.IN);

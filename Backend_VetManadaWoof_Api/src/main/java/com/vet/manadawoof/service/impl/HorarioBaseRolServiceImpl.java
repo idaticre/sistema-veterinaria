@@ -72,7 +72,7 @@ public class HorarioBaseRolServiceImpl implements HorarioBaseRolService {
     }
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<HorarioBaseRolResponseDTO> listarTodos() {
         return repository.findAllWithDetails().stream()
                 .map(mapper :: toResponse)

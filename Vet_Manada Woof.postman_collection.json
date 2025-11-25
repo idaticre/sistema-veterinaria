@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "74e84dfe-e051-4659-ac8e-106a4f5bd1b2",
+		"_postman_id": "91bec70b-113a-43e9-82c5-a58d3892c6eb",
 		"name": "Vet_Manada Woof",
 		"description": "Primer bloque...",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -330,351 +330,6 @@
 							"response": []
 						},
 						{
-							"name": "Horario_Trabajo",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/horarios-base",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"horarios-base"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Horarios Por Rol",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/horarios-base-roles",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"horarios-base-roles"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Consultar historial de horarios",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/asignaciones-horarios/historial/1?idDiaSemana=1",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"asignaciones-horarios",
-										"historial",
-										"1"
-									],
-									"query": [
-										{
-											"key": "idDiaSemana",
-											"value": "1"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Ver horario de colaborador",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "// Obtiene todos los horarios que están actualmente \r\n// activos o vigentes para el colaborador",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/asignaciones-horarios/vigentes?idColaborador=1",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"asignaciones-horarios",
-										"vigentes"
-									],
-									"query": [
-										{
-											"key": "idColaborador",
-											"value": "1"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Ver horarios asignados",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "// Obtiene todos los horarios que están actualmente \r\n// activos o vigentes para el colaborador",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/asignaciones-horarios/vigentes",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"asignaciones-horarios",
-										"vigentes"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Ver historial de cambios",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "// puede ser opcional el filtro del dia /1?idDiaSemana=2",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/asignaciones-horarios/historial/1",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"asignaciones-horarios",
-										"historial",
-										"1"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Resumen ssemanal de colaborador",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "// Obtiene un resumen semanal de los horarios asignados, \r\n// normalmente con agregados como total de horas, días cubiertos, etc.",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/asignaciones-horarios/resumen/1",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"asignaciones-horarios",
-										"resumen",
-										"1"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Ver asistencia por rangos de fecha",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n  \"fechaInicio\": \"2025-01-01\",\r\n  \"fechaFin\": \"2025-01-31\",\r\n  \"idColaborador\": null,\r\n  \"idEstado\": null\r\n}\r\n\r\n\r\n//  Los IDs de estado dependen de la tabla estado_asistencia para filtro",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/asistencias/rango",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"asistencias",
-										"rango"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Ver asistencia por colaborador",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n  \"fechaInicio\": \"2025-01-01\",\r\n  \"fechaFin\": \"2025-01-31\",\r\n  \"idColaborador\": 1,\r\n  \"idEstado\": null\r\n}\r\n\r\n//  Los IDs de estado dependen de la tabla estado_asistencia para filtro",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/asistencias/rango",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"asistencias",
-										"rango"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Dias_Semana",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/dias",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"dias"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "Tipo_Documento",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
@@ -791,6 +446,356 @@
 					]
 				},
 				{
+					"name": "Consultas Horario-Asistencia",
+					"item": [
+						{
+							"name": "Consultar Horarios Base",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/horarios-base",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"horarios-base"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Consultar Horarios Por Rol",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/horarios-base-roles",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"horarios-base-roles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Consultar historial de horarios",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asignaciones-horarios/historial/1?idDiaSemana=2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asignaciones-horarios",
+										"historial",
+										"1"
+									],
+									"query": [
+										{
+											"key": "idDiaSemana",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Consultar horarios por colaborador",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// Obtiene todos los horarios que están actualmente \r\n// activos o vigentes para el colaborador\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asignaciones-horarios/vigentes?idColaborador=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asignaciones-horarios",
+										"vigentes"
+									],
+									"query": [
+										{
+											"key": "idColaborador",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ver horarios asignados",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// Obtiene todos los horarios que están actualmente \r\n// activos o vigentes para el colaborador",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asignaciones-horarios/vigentes",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asignaciones-horarios",
+										"vigentes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ver historial de cambios",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// puede ser opcional el filtro del dia /1?idDiaSemana=2",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asignaciones-horarios/historial/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asignaciones-horarios",
+										"historial",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Resumen semanal por colaborador",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// Obtiene un resumen semanal de los horarios asignados, \r\n// normalmente con agregados como total de horas, días cubiertos, etc.",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asignaciones-horarios/resumen/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asignaciones-horarios",
+										"resumen",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Consultar Asistencia por rangos de fecha",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fechaInicio\": \"2025-11-18\",\r\n  \"fechaFin\": \"2025-11-24\",\r\n  \"idColaborador\": 1,\r\n  \"idEstado\": null\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asistencias/rango",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asistencias",
+										"rango"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ver asistencia por colaborador",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fechaInicio\": \"2024-11-01\",\r\n  \"fechaFin\": \"2025-11-30\",\r\n  \"idColaborador\": 1,\r\n  \"idEstado\": null\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asistencias/rango",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asistencias",
+										"rango"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Dias_Semana",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/dias",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"dias"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Creaciones",
 					"item": [
 						{
@@ -826,42 +831,6 @@
 									"path": [
 										"api",
 										"clientes",
-										"registrar"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Colaboradores",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Juan Pérez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"21121122\",\r\n  \"correo\": \"juan.perez@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 1,\r\n  \"fechaIngreso\": \"2025-10-17\",\r\n  \"foto\": \"foto_juan.png\",\r\n  \"activo\": true\r\n}\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/colaboradores/registrar",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"colaboradores",
 										"registrar"
 									]
 								}
@@ -905,6 +874,42 @@
 							"response": []
 						},
 						{
+							"name": "Colaboradores",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "/*{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Juan Pérez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"21121122\",\r\n  \"correo\": \"juan.perez@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 1,\r\n  \"fechaIngreso\": \"2025-10-17\",\r\n  \"foto\": \"foto_juan.png\",\r\n  \"activo\": true\r\n}\r\n*/\r\n\r\n{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Alberto Sanchez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"23434354\",\r\n  \"correo\": \"alberto@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 2,\r\n  \"fechaIngreso\": \"2025-11-22\",\r\n  \"foto\": \"foto_alberto.png\"\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/colaboradores/registrar",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"colaboradores",
+										"registrar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Asignar a Usuario un Rol",
 							"request": {
 								"method": "POST",
@@ -917,7 +922,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idUsuario\": 1,\r\n  \"idRol\": 2\r\n}",
+									"raw": "{\r\n  \"idUsuario\": 2,\r\n  \"idRol\": 3\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -970,7 +975,7 @@
 							"response": []
 						},
 						{
-							"name": "Asigna horario por dia",
+							"name": "Asignar horario por dia",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -982,7 +987,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// si quiere asignaciones por dia hacer\r\n{\r\n  \"idColaborador\": 1,\r\n  \"idHorarioBase\": 1,\r\n  \"idDiaSemana\": 2,\r\n  \"fechaInicioVigencia\": \"2025-01-01\",\r\n  \"fechaFinVigencia\": null,\r\n  \"motivoCambio\": \"Asignación inicial de horario\"\r\n}\r\n\r\n",
+									"raw": "// Esta asignacion es dia por dia\r\n{\r\n  \"idColaborador\": 1,\r\n  \"idHorarioBase\": 5,\r\n  \"idDiaSemana\": 1,\r\n  \"fechaInicioVigencia\": \"2025-11-25\",\r\n  \"fechaFinVigencia\": null,\r\n  \"motivoCambio\": \"Asignación inicial de horario de caja\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1005,7 +1010,7 @@
 							"response": []
 						},
 						{
-							"name": "Asigna horario amplio",
+							"name": "Asignar ecepcion a un dia",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -1017,79 +1022,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// si quiere asignaciones por semana o mas dias\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fechaInicio\": \"2025-02-01\",\r\n  \"fechaFin\": \"2025-02-07\",\r\n  \"tipoAccion\": \"ASIGNAR_HORARIO\",\r\n  \"idHorarioBase\": 1,\r\n  \"idUsuario\": 1,\r\n  \"motivo\": \"Semana especial de eventos\"\r\n}\r\n\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/asignaciones-horarios/gestionar-rango",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"asignaciones-horarios",
-										"gestionar-rango"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Asigna dias descanso",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// si quiere asignaciones por semana o mas dias\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fechaInicio\": \"2025-02-01\",\r\n  \"fechaFin\": \"2025-02-07\",\r\n  \"tipoAccion\": \"ASIGNAR_HORARIO\",\r\n  \"idHorarioBase\": 1,\r\n  \"idUsuario\": 1,\r\n  \"motivo\": \"Semana especial de eventos\"\r\n}\r\n\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/asignaciones-horarios/gestionar-rango",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"asignaciones-horarios",
-										"gestionar-rango"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Asigna dia especial",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// si quiere asignaciones por dia hacer\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fecha\": \"2025-01-25\",\r\n  \"tipoAccion\": \"HORARIO\",\r\n  \"horaInicio\": \"10:00:00\",\r\n  \"horaFin\": \"14:00:00\",\r\n  \"idUsuario\": 1\r\n}\r\n\r\n",
+									"raw": "// si quiere asignaciones por dia hacer o cambios en el horario\r\n// ejemplo aqui se reduce la jornada\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fecha\": \"2025-11-26\",\r\n  \"tipoAccion\": \"HORARIO\",\r\n  \"horaInicio\": \"10:00:00\",\r\n  \"horaFin\": \"16:00:00\",\r\n  \"idUsuario\": 2\r\n}\r\n\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1113,7 +1046,7 @@
 							"response": []
 						},
 						{
-							"name": "Asigna dia descanso",
+							"name": "Asignar 1 dia descanso",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -1125,7 +1058,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// si quiere asignaciones por dia hacer\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fecha\": \"2025-01-26\",\r\n  \"tipoAccion\": \"DESCANSO\",\r\n  \"horaInicio\": null,\r\n  \"horaFin\": null,\r\n  \"idUsuario\": 1\r\n}\r\n\r\n",
+									"raw": "// aqui generamos un dia de descanso en especial \r\n\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fecha\": \"2025-11-27\",\r\n  \"tipoAccion\": \"DESCANSO\",\r\n  \"horaInicio\": null,\r\n  \"horaFin\": null,\r\n  \"idUsuario\": 2\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1149,7 +1082,7 @@
 							"response": []
 						},
 						{
-							"name": "Registrar_Asistencia",
+							"name": "Asignar rango de fechas",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -1161,7 +1094,187 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idColaborador\": 1,\r\n  \"tipoMarca\": \"ENTRADA\"\r\n}\r\n/*\r\n{\r\n  \"idColaborador\": 1,\r\n  \"tipoMarca\": \"LUNCH_IN\"\r\n}\r\n\r\n{\r\n  \"idColaborador\": 1,\r\n  \"tipoMarca\": \"LUNCH_OUT\"\r\n}\r\n\r\n{\r\n  \"idColaborador\": 1,\r\n  \"tipoMarca\": \"SALIDA\"\r\n}\r\n\r\n*/\r\n",
+									"raw": "// si quiere asignaciones por semana o mas dias \r\n// EJEMPLO, TODO EL MES\r\n\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fechaInicio\": \"2025-11-27\",\r\n  \"fechaFin\": \"2025-11-30\",\r\n  \"tipoAccion\": \"ASIGNAR_HORARIO\",\r\n  \"idHorarioBase\": 5,\r\n  \"idUsuario\": 2,\r\n  \"motivo\": \"Asignación masiva fin de mes\"\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asignaciones-horarios/gestionar-rango",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asignaciones-horarios",
+										"gestionar-rango"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Asignar rango de descanso",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// si quiere asignaciones por semana o mas dias\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fechaInicio\": \"2025-12-01\",\r\n  \"fechaFin\": \"2025-12-10\",\r\n  \"tipoAccion\": \"ASIGNAR_DESCANSO\",\r\n  \"idHorarioBase\": 5,\r\n  \"idUsuario\": 2,\r\n  \"motivo\": \"Vacaciones programadas\"\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asignaciones-horarios/gestionar-rango",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asignaciones-horarios",
+										"gestionar-rango"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Registrar Asistencia Entrada",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idColaborador\": 1,\r\n  \"tipoMarca\": \"ENTRADA\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asistencias/registrar",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asistencias",
+										"registrar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Registrar Asistencia Almuerzo",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idColaborador\": 1,\r\n  \"tipoMarca\": \"LUNCH_IN\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asistencias/registrar",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asistencias",
+										"registrar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Registrar Asistencia Fin Almuerzo",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idColaborador\": 1,\r\n  \"tipoMarca\": \"LUNCH_OUT\"\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/asistencias/registrar",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"asistencias",
+										"registrar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Registrar Asistencia Salida",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idColaborador\": 1,\r\n  \"tipoMarca\": \"SALIDA\"\r\n}\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1299,7 +1412,7 @@
 							"response": []
 						},
 						{
-							"name": "Asigna horario por dia",
+							"name": "Actualiza horario por dia",
 							"request": {
 								"method": "PUT",
 								"header": [
@@ -1311,7 +1424,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "\r\n{\r\n  \"idHorarioBase\": 2,\r\n  \"fechaInicioVigencia\": \"2025-01-15\",\r\n  \"fechaFinVigencia\": \"2025-12-31\",\r\n  \"motivoCambio\": \"Cambio de turno por reorganización\"\r\n}\r\n\r\n\r\n",
+									"raw": "{\r\n  \"idColaborador\": 1,\r\n  \"idHorarioBase\": 6,\r\n  \"idDiaSemana\": 2,\r\n  \"fechaInicioVigencia\": \"2025-11-25\",\r\n  \"fechaFinVigencia\": \"2025-12-31\",\r\n  \"motivoCambio\": \"Cambio temporal a horario de groomer\"\r\n}\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1508,7 +1621,7 @@
 							"response": []
 						},
 						{
-							"name": "Desasigna horario por dia",
+							"name": "Desasignar horario por dia",
 							"request": {
 								"method": "DELETE",
 								"header": [
@@ -1547,7 +1660,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idColaborador\": 1,\r\n  \"fecha\": \"2025-01-25\",\r\n  \"tipoAccion\": \"DESASIGNAR\",\r\n  \"horaInicio\": null,\r\n  \"horaFin\": null,\r\n  \"idUsuario\": 1\r\n}",
+									"raw": "{\r\n  \"idColaborador\": 1,\r\n  \"fecha\": \"2025-11-26\",\r\n  \"tipoAccion\": \"DESASIGNAR\",\r\n  \"horaInicio\": null,\r\n  \"horaFin\": null,\r\n  \"idUsuario\": 2\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1571,7 +1684,7 @@
 							"response": []
 						},
 						{
-							"name": "Desasigna varios dias",
+							"name": "Desasignar varios dias",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -1583,7 +1696,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// si quiere asignaciones por semana o mas dias\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fechaInicio\": \"2025-02-01\",\r\n  \"fechaFin\": \"2025-02-07\",\r\n  \"tipoAccion\": \"RESTAURAR_BASE\",\r\n  \"idHorarioBase\": 1,\r\n  \"idUsuario\": 1,\r\n  \"motivo\": \"Fin de evento especial\"\r\n}\r\n\r\n",
+									"raw": "// si quiere asignaciones por semana o mas dias\r\n{\r\n  \"idColaborador\": 1,\r\n  \"fechaInicio\": \"2025-11-27\",\r\n  \"fechaFin\": \"2025-12-03\",\r\n  \"tipoAccion\": \"RESTAURAR_BASE\",\r\n  \"idHorarioBase\": 6,\r\n  \"idUsuario\": 1,\r\n  \"motivo\": \"Fin de campaña navideña\"\r\n}\r\n\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1612,11 +1725,1032 @@
 		},
 		{
 			"name": "Mascotas",
-			"item": []
+			"item": [
+				{
+					"name": "Consultas",
+					"item": [
+						{
+							"name": "Especies",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/especies",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"especies"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Razas",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/razas",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"razas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tamaños_Mascota",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/tamanos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"tamanos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Etapa_Vida",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/etapasVida",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"etapasVida"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Vacunas",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/vacunas",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"vacunas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tipo_Medicamento",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/tipoMedicamento",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"tipoMedicamento"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Aplicacion_Via",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// si quiere asignaciones por dia hacer\r\n// http://localhost:8088/api/asignaciones/dia\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/via-aplicacion",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"via-aplicacion"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Medicamentos",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/medicamentos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"medicamentos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Estado_Mascota",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/estado-mascota",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"estado-mascota"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Mascotas",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/mascotas",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"mascotas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Medicamento_Mascota",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/medicamentos-mascota",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"medicamentos-mascota"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Vacuna_Mascota",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/vacunas-mascota",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"vacunas-mascota"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Creaciones",
+					"item": [
+						{
+							"name": "Mascotas",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"nombre\": \"Luna\",\r\n  \"sexo\": \"H\",\r\n  \"idCliente\": 1,\r\n  \"idRaza\": 3,\r\n  \"idEspecie\": 2,\r\n  \"fechaNacimiento\": \"2021-11-05\",\r\n  \"pelaje\": \"Largo y sedoso\",\r\n  \"idTamano\": 2,\r\n  \"idEtapa\": 3,\r\n  \"esterilizado\": true,\r\n  \"alergias\": \"Polen y polvo\",\r\n  \"peso\": 5.4,\r\n  \"chip\": true,\r\n  \"pedigree\": false,\r\n  \"factorDea\": true,\r\n  \"agresividad\": false,\r\n  \"foto\": \"https://misfotos.com/luna.jpg\",\r\n  \"idColaborador\": null,\r\n  \"idVeterinario\": null\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/mascotas/crear",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"mascotas",
+										"crear"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Medicamentos_Mascota",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idMascota\": 1,\r\n  \"idMedicamento\": 3,\r\n  \"idVia\": 2,\r\n  \"dosis\": \"5 ml\",\r\n  \"fechaAplicacion\": \"2025-10-26\",\r\n  \"idColaborador\": 1,\r\n  \"idVeterinario\": null,\r\n  \"observaciones\": \"Aplicado por rutina\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/medicamentos-mascota/crear",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"medicamentos-mascota",
+										"crear"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Vacunas_Mascota",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idVacuna\": 1,\r\n  \"idMascota\": 1,\r\n  \"idVia\": 1,\r\n  \"dosis\": \"1 ml\",\r\n  \"fechaAplicacion\": \"2025-10-26\",\r\n  \"durabilidad\": 1,\r\n  \"proxDosis\": \"2026-10-26\",\r\n  \"idColaborador\": 1,\r\n  \"idVeterinario\": null,\r\n  \"observaciones\": \"Primera dosis aplicada correctamente\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/vacunas-mascota/crear",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"vacunas-mascota",
+										"crear"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Actualizaciones",
+					"item": [
+						{
+							"name": "Mascotas",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"nombre\": \"Luna\",\r\n  \"sexo\": \"H\",\r\n  \"idCliente\": 1,\r\n  \"idRaza\": 6,\r\n  \"idEspecie\": 2,\r\n  \"idEstado\": 1,\r\n  \"fechaNacimiento\": \"2021-11-05\",\r\n  \"pelaje\": \"Largo\",\r\n  \"peso\": 12.4,\r\n  \"idTamano\": 3,\r\n  \"idEtapa\": 2,\r\n  \"esterilizado\": true,\r\n  \"alergias\": \"Polen y polvo\",\r\n  \"chip\": true,\r\n  \"pedigree\": false,\r\n  \"factorDea\": true,\r\n  \"agresividad\": false,\r\n  \"foto\": \"luna.png\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/mascotas/actualizar/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"mascotas",
+										"actualizar",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Medicamento_Mascota",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"id\": 1,\r\n  \"idMascota\": 1,\r\n  \"idMedicamento\": 3,\r\n  \"idVia\": 2,\r\n  \"dosis\": \"10 ml\",\r\n  \"fechaAplicacion\": \"2025-10-26\",\r\n  \"idColaborador\": 4,\r\n  \"idVeterinario\": 2,\r\n  \"observaciones\": \"Dosis aumentada\",\r\n  \"activo\": true\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/medicamentos-mascota/actualizar",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"medicamentos-mascota",
+										"actualizar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Vacunas_Mascota",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"id\": 1,\r\n  \"idVacuna\": 2,\r\n  \"idMascota\": 1,\r\n  \"idVia\": 1,\r\n  \"dosis\": \"2 ml\",\r\n  \"fechaAplicacion\": \"2025-10-27\",\r\n  \"durabilidad\": 2,\r\n  \"proxDosis\": \"2027-10-27\",\r\n  \"idColaborador\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"observaciones\": \"Refuerzo anual aplicado correctamente\",\r\n  \"activo\": true\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/vacunas-mascota/actualizar",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"vacunas-mascota",
+										"actualizar"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Eliminaciones",
+					"item": [
+						{
+							"name": "Mascotas",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// El estado cambia a inactivo o dependiendo el estado del catálogo",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/mascotas/eliminar/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"mascotas",
+										"eliminar",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Medicamentos_Mascotas",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// El estado cambia a inactivo o dependiendo el estado del catálogo",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/medicamentos-mascota/eliminar/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"medicamentos-mascota",
+										"eliminar",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Vacunas_Mascota",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// El estado cambia a inactivo o dependiendo el estado del catálogo",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/vacunas-mascota/eliminar/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"vacunas-mascota",
+										"eliminar",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
 		},
 		{
 			"name": "Agendas",
-			"item": []
+			"item": [
+				{
+					"name": "Consultas",
+					"item": [
+						{
+							"name": "Canales_Comunicacion",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/canales-comunicacion",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"canales-comunicacion"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Estados_Agenda",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/estados-agenda",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"estados-agenda"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Medios_Pago",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/medios-pago",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"medios-pago"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Medios_Solicitud",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/medios-solicitud",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"medios-solicitud"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tipo_Recordatorio",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/tipos-recordatorio",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"tipos-recordatorio"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Servicios",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/servicios",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"servicios"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
 		},
 		{
 			"name": "LOGIN",
