@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import "./br_administrativa.css" 
 import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 type MenuKey = "cliente" | "mascotas" | "distribucion" | "venta" | "informe" | "administracion" | "seguridad" | "agenda" | null;
 
 interface BrProps {
@@ -22,17 +22,18 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
     const adminRef = useRef<HTMLUListElement | null>(null);
     const seguridadRef = useRef<HTMLUListElement | null>(null);
     const agendaRef = useRef<HTMLUListElement | null>(null);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+useEffect(() => {
+        const token = sessionStorage.getItem("token"); // sessionStorage, no localStorage
         if (!token) {
-        window.location.href = "/login";
+            navigate("/administracion/home", { replace: true });
         }
-    }, []);
+    }, [navigate]);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("nombreUsuario");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("nombreUsuario");
     };
 
     const toggleMinimizado = () => {
@@ -144,11 +145,11 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <Link to="" className="enlace_opcion">
                                     <i className="fa-solid fa-calendar-days"></i>
                                     <span>Agenda</span>
-                                    <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    <i className={`fa-solid ${openMenu === "agenda" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={agendaRef} className="submenu">
-                                    <li>
-                            <Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
+                                    <li><Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
+                                    <li><Link to="/administracion/agenda/EditarCita" className="sub_opcion">Editar cita</Link></li>
                                 </ul>
                             </li>
                             <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 

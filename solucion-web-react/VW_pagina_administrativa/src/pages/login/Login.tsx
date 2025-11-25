@@ -1,48 +1,49 @@
-import { useNavigate } from "react-router-dom"
-import "./login.css"
-import { useState } from "react"
+import { useNavigate } from "react-router-dom";
+import "./login.css";
+import { useState } from "react";
 
 function Login() {
-  const [usuario, setUsuario] = useState("")
-  const [password, setPassword] = useState("")
-  const navigate = useNavigate()
+  const [usuario, setUsuario] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8088/api/login", {
+      const response = await fetch("http://localhost:8088/api/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          usuario: usuario, 
-          password: password  
-        })
-      })
+          username: usuario, 
+          password: password,
+        }),
+      });
 
-      const data = await response.json()
-      console.log("Respuesta del servidor:", data)
+      const data = await response.json();
+      console.log("Respuesta del servidor:", data);
 
-      if (response.ok && data.success) {   
-        console.log("Login exitoso:", data.message)
+      if (response.ok && data.token) {
+        console.log("Login exitoso:", data.username);
 
-        localStorage.setItem("token", data.token || "dummy-token");
-        localStorage.setItem("nombreUsuario", data.usuario || usuario);
+        // Guarda los datos en localStorage o si quiero que sea mientras la pestaña este abierta sessionStorage
+        sessionStorage.setItem("token", data.token);
+        sessionStorage.setItem("usuario", data.username);
+        sessionStorage.setItem("roles", JSON.stringify(data.roles));
 
-        navigate("/administracion/home")
+        navigate("/administracion/home");
       } else {
-        alert(data.message || "Credenciales incorrectas")
+        alert("Credenciales incorrectas");
         setUsuario("");
         setPassword("");
       }
-
     } catch (error) {
-      console.error("Error al iniciar sesión:", error)
-      alert("Error al conectar con el servidor")
+      console.error("Error al iniciar sesión:", error);
+      alert("Error al conectar con el servidor");
     }
-  }
+  };
 
   return (
     <div className="contenedor_login">
@@ -56,22 +57,24 @@ function Login() {
               placeholder="Ingrese su usuario"
               value={usuario}
               onChange={(e) => setUsuario(e.target.value)}
+              required
             />
           </div>
           <div className="casilla_login">
             <label>Contraseña:</label>
             <input
               type="password"
-              placeholder="Ingresar contraseña"
+              placeholder="Ingrese su contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
           <button type="submit" className="btn_login">Ingresar</button>
         </form>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

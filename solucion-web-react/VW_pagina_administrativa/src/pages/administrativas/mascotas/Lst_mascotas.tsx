@@ -1,47 +1,78 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
 import { Link } from 'react-router-dom';
 import './lst_mascotas.css'
+import type { MascotaResponse } from '../../../components/interfaces/interfaces';
+import IST from '../../../components/proteccion_momentanea/IST';
 
-interface Mascota {
-  id: number;
-  nombre: string;
-  id_cliente: number;
-}
+type Mascotaextendido = MascotaResponse & { nombre_dueño?: string; nombre_raza?: string; nombre_especie?: string; nombre_estado?: string };
 
 function Lst_mascotas() {
   const [minimizado, setMinimizado] = useState(false);
   const [busqueda, setBusqueda] = useState("");
-  const [filtrados, setFiltrados] = useState<Mascota[]>([]);
-  const [mascotas, setMascotas] = useState<Mascota[]>([]);
-  const [mascotaSeleccionado, setMascotaSeleccionado] = useState<Mascota | null>(null);
-  const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [filtrados, setFiltrados] = useState<Mascotaextendido[]>([]);
+  const [mascotas, setMascotas] = useState<Mascotaextendido[]>([]);
+  const [mascotaSeleccionado, setMascotaSeleccionado] = useState<Mascotaextendido | null>(null);
   
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuActivoId(null); 
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   useEffect(() => {
-    // esto tambien xd
-    const datos = [
-      { id: 1, nombre: "Pancho", id_cliente: 2 },
-      { id: 2, nombre: "yuko", id_cliente: 3 },
-      { id: 3, nombre: "chocolate", id_cliente: 1 },
-      { id: 10, nombre: "mostaza", id_cliente: 2 },
-    ];
-    setMascotas(datos);
-    setFiltrados(datos);
+    IST
+      .get<{ data: MascotaResponse[] }>("/mascotas")
+      .then(async (res) => {
+        const lista = res.data.data;
+
+        const mascotasConExtras = await Promise.all(
+          lista.map(async (m: MascotaResponse) => {
+            try {
+              const [dueñoRes, razaRes, especieRes, estadoRes] = await Promise.all([
+                IST.get(`/clientes/${m.idCliente}`),
+                IST.get(`/razas/${m.idRaza}`),
+                IST.get(`/especies/${m.idEspecie}`),
+                IST.get(`/estado-mascota/${m.idEstado}`)
+              ]);
+
+              return {
+                ...m,
+                nombre_dueño: dueñoRes.data.data.nombre,
+                nombre_raza: razaRes.data.nombre,
+                nombre_especie: especieRes.data.nombre,
+                nombre_estado: estadoRes.data.nombre,
+              };
+            } catch (error) {
+              console.error("Error al obtener datos", error);
+              return {
+                ...m,
+                nombre_dueño: "Desconocido",
+                nombre_raza: "Desconocido",
+                nombre_especie: "Desconocido",
+                nombre_estado: "Desconocido",
+              };
+            }
+          })
+        );
+
+        setMascotas(mascotasConExtras);
+        setFiltrados(mascotasConExtras);
+      })
+      .catch((err) => console.error("Error en la carga de mascotas", err));
   }, []);
+
+  const handleDelete = (id?: number) => {
+    if (id === undefined) return; 
+
+    if (!window.confirm("¿Seguro que deseas eliminar esta mascota?")) return;
+
+    IST.delete(`/mascotas/eliminar/${id}`)
+      .then(() => {
+        const actualizados = mascotas.filter(e => e.id !== id);
+        setMascotas(actualizados);
+        setFiltrados(actualizados);
+        setMascotaSeleccionado(null);
+      })
+      .catch(err => {
+        console.error("Error al eliminar esta mascota", err);
+      });
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -58,7 +89,7 @@ function Lst_mascotas() {
         const palabrasBusqueda = busqueda.toLowerCase().split(" ").filter(Boolean);
   
         const resultado = mascotas.filter((mascota) =>{
-          const texto = `${mascota.nombre} ${mascota.id_cliente}`.toLowerCase();
+          const texto = `${mascota.nombre} ${mascota.idCliente}`.toLowerCase();
           return palabrasBusqueda.every(palabra => texto.includes(palabra));
         });
         setFiltrados(resultado);
@@ -78,88 +109,79 @@ function Lst_mascotas() {
                   </div>
                   <button className="anadir-goated"><Link to="/administracion/mascotas/registro">➕AÑADIR</Link></button>
                 </div>
-                <div id='lista_mascotas'>
-                    {filtrados.map((mascota) =>(
-                      <div className='registro_mascota'>
-                        <div className='foto_mascota' onClick={() => setMascotaSeleccionado(mascota)} key={mascota.id}>
-                          <img src="/yuko.jpeg" alt="" />
-                        </div>
-                        <div className='base_mascota'>
-                          <div className='data_mascota' onClick={() => setMascotaSeleccionado(mascota)} key={mascota.id}>
-                              <span className='nombre_mascota'>Nombre: {mascota.nombre}</span>
-                              <span className='dni_dueño'>Dueño: {mascota.id_cliente}</span>
+                <section className='tabla_registosM'>
+                  <div id='lista_mascotas'>
+                      {filtrados.map((mascota) =>(
+                        <div className={`registro_mascota ${mascotaSeleccionado?.id === mascota.id? "seleccionado":""}`} onClick={() => setMascotaSeleccionado(mascota)} key={mascota.id}>
+                          <div className='icono_mascota'>
+                            {mascota.nombre.charAt(0).toUpperCase()}
                           </div>
-                          <div className="lst_opciones_container">
-                            <div className='lst_opciones' onClick={() => setMenuActivoId(mascota.id)}>
-                              <i className="fa-solid fa-ellipsis-vertical" />
+                          <div className='datosB_mascota'>
+                            <p>{mascota.nombre}</p>
+                            <p>Dueño: {mascota.nombre_dueño} <br /> {mascota.nombre_especie} | {mascota.nombre_raza} </p>
+                          </div>
+                          <div className='estado_mascota'>
+                            <p>{mascota.nombre_estado}</p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                  <div className='Datos_mascotaR'>
+                      <div className='registro_mascotaR'>
+                        {mascotaSeleccionado ? (
+                          <div className="datos_mascotaR">
+                            <div className="DmascotaR_contenido">
+                              <button className="DmascotaR_cierre" onClick={() => setMascotaSeleccionado(null)}>❌</button>
+                              <h2>Información de {mascotaSeleccionado.nombre}</h2>
+                              <div className='DmascotaR_contenido_info'>
+                                <table>
+                                  <tr>
+                                    <td><strong>Dueño:</strong></td>
+                                    <td>{mascotaSeleccionado.nombre_dueño}</td>
+                                  </tr>
+                                  <tr>
+                                    <td><strong>Especie:</strong></td>
+                                    <td>{mascotaSeleccionado.nombre_especie}</td>
+                                    <td><strong>Raza:</strong></td>
+                                    <td>{mascotaSeleccionado.nombre_raza}</td>
+                                  </tr>
+                                  <tr>
+                                    <td><strong>Sexo:</strong></td>
+                                    <td>{mascotaSeleccionado.sexo == "M"? "Macho":"Hembra"}</td>
+                                  </tr>
+                                  <tr>
+                                  </tr>
+                                  <tr>
+                                    <td><strong>Pelaje:</strong></td>
+                                    <td>{mascotaSeleccionado.pelaje}</td>
+                                  </tr>
+                                  <tr>
+                                    <td><strong>Peso:</strong></td>
+                                    <td>{mascotaSeleccionado.peso}</td>
+                                  </tr>
+                                  
+                                  <tr>
+                                    <td><strong>Castrado/a:</strong></td>
+                                    <td>{mascotaSeleccionado.foto}</td>
+                                  </tr>
+                                </table>
+                                <div className='DmascotaR_foto'>
+                                  <img src="/yuko.jpeg" alt="" />
+                                </div>
+                                <button><Link to="/administracion/mascotas/registro" state={{ mascotaSeleccionado }}>Editar</Link></button>
+                                <button onClick={() => {handleDelete(mascotaSeleccionado.id)}}>Eliminar</button>
+                              </div>  
                             </div>
-                            {menuActivoId === mascota.id && (
-                              <div ref={menuRef} className="menu-opciones">
-                                <a href={`/mascotas/editar/${mascota.id}`} onClick={() => setMenuActivoId(null)}>Editar</a>
-                                <a href={`/mascotas/eliminar/${mascota.id}` } onClick={() => setMenuActivoId(null)}>Eliminar</a>
-                              </div>
-                            )}
                           </div>
-                        </div>
+                        ):
+                        (
+                          <p>a</p>
+                        )}
                       </div>
-                    ))}
-                </div>
+                  </div>
+                </section>
           </section>
-          {mascotaSeleccionado && (
-              <div className="VDMascota">
-                <div className="VDMascota_contenido">
-                  <button className="VDMascota_cierre" onClick={() => setMascotaSeleccionado(null)}>❌</button>
-                  <h2>Información de la mascota</h2>
-                  <div className='VDMascota_contenido_info'>
-                    <table>
-                      <tr>
-                        <td><strong>ID:</strong></td>
-                        <td>{mascotaSeleccionado.id}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Nombre:</strong></td>
-                        <td>{mascotaSeleccionado.nombre}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Nacimiento:</strong></td>
-                        <td>00/00/0000</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Dueño:</strong></td>
-                        <td>#########</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Especie:</strong></td>
-                        <td>###############</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Raza:</strong></td>
-                        <td>###########</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Pelaje:</strong></td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td><strong>Peso:</strong></td>
-                        <td>17KG</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Sexo:</strong></td>
-                        <td>Hembra</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Castrado/a:</strong></td>
-                        <td>✅</td>
-                      </tr>
-                    </table>
-                    <div className='VDMascota_foto'>
-                      <img src="/yuko.jpeg" alt="" />
-                    </div>
-                  </div>  
-                </div>
-              </div>
-            )}
+          
         </main>
       </div>
     </>

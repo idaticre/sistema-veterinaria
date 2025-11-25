@@ -2,14 +2,13 @@
 -- BASE DE DATOS: vet_manada_woof
 -- Este script contiene la definición inicial de la base de datos
 -- =========================================================
-
+select * from agenda;
 -- ========================================
 -- 0. Creación de la Base de Datos
 -- ========================================
 DROP DATABASE IF EXISTS vet_manada_woof;
 CREATE DATABASE vet_manada_woof;
 USE vet_manada_woof;
-
 -- ========================================
 -- BLOQUE 01: Administracion
 -- gestiona la información de entidades, colaboradores, entre otros
@@ -100,10 +99,10 @@ CREATE TABLE IF NOT EXISTS usuarios (
 );
 
 INSERT INTO usuarios (username, password_hash) VALUES
-('admin_woof',  'admin123'),   -- Administrador General (pwd: admin123)
-('admin_g2',    'admin234'),   -- Administrador G2     (pwd: admin234)
-('caja_milo',   'caja123'),   -- Auxiliar Caja         (pwd: caja123)
-('gromer_luna', 'luna123');   -- Auxiliar Gromers      (pwd: luna123)
+('admin_woof',  '$2a$10$NSgY5kwZkYt8QKUnDpvzGOl0AbIRelb8lh3GwftdkOzxgfARN1KC.'),   -- Administrador General (pwd: admin123)
+('admin_g2',    '$2a$10$tdEG.LOb.EUwi6sH9U/VbehoCOtaFXPCy2RUlHPT.JWD5J4wfW/fy'),   -- Administrador G2     (pwd: admin234)
+('caja_milo',   '$2a$10$dD4rOJmMmy/2yILJbiMet.TAefxSWM5U/Y7RsRASsy.aX/bF0gftC'),   -- Auxiliar Caja         (pwd: caja123)
+('gromer_luna', '$2a$10$yBktNscCkRfzx9rsDOab.OyaS4f21aynN6Huy4hqrGbiEEobdhqCq');   -- Auxiliar Gromers      (pwd: luna123)
 
 -- ========================================
 -- TABLA: roles
@@ -117,11 +116,11 @@ CREATE TABLE IF NOT EXISTS roles (
 );
 
 INSERT INTO roles (nombre, descripcion) VALUES
-('ADMIN GENERAL 1', 'Tiene control total del sistema'),
-('ADMIN GENERAL 2', 'Tiene control total del sistema'),
-('AUX CAJA', 'Gestiona pagos y facturación'),
-('AUX GROMERS', 'Atiende grooming y soporte de servicios'),
-('AUX BAÑADOR', 'Atiende BAÑOS y soporte de servicios');
+('ADMINISTRADOR GENERAL', 'Tiene control total del sistema'),
+('ADMINISTRADOR GENERAL 2', 'Tiene control total del sistema'),
+('AUXILIAR CAJA', 'Gestiona pagos y facturación'),
+('AUXILIAR GROMERS', 'Atiende grooming y soporte de servicios'),
+('AUXILIAR BAÑADOR', 'Atiende BAÑOS y soporte de servicios');
 
 -- ========================================
 -- TABLA: usuarios_roles
@@ -135,6 +134,20 @@ CREATE TABLE IF NOT EXISTS usuarios_roles (
     fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_usuario_rol (id_usuario, id_rol)    
 );
+
+-- Usuario 1 es ADMIN GENERAL 1
+INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES
+(1, 1);
+-- Usuario 2 es ADMIN GENERAL 1
+INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES
+(2, 2);
+-- Usuario 3 es AUX CAJA
+INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES
+(3, 3);
+-- Usuario 4 es AUX GROMERS
+INSERT INTO usuarios_roles (id_usuario, id_rol) VALUES
+(4, 4);
+
 ALTER TABLE usuarios_roles
     ADD CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
     ON DELETE CASCADE,

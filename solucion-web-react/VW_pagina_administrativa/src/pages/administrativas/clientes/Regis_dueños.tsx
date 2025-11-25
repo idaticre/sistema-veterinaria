@@ -1,16 +1,14 @@
-import  { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
 import './regis_dueños.css'
 import type { tipo_doc, ClienteResponse, ClienteResquest } from '../../../components/interfaces/interfaces';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import IST from '../../../components/proteccion_momentanea/IST';
 
 function regis_dueños() {
   const [minimizado, setMinimizado] = useState(false);
-  //const [imagenDueño, setImagenDueño] = useState<string | null>(null); 
   const [tipoDoc, setTipDoc] = useState<tipo_doc[]>([]);
-  //const [clienteReq, setClienteReq] = useState<ClienteResquest[]>([]);
-  const [idTipoPersonaJuridica, setIdTipoPersonaJuridica] = useState<number>(0);
+  const [idTipoPersonaJuridica, setIdTipoPersonaJuridica] = useState<number>(1); // Por defecto Natural
   const [nombre, setNombre] = useState("");
   const [sexo, setSexo] = useState<"M" | "F" | undefined>(undefined);
   const [documento, setDocumento] = useState("");
@@ -25,9 +23,11 @@ function regis_dueños() {
   const clienteSelecc = location.state?.cliente as ClienteResponse | undefined;
   const navigate = useNavigate();
 
+  // Estado para controlar si es persona jurídica
+  const [esPersonaJuridica, setEsPersonaJuridica] = useState(false);
 
   useEffect(() => {
-    axios.get("http://localhost:8088/api/tipo-documento")
+    IST.get("/tipo-documento")
     .then(res => {
       setTipDoc(res.data);
     })
@@ -38,7 +38,8 @@ function regis_dueños() {
 
   useEffect(() => {
     if (clienteSelecc) {
-      setIdTipoPersonaJuridica(clienteSelecc.idTipoPersonaJuridica || 0);
+      const esJuridica = clienteSelecc.idTipoPersonaJuridica === 2;
+      setIdTipoPersonaJuridica(clienteSelecc.idTipoPersonaJuridica || 1);
       setIdTipoDocumento(clienteSelecc.idTipoDocumento || 0);
       setNombre(clienteSelecc.nombre || "");
       setSexo(clienteSelecc.sexo as "M" | "F" | undefined);
@@ -49,17 +50,56 @@ function regis_dueños() {
       setCiudad(clienteSelecc.ciudad || "");
       setDistrito(clienteSelecc.distrito || "");
       setActivo(clienteSelecc.activo ?? true);
+      setEsPersonaJuridica(esJuridica);
+      
+      // Si es jurídica y no tiene tipo documento, asignar RUC por defecto
+      if (esJuridica && !clienteSelecc.idTipoDocumento) {
+        setIdTipoDocumento(2); // RUC
+      }
     }
   }, [clienteSelecc]);
-  
+
+  // Manejar cambio de tipo de persona
+  const handleTipoPersonaChange = (nuevoId: number) => {
+    const esJuridica = nuevoId === 2;
+    setIdTipoPersonaJuridica(nuevoId);
+    setEsPersonaJuridica(esJuridica);
+    
+    // Si cambia a jurídica, forzar RUC y limpiar sexo
+    if (esJuridica) {
+      setIdTipoDocumento(2); // RUC
+      setSexo(undefined);
+    } else {
+      // Si cambia a natural, resetear tipo documento
+      setIdTipoDocumento(0);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validaciones básicas
+    if (!nombre.trim()) {
+      alert("El nombre es obligatorio");
+      return;
+    }
+
+    if (!documento.trim()) {
+      alert("El documento es obligatorio");
+      return;
+    }
+
+    // Para personas naturales, validar que tenga sexo
+    if (!esPersonaJuridica && !sexo) {
+      alert("El sexo es obligatorio para personas naturales");
+      return;
+    }
 
     const nuevoCliente: ClienteResquest = {
       idEntidad: clienteSelecc?.idEntidad ?? undefined, 
       idTipoPersonaJuridica,
       nombre,
-      sexo,
+      sexo: esPersonaJuridica ? undefined : sexo, // Solo enviar sexo para naturales
       documento,
       idTipoDocumento,
       correo,
@@ -71,7 +111,7 @@ function regis_dueños() {
     };
 
     if (clienteSelecc) {
-      axios.put("http://localhost:8088/api/clientes/actualizar", nuevoCliente)
+      IST.put(`/clientes/actualizar/${clienteSelecc.id}`, nuevoCliente)
         .then(res => {
           console.log("cliente actualizado:", res.data);
           alert("Cliente actualizado correctamente ✅");
@@ -82,7 +122,7 @@ function regis_dueños() {
           alert("Error al actualizar cliente ❌");
         });
     } else {
-      axios.post("http://localhost:8088/api/clientes/registrar", nuevoCliente)
+      IST.post("/clientes/registrar", nuevoCliente)
         .then(res => {
           console.log("cliente creado:", res.data);
           alert("Entidad registrada correctamente ✅");
@@ -94,17 +134,6 @@ function regis_dueños() {
         });
     }
   }
-
-  /*const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagenDueño(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };*/
 
   return (
     <>
@@ -126,121 +155,174 @@ function regis_dueños() {
                         <input type="text" value={clienteSelecc.codigoCliente} disabled readOnly/>
                       </div>
                       <div className='form-group'>
-                        <label>Fecha de resgitro</label>
+                        <label>Fecha de registro</label>
                         <input type="text" value={
                           clienteSelecc.fechaRegistro ? 
                           `${clienteSelecc.fechaRegistro.slice(11, 16)}  del  ${clienteSelecc.fechaRegistro.split('T')[0]}` : '' } disabled readOnly/>
                       </div>
                     </div>
                   )}
+                  
                   <div className="form-row">
                     <div className="form-group">
-                      <label htmlFor="dni">Tipo persona juridica</label>
-                      <select value={idTipoPersonaJuridica} onChange={(e) => setIdTipoPersonaJuridica(Number(e.target.value))}>
-                        <option value="0" disabled>Elija la persona</option>
+                      <label htmlFor="tipoPersona">Tipo de Persona *</label>
+                      <select 
+                        value={idTipoPersonaJuridica} 
+                        onChange={(e) => handleTipoPersonaChange(Number(e.target.value))} 
+                        required
+                      >
                         <option value="1">Natural</option>
                         <option value="2">Jurídica</option>
                       </select>
                     </div>
                     <div className="form-group">
-                      <label htmlFor="nombre">Nombre</label>
-                      <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+                      <label htmlFor="nombre">
+                        {esPersonaJuridica ? "Razón Social *" : "Nombre Completo *"}
+                      </label>
+                      <input 
+                        type="text" 
+                        value={nombre} 
+                        onChange={(e) => setNombre(e.target.value)} 
+                        placeholder={esPersonaJuridica ? "Razón Social de la empresa" : "Nombre completo del cliente"}
+                        required 
+                      />
                     </div>
                   </div>
-                  <div className="form-group full-width">
-                    <label>Género</label>
-                    <div className="radio-group">
-                      <input type="radio" name="genero" value="M" checked={sexo === "M"} onChange={() => setSexo("M")} /> Masculino
-                      <input type="radio" name="genero" value="F" checked={sexo === "F"} onChange={() => setSexo("F")} /> Femenino
+
+                  {/* Campo Sexo - Solo para Personas Naturales */}
+                  {!esPersonaJuridica && (
+                    <div className="form-group full-width">
+                      <label>Género *</label>
+                      <div className="radio-group">
+                        <input 
+                          type="radio" 
+                          name="genero" 
+                          value="M" 
+                          checked={sexo === "M"} 
+                          onChange={() => setSexo("M")} 
+                        /> Masculino
+                        <input 
+                          type="radio" 
+                          name="genero" 
+                          value="F" 
+                          checked={sexo === "F"} 
+                          onChange={() => setSexo("F")} 
+                        /> Femenino
+                      </div>
                     </div>
-                  </div>
+                  )}
+
                   <div className="form-row"> 
                     <div className="form-group">
-                      <label htmlFor="dni">Tipo de documento</label>
-                      <select id="tipo_doc" value={idTipoDocumento} onChange={(e) => setIdTipoDocumento(Number(e.target.value))}>
+                      <label htmlFor="tipoDocumento">Tipo de documento *</label>
+                      <select 
+                        id="tipo_doc" 
+                        value={idTipoDocumento} 
+                        onChange={(e) => setIdTipoDocumento(Number(e.target.value))}
+                        disabled={esPersonaJuridica} // Deshabilitado para jurídicas (siempre RUC)
+                      >
                         <option value="0" disabled>Elija documento</option>
-                        {tipoDoc.map((TD)=>(
-                          <option key={TD.id} value={TD.id}>{TD.descripcion}</option>
-                        ))}
+                        {tipoDoc
+                          .filter((TD) => esPersonaJuridica ? TD.id === 2 : true) // Solo RUC para jurídicas
+                          .map((TD) => (
+                            <option key={TD.id} value={TD.id}>{TD.descripcion}</option>
+                          ))
+                        }
                       </select>
+                      {esPersonaJuridica && (
+                        <small style={{color: '#666', fontSize: '12px', display: 'block', marginTop: '5px'}}>
+                          Para personas jurídicas solo se permite RUC
+                        </small>
+                      )}
                     </div>
                     <div className="form-group">
-                      <label htmlFor="telefono">Numero de documento</label>
-                      <input type="text" value={documento} onChange={(e) => setDocumento(e.target.value)} />
+                      <label htmlFor="documento">
+                        {esPersonaJuridica ? "RUC *" : "Número de documento *"}
+                      </label>
+                      <input 
+                        type="text" 
+                        value={documento} 
+                        onChange={(e) => setDocumento(e.target.value)} 
+                        placeholder={esPersonaJuridica ? "Número de RUC" : "Número de documento"}
+                        required
+                      />
                     </div>
                   </div>
+
                   <div className="form-row"> 
                     <div className="form-group">
-                      <label htmlFor="telefono">Telefono</label>
-                      <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+                      <label htmlFor="telefono">Teléfono</label>
+                      <input 
+                        type="text" 
+                        value={telefono} 
+                        onChange={(e) => setTelefono(e.target.value)} 
+                        placeholder="Teléfono"
+                      />
                     </div>
                     <div className="form-group">
                       <label htmlFor="email">Email</label>
-                      <input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} />
+                      <input 
+                        type="email" 
+                        value={correo} 
+                        onChange={(e) => setCorreo(e.target.value)} 
+                        placeholder="correo@ejemplo.com"
+                      />
                     </div>
                   </div>
+
                   <div className="form-row"> 
                     <div className="form-group">
                       <label htmlFor="ciudad">Ciudad</label>
-                      <input type="text" value={ciudad} onChange={(e) => setCiudad(e.target.value)} />
+                      <input 
+                        type="text" 
+                        value={ciudad} 
+                        onChange={(e) => setCiudad(e.target.value)} 
+                        placeholder="Ciudad"
+                      />
                     </div>
                     <div className="form-group">
                       <label htmlFor="distrito">Distrito</label>
-                      <input type="text" value={distrito} onChange={(e) => setDistrito(e.target.value)}/>
+                      <input 
+                        type="text" 
+                        value={distrito} 
+                        onChange={(e) => setDistrito(e.target.value)}
+                        placeholder="Distrito" 
+                      />
                     </div>
                   </div>
+
+                  <div className="form-row"> 
+                    <div className="form-group full-width">
+                      <label htmlFor="domicilio">Dirección</label>
+                      <input 
+                        type="text" 
+                        value={direccion} 
+                        onChange={(e) => setDireccion(e.target.value)} 
+                        placeholder="Dirección completa"
+                      />
+                    </div>
+                  </div>
+
                   <div className="form-row"> 
                     <div className="form-group">
-                      <label htmlFor="domicilio">Dirección</label>
-                      <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
-                    </div>
-                    <div className="form-group">
                       <label htmlFor="activo">Estado</label>
-                      <select value={activo ? "true" : "false"} onChange={(e) => setActivo(e.target.value === "true")}>
-                        <option value="false">Inactiva</option>
+                      <select 
+                        value={activo ? "true" : "false"} 
+                        onChange={(e) => setActivo(e.target.value === "true")}
+                      >
+                        <option value="false">Inactivo</option>
                         <option value="true">Activo</option>
                       </select>
                     </div>
                   </div>
-                  
 
                   <div className="form-group full-width">
-                    <button type='submit' className="btn">{clienteSelecc? "Actualizar" : "Guardar"}</button>
+                    <button type='submit' className="btn">
+                      {clienteSelecc ? "Actualizar" : "Guardar"}
+                    </button>
                   </div>
                 </form>
               </div>
-
-              {/*<div className="profile-section">
-                <h3>
-                  <i className="icon-camera"></i> Foto de perfil
-                </h3>
-
-                <div className="profile-pic">
-                  {imagenDueño && (
-                    <img
-                      src={imagenDueño}
-                      alt="Vista previa"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        borderRadius: "50%",
-                      }}
-                    />
-                  )}
-                </div>
-
-                <label className="upload-label">
-                  Seleccionar foto
-                  <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={handleImageChange}
-                  />
-                </label>
-              </div>*/}
-              
             </div>
           </div>
         </main>

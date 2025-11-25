@@ -119,7 +119,7 @@ const DashboardAdministrativo: React.FC = () => {
         <div className="dashboard-administrativo">
           <div className="header">
             <div className="header-content">
-              <h1>Dashboard Administrativo</h1>
+              <h1>Dashboard Colaboradores</h1>
               <p className="subtitle">Panel de control y seguimiento del personal - Manada Woof</p>
             </div>
           </div>

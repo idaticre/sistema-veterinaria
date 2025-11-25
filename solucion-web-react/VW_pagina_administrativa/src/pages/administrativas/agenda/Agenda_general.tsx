@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
@@ -24,6 +25,8 @@ interface Evento {
 }
 
 function Agenda_general() {
+  const navigate = useNavigate();
+
   const [minimizado, setMinimizado] = useState(false);
   const [fechaSeleccionada, setFechaSeleccionada] = useState<Date>(new Date());
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -34,15 +37,22 @@ function Agenda_general() {
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [editandoEvento, setEditandoEvento] = useState<Evento | null>(null);
+
   const [nuevoEvento, setNuevoEvento] = useState({
     summary: "",
     description: "",
+    cliente: "",
+    mascota: "",
+    servicio: "",
+    veterinario: "",
     date: "",
     startTime: "10:00",
-    endTime: "11:00",
+    
+    duracion: "",
+    estado: "",
   });
 
-  // ================== CARGA DE GAPI Y GIS ==================
+  // ================== CARGA GAPI ==================
   useEffect(() => {
     const cargarGapi = async () => {
       const script = document.createElement("script");
@@ -64,6 +74,7 @@ function Agenda_general() {
     cargarGapi();
   }, []);
 
+  // ================== CARGA GIS ==================
   useEffect(() => {
     const cargarGis = () => {
       const script = document.createElement("script");
@@ -91,8 +102,7 @@ function Agenda_general() {
   }, []);
 
   useEffect(() => {
-    if (gapiInited && gisInited)
-      setStatus("✅ Google Calendar listo para usar");
+    if (gapiInited && gisInited) setStatus("✅ Google Calendar listo para usar");
   }, [gapiInited, gisInited]);
 
   // ================== SESIÓN ==================
@@ -136,80 +146,53 @@ function Agenda_general() {
   };
 
   useEffect(() => {
-    if (isSignedIn) {
-      cargarEventos();
-    }
+    if (isSignedIn) cargarEventos();
   }, [fechaSeleccionada, isSignedIn]);
 
-  // ================== CRUD ==================
+  // ================== GUARDAR EVENTO ==================
   const guardarEvento = async () => {
-    if (!nuevoEvento.summary || !nuevoEvento.date)
-      return alert("Completa los campos obligatorios.");
+    // validaciones mínimas
+    if (!nuevoEvento.cliente?.trim() || !nuevoEvento.mascota?.trim() || !nuevoEvento.date)
+      return alert("Completa los campos obligatorios (*)");
 
     const start = new Date(`${nuevoEvento.date}T${nuevoEvento.startTime}`);
-    const end = new Date(`${nuevoEvento.date}T${nuevoEvento.endTime}`);
+    const duracionMin = parseInt(nuevoEvento.duracion || "30", 10);
+    const end = new Date(start.getTime() + duracionMin * 60000);
+
+    if (isNaN(start.getTime())) return alert("Fecha/hora inválida");
+    if (end <= start) return alert("La hora de fin debe ser posterior a la de inicio.");
+
     const evento = {
-      summary: nuevoEvento.summary,
-      description: nuevoEvento.description,
+      summary: `${nuevoEvento.servicio} - ${nuevoEvento.mascota} 🐾`,
+      description: `
+Cliente: ${nuevoEvento.cliente}
+Mascota: ${nuevoEvento.mascota}
+Servicio: ${nuevoEvento.servicio}
+Veterinario: ${nuevoEvento.veterinario}
+Estado: ${nuevoEvento.estado}
+Observaciones: ${nuevoEvento.description || "Ninguna"}
+      `,
       start: { dateTime: start.toISOString(), timeZone: "America/Lima" },
       end: { dateTime: end.toISOString(), timeZone: "America/Lima" },
     };
 
     try {
-      if (editandoEvento) {
-        await window.gapi.client.calendar.events.update({
-          calendarId: "primary",
-          eventId: editandoEvento.id,
-          resource: evento,
-        });
-        setStatus("✏️ Evento editado correctamente");
-      } else {
-        await window.gapi.client.calendar.events.insert({
-          calendarId: "primary",
-          resource: evento,
-        });
-        setStatus("✅ Evento creado correctamente");
-      }
+      await window.gapi.client.calendar.events.insert({
+        calendarId: "primary",
+        resource: evento,
+      });
+
+      setStatus("✅ Cita registrada correctamente");
       setMostrarModal(false);
       setEditandoEvento(null);
-      setNuevoEvento({
-        summary: "",
-        description: "",
-        date: "",
-        startTime: "10:00",
-        endTime: "11:00",
-      });
+
       cargarEventos();
     } catch (error) {
-      console.error("Error al guardar evento:", error);
-      setStatus("⚠️ Error al guardar el evento");
+      console.error("Error al guardar cita:", error);
+      setStatus("⚠️ Error al guardar la cita");
     }
   };
-
-  const editarEvento = (e: Evento) => {
-    const inicio = new Date(e.start.dateTime);
-    const fin = new Date(e.end.dateTime);
-    setNuevoEvento({
-      summary: e.summary,
-      description: e.description || "",
-      date: inicio.toISOString().split("T")[0],
-      startTime: inicio.toTimeString().slice(0, 5),
-      endTime: fin.toTimeString().slice(0, 5),
-    });
-    setEditandoEvento(e);
-    setMostrarModal(true);
-  };
-
-  const eliminarEvento = async (id: string) => {
-    if (confirm("¿Eliminar este evento?")) {
-      await window.gapi.client.calendar.events.delete({
-        calendarId: "primary",
-        eventId: id,
-      });
-      cargarEventos();
-      setStatus("🗑️ Evento eliminado");
-    }
-  };
+  
 
   // ================== RENDER ==================
   return (
@@ -221,7 +204,7 @@ function Agenda_general() {
           <h2 className="titulo-agenda">Agenda de Citas</h2>
 
           <div className="agenda-layout">
-            {/* 📅 CALENDARIO */}
+            {/* CALENDARIO */}
             <div className="calendar-container">
               <Calendar
                 onChange={(date) => setFechaSeleccionada(date as Date)}
@@ -241,27 +224,34 @@ function Agenda_general() {
               </div>
             </div>
 
-            {/* 📋 EVENTOS */}
+            {/* EVENTOS */}
             <div className="citas-container">
               <div className="citas-header">
                 <h3>📋 Eventos del {fechaSeleccionada.toLocaleDateString()}</h3>
 
                 {isSignedIn && (
                   <button
-                    className="btn-agregar"
+                    className="btn-agregar-linda"
                     onClick={() => {
-                      const fechaISO = fechaSeleccionada.toISOString().split("T")[0];
+
                       setNuevoEvento({
                         summary: "",
                         description: "",
-                        date: fechaISO,
+                        cliente: "",
+                        mascota: "",
+                        servicio: "",
+                        veterinario: "",
+                        date: fechaSeleccionada.toISOString().split("T")[0],
                         startTime: "10:00",
-                        endTime: "11:00",
+
+                        duracion: "",
+                        estado: "",
                       });
+                      setEditandoEvento(null);
                       setMostrarModal(true);
                     }}
                   >
-                    ➕ Nuevo evento
+                    ✨➕ Nueva cita
                   </button>
                 )}
               </div>
@@ -272,81 +262,169 @@ function Agenda_general() {
                 <p>No hay eventos para este día.</p>
               ) : (
                 <div className="citas-lista">
-                  {eventos.map((e) => (
-                    <div key={e.id} className="cita-card">
-                      <strong>{e.summary}</strong>
-                      {e.description && <p>{e.description}</p>}
-                      <small>
-                        {new Date(e.start.dateTime).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
-                        -{" "}
-                        {new Date(e.end.dateTime).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </small>
-                      <div className="acciones">
-                        <button onClick={() => editarEvento(e)}>✏️</button>
-                        <button onClick={() => eliminarEvento(e.id!)}>🗑️</button>
+                  {eventos.map((e) => {
+                    const detalles =
+                      e.description?.split("\n").reduce((acc: any, linea) => {
+                        const [clave, valor] = linea.split(":");
+                        if (clave && valor) acc[clave.trim()] = valor.trim();
+                        return acc;
+                      }, {}) || {};
+
+                    const horaInicio = new Date(e.start.dateTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+
+                    const horaFin = new Date(e.end.dateTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+
+                    return (
+                      <div key={e.id} className="cita-card">
+                        <div className="cita-info">
+                          <p><strong>Cliente:</strong> {detalles.Cliente || "---"}</p>
+                          <p><strong>Mascota:</strong> {detalles.Mascota || "---"}</p>
+                          <p><strong>Servicio:</strong> {detalles.Servicio || "---"}</p>
+                          <p><strong>Hora:</strong> {horaInicio} - {horaFin}</p>
+                        </div>
+
+                        <button
+                          className="btn-mas-info"
+                          onClick={() => navigate(`/administracion/agenda/EditarCita`)}
+                        >
+                          📄 Más información
+                        </button>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
+
               <p style={{ marginTop: "10px", color: "#555" }}>{status}</p>
             </div>
           </div>
         </section>
       </main>
 
-      {/* MODAL CREAR / EDITAR */}
+      {/* MODAL */}
       {mostrarModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>{editandoEvento ? "Editar evento" : "Crear nuevo evento"}</h3>
+            <h3>{editandoEvento ? "Editar cita" : "Agendar nueva cita 🗓️"}</h3>
 
-            <input
-              type="text"
-              placeholder="Título del evento"
-              value={nuevoEvento.summary}
-              onChange={(e) =>
-                setNuevoEvento({ ...nuevoEvento, summary: e.target.value })
-              }
-            />
+            {/* COLUMNA IZQUIERDA */}
+            <div className="col-izq">
+              <label>Fecha *</label>
+              <input
+                type="date"
+                value={nuevoEvento.date}
+                onChange={(e) =>
+                  setNuevoEvento({ ...nuevoEvento, date: e.target.value })
+                }
+              />
+
+              <label>Hora *</label>
+              <input
+                type="time"
+                value={nuevoEvento.startTime}
+                onChange={(e) =>
+                  setNuevoEvento({ ...nuevoEvento, startTime: e.target.value })
+                }
+              />
+
+              <label>Duración (min)</label>
+              <input
+                type="number"
+                placeholder="Ej: 30"
+                value={nuevoEvento.duracion}
+                onChange={(e) =>
+                  setNuevoEvento({ ...nuevoEvento, duracion: e.target.value })
+                }
+              />
+
+              <label>Estado *</label>
+              <select
+                value={nuevoEvento.estado}
+                onChange={(e) =>
+                  setNuevoEvento({ ...nuevoEvento, estado: e.target.value })
+                }
+              >
+                <option value="">Seleccione...</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Confirmado">Confirmado</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </div>
+
+            {/* COLUMNA DERECHA - VALIDACIÓN PROGRESIVA */}
+            <div className="col-der">
+              <label>Cliente (Dueño) *</label>
+              <input
+                type="text"
+                value={nuevoEvento.cliente}
+                onChange={(e) =>
+                  setNuevoEvento({ ...nuevoEvento, cliente: e.target.value })
+                }
+              />
+
+              <label>Mascota *</label>
+              <input
+                type="text"
+                value={nuevoEvento.mascota}
+                onChange={(e) =>
+                  setNuevoEvento({ ...nuevoEvento, mascota: e.target.value })
+                }
+                disabled={!nuevoEvento.cliente.trim()}
+              />
+
+              <label>Tipo de servicio *</label>
+              <select
+                value={nuevoEvento.servicio}
+                onChange={(e) =>
+                  setNuevoEvento({ ...nuevoEvento, servicio: e.target.value })
+                }
+                disabled={!nuevoEvento.mascota.trim()}
+              >
+                <option value="">Seleccione...</option>
+                <option value="Baño">Baño</option>
+                <option value="Consulta">Consulta</option>
+                <option value="Vacunación">Vacunación</option>
+                <option value="Control">Control</option>
+              </select>
+
+              <label>Veterinario</label>
+              <input
+                type="text"
+                value={nuevoEvento.veterinario}
+                onChange={(e) =>
+                  setNuevoEvento({ ...nuevoEvento, veterinario: e.target.value })
+                }
+                disabled={!nuevoEvento.servicio.trim()}
+              />
+            </div>
+
+            {/* OBSERVACIONES ABAJO */}
+            <label className="label-obs">Observaciones</label>
             <textarea
-              placeholder="Descripción"
+              className="textarea-obs"
               value={nuevoEvento.description}
               onChange={(e) =>
                 setNuevoEvento({ ...nuevoEvento, description: e.target.value })
               }
             />
-            <input
-              type="date"
-              value={nuevoEvento.date}
-              onChange={(e) =>
-                setNuevoEvento({ ...nuevoEvento, date: e.target.value })
-              }
-            />
-            <input
-              type="time"
-              value={nuevoEvento.startTime}
-              onChange={(e) =>
-                setNuevoEvento({ ...nuevoEvento, startTime: e.target.value })
-              }
-            />
-            <input
-              type="time"
-              value={nuevoEvento.endTime}
-              onChange={(e) =>
-                setNuevoEvento({ ...nuevoEvento, endTime: e.target.value })
-              }
-            />
 
+            {/* BOTONES */}
             <div className="acciones-modal">
-              <button onClick={guardarEvento}>Guardar</button>
-              <button onClick={() => setMostrarModal(false)}>Cancelar</button>
+              <button className="btn-agregar" onClick={guardarEvento}>
+                💾 Guardar
+              </button>
+              <button
+                className="btn-cerrar"
+                onClick={() => setMostrarModal(false)}
+              >
+                ❌ Cancelar
+              </button>
             </div>
           </div>
         </div>

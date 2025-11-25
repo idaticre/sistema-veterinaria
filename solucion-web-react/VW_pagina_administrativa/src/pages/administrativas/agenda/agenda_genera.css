@@ -2,6 +2,10 @@
   --color-principal: #ff9900;
   --color-principal-hover: #e07b00;
   --color-borde: #ddd;
+  --color-verde-claro: #6fdc6f;
+  --color-celeste: #a7e0ff;
+  --color-rojo: #e74c3c;
+  --color-rojo-hover: #c0392b;
 }
 
 /* ================== CONTENEDOR PRINCIPAL ================== */
@@ -46,7 +50,7 @@
   width: 100%;
 }
 
-/* Hace que el calendario sea más grande */
+
 .react-calendar {
   width: 100% !important;
   max-width: 600px;
@@ -54,12 +58,12 @@
   border: none;
 }
 
-/* Días del calendario */
+
 .react-calendar__month-view__days__day {
   padding: 1rem 0.6rem;
 }
 
-/* Encabezado (mes y botones) */
+
 .react-calendar__navigation {
   margin-bottom: 1rem;
 }
@@ -70,39 +74,103 @@
   font-weight: bold;
 }
 
-/* Días de la semana */
+
 .react-calendar__month-view__weekdays {
   font-weight: bold;
   text-transform: uppercase;
   color: #333;
 }
 
-/* Días seleccionados */
+/* ================== FIX Y ESTILOS CALENDARIO ================== */
+.react-calendar__tile {
+  color: #333 !important;
+  background-color: #fff !important;
+  border-radius: 8px;
+  transition: 0.2s ease;
+}
+
+.react-calendar__tile abbr {
+  color: #333 !important;
+}
+
+
+.react-calendar__tile--now {
+  background: #ffeaa7 !important;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.react-calendar__tile--now abbr {
+  color: #000 !important;
+}
+
+
 .react-calendar__tile--active {
-  background: var(--color-principal) !important;
+  background: var(--color-verde-claro) !important;
   color: #fff !important;
   border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0,0,0,0.15);
+  transform: scale(1.05);
 }
 
-/* Hover */
+
 .react-calendar__tile:hover {
-  background: rgba(255, 153, 0, 0.2);
+  background: var(--color-celeste) !important;
   border-radius: 8px;
+  color: #000 !important;
+  cursor: pointer;
 }
 
-/* ================== BOTÓN DE SESIÓN ================== */
-.auth-buttons {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
+
+.react-calendar__month-view__days__day--neighboringMonth abbr {
+  color: #bbb !important;
 }
 
-.btn-cerrar,
+/* ================== BOTONES ================== */
+.btn-agregar, .btn-cerrar {
+  margin-top: 1rem;
+  color: white;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+
 .btn-agregar {
-  width: 80%;
-  font-size: 1rem;
-  padding: 0.8rem 0;
+  background: var(--color-verde-claro);
+}
+.btn-agregar:hover {
+  background: #58c958;
+  transform: scale(1.05);
+}
+
+
+.btn-cerrar {
+  background: var(--color-rojo);
+}
+.btn-cerrar:hover {
+  background: var(--color-rojo-hover);
+  transform: scale(1.05);
+}
+
+
+.btn-eliminar {
+  background: var(--color-rojo);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-eliminar:hover {
+  background: var(--color-rojo-hover);
+  transform: scale(1.05);
 }
 
 /* ================== CUADRO EVENTOS ================== */
@@ -129,27 +197,42 @@
   background: #fff;
   transition: 0.25s ease;
 }
+
+
 .cita-card:hover {
-  background: var(--color-principal);
-  color: #fff;
+  background: var(--color-celeste);
+  color: #000;
   transform: translateY(-3px);
 }
 
-/* ================== BOTONES ================== */
-.btn-agregar, .btn-cerrar {
-  margin-top: 1rem;
-  background: var(--color-principal);
-  color: white;
-  padding: 0.6rem 1rem;
+
+.cita-card .acciones button {
   border: none;
   border-radius: 8px;
-  cursor: pointer;
+  padding: 6px 10px;
   font-weight: bold;
-  transition: 0.2s;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.btn-agregar:hover, .btn-cerrar:hover {
-  background: var(--color-principal-hover);
-  transform: scale(1.05);
+
+/* EDITAR → azul */
+.cita-card .acciones button:first-child {
+  background-color: #1130ff;
+  color: white;
+}
+.cita-card .acciones button:first-child:hover {
+  background-color: #005ba0;
+  transform: scale(1.1);
+}
+
+/* ELIMINAR → rojo */
+.cita-card .acciones button:last-child {
+  background-color: #ff4d4d;
+  color: white !important;
+}
+.cita-card .acciones button:last-child:hover {
+  background-color: #e63939;
+  transform: scale(1.1);
 }
 
 /* ================== MODAL ================== */
@@ -167,13 +250,110 @@
 }
 
 .modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 420px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 40px;                  /* MÁS ESPACIO */
+  max-width: 1100px !important;   /* FORMULARIO MUCHO MÁS GRANDE */
+  width: 97%;                     /* MÁS ANCHO */
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;                      /* MÁS SEPARACIÓN ENTRE CAMPOS */
+  box-shadow: 0 12px 35px rgba(0,0,0,0.18);
+}
+
+
+.modal-content h3 {
+  grid-column: span 2;
+  font-size: 1.6rem;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.modal-content label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.modal-content textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  padding: 0.65rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  grid-column: span 2;
+}
+
+/* BOTONES MODAL */
+.acciones-modal {
+  grid-column: span 2;
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.btn-guardar {
+  background: #5b73ff;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-guardar:hover {
+  background: #2547f2;
+}
+
+.btn-cancelar {
+  background: #ed4141;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  color: #eb2525;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-cancelar:hover {
+  background: #c8c8c8;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .modal-content {
+    width: 95%;
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content textarea {
+    grid-column: span 1;
+  }
+
+  .acciones-modal {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-guardar,
+  .btn-cancelar {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* ================== ENCABEZADO DE EVENTOS ================== */
@@ -188,7 +368,7 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
-/* 🔹 Hace más grande el texto del encabezado */
+
 .citas-header h3 {
   font-size: 1.6rem;
   font-weight: bold;
@@ -196,9 +376,9 @@
   margin: 0;
 }
 
-/* 🔹 Botón “Nuevo evento” más visible */
+
 .citas-header .btn-agregar {
-  background: var(--color-principal);
+  background: var(--color-verde-claro);
   color: white;
   font-size: 1.1rem;
   padding: 0.8rem 1.3rem;
@@ -207,10 +387,27 @@
 }
 
 .citas-header .btn-agregar:hover {
-  background: var(--color-principal-hover);
+  background: #58c958;
   transform: scale(1.07);
 }
 
+
+.btn-agregar-linda {
+  background: linear-gradient(135deg, #6fdc6f, #4caf50);
+  color: white;
+  font-size: 1.1rem;
+  padding: 0.8rem 1.4rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+.btn-agregar-linda:hover {
+  background: linear-gradient(135deg, #58c958, #43a047);
+  transform: scale(1.08);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
 
 /* ================== RESPONSIVO ================== */
 @media (max-width: 900px) {
@@ -222,8 +419,67 @@
     max-width: 100%;
     font-size: 1rem;
   }
-
+  .modal-content {
+    width: 95%;
+    grid-template-columns: 1fr;
+  }
   .btn-cerrar, .btn-agregar {
     width: 100%;
   }
+}
+/* ---------------- TARJETA ---------------- */
+.cita-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  width: 100%;
+}
+
+.cita-info {
+  flex: 1;
+}
+
+.btn-mas-info {
+  background: #42b5ff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.btn-mas-info:hover {
+  background: #77caff;
+  transform: scale(1.05);
+}
+
+/* ---------------- MODAL EN 2 COLUMNAS ---------------- */
+.modal-content {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.col-izq,
+.col-der {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label-obs {
+  grid-column: span 2;
+  font-weight: bold;
+}
+
+.textarea-obs {
+  grid-column: span 2;
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
