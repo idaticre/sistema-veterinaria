@@ -12,7 +12,14 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
     const [openMenu, setOpenMenu] = useState<MenuKey>(null);
     const [minimizado,setMinimizado] = useState(false)
 
-    const nombreUsuario = localStorage.getItem("nombreUsuario");
+    const nombreUsuario = sessionStorage.getItem("username");
+
+    const rolesGuardados = sessionStorage.getItem("roles");
+    const roles: string[] = rolesGuardados ? JSON.parse(rolesGuardados) : [];
+    const tieneRol = (rol: string) => roles.includes(rol);
+    const RolesPermitidos = (...rolesRequeridos: string[]) => {
+        return rolesRequeridos.some(rol => tieneRol(rol));
+    };
 
     const clienteRef = useRef<HTMLUListElement | null>(null);
     const mascotasRef = useRef<HTMLUListElement | null>(null);
@@ -24,16 +31,16 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
     const agendaRef = useRef<HTMLUListElement | null>(null);
     const navigate = useNavigate();
 
-useEffect(() => {
+    useEffect(() => {
         const token = sessionStorage.getItem("token"); // sessionStorage, no localStorage
         if (!token) {
             navigate("/administracion/home", { replace: true });
         }
     }, [navigate]);
 
-    const handleLogout = () => {
-        sessionStorage.removeItem("token");
-        sessionStorage.removeItem("nombreUsuario");
+    const cerrarSesion = () => {
+        sessionStorage.clear();
+        navigate("/administracion/login", { replace: true });
     };
 
     const toggleMinimizado = () => {
@@ -98,75 +105,86 @@ useEffect(() => {
                                     <span>Inicio</span>
                                 </Link>
                             </li>
-                            <li className={`opcion opcion_desplegable ${openMenu === "cliente"?"toggle_submenu":""}`} 
-                                onClick={() => toggleMenu("cliente")}
-                            >
-                                <Link to="" className="enlace_opcion">
-                                    <i className="fa-solid fa-user"></i>
-                                    <span>Cliente</span>
-                                    <i className={`fa-solid ${openMenu === "cliente" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
-                                </Link>
-                                <ul ref={clienteRef} className="submenu">
-                                    <li><Link to="/administracion/cliente/lista" className="sub_opcion">Lista de clientes</Link></li>
-                                    <li><Link to="/administracion/cliente/registro" className="sub_opcion">Registrar cliente</Link></li>
-                                </ul>
-                            </li>
-                            <li className={`opcion opcion_desplegable ${openMenu === "mascotas"?"toggle_submenu":""}`} 
-                                onClick={() => toggleMenu("mascotas")}
-                            >
-                                <Link to="" className="enlace_opcion">
-                                    <i className="fa-solid fa-shield-dog"></i>
-                                    <span>Mascotas</span>
-                                    <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
-                                </Link>
-                                <ul ref={mascotasRef} className="submenu">
-                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Mascotas registradas</Link></li>
-                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Registrar mascota</Link></li>
-                                    <li><Link to="/administracion/mascotas/registrar_salida_mascota" className="sub_opcion">Registrar salida de mascota</Link></li>
-                                    <li><Link to="/administracion/mascotas/espcies_razas" className="sub_opcion">Especies y razas</Link></li>
-                                    <li><Link to="/administracion/mascotas/vacunas" className="sub_opcion">Vacunas disponibles</Link></li>
-                                </ul>
-                            </li>
-                            <li className="opcion opcion_simple">
-                                <Link to="#" className="enlace_opcion">
-                                    <i className="fa-solid fa-folder"></i>
-                                    <span>Historial Médico</span>
-                                </Link>
-                            </li>
-                            <li className="opcion opcion_simple">
-                                <Link to="/administracion/servicios" className="enlace_opcion">
-                                    <i className="fa-solid fa-folder"></i>
-                                    <span>Servicios</span>
-                                </Link>
-                            </li>
-                            <li className={`opcion opcion_desplegable ${openMenu === "agenda"?"toggle_submenu":""}`} 
-                                onClick={() => toggleMenu("agenda")}
-                            >
-                                <Link to="" className="enlace_opcion">
-                                    <i className="fa-solid fa-calendar-days"></i>
-                                    <span>Agenda</span>
-                                    <i className={`fa-solid ${openMenu === "agenda" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
-                                </Link>
-                                <ul ref={agendaRef} className="submenu">
-                                    <li><Link to="/administracion/agenda/DashboardAgenda" className="sub_opcion">Dashboard</Link></li>
-                                    <li><Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
-                                    <li><Link to="/administracion/agenda/EditarCita" className="sub_opcion">Editar cita</Link></li>
-                                </ul>
-                            </li>
-                            <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 
-                                onClick={() => toggleMenu("distribucion")}
-                            >
-                                <Link to="" className="enlace_opcion">
-                                    <i className="fa-solid fa-truck-moving"></i>
-                                    <span>Distribución</span>
-                                    <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
-                                </Link>
-                                <ul ref={distribRef} className="submenu">
-                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Inventario</Link></li>
-                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Ordenes de compra</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Proveedores</Link></li>
-                                </ul>
-                            </li>
+                            {RolesPermitidos("ADMINISTRADOR GENERAL", "") && (
+                                <li className={`opcion opcion_desplegable ${openMenu === "cliente"?"toggle_submenu":""}`} 
+                                    onClick={() => toggleMenu("cliente")}
+                                >
+                                    <Link to="" className="enlace_opcion">
+                                        <i className="fa-solid fa-user"></i>
+                                        <span>Cliente</span>
+                                        <i className={`fa-solid ${openMenu === "cliente" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    </Link>
+                                    <ul ref={clienteRef} className="submenu">
+                                        <li><Link to="/administracion/cliente/lista" className="sub_opcion">Lista de clientes</Link></li>
+                                        <li><Link to="/administracion/cliente/registro" className="sub_opcion">Registrar cliente</Link></li>
+                                    </ul>
+                                </li>
+                            )}
+                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
+                                <li className={`opcion opcion_desplegable ${openMenu === "mascotas"?"toggle_submenu":""}`} 
+                                    onClick={() => toggleMenu("mascotas")}
+                                >
+                                    <Link to="" className="enlace_opcion">
+                                        <i className="fa-solid fa-shield-dog"></i>
+                                        <span>Mascotas</span>
+                                        <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    </Link>
+                                    <ul ref={mascotasRef} className="submenu">
+                                        <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Mascotas registradas</Link></li>
+                                        <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Registrar mascota</Link></li>
+                                        <li><Link to="/administracion/mascotas/registrar_salida_mascota" className="sub_opcion">Registrar salida de mascota</Link></li>
+                                        <li><Link to="/administracion/mascotas/espcies_razas" className="sub_opcion">Especies y razas</Link></li>
+                                        <li><Link to="/administracion/mascotas/vacunas" className="sub_opcion">Vacunas disponibles</Link></li>
+                                    </ul>
+                                </li>
+                            )}
+                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
+                                <li className="opcion opcion_simple">
+                                    <Link to="#" className="enlace_opcion">
+                                        <i className="fa-solid fa-folder"></i>
+                                        <span>Historial Médico</span>
+                                    </Link>
+                                </li>
+                            )}
+                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
+                                <li className="opcion opcion_simple">
+                                    <Link to="/administracion/servicios" className="enlace_opcion">
+                                        <i className="fa-solid fa-folder"></i>
+                                        <span>Servicios</span>
+                                    </Link>
+                                </li>
+                            )}
+                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
+                                <li className={`opcion opcion_desplegable ${openMenu === "agenda"?"toggle_submenu":""}`} 
+                                    onClick={() => toggleMenu("agenda")}
+                                >
+                                    <Link to="" className="enlace_opcion">
+                                        <i className="fa-solid fa-calendar-days"></i>
+                                        <span>Agenda</span>
+                                        <i className={`fa-solid ${openMenu === "agenda" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    </Link>
+                                    <ul ref={agendaRef} className="submenu">
+                                        <li><Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
+                                        <li><Link to="/administracion/agenda/EditarCita" className="sub_opcion">Editar cita</Link></li>
+                                    </ul>
+                                </li>
+                            )}
+                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
+                                <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 
+                                    onClick={() => toggleMenu("distribucion")}
+                                >
+                                    <Link to="" className="enlace_opcion">
+                                        <i className="fa-solid fa-truck-moving"></i>
+                                        <span>Distribución</span>
+                                        <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    </Link>
+                                    <ul ref={distribRef} className="submenu">
+                                        <li><Link to="/administracion/distribucion/inventario" className="sub_opcion">Inventario</Link></li>
+                                        <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Ordenes de compra</Link></li>
+                                        <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Proveedores</Link></li>
+                                    </ul>
+                                </li>
+                            )}
                             <li className={`opcion opcion_desplegable ${openMenu === "venta"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("venta")}
                             >
@@ -250,7 +268,7 @@ useEffect(() => {
                                 <span className="mail_user">123456@gmail.com</span>
                             </div>
                             <div className="user_icon">
-                                <Link to="/" onClick={handleLogout}><i className="fa-solid fa-right-to-bracket"></i></Link>
+                                <Link to="/" onClick={cerrarSesion}><i className="fa-solid fa-right-to-bracket"></i></Link>
                             </div>
                         </div>
                     </div>

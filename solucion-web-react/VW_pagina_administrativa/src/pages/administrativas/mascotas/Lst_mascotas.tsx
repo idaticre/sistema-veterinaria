@@ -5,7 +5,8 @@ import './lst_mascotas.css'
 import type { MascotaResponse } from '../../../components/interfaces/interfaces';
 import IST from '../../../components/proteccion_momentanea/IST';
 
-type Mascotaextendido = MascotaResponse & { nombre_dueño?: string; nombre_raza?: string; nombre_especie?: string; nombre_estado?: string };
+type Mascotaextendido = MascotaResponse & { nombre_dueño?: string; nombre_raza?: string; nombre_especie?: string;
+   nombre_estado?: string; nombre_tamaño?: string; nombre_etapa?: string };
 
 function Lst_mascotas() {
   const [minimizado, setMinimizado] = useState(false);
@@ -24,11 +25,13 @@ function Lst_mascotas() {
         const mascotasConExtras = await Promise.all(
           lista.map(async (m: MascotaResponse) => {
             try {
-              const [dueñoRes, razaRes, especieRes, estadoRes] = await Promise.all([
+              const [dueñoRes, razaRes, especieRes, estadoRes, tamanoRes, etapaRes] = await Promise.all([
                 IST.get(`/clientes/${m.idCliente}`),
                 IST.get(`/razas/${m.idRaza}`),
                 IST.get(`/especies/${m.idEspecie}`),
-                IST.get(`/estado-mascota/${m.idEstado}`)
+                IST.get(`/estado-mascota/${m.idEstado}`),
+                IST.get(`/tamanos/${m.idTamano}`),
+                IST.get(`/etapasVida/${m.idEtapa}`)
               ]);
 
               return {
@@ -37,6 +40,8 @@ function Lst_mascotas() {
                 nombre_raza: razaRes.data.nombre,
                 nombre_especie: especieRes.data.nombre,
                 nombre_estado: estadoRes.data.nombre,
+                nombre_tamaño: tamanoRes.data.descripcion,
+                nombre_etapa: etapaRes.data.descripcion,
               };
             } catch (error) {
               console.error("Error al obtener datos", error);
@@ -46,6 +51,8 @@ function Lst_mascotas() {
                 nombre_raza: "Desconocido",
                 nombre_especie: "Desconocido",
                 nombre_estado: "Desconocido",
+                nombre_tamaño: "Desconocido",
+                nombre_etapa: "Desconocido",
               };
             }
           })
@@ -107,7 +114,7 @@ function Lst_mascotas() {
                     <input type="text" placeholder='Ingrese el nombre del cliente que desea buscar' value={busqueda}
                       onChange={(e) => setBusqueda(e.target.value)}/>
                   </div>
-                  <button className="anadir-goated"><Link to="/administracion/mascotas/registro">➕AÑADIR</Link></button>
+                  <Link to="/administracion/mascotas/registro"><button className="anadir-goated">➕AÑADIR</button></Link>
                 </div>
                 <section className='tabla_registosM'>
                   <div id='lista_mascotas'>
@@ -131,51 +138,70 @@ function Lst_mascotas() {
                         {mascotaSeleccionado ? (
                           <div className="datos_mascotaR">
                             <div className="DmascotaR_contenido">
-                              <button className="DmascotaR_cierre" onClick={() => setMascotaSeleccionado(null)}>❌</button>
-                              <h2>Información de {mascotaSeleccionado.nombre}</h2>
+                              <div className='DmascotaR_cabecera'>
+                                <button className="DmascotaR_cierre" onClick={() => setMascotaSeleccionado(null)}>❌</button>
+                                <h2>Información de {mascotaSeleccionado.nombre}</h2>
+                              </div>
                               <div className='DmascotaR_contenido_info'>
+                                <section className='DmascotaR_contenido_superior'>
+                                  <table>
+                                    <tr>
+                                      <td><strong>Codigo:</strong></td>
+                                      <td colSpan={3}>{mascotaSeleccionado.codigo}</td>
+                                    </tr>
+                                    <tr>
+                                      <td><strong>Dueño:</strong></td>
+                                      <td colSpan={3}>{mascotaSeleccionado.nombre_dueño}</td>
+                                    </tr>
+                                    <tr>
+                                      <td><strong>Especie:</strong></td>
+                                      <td>{mascotaSeleccionado.nombre_especie}</td>
+                                      <td><strong>Raza:</strong></td>
+                                      <td>{mascotaSeleccionado.nombre_raza}</td>
+                                    </tr>
+                                    <tr>
+                                      <td><strong>Sexo:</strong></td>
+                                      <td>{mascotaSeleccionado.sexo == "M"? "Macho":"Hembra"}</td>
+                                      <td><strong>Etapa:</strong></td>
+                                      <td>{mascotaSeleccionado.nombre_etapa}</td>
+                                    </tr>
+                                    <tr>
+                                      <td><strong>Tamaño:</strong></td>
+                                      <td colSpan={3}>{mascotaSeleccionado.nombre_tamaño}</td>
+                                    </tr>
+                                  </table>
+                                  <img src="/guardados/mascotas/canino1_1763079136619.png" alt="" />
+                                </section>
                                 <table>
                                   <tr>
-                                    <td><strong>Dueño:</strong></td>
-                                    <td>{mascotaSeleccionado.nombre_dueño}</td>
-                                  </tr>
-                                  <tr>
-                                    <td><strong>Especie:</strong></td>
-                                    <td>{mascotaSeleccionado.nombre_especie}</td>
-                                    <td><strong>Raza:</strong></td>
-                                    <td>{mascotaSeleccionado.nombre_raza}</td>
-                                  </tr>
-                                  <tr>
-                                    <td><strong>Sexo:</strong></td>
-                                    <td>{mascotaSeleccionado.sexo == "M"? "Macho":"Hembra"}</td>
-                                  </tr>
-                                  <tr>
-                                  </tr>
-                                  <tr>
-                                    <td><strong>Pelaje:</strong></td>
-                                    <td>{mascotaSeleccionado.pelaje}</td>
-                                  </tr>
-                                  <tr>
-                                    <td><strong>Peso:</strong></td>
-                                    <td>{mascotaSeleccionado.peso}</td>
-                                  </tr>
-                                  
-                                  <tr>
-                                    <td><strong>Castrado/a:</strong></td>
-                                    <td>{mascotaSeleccionado.foto}</td>
+                                    <td><strong>Fecha de nacimiento:</strong></td>
+                                    <td>{mascotaSeleccionado.fechaNacimiento}</td>
                                   </tr>
                                 </table>
-                                <div className='DmascotaR_foto'>
-                                  <img src="/yuko.jpeg" alt="" />
+                                <table>
+                                  <tr>
+                                    <td>Pelaje: {mascotaSeleccionado.pelaje}</td>
+                                    <td>Alergias:{mascotaSeleccionado.alergias}</td>
+                                    <td>estado: {mascotaSeleccionado.nombre_estado}</td>
+                                  </tr>
+                                </table>
+                                <div>
+                                  <span><strong>Castrado/a: </strong>{mascotaSeleccionado.esterilizado? "✅":"❌"}</span>
+                                  <span><strong>Chip: </strong>{mascotaSeleccionado.chip? "✅":"❌"}</span>
+                                  <span><strong>Factor Dea: </strong>{mascotaSeleccionado.factorDea? "✅":"❌"}</span>
+                                  <span><strong>Pedigree: </strong>{mascotaSeleccionado.pedigree? "✅":"❌"}</span>
+                                  <span><strong>Agresivo: </strong>{mascotaSeleccionado.agresividad? "✅":"❌"}</span>
                                 </div>
-                                <button><Link to="/administracion/mascotas/registro" state={{ mascotaSeleccionado }}>Editar</Link></button>
+                                <Link to="/administracion/mascotas/registro" state={{ mascotaSeleccionado }}><button>Editar</button></Link>
                                 <button onClick={() => {handleDelete(mascotaSeleccionado.id)}}>Eliminar</button>
                               </div>  
                             </div>
                           </div>
                         ):
                         (
-                          <p>a</p>
+                          <div className='SinSeleccion'>
+                            <h2>Por favor seleccione una mascota <br />📚</h2>
+                          </div>
                         )}
                       </div>
                   </div>

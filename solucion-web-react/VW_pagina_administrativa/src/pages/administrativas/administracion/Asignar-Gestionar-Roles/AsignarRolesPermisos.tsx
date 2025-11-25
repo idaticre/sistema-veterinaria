@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import IST from "../../../../components/proteccion_momentanea/IST";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./AsignarRolesPermisos.css";
-import type { Usuario, Rol, UsuarioRol } from "../../../../components/interfaces/interfaces";
+import type { UsuarioResponse, Rol, UsuarioRol } from "../../../../components/interfaces/interfaces";
 
 const AsignarRolesPermisos: React.FC = () => {
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [usuarios, setUsuarios] = useState<UsuarioResponse[]>([]);
   const [roles, setRoles] = useState<Rol[]>([]);
   const [usuariosRoles, setUsuariosRoles] = useState<UsuarioRol[]>([]);
   const [rolSeleccionado, setRolSeleccionado] = useState<{ [key: number]: number }>({});
@@ -20,17 +20,17 @@ const AsignarRolesPermisos: React.FC = () => {
   }, []);
 
   const obtenerUsuarios = async () => {
-    const res = await axios.get(`${baseURL}/usuarios`);
+    const res = await IST.get("/usuarios");
     setUsuarios(res.data);
   };
 
   const obtenerRoles = async () => {
-    const res = await axios.get(`${baseURL}/roles`);
-    setRoles(res.data);
+    const res = await IST.get("/roles");
+    setRoles(res.data.usuarioRoles);
   };
 
   const obtenerUsuariosRoles = async () => {
-    const res = await axios.get(`${baseURL}/usuarios-roles`);
+    const res = await IST.get("/usuarios-roles");
     setUsuariosRoles(res.data.data);
   };
 
@@ -39,7 +39,7 @@ const AsignarRolesPermisos: React.FC = () => {
     if (!idRol) return alert("Selecciona un rol primero");
 
     try {
-      await axios.post(`${baseURL}/usuarios-roles/asignar`, {
+      await IST.post(`${baseURL}/usuarios-roles/asignar`, {
         idUsuario,
         idRol
       });
@@ -54,7 +54,7 @@ const AsignarRolesPermisos: React.FC = () => {
 
   const eliminarRol = async (idUsuario: number, idRol: number) => {
     try {
-      await axios.delete(`${baseURL}/usuarios-roles/eliminar`, {
+      await IST.delete(`/usuarios-roles/eliminar`, {
         data: { idUsuario, idRol }
       });
       alert("Rol eliminado correctamente 🗑️");

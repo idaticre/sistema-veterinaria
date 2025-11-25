@@ -336,7 +336,7 @@ export interface Tamaño_Mascota{
 export interface Etapa_Mascota{
     id: number;
     descripcion: string;
-    sctivo: boolean;
+    activo: boolean;
 }
 
 export interface dueñoNom{

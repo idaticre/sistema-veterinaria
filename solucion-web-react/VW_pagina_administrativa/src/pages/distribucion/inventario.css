@@ -1,0 +1,62 @@
+.lst_inventario{
+    background-color: #bdd1fd;
+    padding: 0.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tabla_productos {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.tabla_productos thead {
+  background: #4a76dd;
+  color: white;
+  font-weight: bold;
+}
+
+.tabla_productos thead td {
+  padding: 14px 10px;
+  text-transform: capitalize;
+}
+
+.tabla_productos td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.tabla_productos tbody tr:nth-child(even) {
+  background: #f8faff;
+}
+
+.tabla_productos tbody tr:hover {
+  background: #bdd1fd;
+  transition: 0.2s;
+}
+
+.tabla_productos .no-encontrado {
+  text-align: center;
+  padding: 20px;
+  font-weight: bold;
+  color: #777;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .tabla_productos {
+    font-size: 13px;
+  }
+  .tabla_productos thead td {
+    padding: 10px 6px;
+  }
+  .tabla_productos td {
+    padding: 10px 6px;
+  }
+}
