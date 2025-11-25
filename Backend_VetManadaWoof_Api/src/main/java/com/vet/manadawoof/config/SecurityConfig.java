@@ -1,4 +1,3 @@
-/*
 package com.vet.manadawoof.config;
 
 import org.springframework.context.annotation.Bean;
@@ -71,4 +70,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-*/

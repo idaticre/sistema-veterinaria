@@ -1,4 +1,3 @@
-/*
 package com.vet.manadawoof;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,4 +12,3 @@ public class BCryptGenerator {
         System.out.println("gromer_luna (luna123): " + encoder.encode("luna123"));
     }
 }
-*/

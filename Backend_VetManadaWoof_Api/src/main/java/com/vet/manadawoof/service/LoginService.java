@@ -1,4 +1,3 @@
-/*
 package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.UsuarioEntity;
@@ -11,15 +10,15 @@ import java.util.Optional;
 
 @Service
 public class LoginService {
-
+    
     @Autowired
     private UsuarioRepository usuarioRepository;
-
+    
     //private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
+    
     public Optional<UsuarioEntity> verificarUsuario(String username, String password) {
         Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findByUsername(username);
-
+        
         if(usuarioOpt.isPresent()) {
             UsuarioEntity usuario = usuarioOpt.get();
             if(usuario.getPasswordHash().equals(password)) {
@@ -29,4 +28,3 @@ public class LoginService {
         return Optional.empty();
     }
 }
-*/

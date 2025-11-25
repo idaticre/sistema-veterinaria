@@ -1,4 +1,3 @@
-/*
 
 package com.vet.manadawoof.config;
 
@@ -21,4 +20,3 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: No autorizado");
     }
 }
-*/

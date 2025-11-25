@@ -60,7 +60,7 @@ public class MedicamentoServiceImpl implements MedicamentoService {
     
     // Listar medicamentos
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<MedicamentoEntity> listar() {
         return repository.findAll();
     }
