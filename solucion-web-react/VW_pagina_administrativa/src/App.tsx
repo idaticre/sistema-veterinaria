@@ -22,6 +22,7 @@ import RegistrarSalidaMascota from './pages/administrativas/mascotas/RegistrarSa
 
 import Servicios from './pages/administrativas/servicios/servicios';
 
+import DashboardAgenda from './pages/administrativas/agenda/DashboardAgenda';
 import Agenda_general from './pages/administrativas/agenda/Agenda_general';
 import EditarCita from './pages/administrativas/agenda/EditarAgendas/EditarCita';
 
@@ -66,6 +67,7 @@ function App() {
         <Route path='/administracion/servicios' element={<Servicios/>}/>      
 
         {/* Agenda */}
+        <Route path='/administracion/agenda/DashboardAgenda' element={<DashboardAgenda />} />
         <Route path='/administracion/agenda/Agenda_general' element={<Agenda_general />} />
         <Route path='/administracion/agenda/EditarCita' element={<EditarCita />} />
 

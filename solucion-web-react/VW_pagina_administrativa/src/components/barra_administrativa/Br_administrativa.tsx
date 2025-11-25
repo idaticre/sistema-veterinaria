@@ -148,6 +148,7 @@ useEffect(() => {
                                     <i className={`fa-solid ${openMenu === "agenda" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={agendaRef} className="submenu">
+                                    <li><Link to="/administracion/agenda/DashboardAgenda" className="sub_opcion">Dashboard</Link></li>
                                     <li><Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
                                     <li><Link to="/administracion/agenda/EditarCita" className="sub_opcion">Editar cita</Link></li>
                                 </ul>

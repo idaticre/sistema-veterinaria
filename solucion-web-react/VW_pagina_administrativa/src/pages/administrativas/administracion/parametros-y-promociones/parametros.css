@@ -1,97 +1,213 @@
+/* ================== COLORES BASE ================== */
 :root {
-  --sidebar-width: 240px;
-  --sidebar-width-min: 60px;
+  --color-principal: #ff9900;
+  --color-principal-hover: #e07b00;
+  --color-borde: #ddd;
+  --color-verde-claro: #6fdc6f;
+  --color-celeste: #a7e0ff;
+  --color-rojo: #e74c3c;
+  --color-rojo-hover: #c0392b;
+  --fondo-tarjeta: #ffffff;
+  --sombra: rgba(0, 0, 0, 0.12);
 }
 
-#promociones {
+/* ================== CONTENEDOR PRINCIPAL ================== */
+#parametros {
   display: flex;
   width: 100%;
   height: 100vh;
 }
 
-#promociones main {
+.parametros-container {
   flex: 1;
-  margin-left: var(--sidebar-width);
-  transition: margin-left 0.3s ease;
+  background: #f8fafc;
   padding: 2rem;
-  box-sizing: border-box;
+  border-radius: 12px;
   overflow-y: auto;
 }
 
-#promociones main.minimize {
-  margin-left: var(--sidebar-width-min);
+.titulo-parametros {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-shadow: 0px 1px 2px rgba(0,0,0,.15);
 }
 
-h2 {
-  margin-bottom: 1rem;
+/* ================== BOTÓN NUEVA PROMO ================== */
+.btn-agregar-linda {
+  background: linear-gradient(135deg, #6fdc6f, #42b845);
+  color: white;
+  padding: 0.9rem 1.6rem;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+.btn-agregar-linda:hover {
+  background: linear-gradient(135deg, #58c958, #37a53b);
+  transform: scale(1.08);
+}
+
+/* ================== LISTA DE PROMOS ================== */
+.lista-promos {
+  margin-top: 1.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* ================== TARJETAS DE PROMOCIONES ================== */
+.promo-card {
+  background: var(--fondo-tarjeta);
+  padding: 1.4rem 1.7rem;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.25s ease;
+  border: 1px solid #e6e6e6;
+  box-shadow: 0 4px 12px var(--sombra);
+  position: relative;
+  overflow: hidden;
+}
+/* 🐾 Sticker decorativo */
+.promo-card::before {
+  content: "🐾";
+  position: absolute;
+  font-size: 2.5rem;
+  opacity: 0.12;
+  right: 15px;
+  bottom: 5px;
+  transform: rotate(-20deg);
+}
+.promo-card:hover {
+  background: #eaf7ff;
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+}
+
+/* ================== TEXTO ================== */
+.promo-info h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #222;
+}
+.promo-info p {
+  margin: 4px 0 0 0;
+  font-size: 0.95rem;
   color: #444;
 }
 
-.btn {
-  background: #617ff4;
+/* ================== ESTADOS PUBLICADA / PENDIENTE ================== */
+.publicada {
+  background: #42b845;
   color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 24px;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  display: inline-block;
+  margin-top: 6px;
+}
+.pendiente {
+  background: #ffbf47;
+  color: #333;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  display: inline-block;
+  margin-top: 6px;
 }
 
-.btn:hover {
-  background: #4054c6;
+/* ================== SOLO CLIENTES ================== */
+.clientes-tag {
+  font-size: 0.85rem;
+  margin-top: 6px;
+  background: #a7e0ff;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
-.lista_promos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: flex-start;
-}
-
-.promo_card {
-  background: #f5f8ff;
-  border: 2px solid #617ff4;
-  border-radius: 10px;
-  padding: 1rem;
-  width: 250px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
-}
-
-.promo_card:hover {
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-  background: #ff9900;
-}
-
-.promo_card h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-}
-
+/* ================== ACCIONES ================== */
 .acciones {
   display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
+  gap: 0.6rem;
 }
 
-.acciones button {
-  border: none;
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  cursor: pointer;
-  background: #617ff4;
+/* BOTÓN PUBLICAR */
+.btn-publicar {
+  background: #ffa600;
   color: white;
-  font-size: 14px;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: .2s;
+  box-shadow: 0 2px 8px rgba(255,165,0,0.4);
+}
+.btn-publicar:hover {
+  background: #e69200;
+  transform: scale(1.08);
 }
 
-.acciones button:hover {
-  background: #4054c6;
+/* BOTÓN EDITAR */
+.btn-editar {
+  background-color: #1130ff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: .2s;
+  box-shadow: 0 2px 8px rgba(0,0,255,0.3);
+}
+.btn-editar:hover {
+  background-color: #003ce0;
+  transform: scale(1.08);
 }
 
-@media (max-width: 768px) {
-  #promociones main,
-  #promociones main.minimize {
-    margin-left: 0;
-    padding: 1rem;
-  }
+/* BOTÓN ELIMINAR */
+.btn-eliminar {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: .2s;
+  box-shadow: 0 2px 8px rgba(255,0,0,0.3);
+}
+.btn-eliminar:hover {
+  background-color: #d62828;
+  transform: scale(1.08);
+}
+
+/* ================== MODAL ================== */
+.modal-promos input,
+.modal-promos textarea,
+.modal-promos select {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* ================== LISTA DE CLIENTES ================== */
+.lista-clientes {
+  background: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
