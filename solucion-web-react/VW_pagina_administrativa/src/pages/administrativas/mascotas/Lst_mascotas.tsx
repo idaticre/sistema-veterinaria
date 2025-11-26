@@ -14,8 +14,6 @@ function Lst_mascotas() {
   const [filtrados, setFiltrados] = useState<Mascotaextendido[]>([]);
   const [mascotas, setMascotas] = useState<Mascotaextendido[]>([]);
   const [mascotaSeleccionado, setMascotaSeleccionado] = useState<Mascotaextendido | null>(null);
-  
-
   useEffect(() => {
     IST
       .get<{ data: MascotaResponse[] }>("/mascotas")
