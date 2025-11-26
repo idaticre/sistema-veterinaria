@@ -18,7 +18,6 @@ import Mascotas from './pages/administrativas/mascotas/Regis_mascotas';
 import Especies_razas from './pages/administrativas/mascotas/Especies_razas';
 import Lst_mascotas from './pages/administrativas/mascotas/Lst_mascotas';
 import Vacunas from './pages/administrativas/mascotas/Vacunas';
-import RegistrarSalidaMascota from './pages/administrativas/mascotas/RegistrarSalidaMascota/RegistrarSalidaMascota';
 
 import Servicios from './pages/administrativas/servicios/servicios';
 
@@ -68,7 +67,6 @@ function App() {
         <Route element={<IPRR roles={['ADMINISTRADOR GENERAL', 'AUXILIAR CAJA']} />} >
           <Route path='/administracion/mascotas/registro' element={<Mascotas/>}/>
           <Route path='/administracion/mascotas/especies_razas' element={<Especies_razas/>}/>
-          <Route path='/administracion/mascotas/registrar_salida_mascota' element={<RegistrarSalidaMascota />}/>
           <Route path='/administracion/mascotas/vacunas' element={<Vacunas/>}/>
         </Route>
         <Route element={<IPRR roles={['ADMINISTRADOR GENERAL','AUXILIAR CAJA', 'AUXILIAR GROMERS']} />} >

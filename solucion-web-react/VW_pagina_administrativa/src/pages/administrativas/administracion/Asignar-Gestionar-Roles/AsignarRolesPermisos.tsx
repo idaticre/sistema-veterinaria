@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import IST from "../../../../components/proteccion_momentanea/IST";
+
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./AsignarRolesPermisos.css";
 import type { UsuarioResponse, Rol, UsuarioRol } from "../../../../components/interfaces/interfaces";
+import IST from "../../../../components/proteccion_momentanea/IST";
+
 
 const AsignarRolesPermisos: React.FC = () => {
   const [usuarios, setUsuarios] = useState<UsuarioResponse[]>([]);
@@ -20,17 +22,17 @@ const AsignarRolesPermisos: React.FC = () => {
   }, []);
 
   const obtenerUsuarios = async () => {
-    const res = await IST.get("/usuarios");
+    const res = await IST.get(`${baseURL}/usuarios`);
     setUsuarios(res.data);
   };
 
   const obtenerRoles = async () => {
-    const res = await IST.get("/roles");
-    setRoles(res.data.usuarioRoles);
+    const res = await IST.get(`${baseURL}/roles`);
+    setRoles(res.data);
   };
 
   const obtenerUsuariosRoles = async () => {
-    const res = await IST.get("/usuarios-roles");
+    const res = await IST.get(`${baseURL}/usuarios-roles`);
     setUsuariosRoles(res.data.data);
   };
 
@@ -54,7 +56,7 @@ const AsignarRolesPermisos: React.FC = () => {
 
   const eliminarRol = async (idUsuario: number, idRol: number) => {
     try {
-      await IST.delete(`/usuarios-roles/eliminar`, {
+      await IST.delete(`${baseURL}/usuarios-roles/eliminar`, {
         data: { idUsuario, idRol }
       });
       alert("Rol eliminado correctamente 🗑️");

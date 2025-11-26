@@ -132,7 +132,6 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <ul ref={mascotasRef} className="submenu">
                                         <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Mascotas registradas</Link></li>
                                         <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Registrar mascota</Link></li>
-                                        <li><Link to="/administracion/mascotas/registrar_salida_mascota" className="sub_opcion">Registrar salida de mascota</Link></li>
                                         <li><Link to="/administracion/mascotas/espcies_razas" className="sub_opcion">Especies y razas</Link></li>
                                         <li><Link to="/administracion/mascotas/vacunas" className="sub_opcion">Vacunas disponibles</Link></li>
                                     </ul>
@@ -232,7 +231,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Horarios de colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
                                     <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
-                                    <li><Link to="/administracion/administracion/dashboard_administrativo" className="sub_opcion">Desempeño de colaboradore</Link></li>
+                                    <li><Link to="/administracion/administracion/dashboard_administrativo" className="sub_opcion">Dashboard Administrativo</Link></li>
                                     
                                 </ul>
                             </li>
