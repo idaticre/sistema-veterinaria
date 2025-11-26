@@ -2,7 +2,7 @@
 -- BASE DE DATOS: vet_manada_woof
 -- Este script contiene la definición inicial de la base de datos
 -- =========================================================
-select * from agenda;
+
 -- ========================================
 -- 0. Creación de la Base de Datos
 -- ========================================
@@ -1406,85 +1406,90 @@ INSERT INTO tipos_archivo_clinico (nombre, descripcion) VALUES
 
 -- ========================================
 -- TABLA: historia_clinica
--- Registra atenciones médicas realizadas a cada mascota.
+-- (EXPEDIENTE ÚNICO POR MASCOTA)
 -- Se vincula con la visita, servicio, colaborador y veterinario responsable.
 -- ========================================
-CREATE TABLE IF NOT EXISTS historia_clinica (
+CREATE TABLE historia_clinica (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(16) NULL UNIQUE,
-    id_mascota BIGINT NOT NULL,
-    id_colaborador BIGINT NULL,
-    id_veterinario BIGINT NULL,
-    motivo_consulta VARCHAR(128) NULL,
-    diagnostico TEXT NULL,
-    tratamiento TEXT NULL,
-    fecha DATE NOT NULL,
-    hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL,
-    descripcion TEXT NULL,
-    observaciones TEXT NULL,
-    fecha_registro_inicial TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_estado INT NULL
+    codigo VARCHAR(16) NOT NULL UNIQUE,
+    id_mascota BIGINT NOT NULL UNIQUE,  -- UNIQUE: solo 1 historia por mascota
+    fecha_apertura DATE NOT NULL DEFAULT (CURDATE()),
+    observaciones_generales TEXT,
+    activa TINYINT NOT NULL DEFAULT 1 CHECK (activa IN (0,1)),
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 ALTER TABLE historia_clinica
-    ADD CONSTRAINT fk_hist_mascota FOREIGN KEY (id_mascota) REFERENCES mascotas(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_hist_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_hist_vet FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-	ADD CONSTRAINT fk_hist_estado FOREIGN KEY (id_estado) REFERENCES estado_historia_clinica(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_historia_mascota FOREIGN KEY (id_mascota) 
+        REFERENCES mascotas(id) ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- Índice para consultas rápidas de historias clínicas por mascota
--- (útil para listar todo el historial médico de una mascota específica).
-CREATE INDEX idx_historia_clinica_mascota ON historia_clinica(id_mascota);
-
--- Índice para consultas que agrupan o filtran por veterinario responsable.
--- Muy útil si se generan reportes de actividades por veterinario.
-CREATE INDEX idx_historia_clinica_veterinario ON historia_clinica(id_veterinario);
-
--- Índice para facilitar búsquedas cronológicas
--- (permite ordenar o filtrar historias clínicas por fecha de atención,
--- útil en listados por rango de fechas o reportes médicos).
-CREATE INDEX idx_historia_clinica_fecha ON historia_clinica(fecha);
-
--- Índice para consultas que buscan historias clínicas por colaborador que registró la atención.
--- Útil para filtros del tipo: "atenciones realizadas por el colaborador X".
-CREATE INDEX idx_historia_clinica_colaborador ON historia_clinica(id_colaborador);
-
--- Índice para facilitar filtros por estado clínico
--- (por ejemplo: mostrar solo historias abiertas o en revisión).
-CREATE INDEX idx_historia_clinica_estado ON historia_clinica(id_estado);
-
+CREATE INDEX idx_historia_mascota ON historia_clinica(id_mascota);
 
 -- ========================================
--- TABLA: historia_clinica_archivos
--- Almacena archivos digitales asociados a un registro clínico.
--- Incluye imágenes, análisis y otros documentos relevantes.
--- Ejemplo: Imagen de radiografía torácica asociada al historial médico #58.
+-- TABLA: historia_clinica_registros (CADA ATENCIÓN MÉDICA)
 -- ========================================
-CREATE TABLE IF NOT EXISTS historia_clinica_archivos (
+CREATE TABLE historia_clinica_registros (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
     id_historia_clinica BIGINT NOT NULL,
-    id_t_archivo INT NULL,
+    id_agenda BIGINT NULL,
+    id_veterinario BIGINT NULL,
+    id_colaborador BIGINT NULL,
+    fecha_atencion DATE NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NULL,
+    motivo_consulta VARCHAR(256),
+    anamnesis TEXT,
+    examen_fisico TEXT,
+    signos_vitales VARCHAR(256),
+    peso_kg DECIMAL(6,2),
+    temperatura_c DECIMAL(4,2),
+    diagnostico TEXT,
+    tratamiento TEXT,
+    observaciones TEXT,
+    proximo_control DATE,
+    id_estado INT,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE historia_clinica_registros
+    ADD CONSTRAINT fk_registro_historia FOREIGN KEY (id_historia_clinica) 
+        REFERENCES historia_clinica(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_registro_agenda FOREIGN KEY (id_agenda) 
+        REFERENCES agenda(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_registro_veterinario FOREIGN KEY (id_veterinario) 
+        REFERENCES veterinarios(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_registro_colaborador FOREIGN KEY (id_colaborador) 
+        REFERENCES colaboradores(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_registro_estado FOREIGN KEY (id_estado) 
+        REFERENCES estado_historia_clinica(id) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+CREATE INDEX idx_registro_historia ON historia_clinica_registros(id_historia_clinica);
+CREATE INDEX idx_registro_agenda ON historia_clinica_registros(id_agenda);
+CREATE INDEX idx_registro_fecha ON historia_clinica_registros(fecha_atencion);
+CREATE INDEX idx_registro_veterinario ON historia_clinica_registros(id_veterinario);
+CREATE INDEX idx_registro_estado ON historia_clinica_registros(id_estado);
+
+-- ========================================
+-- TABLA: historia_clinica_archivos (ARCHIVOS POR REGISTRO)
+-- ========================================
+CREATE TABLE historia_clinica_archivos (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    codigo VARCHAR(16) NOT NULL UNIQUE,
+    id_registro_atencion BIGINT NOT NULL,
+    id_tipo_archivo INT NULL,
     nombre_archivo VARCHAR(128) NOT NULL,
-    extension_archivo VARCHAR(128) NOT NULL,
-    descripcion VARCHAR(128),
+    extension_archivo VARCHAR(32) NOT NULL,
+    descripcion VARCHAR(256),
     fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 ALTER TABLE historia_clinica_archivos
-    ADD CONSTRAINT fk_archivo_tipo FOREIGN KEY (id_t_archivo) REFERENCES tipos_archivo_clinico(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-	ADD CONSTRAINT fk_archivo_historia FOREIGN KEY (id_historia_clinica) REFERENCES historia_clinica(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_archivo_registro FOREIGN KEY (id_registro_atencion) 
+        REFERENCES historia_clinica_registros(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_archivo_tipo FOREIGN KEY (id_tipo_archivo) 
+        REFERENCES tipos_archivo_clinico(id) ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- Índice para búsquedas rápidas de archivos clínicos por historia clínica
--- (permite listar rápidamente todos los archivos asociados a un registro médico).
-CREATE INDEX idx_historia_archivos_historia ON historia_clinica_archivos(id_historia_clinica);
-
--- Índice para listar archivos según tipo (ej. ver solo radiografías o solo análisis).
--- Útil para vistas o filtros en la interfaz de archivos clínicos.
-CREATE INDEX idx_archivo_tipo ON historia_clinica_archivos(id_t_archivo);
+CREATE INDEX idx_archivo_registro ON historia_clinica_archivos(id_registro_atencion);
+CREATE INDEX idx_archivo_tipo ON historia_clinica_archivos(id_tipo_archivo);
 

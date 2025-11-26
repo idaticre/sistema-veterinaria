@@ -1,0 +1,42 @@
+# ===============================
+# Configuracion general
+# ===============================
+# Nombre de la aplicacion
+spring.application.name                    = VetManadaWoof
+# Puerto en el que corre la app
+server.port                                = 8088
+# Ruta base ("/" significa raiz)
+server.servlet.context-path                = /
+
+app.jwt.secret                             = mySuperSecretKeyForJWTGenerationInVetManadaWoofApplication2024
+
+app.jwt.expiration-ms                      = 86400000
+
+# ===============================
+# Configuracion de la base de datos
+# ===============================
+# URL de conexion a MySQL
+spring.datasource.url                      = jdbc:mysql://-----server-----/vet_manada_woof
+# Usuario de la BD
+spring.datasource.username                 =
+# Contrasena de la BD
+spring.datasource.password                 =
+# Driver de MySQL
+spring.datasource.driver-class-name        = com.mysql.cj.jdbc.Driver
+
+
+# ===============================
+# Configuracion de JPA / Hibernate
+# ===============================
+# Valida esquema segun entidades (solo en dev)
+spring.jpa.hibernate.ddl-auto              = validate
+
+# Dialecto especifico de MySQL 8
+spring.jpa.database-platform               = org.hibernate.dialect.MySQL8Dialect
+# Muestra SQL en consola (util en desarrollo)
+spring.jpa.show-sql                        = true
+# Da formato al SQL mostrado
+spring.jpa.properties.hibernate.format_sql = true
+
+
+spring.autoconfigure.exclude               = org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration

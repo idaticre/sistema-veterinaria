@@ -4,7 +4,7 @@
 -- vinculando la información clínica con los ingresos/visitas
 -- y permitiendo almacenar archivos relacionados.
 -- ========================================
-USE vet_manada_woof;
+
 -- ========================================
 -- TABLA: estado_historia_clinica
 -- Define los estados posibles del ciclo de una historia clínica.
@@ -40,8 +40,7 @@ INSERT INTO estado_historia_clinica (nombre, descripcion) VALUES
 CREATE TABLE IF NOT EXISTS tipos_archivo_clinico (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) UNIQUE NOT NULL,
-    descripcion VARCHAR(128),
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    descripcion VARCHAR(128)
 );
 INSERT INTO tipos_archivo_clinico (nombre, descripcion) VALUES
 -- IMÁGENES DIAGNÓSTICAS
@@ -93,7 +92,6 @@ CREATE TABLE IF NOT EXISTS historia_clinica (
     id_mascota BIGINT NOT NULL,
     id_colaborador BIGINT NULL,
     id_veterinario BIGINT NULL,
-    id_visita BIGINT NULL,
     motivo_consulta VARCHAR(128) NULL,
     diagnostico TEXT NULL,
     tratamiento TEXT NULL,
@@ -110,9 +108,7 @@ ALTER TABLE historia_clinica
         ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_hist_colab FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_hist_vet FOREIGN KEY (id_veterinario) REFERENCES colaboradores(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    ADD CONSTRAINT fk_hist_visita FOREIGN KEY (id_visita) REFERENCES visitas_ingresos(id)
+    ADD CONSTRAINT fk_hist_vet FOREIGN KEY (id_veterinario) REFERENCES veterinarios(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
 	ADD CONSTRAINT fk_hist_estado FOREIGN KEY (id_estado) REFERENCES estado_historia_clinica(id)
         ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -124,10 +120,6 @@ CREATE INDEX idx_historia_clinica_mascota ON historia_clinica(id_mascota);
 -- Índice para consultas que agrupan o filtran por veterinario responsable.
 -- Muy útil si se generan reportes de actividades por veterinario.
 CREATE INDEX idx_historia_clinica_veterinario ON historia_clinica(id_veterinario);
-
--- Índice para búsquedas rápidas de historias clínicas por visita
--- (facilita obtener todos los registros asociados a una hospitalización).
-CREATE INDEX idx_historia_clinica_visita ON historia_clinica(id_visita);
 
 -- Índice para facilitar búsquedas cronológicas
 -- (permite ordenar o filtrar historias clínicas por fecha de atención,
