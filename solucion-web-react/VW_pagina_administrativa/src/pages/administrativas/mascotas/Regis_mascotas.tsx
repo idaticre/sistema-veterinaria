@@ -91,18 +91,30 @@ function Regis_mascotas() {
         }
     }, [mascotaSelecc]);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const fileName = `${nombre || "mascota"}_${Date.now()}`; // nombre único simulado
-            const fakePath = `/guardados/mascotas/${fileName}`; // ruta simulada dentro del public
+        if (!file) return;
 
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("nombreMascota", nombre || "mascota");
+
+            const res = await IST.post("/archivos/subir", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+
+            const urlBackend = res.data; // URL generada por Spring
+            setFoto(urlBackend);
+
+            // preview
             const reader = new FileReader();
-            reader.onloadend = () => {
-            setImagenMascota(reader.result as string); // para mostrar preview
-            setFoto(fakePath); // guardamos solo la ruta simulada en la base de datos
-            };
+            reader.onloadend = () => setImagenMascota(reader.result as string);
             reader.readAsDataURL(file);
+
+        } catch (err) {
+            console.error("Error al subir imagen:", err);
+            alert("No se pudo subir la imagen ❌");
         }
     };
 

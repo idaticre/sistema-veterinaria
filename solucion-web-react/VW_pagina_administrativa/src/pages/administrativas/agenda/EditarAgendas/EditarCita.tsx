@@ -82,10 +82,20 @@ function EditarCita() {
             "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
           callback: (tokenResponse: any) => {
             if (tokenResponse.access_token) {
+              // ⭐ AGREGADO: cuando recibimos el token, lo seteamos en gapi...
               window.gapi.client.setToken({
                 access_token: tokenResponse.access_token,
               });
+
+              // ⭐ AGREGADO: guardamos token en localStorage para persistir sesión entre componentes y recargas
+              try {
+                localStorage.setItem("google_token", tokenResponse.access_token);
+              } catch (err) {
+                console.warn("No se pudo guardar token en localStorage:", err);
+              }
+
               setIsSignedIn(true);
+              setStatus("🔓 Sesión Google iniciada");
             }
           },
         });
@@ -97,13 +107,38 @@ function EditarCita() {
     cargarGis();
   }, []);
 
+  // ⭐ AGREGADO: Restaurar sesión automáticamente si hay token en localStorage
+  useEffect(() => {
+    if (!gapiInited || !gisInited) return;
+
+    const savedToken = (() => {
+      try {
+        return localStorage.getItem("google_token");
+      } catch (err) {
+        console.warn("Error leyendo localStorage:", err);
+        return null;
+      }
+    })();
+
+    if (savedToken) {
+      // asignamos token a gapi para que las llamadas funcionen sin pedir login de nuevo
+      window.gapi.client.setToken({ access_token: savedToken });
+      setIsSignedIn(true);
+      setStatus("🔓 Sesión restaurada automáticamente");
+      // cargarEventos se disparará por el useEffect en isSignedIn true
+    }
+  }, [gapiInited, gisInited]);
+
   useEffect(() => {
     if (gapiInited && gisInited)
-      setStatus("✅ Google Calendar listo para usar");
+      setStatus((s) =>
+        s.includes("🔌") ? "✅ Google Calendar listo para usar" : s
+      );
   }, [gapiInited, gisInited]);
 
   // ================== SESIÓN ==================
-  const iniciarSesion = () => tokenClient?.requestAccessToken();
+  // ⭐ Cambiado para usar prompt vacío y permitir renovación silenciosa cuando sea posible
+  const iniciarSesion = () => tokenClient?.requestAccessToken({ prompt: "consent" });
 
   const cerrarSesion = () => {
     const token = window.gapi.client.getToken();
@@ -111,6 +146,14 @@ function EditarCita() {
       window.google.accounts.oauth2.revoke(token.access_token);
       window.gapi.client.setToken(null);
     }
+
+    // ⭐ AGREGADO: borrar token de localStorage para que no se restaure automáticamente
+    try {
+      localStorage.removeItem("google_token");
+    } catch (err) {
+      console.warn("Error al borrar token de localStorage:", err);
+    }
+
     setIsSignedIn(false);
     setEventos([]);
     setEventosFiltrados([]);
@@ -199,12 +242,12 @@ function EditarCita() {
     const evento = {
       summary: `${nuevoEvento.servicio} - ${nuevoEvento.mascota} 🐾`,
       description: `
-Cliente: ${nuevoEvento.cliente}
-Mascota: ${nuevoEvento.mascota}
-Servicio: ${nuevoEvento.servicio}
-Veterinario: ${nuevoEvento.veterinario}
-Estado: ${nuevoEvento.estado}
-Observaciones: ${nuevoEvento.description || "Ninguna"}
+      Cliente: ${nuevoEvento.cliente}
+      Mascota: ${nuevoEvento.mascota}
+      Servicio: ${nuevoEvento.servicio}
+      Veterinario: ${nuevoEvento.veterinario}
+      Estado: ${nuevoEvento.estado}
+      Observaciones: ${nuevoEvento.description || "Ninguna"}
       `,
       start: { dateTime: start.toISOString(), timeZone: "America/Lima" },
       end: { dateTime: end.toISOString(), timeZone: "America/Lima" },

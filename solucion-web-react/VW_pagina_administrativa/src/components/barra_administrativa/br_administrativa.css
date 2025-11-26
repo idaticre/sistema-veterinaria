@@ -103,6 +103,7 @@
     padding: 0.55rem  0;
     text-decoration: none;
     border-radius: 0.3rem;
+    color: rgb(70, 20, 135);
 }
 
 .opcion:hover .enlace_opcion{

@@ -23,7 +23,7 @@ function Login() {
       });
 
       const data = await response.json();
-      console.log("Respuesta del servidor:", data);
+      console.log("Respuesta del servidor:", data); //quitar o modificar despues
 
       if (response.ok && data.token) {
         console.log("Login exitoso:", data.username);

@@ -15,7 +15,6 @@ function Lst_clientes() {
   const navigate = useNavigate();
   
   useEffect(() => {
-
     IST.get("/clientes")
       .then(res => {
         console.log("clientes:", res.data);

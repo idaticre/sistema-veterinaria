@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa';
 import "./styles.css";
-import type { ColaboradorRequest, ColaboradorResponse, tipo_doc, TipoPersonaJuridica, UsuarioResponse } from "../../../../components/interfaces/interfaces";
-import axios from 'axios';
-import { Link } from "react-router-dom";
+import type { ColaboradorRequest, ColaboradorResponse, tipo_doc, TipoPersonaJuridica } from "../../../../components/interfaces/interfaces";
+import IST from '../../../../components/proteccion_momentanea/IST';
 
 const GestionarColaboradores: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);
@@ -15,9 +14,7 @@ const GestionarColaboradores: React.FC = () => {
     const [tiposDocumento, setTiposDocumento] = useState<tipo_doc[]>([]);
     const [tiposPersonasJuridicas, setTiposPersonasJuridicas] = useState<TipoPersonaJuridica[]>([]);
     const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
-    const [usuarios, setUsuarios] = useState<UsuarioResponse[]>([]);
     const menuRef = useRef<HTMLDivElement | null>(null);
-    const baseURL = "http://localhost:8088/api";
     /* 
         De forma similar a mostrarModal && edicion, usaremos consts para mostrar de forma extensiva la información de un colaborador mediante un
         tercer botón "Más..." uwu
@@ -29,7 +26,7 @@ const GestionarColaboradores: React.FC = () => {
     useEffect(() => {obtenerTiposDocumento();}, []);
     const obtenerTiposDocumento = async () => {
         try {
-            const response = await axios.get(`${baseURL}/tipo-documento`);
+            const response = await IST.get(`/tipo-documento`);
             setTiposDocumento(response.data);
         } catch (error) {console.error("Error al obtener tipos de documento:", error);}
     }; 
@@ -38,19 +35,9 @@ const GestionarColaboradores: React.FC = () => {
     useEffect(() => {obtenerTiposPersonasJuridicas();}, []);
     const obtenerTiposPersonasJuridicas = async () => {
         try {
-            const response = await axios.get(`${baseURL}/tipo-persona-juridica`);
+            const response = await IST.get(`/tipo-persona-juridica`);
             setTiposPersonasJuridicas(response.data);
         } catch (error) {console.error("Error al obtener tipos de personas jurídicas", error);}
-    };
-
-    // Obtener usuarios
-    useEffect(() => {obtenerUsuarios();}, []);
-    const obtenerUsuarios = async () => {
-        try {
-            const response = await axios.get(`${baseURL}/usuarios`);
-            const usuariosActivos = response.data.filter((u: UsuarioResponse) => u.activo === true);
-            setUsuarios(usuariosActivos);
-        } catch (error) {console.error("Error al obtener los usuarios", error);}
     };
 
     // Efecto de cerrar ventana
@@ -74,7 +61,7 @@ const GestionarColaboradores: React.FC = () => {
     useEffect(() => {listarColaboradores();}, []);
     const listarColaboradores = async () => {
         try {
-            const respuesta = await axios.get(`${baseURL}/colaboradores`);
+            const respuesta = await IST.get(`/colaboradores`);
             const lista = Array.isArray(respuesta.data)
             ? respuesta.data
             : respuesta.data.data;
@@ -135,8 +122,8 @@ const GestionarColaboradores: React.FC = () => {
         if (!edicion) return;
         
         try {
-            if (edicion.id && edicion.id > 0) {await axios.put(`${baseURL}/colaboradores/actualizar`, edicion);} 
-            else {await axios.post(`${baseURL}/colaboradores/registrar`, edicion);}
+            if (edicion.id && edicion.id > 0) {await IST.put(`/colaboradores/actualizar`, edicion);} 
+            else {await IST.post(`/colaboradores/registrar`, edicion);}
             listarColaboradores();
             setEdicion(null);
             setMostrarModal(false);
@@ -149,7 +136,7 @@ const GestionarColaboradores: React.FC = () => {
     // Eliminar
     const eliminarColaborador = async (id: number) => {
         try {
-            await axios.delete(`${baseURL}/colaboradores/eliminar/${id}`);
+            await IST.delete(`/colaboradores/eliminar/${id}`);
             listarColaboradores();
             alert("Eliminación exitosa");
         } catch (error) {
@@ -283,13 +270,6 @@ const GestionarColaboradores: React.FC = () => {
                         <input type="text" placeholder="Dirección" value={edicion.direccion} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, direccion: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Ciudad" value={edicion.ciudad} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ciudad: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Distrito" value={edicion.distrito} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, distrito: nuevoValor.target.value } : null)}/>
-                        <select value={edicion.idUsuario ?? 0} onChange={(nuevoValor) => setEdicion(edicion ? {...edicion, idUsuario: Number(nuevoValor.target.value) } : null)}>
-                            <option value={0}>Sin usuario</option>
-                            {usuarios.map((usuario) => (
-                                <option key={usuario.id} value={usuario.id}>{usuario.username}</option>
-                            ))}
-                        </select>
-
                         <div className="acciones-de-registro">
                             <button onClick={guardarColaborador}>Guardar</button>
                             <button style={{background:"#c82333"}} onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
@@ -305,14 +285,6 @@ const GestionarColaboradores: React.FC = () => {
                         <div className="info-extensiva"><strong>Sexo: </strong>{masInformacion.sexo === "M" ? "Masculino" : "Femenino"}</div>
                         <div className="info-extensiva"><strong>Ciudad: </strong>{masInformacion.ciudad}</div>
                         <div className="info-extensiva"><strong>Distrito: </strong>{masInformacion.distrito}</div>
-                        <div className="info-extensiva"><strong>Usuario: </strong>
-                        {masInformacion.usuario && masInformacion.usuario !== 0 ? (usuarios.find(u => u.id === masInformacion.usuario)?.username ?? (
-                            <span style={{ color: "gray", fontStyle: "italic" }}>Usuario desconocido</span>)) 
-                            : (<span style={{ color: "gray", fontStyle: "italic" }}>Sin usuario.{" "}
-                            <Link to="/administracion/administracion/gestionar_usuarios" className="asignar-a">Crear usuario</Link>
-                            </span>
-                        )}
-                        </div>
                     </div>
                     <div className="acciones-de-registro">
                         <button onClick={() => { setMostrarModalInformativo(false); setMasInformacion(null); }}>Cerrar</button>                        

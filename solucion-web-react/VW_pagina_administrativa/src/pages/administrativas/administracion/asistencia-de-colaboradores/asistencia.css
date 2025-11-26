@@ -1,9 +1,10 @@
 :root {
   --sidebar-width: 240px;
   --sidebar-width-min: 60px;
-  --color-principal: #ff9900;
-  --color-principal-hover: #e07b00;
+  --color-principall: #57ff73;
+  --color-principal-hovers: #6bff4d;
   --color-borde: #333; /* Borde más oscuro */
+  --color-hover-tabla: #00bfff; /* Celeste para filas de tabla */
 }
 
 /* ================== LAYOUT GENERAL ================== */
@@ -152,9 +153,9 @@
 }
 
 .acciones-asistencia button:hover {
-  background: var(--color-principal);
-  border-color: var(--color-principal-hover);
-  color: #fff;
+  background: var(--color-principall);
+  border-color: var(--color-principal-hovers);
+  color: #000000;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(255, 153, 0, 0.4);
 }
@@ -177,9 +178,10 @@
   transition: all 0.25s ease;
 }
 
+/* Hover exclusivo para filas de asistencia */
 .fila-asistencia:hover {
-  background: var(--color-principal);
-  color: #fff;
+  background: var(--color-hover-tabla); /* celeste */
+  color: #000000;
   transform: scale(1.01);
 }
 
