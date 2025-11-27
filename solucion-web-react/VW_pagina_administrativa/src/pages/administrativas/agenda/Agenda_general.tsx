@@ -52,7 +52,7 @@ function Agenda_general() {
     colaborador: "",
     date: "",
     startTime: "10:00",
-    duracion: "",
+    duracion: "30",
     estado: "",
   });
 
@@ -147,12 +147,25 @@ function Agenda_general() {
     if (isSignedIn) cargarEventos();
   }, [fechaSeleccionada, isSignedIn]);
 
+  // ================== VALIDAR HORARIOS ==================
+  const horaOcupada = (start: Date, end: Date) => {
+    return eventos.some((e) => {
+      const eStart = new Date(e.start.dateTime);
+      const eEnd = new Date(e.end.dateTime);
+      return (start < eEnd && end > eStart); // verifica solapamiento
+    });
+  };
+
   const guardarEvento = async () => {
     if (!nuevoEvento.cliente || !nuevoEvento.mascota || !nuevoEvento.servicio || !nuevoEvento.colaborador)
       return alert("Completa los campos obligatorios");
 
     const start = new Date(`${nuevoEvento.date}T${nuevoEvento.startTime}`);
     const end = new Date(start.getTime() + (parseInt(nuevoEvento.duracion) || 30) * 60000);
+
+    if (horaOcupada(start, end)) {
+      return alert("⚠️ Ya existe una cita en este horario. Elige otro horario.");
+    }
 
     const evento = {
       summary: `${nuevoEvento.servicio} - ${nuevoEvento.mascota}`,
@@ -194,7 +207,8 @@ function Agenda_general() {
                   <button
                     className="btn-agregar-linda"
                     onClick={() => {
-                      setNuevoEvento({
+                      setNuevoEvento((prev) => ({
+                        ...prev,
                         summary: "",
                         description: "",
                         dni: "",
@@ -202,12 +216,12 @@ function Agenda_general() {
                         clienteId: 0,
                         mascota: "",
                         servicio: "",
-                        colaborador: "",
                         date: fechaSeleccionada.toISOString().split("T")[0],
                         startTime: "10:00",
-                        duracion: "",
+                        duracion: "30",
                         estado: "",
-                      });
+                        colaborador: prev.colaborador || "",
+                      }));
                       setMostrarModal(true);
                     }}
                   >
@@ -302,7 +316,11 @@ function Agenda_general() {
               </select>
 
               <label>Colaborador *</label>
-              <select value={nuevoEvento.colaborador} onChange={(e) => setNuevoEvento({ ...nuevoEvento, colaborador: e.target.value })} disabled={!nuevoEvento.servicio}>
+              <select
+                value={nuevoEvento.colaborador || ""}
+                onChange={(e) => setNuevoEvento({ ...nuevoEvento, colaborador: e.target.value })}
+                disabled={!nuevoEvento.servicio}
+              >
                 <option value="">Seleccione colaborador...</option>
                 {colaboradores.map((c) => (<option key={c.id} value={c.nombre}>{c.nombre}</option>))}
               </select>
