@@ -129,7 +129,7 @@ const GestionarColaboradores: React.FC = () => {
             setMostrarModal(false);
         } catch (error) {
             console.error("Error al registrar/actualizar: ", error);
-            alert(error);
+            alert("Error al aregistrar o actualizar");
         }
     }
     

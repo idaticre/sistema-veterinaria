@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
-import type { UsuarioRequest, UsuarioResponse, ColaboradorResponse, ColaboradorRequest } from "../../../../components/interfaces/interfaces";
-import axios from 'axios';
+import type { UsuarioRequest, UsuarioResponse } from "../../../../components/interfaces/interfaces";
+import IST from '../../../../components/proteccion_momentanea/IST';
 
 const gestionarUsuarios: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);
@@ -12,7 +12,6 @@ const gestionarUsuarios: React.FC = () => {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [edicion, setEdicion] = useState<UsuarioRequest | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
-    const baseURL = "http://localhost:8088/api";
 
     // Efecto de cerrar ventana
     useEffect(() => {
@@ -35,7 +34,7 @@ const gestionarUsuarios: React.FC = () => {
     useEffect(() => {listarUsuarios();}, []);
     const listarUsuarios = async () => {
         try {
-            const respuesta = await axios.get(`${baseURL}/usuarios`);
+            const respuesta = await IST.get(`/usuarios`);
             const lista = Array.isArray(respuesta.data)
             ? respuesta.data
             : respuesta.data.data;
@@ -74,8 +73,8 @@ const gestionarUsuarios: React.FC = () => {
     const guardarUsuario = async () => {
         if (!edicion) return;
         try {
-            if (edicion.id && edicion.id > 0) {await axios.put(`${baseURL}/usuarios/${edicion.id}`, edicion);}
-            else {await axios.post(`${baseURL}/usuarios`, edicion);}
+            if (edicion.id && edicion.id > 0) {await IST.put(`/usuarios/${edicion.id}`, edicion);}
+            else {await IST.post(`/usuarios`, edicion);}
             listarUsuarios();
             setEdicion(null);
             setMostrarModal(false);
@@ -88,7 +87,7 @@ const gestionarUsuarios: React.FC = () => {
     // Eliminar
     const eliminarUsuario = async (id: number) => {
         try {
-            await axios.delete(`${baseURL}/usuarios/${id}`);
+            await IST.delete(`/usuarios/${id}`);
             listarUsuarios();
             alert("Eliminación exitosa");
         } catch (error) {
