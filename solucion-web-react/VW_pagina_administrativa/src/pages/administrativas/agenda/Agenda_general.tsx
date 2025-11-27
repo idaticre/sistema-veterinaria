@@ -47,7 +47,6 @@ function Agenda_general() {
     veterinario: "",
     date: "",
     startTime: "10:00",
-    
     duracion: "",
     estado: "",
   });
@@ -89,7 +88,16 @@ function Agenda_general() {
               window.gapi.client.setToken({
                 access_token: tokenResponse.access_token,
               });
+
+              // ⭐ Guardar token
+              try {
+                localStorage.setItem("google_token", tokenResponse.access_token);
+              } catch (err) {
+                console.warn("Error guardando token:", err);
+              }
+
               setIsSignedIn(true);
+              cargarEventos(); // cargar al iniciar sesión
             }
           },
         });
@@ -105,6 +113,27 @@ function Agenda_general() {
     if (gapiInited && gisInited) setStatus("✅ Google Calendar listo para usar");
   }, [gapiInited, gisInited]);
 
+  // ============= RESTAURAR SESIÓN AUTOMÁTICAMENTE ============
+  useEffect(() => {
+    if (!gapiInited || !gisInited) return;
+
+    const savedToken = (() => {
+      try {
+        return localStorage.getItem("google_token");
+      } catch {
+        return null;
+      }
+    })();
+
+    if (savedToken) {
+      window.gapi.client.setToken({ access_token: savedToken });
+      setIsSignedIn(true);
+      setStatus("🔓 Sesión restaurada automáticamente");
+
+      cargarEventos(); // 🔥 carga inmediata
+    }
+  }, [gapiInited, gisInited]);
+
   // ================== SESIÓN ==================
   const iniciarSesion = () => tokenClient?.requestAccessToken();
 
@@ -114,6 +143,11 @@ function Agenda_general() {
       window.google.accounts.oauth2.revoke(token.access_token);
       window.gapi.client.setToken(null);
     }
+
+    try {
+      localStorage.removeItem("google_token");
+    } catch {}
+
     setIsSignedIn(false);
     setEventos([]);
     setStatus("🔒 Sesión cerrada");
@@ -151,7 +185,6 @@ function Agenda_general() {
 
   // ================== GUARDAR EVENTO ==================
   const guardarEvento = async () => {
-    // validaciones mínimas
     if (!nuevoEvento.cliente?.trim() || !nuevoEvento.mascota?.trim() || !nuevoEvento.date)
       return alert("Completa los campos obligatorios (*)");
 
@@ -192,7 +225,6 @@ Observaciones: ${nuevoEvento.description || "Ninguna"}
       setStatus("⚠️ Error al guardar la cita");
     }
   };
-  
 
   // ================== RENDER ==================
   return (
@@ -233,7 +265,6 @@ Observaciones: ${nuevoEvento.description || "Ninguna"}
                   <button
                     className="btn-agregar-linda"
                     onClick={() => {
-
                       setNuevoEvento({
                         summary: "",
                         description: "",
@@ -243,7 +274,6 @@ Observaciones: ${nuevoEvento.description || "Ninguna"}
                         veterinario: "",
                         date: fechaSeleccionada.toISOString().split("T")[0],
                         startTime: "10:00",
-
                         duracion: "",
                         estado: "",
                       });
@@ -313,7 +343,6 @@ Observaciones: ${nuevoEvento.description || "Ninguna"}
           <div className="modal-content">
             <h3>{editandoEvento ? "Editar cita" : "Agendar nueva cita 🗓️"}</h3>
 
-            {/* COLUMNA IZQUIERDA */}
             <div className="col-izq">
               <label>Fecha *</label>
               <input
@@ -357,7 +386,6 @@ Observaciones: ${nuevoEvento.description || "Ninguna"}
               </select>
             </div>
 
-            {/* COLUMNA DERECHA - VALIDACIÓN PROGRESIVA */}
             <div className="col-der">
               <label>Cliente (Dueño) *</label>
               <input
@@ -404,7 +432,6 @@ Observaciones: ${nuevoEvento.description || "Ninguna"}
               />
             </div>
 
-            {/* OBSERVACIONES ABAJO */}
             <label className="label-obs">Observaciones</label>
             <textarea
               className="textarea-obs"
@@ -414,7 +441,6 @@ Observaciones: ${nuevoEvento.description || "Ninguna"}
               }
             />
 
-            {/* BOTONES */}
             <div className="acciones-modal">
               <button className="btn-agregar" onClick={guardarEvento}>
                 💾 Guardar
