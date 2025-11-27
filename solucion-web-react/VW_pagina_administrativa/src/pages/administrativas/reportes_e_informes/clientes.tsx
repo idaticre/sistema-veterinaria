@@ -3,10 +3,10 @@ import Br_administrativa from '../../../components/barra_administrativa/Br_admin
 import "./reportesEinformes.css";
 import type { ClienteResponse, MascotaResponse } from "../../../components/interfaces/interfaces";
 import IST from '../../../components/proteccion_momentanea/IST';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
-;(pdfMake as any).vfs = (pdfFonts as any).pdfMake?.vfs ?? (pdfFonts as any);
+pdfMake.vfs = pdfFonts.vfs; 
 
 type MascotaExtendido = MascotaResponse & { 
     nombre_dueño?   : string;

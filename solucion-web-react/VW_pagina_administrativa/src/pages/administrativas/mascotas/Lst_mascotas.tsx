@@ -168,7 +168,7 @@ function Lst_mascotas() {
                                       <td colSpan={3}>{mascotaSeleccionado.nombre_tamaño}</td>
                                     </tr>
                                   </table>
-                                  <img src="/guardados/mascotas/canino1_1763079136619.png" alt="" />
+                                  <img src={mascotaSeleccionado.foto} alt="" />
                                 </section>
                                 <table>
                                   <tr>
@@ -179,7 +179,7 @@ function Lst_mascotas() {
                                 <table>
                                   <tr>
                                     <td>Pelaje: {mascotaSeleccionado.pelaje}</td>
-                                    <td>Alergias:{mascotaSeleccionado.alergias}</td>
+                                    <td>Alergias: {mascotaSeleccionado.alergias}</td>
                                     <td>estado: {mascotaSeleccionado.nombre_estado}</td>
                                   </tr>
                                 </table>

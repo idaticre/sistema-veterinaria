@@ -4,6 +4,7 @@ import './regis_mascotas.css';
 import type { Razas, Especie, MascotaRequest, ClienteResponse, Estado_Mascota, Tamaño_Mascota, Etapa_Mascota, MascotaResponse } from '../../../components/interfaces/interfaces';
 import IST from '../../../components/proteccion_momentanea/IST';
 import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function Regis_mascotas() {
     const [minimizado, setMinimizado] = useState(false);
@@ -33,6 +34,7 @@ function Regis_mascotas() {
     const [factorDea, setFactorDea] = useState(false);
     const [agresividad, setAgresividad] = useState(false);
     const [foto, setFoto] = useState("");
+    const [fotoFile, setFotoFile] = useState<File | null>(null);
 
     const [busqueda, setBusqueda] = useState(""); 
     const [resultados, setResultados] = useState<ClienteResponse[]>([]);
@@ -91,80 +93,82 @@ function Regis_mascotas() {
         }
     }, [mascotaSelecc]);
 
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        try {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("nombreMascota", nombre || "mascota");
+        // Guardamos el archivo para subirlo después
+        setFotoFile(file);
 
-            const res = await IST.post("/archivos/subir", formData, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
-
-            const urlBackend = res.data; // URL generada por Spring
-            setFoto(urlBackend);
-
-            // preview
-            const reader = new FileReader();
-            reader.onloadend = () => setImagenMascota(reader.result as string);
-            reader.readAsDataURL(file);
-
-        } catch (err) {
-            console.error("Error al subir imagen:", err);
-            alert("No se pudo subir la imagen ❌");
-        }
+        // Vista previa
+        const reader = new FileReader();
+        reader.onloadend = () => setImagenMascota(reader.result as string);
+        reader.readAsDataURL(file);
     };
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const nuevaMascota: MascotaRequest = {
-        nombre,
-        sexo,
-        idCliente,
-        idRaza,
-        idEspecie,
-        idEstado,
-        fechaNacimiento,
-        pelaje,
-        idTamano,
-        idEtapa,
-        esterilizado,
-        alergias,
-        peso,
-        chip,
-        pedigree,
-        factorDea,
-        agresividad,
-        foto,
-        };
+        try {
+            let fotoURL = foto;
 
-        if(mascotaSelecc){
-            IST.put(`/mascotas/actualizar/${mascotaSelecc.id}`, nuevaMascota)
-            .then(res => {
-            console.log("cliente actualizado:", res.data);
-            alert("Mascota actualizada correctamente ✅");
-            navigate("/administracion/mascotas/lista"); 
-            })
-            .catch(err => {
-            console.error("Error al actualizar mascota", err);
-            alert("Error al actualizar mascota ❌");
-            });
-        }else{
-            IST.post("/mascotas/crear", nuevaMascota)
-            .then(res => {
-                console.log("Respuesta del servidor:", res.data);
-                alert("Mascota registrada correctamente ✅");
-                navigate("/administracion/mascotas/lista"); 
-            })
-            .catch(err => {
-                console.error("Error al registrar mascota:", err);
-                alert("Error al registrar mascota ❌");
-            });
-        }
+            // Si se seleccionó una imagen, la subimos
+            if (fotoFile) {
+                const formData = new FormData();
+                formData.append("file", fotoFile);
+                formData.append("nombreMascota", nombre || "mascota");
+
+                const res = await IST.post("/archivos/subir", formData);
+                fotoURL = res.data; // URL devuelta por backend
+            }
+
+            const nuevaMascota: MascotaRequest = {
+            nombre,
+            sexo,
+            idCliente,
+            idRaza,
+            idEspecie,
+            idEstado,
+            fechaNacimiento,
+            pelaje,
+            idTamano,
+            idEtapa,
+            esterilizado,
+            alergias,
+            peso,
+            chip,
+            pedigree,
+            factorDea,
+            agresividad,
+            foto: fotoURL,
+            };
+
+            if(mascotaSelecc){
+                IST.put(`/mascotas/actualizar/${mascotaSelecc.id}`, nuevaMascota)
+                .then(res => {
+                    console.log("cliente actualizado:", res.data);
+                    alert("Mascota actualizada correctamente ✅");
+                    navigate("/administracion/mascotas/lista"); 
+                })
+                .catch(err => {
+                    console.error("Error al actualizar mascota", err);
+                    alert("Error al actualizar mascota ❌");
+                });
+            }else{
+                IST.post("/mascotas/crear", nuevaMascota)
+                .then(res => {
+                    console.log("Respuesta del servidor:", res.data);
+                    alert("Mascota registrada correctamente ✅");
+                    navigate("/administracion/mascotas/lista"); 
+                })
+            }
+
+        }catch(err) {
+            console.error("Error al registrar mascota:", err);
+            alert("Error al registrar mascota ❌");
+        };
+        
     };
 
     const handleBusqueda = (valor: string) => {
