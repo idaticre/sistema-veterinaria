@@ -5,7 +5,6 @@ import "./AsignarRolesPermisos.css";
 import type { UsuarioResponse, Rol, UsuarioRol } from "../../../../components/interfaces/interfaces";
 import IST from "../../../../components/proteccion_momentanea/IST";
 
-
 const AsignarRolesPermisos: React.FC = () => {
   const [usuarios, setUsuarios] = useState<UsuarioResponse[]>([]);
   const [roles, setRoles] = useState<Rol[]>([]);
@@ -43,13 +42,16 @@ const AsignarRolesPermisos: React.FC = () => {
     try {
       await IST.post(`${baseURL}/usuarios-roles/asignar`, {
         idUsuario,
-        idRol
+        idRol,
       });
-      alert("Rol asignado correctamente ✅");
+
+      alert("Rol asignado correctamente");
       obtenerUsuariosRoles();
+
+      // limpiamos selección
       setRolSeleccionado({ ...rolSeleccionado, [idUsuario]: 0 });
     } catch (error) {
-      alert("Error al asignar el rol ❌");
+      alert("Error al asignar el rol");
       console.error(error);
     }
   };
@@ -57,16 +59,18 @@ const AsignarRolesPermisos: React.FC = () => {
   const eliminarRol = async (idUsuario: number, idRol: number) => {
     try {
       await IST.delete(`${baseURL}/usuarios-roles/eliminar`, {
-        data: { idUsuario, idRol }
+        data: { idUsuario, idRol },
       });
-      alert("Rol eliminado correctamente 🗑️");
+
+      alert("Rol eliminado correctamente");
       obtenerUsuariosRoles();
     } catch (error) {
-      alert("Error al eliminar el rol ❌");
+      alert("Error al eliminar el rol");
       console.error(error);
     }
   };
 
+  // Obtiene todos los roles asignados a un usuario
   const rolesDeUsuario = (idUsuario: number) => {
     return usuariosRoles.filter((ur) => ur.idUsuario === idUsuario);
   };
@@ -79,7 +83,7 @@ const AsignarRolesPermisos: React.FC = () => {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true
+      hour12: true,
     });
   };
 
@@ -99,21 +103,36 @@ const AsignarRolesPermisos: React.FC = () => {
                 <th>Usuario</th>
                 <th>Rol Asignado</th>
                 <th>Fecha de Asignación</th>
-                <th>Asignar Rol</th>
+                <th>Acción</th>
               </tr>
             </thead>
+
             <tbody>
               {usuarios.map((usuario) => {
                 const rolesUsuario = rolesDeUsuario(usuario.id);
-                const maxRoles = 4;
+
+                // CANTIDAD TOTAL DE ROLES DISPONIBLES (dinámico)
+                const maxRoles = roles.length;
+
+                // ¿Puede seguir agregando roles?
                 const puedeAsignarMas = rolesUsuario.length < maxRoles;
 
+                // Preparamos lista de roles NO asignados
+                const rolesAsignadosNombres = rolesUsuario.map((r) => r.rol);
+                const rolesDisponibles = roles.filter(
+                  (r) => !rolesAsignadosNombres.includes(r.nombre)
+                );
+
+                // Caso: usuario sin roles
                 if (rolesUsuario.length === 0) {
                   return (
-                    <tr key={`${usuario.id}-sin-rol`}>
+                    <tr key={`${usuario.id}-sin-rol`} className="fila-usuario">
                       <td>{usuario.username}</td>
-                      <td><span className="sin-rol">Sin rol asignado</span></td>
+                      <td>
+                        <span className="sin-rol">Sin rol asignado</span>
+                      </td>
                       <td>-</td>
+
                       <td>
                         <div className="asignar-grupo">
                           <select
@@ -122,17 +141,20 @@ const AsignarRolesPermisos: React.FC = () => {
                             onChange={(e) =>
                               setRolSeleccionado({
                                 ...rolSeleccionado,
-                                [usuario.id]: parseInt(e.target.value)
+                                [usuario.id]: parseInt(e.target.value),
                               })
                             }
                           >
                             <option value="">Seleccione un rol</option>
-                            {roles.map((rol) => (
+
+                            {/* Mostrar solo roles que NO tiene */}
+                            {rolesDisponibles.map((rol) => (
                               <option key={rol.id} value={rol.id}>
                                 {rol.nombre}
                               </option>
                             ))}
                           </select>
+
                           <button className="btn-asignar" onClick={() => asignarRol(usuario.id)}>
                             Asignar
                           </button>
@@ -142,38 +164,54 @@ const AsignarRolesPermisos: React.FC = () => {
                   );
                 }
 
-                return rolesUsuario.map((usuarioRol, index) => {
-                  const rolObj = roles.find((r) => r.nombre === usuarioRol.rol);
+                // Caso: usuario con roles asignados
+                return [
+                  ...rolesUsuario.map((usuarioRol, index) => {
+                    const esPrimeraFila = index === 0;
 
-                  return (
-                    <tr key={`${usuario.id}-${usuarioRol.rol}`}>
-                      {index === 0 && (
-                        <td rowSpan={puedeAsignarMas ? rolesUsuario.length + 1 : rolesUsuario.length}>
-                          {usuario.username}
-                        </td>
-                      )}
-                      <td><span className="badge-rol">{usuarioRol.rol}</span></td>
-                      <td>{formatearFecha(usuarioRol.fechaAsignacion)}</td>
-                      <td>
-                        {rolObj && (
-                          <button
-                            className="btn-eliminar"
-                            onClick={() => eliminarRol(usuario.id, rolObj.id)}
+                    // Encontrar ID real del rol usando su nombre
+                    const rolObj = roles.find((r) => r.nombre === usuarioRol.rol);
+
+                    return (
+                      <tr key={`${usuario.id}-${usuarioRol.rol}`} className={esPrimeraFila ? "fila-usuario" : ""}>
+                        {esPrimeraFila && (
+                          <td
+                            rowSpan={puedeAsignarMas ? rolesUsuario.length + 1 : rolesUsuario.length}
                           >
-                            Eliminar Rol
-                          </button>
+                            {usuario.username}
+                          </td>
                         )}
-                      </td>
-                    </tr>
-                  );
-                }).concat(
-                  puedeAsignarMas ? (
-                    <tr key={`${usuario.id}-asignar`}>
+
+                        <td>
+                          <span className="badge-rol">{usuarioRol.rol}</span>
+                        </td>
+
+                        <td>{formatearFecha(usuarioRol.fechaAsignacion)}</td>
+
+                        <td>
+                          {rolObj && (
+                            <button
+                              className="btn-eliminar"
+                              onClick={() => eliminarRol(usuario.id, rolObj.id)}
+                            >
+                              Eliminar Rol
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  }),
+
+                  // Fila final para agregar rol (si faltan roles)
+                  puedeAsignarMas && (
+                    <tr key={`${usuario.id}-agregar`}>
                       <td colSpan={2}>
+                        {/* Aquí está la lógica de "X/Y roles" */}
                         <span className="texto-agregar">
                           Agregar otro rol ({rolesUsuario.length}/{maxRoles})
                         </span>
                       </td>
+
                       <td>
                         <div className="asignar-grupo">
                           <select
@@ -182,25 +220,28 @@ const AsignarRolesPermisos: React.FC = () => {
                             onChange={(e) =>
                               setRolSeleccionado({
                                 ...rolSeleccionado,
-                                [usuario.id]: parseInt(e.target.value)
+                                [usuario.id]: parseInt(e.target.value),
                               })
                             }
                           >
                             <option value="">Seleccione un rol</option>
-                            {roles.map((rol) => (
+
+                            {/* Mostrar únicamente roles no asignados */}
+                            {rolesDisponibles.map((rol) => (
                               <option key={rol.id} value={rol.id}>
                                 {rol.nombre}
                               </option>
                             ))}
                           </select>
+
                           <button className="btn-asignar" onClick={() => asignarRol(usuario.id)}>
                             Asignar
                           </button>
                         </div>
                       </td>
                     </tr>
-                  ) : []
-                );
+                  ),
+                ];
               })}
             </tbody>
           </table>
