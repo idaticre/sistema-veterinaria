@@ -17,6 +17,42 @@ type MascotaExtendido = MascotaResponse & {
     nombre_etapa?   : string
 }
 
+const camposCliente: Record<string, string> = {
+    codigo: "Código de cliente",
+    fechaRegistro: "Fecha de registro",
+    nombre: "Nombre",
+    sexo: "Sexo",
+    idTipoDocumento: "Tipo de documento",
+    documento: "Documento",
+    idTipoPersonaJurdicia: "Tipo de persona",
+    correo: "Correo",
+    telefono: "Teléfono",
+    direccion: "Dirección",
+    ciudad: "Ciudad",
+    distrito: "Distrito",
+};
+
+const camposMascota: Record<string, string> = {
+    codigo: "Código de mascota",
+    nombre: "Nombre",
+    sexo: "Sexo",
+    idRaza: "Raza",
+    idEspecie: "Especie",
+    idEstado: "Estado",
+    idTamano: "Tamaño",
+    idEtapa: "Etapa",
+    fechaNacimiento: "Fecha de nacimiento",
+    pelaje: "Pelaje",
+    esterilizado: "Esterilizado",
+    alergias: "Alergias",
+    peso: "Peso",
+    chip: "Chip",
+    pedigree: "Pedigree",
+    factorDea: "Factor dea",
+    agresividad: "Agresivo",
+    fechaRegistro: "Fecha de registro"
+};
+
 const GestionarColaboradores: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);
     const [clientes, setClientes] = useState<ClienteResponse[]>([]);
@@ -66,59 +102,57 @@ const GestionarColaboradores: React.FC = () => {
             cliente,
             mascotas: mascotasCliente,
         });
-        console.log("Datos cargados para el reporte:", {cliente, mascotasCliente,});
+        alert("Datos cargados, ahora puede generar un PDF");
 
     } catch (error) {console.error("Error cargando datos del reporte:", error);}
     };
 
     const generarPDF = (datosReporte: any) => {
-        if (!datosReporte) {
-            alert("No hay datos cargados para generar el PDF");
-            return;
-        }
-
+        if (!datosReporte) { alert("No hay datos cargados para generar el PDF"); return; }
         const { cliente, mascotas } = datosReporte;
 
-        // ==== Secciones ====
+        // Parte de clientes
+        const datosCliente = Object.entries(cliente)
+            .filter(([campo]) => campo in camposCliente)            // solo campos permitidos
+            .map(([campo, valor]) => {
+                const valorFinal = typeof valor === "boolean" 
+                    ? (valor ? "Sí" : "No") 
+                    : valor;
 
-        const datosCliente = Object.entries(cliente).map(([campo, valor]) => {
-            return `${campo}: ${valor}`;
-        });
-
+                return `${camposCliente[campo]}: ${valorFinal}`;
+            });
+        
+        // Parte de mascotas
         let datosMascotas: string[] = [];
-
         if (mascotas && mascotas.length > 0) {
             mascotas.forEach((m: MascotaExtendido, i: any) => {
-            datosMascotas.push(`--- Mascota ${i + 1} ---`);
-            Object.entries(m).forEach(([campo, valor]) => {
-                datosMascotas.push(`${campo}: ${valor}`);
-            });
+                datosMascotas.push(`--- Mascota ${i + 1} ---`);
+
+                Object.entries(m)
+                    .filter(([campo]) => campo in camposMascota)
+                    .forEach(([campo, valor]) => {
+                        const valorFinal = typeof valor === "boolean"
+                            ? (valor ? "Sí" : "No")
+                            : valor;
+
+                        datosMascotas.push(`${camposMascota[campo]}: ${valorFinal}`);
+                    });
             });
         }
 
         // ==== Definición del PDF ====
-
         const docDefinition = {
             content: [
                 { text: "Reporte del Cliente", style: "titulo" },
                 "\n",
 
                 { text: "Información del Cliente", style: "subtitulo" },
-                {
-                    ul: datosCliente,
-                },
+                { ul: datosCliente },
 
                 "\n",
 
-                mascotas?.length > 0
-                    ? { text: "Mascotas", style: "subtitulo" }
-                    : "",
-
-                mascotas?.length > 0
-                    ? {
-                        ul: datosMascotas,
-                    }
-                    : "",
+                mascotas?.length > 0 ? { text: "Mascotas", style: "subtitulo" } : "",
+                mascotas?.length > 0 ? { ul: datosMascotas } : "",
             ],
 
             styles: {
@@ -135,24 +169,28 @@ const GestionarColaboradores: React.FC = () => {
             },
         };
 
-        // ==== Abrir en nueva pestaña (vista previa) ====
         pdfMake.createPdf(docDefinition).open();
-        // Para descargar directamente sería:
-        // pdfMake.createPdf(docDefinition).download("reporte.pdf");
     };
+
 
     return (
         <div id="cuerpo-main">
             <Br_administrativa onMinimizeChange={setMinimizado}/>
             <main className={minimizado ? "minimize" : ""}>
                 <section id="cuerpo">
-                    <select value={clienteSeleccionado ?? ""} onChange={(cliente) => {const val = cliente.target.value; setClienteSeleccionado(val ? Number(val) : null);}}>
-                        <option value="">Seleccione un cliente</option>
-                        {clientes.map((cliente) => (<option key={cliente.id} value={cliente.id}>{cliente.nombre}</option>))}
-                    </select>
-                    <label><input type="checkbox" checked={incluirMascotas} onChange={(e) => setIncluirMascotas(e.target.checked)}/>Incluir mascotas</label>
-                    <button onClick={cargarDatos}>Cargar datos</button>
-                    <button onClick={() => generarPDF(datosReporte)} disabled={!datosReporte}>Generar PDF</button>
+                    <div className="diva">
+                        <div className="selecciones">
+                            <select className="combobo" value={clienteSeleccionado ?? ""} onChange={(cliente) => {const val = cliente.target.value; setClienteSeleccionado(val ? Number(val) : null);}}>
+                                <option value="">Seleccione un cliente</option>
+                                {clientes.map((cliente) => (<option key={cliente.id} value={cliente.id}>{cliente.nombre}</option>))}
+                            </select>
+                            <label className="checkbobo"><input type="checkbox" checked={incluirMascotas} onChange={(e) => setIncluirMascotas(e.target.checked)}/>Incluir mascotas</label>
+                        </div>
+                        <div className="botones-pdf"> 
+                            <button onClick={cargarDatos}>Cargar datos</button>
+                            <button onClick={() => generarPDF(datosReporte)} disabled={!datosReporte}>Generar PDF</button>
+                        </div>
+                    </div>
                 </section>
             </main>
         </div>

@@ -108,7 +108,6 @@ const GestionarServicios: React.FC = () => {
                 <section id="listar-registros">
                     <div className="encabezado"><h2>Lista de servicios</h2></div>
                     <div className="goated">
-                        <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del servicio que desea buscar 🔍"/></div>
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={abrirFormularioNuevo}>Registrar servicio</button>
                     </div>
                     <table className="GM-table">

@@ -278,6 +278,8 @@ export interface UsuarioResponse {
   username: string;
   passwordHash: string;
   activo: boolean;
+  fechaCreacion: string,
+  fechaBaja?: string | null
 }
 
 export interface UsuarioRequest {
@@ -285,6 +287,8 @@ export interface UsuarioRequest {
   username: string;
   passwordHash: string;
   activo: boolean;
+  fechaCreacion?: string,
+  fechaBaja?: string | null
 }
 
 export interface Rol {

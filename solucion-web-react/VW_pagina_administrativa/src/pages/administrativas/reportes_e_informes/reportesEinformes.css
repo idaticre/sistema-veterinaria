@@ -1,0 +1,26 @@
+#cuerpo {
+    display: flex;
+    align-items: center;
+}
+
+.combobo {margin: 10px;}
+.checkbobo {margin: 10px;}
+
+.diva {
+    display: flex;
+    flex-direction: column;
+
+    height: 300px;
+    justify-content: center;
+    align-items: center;
+
+    background-color: #bdb0b0;
+    padding: 10px;
+
+    border-radius: 10px;
+}
+
+.botones-pdf button {
+    margin: 10px;
+    background-color: rgb(81, 81, 158);
+}

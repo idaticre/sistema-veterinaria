@@ -270,9 +270,9 @@ const GestionarColaboradores: React.FC = () => {
                         <input type="text" placeholder="Dirección" value={edicion.direccion} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, direccion: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Ciudad" value={edicion.ciudad} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, ciudad: nuevoValor.target.value } : null)}/>
                         <input type="text" placeholder="Distrito" value={edicion.distrito} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, distrito: nuevoValor.target.value } : null)}/>
-                        <div className="acciones-de-registro">
+                        <div className="accDeReg">
                             <button onClick={guardarColaborador}>Guardar</button>
-                            <button style={{background:"#c82333"}} onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
+                            <button className="" onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
                         </div>
                     </div>
                 </div>
@@ -286,8 +286,8 @@ const GestionarColaboradores: React.FC = () => {
                         <div className="info-extensiva"><strong>Ciudad: </strong>{masInformacion.ciudad}</div>
                         <div className="info-extensiva"><strong>Distrito: </strong>{masInformacion.distrito}</div>
                     </div>
-                    <div className="acciones-de-registro">
-                        <button onClick={() => { setMostrarModalInformativo(false); setMasInformacion(null); }}>Cerrar</button>                        
+                    <div className="accDeReg-cer">
+                        <button style={{color:"white", background:"red"}} onClick={() => { setMostrarModalInformativo(false); setMasInformacion(null); }}>Cerrar</button>                        
                     </div>
                 </div>
             )}

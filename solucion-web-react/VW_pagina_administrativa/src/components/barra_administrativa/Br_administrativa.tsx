@@ -212,7 +212,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 </ul>
                             </li>
                             */}
-                            {/*
+                            
                             <li className={`opcion opcion_desplegable ${openMenu === "informe"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("informe")}
                             >
@@ -222,15 +222,15 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={informRef} className="submenu">
-                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Ventas</Link></li>
+                                    {/*<li><Link to="/administracion/mascotas/lista" className="sub_opcion">Ventas</Link></li>
                                     <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Financieros</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Inventarios</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Clientes</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Proveedores</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Caja general</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Inventarios</Link></li>*/}
+                                    <li><Link to="/administracion/reportes_e_informes/clientes" className="sub_opcion">Clientes</Link></li>
+                                    {/*<li><Link to="/administracion/mascotas/especies" className="sub_opcion">Proveedores</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Caja general</Link></li>*/}
                                 </ul>
                             </li>
-                            */}
+                            
                             {RolesPermitidos("ADMINISTRADOR GENERAL") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "administracion"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("administracion")}
