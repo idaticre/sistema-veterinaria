@@ -6,7 +6,6 @@ import type { ClienteResponse,
     tipo_doc,
     TipoPersonaJuridica,
     Razas,
-    Especie,
     Tamaño_Mascota,
     Etapa_Mascota,
     Estado_Mascota
