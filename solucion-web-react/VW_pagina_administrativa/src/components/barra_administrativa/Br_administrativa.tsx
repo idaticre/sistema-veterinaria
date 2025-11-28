@@ -105,7 +105,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <span>Inicio</span>
                                 </Link>
                             </li>
-                            {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROOMERS") && (
+                            {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "cliente"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("cliente")}
                                 >
@@ -122,7 +122,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </ul>
                                 </li>
                             )}
-                            {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROOMERS") && (
+                            {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "mascotas"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("mascotas")}
                                 >
@@ -144,7 +144,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </ul>
                                 </li>
                             )}
-                            {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROOMERS") && (
+                            {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "agenda"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("agenda")}
                                 >
