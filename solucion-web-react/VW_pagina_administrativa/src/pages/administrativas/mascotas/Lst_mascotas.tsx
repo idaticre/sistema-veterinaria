@@ -190,6 +190,7 @@ function Lst_mascotas() {
                                   <span><strong>Pedigree: </strong>{mascotaSeleccionado.pedigree? "✅":"❌"}</span>
                                   <span><strong>Agresivo: </strong>{mascotaSeleccionado.agresividad? "✅":"❌"}</span>
                                 </div>
+                                <p>{mascotaSeleccionado.foto}</p>
                                 <Link to="/administracion/mascotas/registro" state={{ mascotaSeleccionado }}><button>Editar</button></Link>
                                 <button onClick={() => {handleDelete(mascotaSeleccionado.id)}}>Eliminar</button>
                               </div>  

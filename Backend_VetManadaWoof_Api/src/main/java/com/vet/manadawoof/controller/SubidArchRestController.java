@@ -22,7 +22,8 @@ public class SubidArchRestController {
     @PostMapping("/subir")
     public ResponseEntity<String> subirArchivo(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("nombreMascota") String nombreMascota) {
+            @RequestParam(required = false) String nombreExistente,
+            @RequestParam(required = false) String nombreMascota) { 
 
         try {
             if (file.isEmpty()) {
@@ -58,17 +59,20 @@ public class SubidArchRestController {
             File directory = new File(folder);
             if (!directory.exists()) directory.mkdirs();
 
-            // Limpieza del nombre
-            String limpio = nombreMascota.replaceAll("[^a-zA-Z0-9_-]", "");
-
-            // Timestamp
-            String fecha = java.time.LocalDateTime.now()
-                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-
-            String nombreFinal = limpio + "_" + fecha + extension;
+            String nombreFinal;
+            if (nombreExistente != null && !nombreExistente.isEmpty()) {
+                // Usar nombre existente para reemplazar
+                nombreFinal = nombreExistente;
+            } else {
+                // Limpiar y generar timestamp
+                String limpio = (nombreMascota != null ? nombreMascota : "archivo").replaceAll("[^a-zA-Z0-9_-]", "");
+                String fecha = java.time.LocalDateTime.now()
+                        .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                nombreFinal = limpio + "_" + fecha + extension;
+            }
 
             File destino = new File(folder + nombreFinal);
-            file.transferTo(destino);
+            file.transferTo(destino); // sobrescribe si existe
 
             String publicUrl = "http://localhost:8088/archivos/" + (esMultimedia ? "multimedia/" : "documentos/") + nombreFinal;
 

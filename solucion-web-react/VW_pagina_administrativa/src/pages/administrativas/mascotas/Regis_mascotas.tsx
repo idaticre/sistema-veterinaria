@@ -4,7 +4,6 @@ import './regis_mascotas.css';
 import type { Razas, Especie, MascotaRequest, ClienteResponse, Estado_Mascota, Tamaño_Mascota, Etapa_Mascota, MascotaResponse } from '../../../components/interfaces/interfaces';
 import IST from '../../../components/proteccion_momentanea/IST';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 function Regis_mascotas() {
     const [minimizado, setMinimizado] = useState(false);
@@ -90,6 +89,7 @@ function Regis_mascotas() {
             setFactorDea(mascotaSelecc.factorDea || false);
             setAgresividad(mascotaSelecc.agresividad || false);
             setFoto(mascotaSelecc.foto || "");
+            setImagenMascota(mascotaSelecc.foto || null);
         }
     }, [mascotaSelecc]);
 
@@ -117,10 +117,16 @@ function Regis_mascotas() {
             if (fotoFile) {
                 const formData = new FormData();
                 formData.append("file", fotoFile);
-                formData.append("nombreMascota", nombre || "mascota");
+                
+                const nombreArchivoExistente = mascotaSelecc?.foto?.split("/").pop();
+                if (nombreArchivoExistente) {
+                    formData.append("nombreExistente", nombreArchivoExistente);
+                } else {
+                    formData.append("nombreMascota", nombre || "mascota");
+                }
 
                 const res = await IST.post("/archivos/subir", formData);
-                fotoURL = res.data; // URL devuelta por backend
+                fotoURL = res.data;
             }
 
             const nuevaMascota: MascotaRequest = {
@@ -184,6 +190,12 @@ function Regis_mascotas() {
         console.log("Coincidencias encontradas:", filtrados);
         setResultados(filtrados);
     };
+
+    useEffect(() => {
+        if (mascotaSelecc?.foto) {
+            setImagenMascota(mascotaSelecc.foto);
+        }
+    }, [mascotaSelecc]);
 
     return (
         <>
