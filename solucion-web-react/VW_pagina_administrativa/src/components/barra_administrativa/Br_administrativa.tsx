@@ -177,6 +177,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                 </li>
                             )}
+                            {/*
                             {RolesPermitidos("ADMINISTRADOR GENERAL") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("distribucion")}
@@ -188,13 +189,13 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                     <ul ref={distribRef} className="submenu">
                                         <li><Link to="/administracion/distribucion/inventario" className="sub_opcion">Inventario</Link></li>
-                                        {/* 
                                         <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Ordenes de compra</Link></li>
                                         <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Proveedores</Link></li>
-                                        */}        
+                                                
                                     </ul>
                                 </li>
                             )}
+                            */}
                             {/*
                             <li className={`opcion opcion_desplegable ${openMenu === "venta"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("venta")}>
