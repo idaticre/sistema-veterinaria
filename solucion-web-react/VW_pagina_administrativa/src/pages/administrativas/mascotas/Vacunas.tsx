@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import "./vacunas.css"
 import type { Especialidad } from '../../../components/interfaces/interfaces';
-import IST from '../../../components/proteccion_momentanea/IST';
+import IST from '../../../components/proteccion/IST';
 
 function Vacunas() {
   const [minimizado, setMinimizado] = useState(false);

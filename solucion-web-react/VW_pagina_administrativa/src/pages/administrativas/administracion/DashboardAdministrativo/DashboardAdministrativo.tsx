@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./DashboardAdministrativo.css";
-import IST from "../../../../components/proteccion_momentanea/IST";
+import IST from "../../../../components/proteccion/IST";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 
 interface Colaborador {

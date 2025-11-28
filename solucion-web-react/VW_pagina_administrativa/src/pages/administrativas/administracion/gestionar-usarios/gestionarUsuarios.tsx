@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
 import type { UsuarioRequest, UsuarioResponse } from "../../../../components/interfaces/interfaces";
-import IST from '../../../../components/proteccion_momentanea/IST';
+import IST from '../../../../components/proteccion/IST';
 
 const gestionarUsuarios: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);

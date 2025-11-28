@@ -176,7 +176,6 @@ main.minimize{
             margin-left: 50px ;
         }
 
-        /* Botón de envío */
         .submit-btn {
             background: #4caf50;
             color: white;
@@ -207,7 +206,6 @@ main.minimize{
             text-decoration: underline;
         }
 
-        /* Contenedor de listas */
         .list-container {
             padding: 30px;
         }
@@ -225,7 +223,6 @@ main.minimize{
             margin-top: 40px;
         }
 
-        /* Responsividad para tablets y móviles */
         @media (max-width: 768px) {
             .sidebar {
                 width: 200px;
@@ -244,13 +241,10 @@ main.minimize{
                 grid-column: span 1;
             }
         }
-
-        /* Estilos específicos para el título de mascotas */
         .page-title.mascotas::before {
             content: '🐕';
         }
 
-        /* Estilos para campos específicos de mascotas */
         .pet-weight {
             max-width: 120px;
         }
@@ -261,15 +255,13 @@ main.minimize{
             border-radius: 8px;
             cursor: pointer;
         }
-
-        /* Sección de información del dueño */
-        /* 🔍 Contenedor general del buscador */
+        /* Contenedor general del buscador */
         .owner-search {
             position: relative;
             display: flex;
             flex-direction: column;
             width: 100%;
-            max-width: 400px;
+            max-width: 33.5rem;
         }
 
         /* Caja de texto del buscador */
@@ -291,15 +283,15 @@ main.minimize{
         /* Lista desplegable */
         .suggestions-list {
             position: absolute;
-            top: 100%; /* Justo debajo del input */
+            top: 92%; /* Justo debajo del input */
             left: 0;
-            width: 100%;
+            width: 50%;
             background: white;
             border: 1px solid #ddd;
             border-top: none;
             border-radius: 0 0 6px 6px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            max-height: 180px; /* Altura máxima con scroll */
+            max-height: 180px;
             overflow-y: auto;
             z-index: 1000;
             list-style: none;

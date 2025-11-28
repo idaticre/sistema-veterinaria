@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import "./reportesEinformes.css";
 import type { ClienteResponse, MascotaResponse } from "../../../components/interfaces/interfaces";
-import IST from '../../../components/proteccion_momentanea/IST';
+import IST from '../../../components/proteccion/IST';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 

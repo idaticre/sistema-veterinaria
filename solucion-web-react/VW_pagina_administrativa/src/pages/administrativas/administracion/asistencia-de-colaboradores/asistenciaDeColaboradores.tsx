@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import IST from "../../../../components/proteccion_momentanea/IST";
+import IST from "../../../../components/proteccion/IST";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./asistencia.css";
 

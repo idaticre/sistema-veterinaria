@@ -3,7 +3,7 @@ import Br_administrativa from "../../../components/barra_administrativa/Br_admin
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import "./Admin_index.css"
 import type { ClienteResponse, MascotaResponse } from "../../../components/interfaces/interfaces";
-import IST from "../../../components/proteccion_momentanea/IST";
+import IST from "../../../components/proteccion/IST";
 
 function Admin_index() {
     const [minimizado, setMinimizado] = useState(false);

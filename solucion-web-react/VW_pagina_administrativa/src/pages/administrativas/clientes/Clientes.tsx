@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import './clientes.css';
-import IST from '../../../components/proteccion_momentanea/IST';
+import IST from '../../../components/proteccion/IST';
 import { Link, useNavigate } from 'react-router-dom';
 import type { ClienteResponse, MascotaResponse } from '../../../components/interfaces/interfaces';
 
@@ -199,30 +199,27 @@ function Lst_clientes() {
                         <td>{clienteSeleccionado.direccion}</td>
                       </tr>
                     </table>
-                    <div className='VDCliente_foto'>
-                      <img src="/kayn.jpg" alt="" />
+                    <div className='VDCliente_mis_mascotas'>
+                      {mascotaDueño.length === 0 ? (
+                        <p>NO HAY MASCOTAS A SU NOMBRE</p>
+                      ):(
+                        mascotaDueño.map((masc) => (
+                          <div className='masc_dueño'>
+                              <div className='masc_dueño_img'>
+                                <img src={masc.foto} alt="" />
+                              </div>
+                              <div className='masc_dueño_dataS masc_superior'>
+                                <p>{masc.nombre}</p>
+                                <span>{masc.nombre_estado}</span>
+                              </div>
+                              <div className='masc_dueño_dataS masc_inferior'>
+                                <p>Especie: {masc.nombre_especie}</p>
+                                <span>Raza: {masc.nombre_raza}</span>
+                              </div>
+                          </div>
+                        ))
+                      )}
                     </div>
-                  </div>
-                  <div className='VDCliente_mis_mascotas'>
-                    {mascotaDueño.length === 0 ? (
-                      <p>NO HAY MASCOTAS A SU NOMBRE</p>
-                    ):(
-                      mascotaDueño.map((masc) => (
-                        <div className='masc_dueño'>
-                            <div className='masc_dueño_img'>
-                              <img src="/guardados/mascotas/canino1_1763079136619.png" alt="" />
-                            </div>
-                            <div className='masc_dueño_dataS masc_superior'>
-                              <p>{masc.nombre}</p>
-                              <span>{masc.nombre_estado}</span>
-                            </div>
-                            <div className='masc_dueño_dataS masc_inferior'>
-                              <p>Especie: {masc.nombre_especie}</p>
-                              <span>Raza: {masc.nombre_raza}</span>
-                            </div>
-                        </div>
-                      ))
-                    )}
                   </div>
                 </div>
               </div>

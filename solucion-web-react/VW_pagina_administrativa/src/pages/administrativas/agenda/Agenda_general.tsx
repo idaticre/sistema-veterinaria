@@ -4,7 +4,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
 import "./Agenda_genera.css";
-import IST from "../../../components/proteccion_momentanea/IST";
+import IST from "../../../components/proteccion/IST";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;

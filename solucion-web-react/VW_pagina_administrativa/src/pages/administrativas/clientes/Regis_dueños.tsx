@@ -3,7 +3,7 @@ import Br_administrativa from '../../../components/barra_administrativa/Br_admin
 import './regis_dueños.css'
 import type { tipo_doc, ClienteResponse, ClienteResquest } from '../../../components/interfaces/interfaces';
 import { useLocation, useNavigate } from 'react-router-dom';
-import IST from '../../../components/proteccion_momentanea/IST';
+import IST from '../../../components/proteccion/IST';
 
 function regis_dueños() {
   const [minimizado, setMinimizado] = useState(false);

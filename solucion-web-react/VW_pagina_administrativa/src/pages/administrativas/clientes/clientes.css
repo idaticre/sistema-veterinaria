@@ -152,7 +152,7 @@
 }
 
 .VDCliente_contenido_info table {
-  width: 60%;
+  width: 40%;
   border-collapse: collapse;
 }
 
@@ -183,8 +183,11 @@
   border-radius: 4px;
 }
 
+.VDCliente_mis_mascotas{
+  width: 57%;
+}
+
 .masc_dueño {
-  width: 55%;
   max-width: 700px;
   background: #f8f8f8;
   border-radius: 50px;

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
 import "./styles.css"
-import IST from '../../../components/proteccion_momentanea/IST'
+import IST from '../../../components/proteccion/IST'
 
     
 interface ServicioResponse {

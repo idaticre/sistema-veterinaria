@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import './regis_mascotas.css';
 import type { Razas, Especie, MascotaRequest, ClienteResponse, Estado_Mascota, Tamaño_Mascota, Etapa_Mascota, MascotaResponse } from '../../../components/interfaces/interfaces';
-import IST from '../../../components/proteccion_momentanea/IST';
+import IST from '../../../components/proteccion/IST';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+type Mascotaextendido = MascotaResponse & { nombre_dueño?: string;};
 
 function Regis_mascotas() {
     const [minimizado, setMinimizado] = useState(false);
@@ -37,10 +39,9 @@ function Regis_mascotas() {
 
     const [busqueda, setBusqueda] = useState(""); 
     const [resultados, setResultados] = useState<ClienteResponse[]>([]);
-    const [duenoSeleccionado, setDuenoSeleccionado] = useState<ClienteResponse | null>(null);
 
     const location = useLocation();
-    const mascotaSelecc = location.state?.mascotaSeleccionado as MascotaResponse | undefined;
+    const mascotaSelecc = location.state?.mascotaSeleccionado as Mascotaextendido | undefined;
 
     const navigate = useNavigate();
 
@@ -190,12 +191,6 @@ function Regis_mascotas() {
         console.log("Coincidencias encontradas:", filtrados);
         setResultados(filtrados);
     };
-
-    useEffect(() => {
-        if (mascotaSelecc?.foto) {
-            setImagenMascota(mascotaSelecc.foto);
-        }
-    }, [mascotaSelecc]);
 
     return (
         <>
@@ -379,16 +374,12 @@ function Regis_mascotas() {
                                                     <input type="checkbox" id="agresividad" name="agresividad" checked={agresividad} onChange={(e) => setAgresividad(e.target.checked)}/>
                                                 </div>
                                             </div>
-
-                                            
-
                                             <div className="owner-info">
                                                 <h4>Dueño</h4>
-
                                                 <div className="owner-search">
                                                     <input
                                                     type="text"
-                                                    placeholder="Buscar cliente por nombre"
+                                                    placeholder= {mascotaSelecc? mascotaSelecc.nombre_dueño : "Buscar cliente por nombre"}
                                                     value={busqueda}
                                                     onChange={(e) => handleBusqueda(e.target.value)}
                                                     />
@@ -402,7 +393,6 @@ function Regis_mascotas() {
                                                         <li
                                                             key={cliente.id}
                                                             onClick={() => {
-                                                            setDuenoSeleccionado(cliente);
                                                             setBusqueda(cliente.nombre);
                                                             setIdCliente(cliente.id);
                                                             setResultados([]);
@@ -412,15 +402,6 @@ function Regis_mascotas() {
                                                         </li>
                                                         ))}
                                                     </ul>
-                                                )}
-
-                                                {duenoSeleccionado && (
-                                                    <div className="owner-details" style={{ marginTop: "10px" }}>
-                                                    <div><strong>Nombre:</strong> {duenoSeleccionado.nombre}</div>
-                                                    <div><strong>DNI:</strong> {duenoSeleccionado.documento}</div>
-                                                    <div><strong>Teléfono:</strong> {duenoSeleccionado.telefono}</div>
-                                                    <div><strong>Email:</strong> {duenoSeleccionado.correo}</div>
-                                                    </div>
                                                 )}
                                             </div>
                                                     
