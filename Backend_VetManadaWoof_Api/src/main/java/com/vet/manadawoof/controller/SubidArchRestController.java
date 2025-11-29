@@ -82,5 +82,37 @@ public class SubidArchRestController {
             return ResponseEntity.status(500).body("Error al subir archivo: " + e.getMessage());
         }
     }
+    
+    @PostMapping("/eliminar")
+    public ResponseEntity<String> eliminarArchivo(@RequestParam String nombreArchivo) {
+        try {
+            if (nombreArchivo == null || nombreArchivo.isEmpty()) {
+                return ResponseEntity.badRequest().body("Nombre no válido");
+            }
+
+            // Detectar carpeta según extensión
+            String folder;
+            if (nombreArchivo.matches(".*\\.(jpg|jpeg|png|mp4)$")) {
+                folder = MULTIMEDIA;
+            } else {
+                folder = DOCUMENTOS;
+            }
+
+            File archivo = new File(folder + nombreArchivo);
+
+            if (archivo.exists()) {
+                if (archivo.delete()) {
+                    return ResponseEntity.ok("Archivo eliminado");
+                } else {
+                    return ResponseEntity.status(500).body("No se pudo eliminar el archivo");
+                }
+            } else {
+                return ResponseEntity.badRequest().body("El archivo no existe");
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
 
 }

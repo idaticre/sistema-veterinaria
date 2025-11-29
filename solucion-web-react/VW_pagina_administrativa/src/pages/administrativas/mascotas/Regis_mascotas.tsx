@@ -192,6 +192,31 @@ function Regis_mascotas() {
         setResultados(filtrados);
     };
 
+    const eliminarFoto = async () => {
+        const nombreArchivo = mascotaSelecc?.foto?.split("/").pop();
+        if (!nombreArchivo) return;
+
+        try {
+            const formData = new FormData();
+            formData.append("nombreArchivo", nombreArchivo);
+
+            await IST.post("/archivos/eliminar", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            console.log("Imagen eliminada correctamente");
+
+            setImagenMascota(null);
+            setFotoFile(null);
+            setFoto("");
+
+            alert("Imagen eliminada ✔");
+        } catch (error) {
+            console.error("Error eliminando archivo:", error);
+            alert("Error eliminando la imagen ❌");
+        }
+    };
+
     return (
         <>
             <div id="regis_mascotas">
@@ -293,8 +318,16 @@ function Regis_mascotas() {
                                                             "🐕"
                                                             )}
                                                         </div>
+                                                        {imagenMascota && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={eliminarFoto}
+                                                                className="remove-photo-btn"
+                                                            >
+                                                                Quitar imagen ❌
+                                                            </button>
+                                                        )}
                                                     </div>
-
                                                 </section>
 
                                                 <div className="form-group">
