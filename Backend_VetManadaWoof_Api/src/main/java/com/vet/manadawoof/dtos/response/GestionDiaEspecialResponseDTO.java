@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-/**
- * Respuesta completa para gestionar_dia_especial
- */
+
 @Data
 @Builder
 @AllArgsConstructor

@@ -882,11 +882,16 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDIwNzkwNywiZXhwIjoxNzY0Mjk0MzA3fQ.Qgky_UdUYeRRzMaszX-aab1AQScAkyabm-OGYAOlErA",
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "/*{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Juan Pérez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"21121122\",\r\n  \"correo\": \"juan.perez@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 1,\r\n  \"fechaIngreso\": \"2025-10-17\",\r\n  \"foto\": \"foto_juan.png\",\r\n  \"activo\": true\r\n}\r\n*/\r\n\r\n{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Alberto Sanchez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"23434354\",\r\n  \"correo\": \"alberto@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 2,\r\n  \"fechaIngreso\": \"2025-11-22\",\r\n  \"foto\": \"foto_alberto.png\"\r\n}\r\n\r\n",
+									"raw": "{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Juan Pérez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"21121122\",\r\n  \"correo\": \"juan.perez@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 1,\r\n  \"fechaIngreso\": \"2025-10-17\",\r\n  \"foto\": \"foto_juan.png\",\r\n  \"activo\": true\r\n}\r\n/*\r\n{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Alberto Sanchez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"23434354\",\r\n  \"correo\": \"alberto@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 2,\r\n  \"fechaIngreso\": \"2025-11-22\",\r\n  \"foto\": \"foto_alberto.png\"\r\n}\r\n*/\r\n\r\n\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2521,7 +2526,7 @@
 					"name": "Consultas",
 					"item": [
 						{
-							"name": "Canales_Comunicacion",
+							"name": "Agenda",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2544,7 +2549,7 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:8088/api/canales-comunicacion",
+									"raw": "http://localhost:8088/api/agenda",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -2552,7 +2557,47 @@
 									"port": "8088",
 									"path": [
 										"api",
-										"canales-comunicacion"
+										"agenda"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Servicios de una Agenda",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/ingresos-servicios/agenda/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"ingresos-servicios",
+										"agenda",
+										"1"
 									]
 								}
 							},
@@ -2591,6 +2636,122 @@
 									"path": [
 										"api",
 										"estados-agenda"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Abono de una Cita",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/pagos-agenda/agenda/10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"pagos-agenda",
+										"agenda",
+										"10"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Canales_Comunicacion",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/canales-comunicacion",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"canales-comunicacion"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Recordatorios Agenda",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/recordatorios-agenda",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"recordatorios-agenda"
 									]
 								}
 							},
@@ -2749,6 +2910,634 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Creaciones",
+					"item": [
+						{
+							"name": "Crear Cita",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idCliente\": 1,\r\n  \"idMascota\": 1,\r\n  \"fecha\": \"2025-12-02\",\r\n  \"hora\": \"11:00:00\",\r\n  \"idEstado\": 1,\r\n  \"idMedioSolicitud\": 1,\r\n  \"duracionEstimadaMin\": null,\r\n  \"abonoInicial\": 0,\r\n  \"observaciones\": \"Primera consulta\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/agenda/crear",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"agenda",
+										"crear"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Servicios de una cita",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idServicio\": 5,\r\n  \"idVeterinario\": 1,\r\n  \"cantidad\": 1,\r\n  \"duracionMin\": 30,\r\n  \"valorServicio\": 180,\r\n  \"observaciones\": \"Baño y corte\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/ingresos-servicios/crear",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"ingresos-servicios",
+										"crear"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Abono de Cita",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idMedioPago\": 1,\r\n  \"idUsuario\": 2,\r\n  \"monto\": 180,\r\n  \"observaciones\": \"Pago con transferencia\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/pagos-agenda/crear",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"pagos-agenda",
+										"crear"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Actualizaciones",
+					"item": [
+						{
+							"name": "Actualizar Cita",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"id\": 1,\r\n  \"idCliente\": 1,\r\n  \"idMascota\": 1,\r\n  \"fecha\": \"2025-12-02\",\r\n  \"hora\": \"14:30:00\",\r\n  \"idEstado\": 2,\r\n  \"observaciones\": \"Cambio de horario\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/agenda/actualizar",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"agenda",
+										"actualizar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar servicios de una cita",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idIngreso\": 15,\r\n  \"idAgenda\": 10,\r\n  \"cantidad\": 2,\r\n  \"valorServicio\": 360000,\r\n  \"observaciones\": \"Se agregaron uñas\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/ingresos-servicios/actualizar",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"ingresos-servicios",
+										"actualizar"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Eliminaciones",
+					"item": [
+						{
+							"name": "Eliminar servicios de una cita",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/ingresos-servicios/eliminar/1/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"ingresos-servicios",
+										"eliminar",
+										"1",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Eliminar Abono de una Cita",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idMedioPago\": 1,\r\n  \"idUsuario\": 2,\r\n  \"monto\": 180,\r\n  \"observaciones\": \"Pago con transferencia\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/pagos-agenda/eliminar/1/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"pagos-agenda",
+										"eliminar",
+										"1",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Historia Clinica",
+			"item": [
+				{
+					"name": "Consultas",
+					"item": [
+						{
+							"name": "Cosultar historial por mascota",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica/historial-mascota/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica",
+										"historial-mascota",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Estados Historia Clinica",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/estados-historia-clinica",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"estados-historia-clinica"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Consultar por id de atencion",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica/registro-atencion/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica",
+										"registro-atencion",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tipos de Archivo Clinico",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/tipos-archivo-clinico",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"tipos-archivo-clinico"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Creaciones",
+					"item": [
+						{
+							"name": "Crear Historia clinica",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idMascota\": 1,\r\n  \"observacionesGenerales\": \"Mascota rescatada\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica/crear",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica",
+										"crear"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Guardar cita en h clinica",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idHistoriaClinica\": 1,\r\n  \"idAgenda\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"fechaAtencion\": \"2025-12-02\",\r\n  \"horaInicio\": \"11:00:00\",\r\n  \"horaFin\": \"11:45:00\",\r\n  \"motivoConsulta\": \"Vacunación\",\r\n  \"pesoKg\": 9.2,\r\n  \"temperaturaC\": 38.8,\r\n  \"diagnostico\": \"Sano\",\r\n  \"tratamiento\": \"Vacuna aplicada\",\r\n  \"observaciones\": \"Todo bien\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica/registrar-atencion",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica",
+										"registrar-atencion"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar una cita en h clinica",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idRegistro\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"horaFin\": \"12:00:00\",\r\n  \"pesoKg\": 9.3,\r\n  \"idEstado\": 2,\r\n  \"observaciones\": \"Paciente muy colaborador\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica/actualizar-atencion",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica",
+										"actualizar-atencion"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Subir un archivo de mascota",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idRegistroAtencion\": 2,\r\n  \"idTipoArchivo\": 1,\r\n  \"nombreArchivo\": \"certificado_2025.pdf\",\r\n  \"extensionArchivo\": \"pdf\",\r\n  \"descripcion\": \"Certificado vacunación\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica/subir-archivo",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica",
+										"subir-archivo"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Eliminaciones",
+					"item": [
+						{
+							"name": "Eliminar un archivo de mascota",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica/eliminar-archivo/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica",
+										"eliminar-archivo",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -2769,7 +3558,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"caja_milo\",\r\n    \"password\": \"caja123\"\r\n}",
+					"raw": "{\r\n    \"username\": \"admin_woof\",\r\n    \"password\": \"admin123\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

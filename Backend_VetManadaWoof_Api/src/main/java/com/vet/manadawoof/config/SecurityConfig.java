@@ -1,7 +1,6 @@
 
 package com.vet.manadawoof.config;
 
-import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,6 +16,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -47,9 +48,9 @@ public class SecurityConfig {
                         // Endpoints públicos
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-
+                        
                         // Endpoints que requieren roles específicos
-
+                        
                         //Permisos de solo Admin
                         .requestMatchers("/api/asignaciones/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/colaboradores/**").hasAuthority("ADMINISTRADOR GENERAL")
@@ -58,28 +59,28 @@ public class SecurityConfig {
                         .requestMatchers("/api/entidades/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/estado-asistencia/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/horarios-trabajo/**").hasAuthority("ADMINISTRADOR GENERAL")
-
+                        
                         //Permisos del Auxiliar Caja
-
-                        .requestMatchers(HttpMethod.POST,"/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA","ADMINISTRADOR GENERAL")
-                        .requestMatchers(HttpMethod.POST,"/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR CAJA")
+                        
+                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA", "ADMINISTRADOR GENERAL")
+                        .requestMatchers(HttpMethod.POST, "/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
                         // (pendiente por hacer)
-                        .requestMatchers("/api/clientes/listar_solo_con_nombreymascota").hasAnyAuthority("AUXILIAR CAJA","ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/clientes/listar_solo_con_nombreymascota").hasAnyAuthority("AUXILIAR CAJA", "ADMINISTRADOR GENERAL")
                         // Permisos del Auxiliar Gromers
-
+                        
                         .requestMatchers("/api/public/**").permitAll()
                         
                         // Endpoints que requieren roles específicos
                         .requestMatchers("/api/por_definir/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO")
                         .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
-
-                        .requestMatchers(HttpMethod.POST,"/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA", "AUXILIAR GROMERS")
-                        .requestMatchers(HttpMethod.GET,"/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
+                        
+                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA", "AUXILIAR GROMERS")
+                        .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
                         .requestMatchers("/api/estados-agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
                         .requestMatchers("/api/estados-mascota/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
                         //.requestMatchers(HttpMethod.GET,"/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
-
+                        
                         // Permisos que todavia no han sido definido quienes seran los responsables
                         .requestMatchers("/api/canales-comunicacion/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/especialidades/**").hasAuthority("ADMINISTRADOR GENERAL")
@@ -104,16 +105,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/vacunas-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/vacunas/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/veterinarios/**").hasAuthority("ADMINISTRADOR GENERAL")
-
-
+                        
+                        
                         .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA")
                         .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
                         .requestMatchers("/api/colaboradores/**").hasAnyAuthority("ADMINISTRADOR GENERAL")
                         
                         
-
                         // Todos los demás endpoints requieren autenticación
-
+                        
                         .anyRequest().authenticated()
                 );
         
@@ -130,7 +130,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
-
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -146,4 +146,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-

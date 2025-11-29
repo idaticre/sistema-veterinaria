@@ -5,7 +5,8 @@ import com.vet.manadawoof.dtos.response.ApiResponse;
 import com.vet.manadawoof.dtos.response.UsuarioRolResponseDTO;
 import com.vet.manadawoof.service.UsuarioRolService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,15 +15,10 @@ import java.util.List;
 @RequestMapping("/api/usuarios-roles")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
-// Controlador REST que gestiona la relación entre usuarios y roles.
 public class UsuarioRolRestController {
     
     private final UsuarioRolService service;
     
-    /**
-     * Asigna un rol a un usuario usando la acción 'ASIGNAR' del SP.
-     * Devuelve HTTP 201 si se crea exitosamente.
-     */
     @PostMapping("/asignar")
     public ResponseEntity<ApiResponse<UsuarioRolResponseDTO>> asignar(@RequestBody UsuarioRolRequestDTO dto) {
         dto.setAccion("ASIGNAR"); UsuarioRolResponseDTO response = service.ejecutarAccion(dto);

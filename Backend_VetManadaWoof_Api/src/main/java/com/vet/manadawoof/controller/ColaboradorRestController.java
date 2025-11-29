@@ -5,7 +5,8 @@ import com.vet.manadawoof.dtos.response.ApiResponse;
 import com.vet.manadawoof.dtos.response.ColaboradorResponseDTO;
 import com.vet.manadawoof.service.ColaboradorService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +29,7 @@ public class ColaboradorRestController {
         if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
             return ResponseEntity.ok(new ApiResponse<>(false, response.getMensaje(), null));
         }
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(true, response.getMensaje(), response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response.getMensaje(), response));
     }
     
     
@@ -41,8 +41,7 @@ public class ColaboradorRestController {
         
         if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
             return ResponseEntity.ok(new ApiResponse<>(false, response.getMensaje(), null));
-        }
-        return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+        } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
     }
     
     /**
@@ -62,10 +61,8 @@ public class ColaboradorRestController {
         ColaboradorResponseDTO colaborador = service.obtenerPorId(id);
         
         if(colaborador == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(false, "Colaborador no encontrado", null));
-        }
-        return ResponseEntity.ok(new ApiResponse<>(true, "Colaborador encontrado", colaborador));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, "Colaborador no encontrado", null));
+        } return ResponseEntity.ok(new ApiResponse<>(true, "Colaborador encontrado", colaborador));
     }
     
     /**
@@ -77,13 +74,10 @@ public class ColaboradorRestController {
             ColaboradorResponseDTO response = service.eliminar(id);
             
             if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ApiResponse<>(false, response.getMensaje(), null));
-            }
-            return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, response.getMensaje(), null));
+            } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
         }
     }
 }

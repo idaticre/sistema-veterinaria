@@ -5,7 +5,8 @@ import com.vet.manadawoof.dtos.response.ApiResponse;
 import com.vet.manadawoof.dtos.response.ClienteResponseDTO;
 import com.vet.manadawoof.service.ClienteService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

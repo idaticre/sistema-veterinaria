@@ -1,16 +1,14 @@
 package com.vet.manadawoof.dtos.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
-/**
- * DTO que representa un registro de asistencia de un colaborador.
- * <p>
- * Este DTO sirve para DOS propósitos:
- * 1. Respuesta de registrar() - incluye success, mensaje, tardanza
- * 2. Respuesta de verAsistenciaPorRango() - incluye colaborador, horario, estado
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

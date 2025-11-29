@@ -14,36 +14,37 @@ import java.util.List;
 @RequestMapping("/api/tipo-persona-juridica")
 @RequiredArgsConstructor
 public class TipoPersonaJuridicaRestController {
-
+    
     private final TipoPersonaJuridicaService service;
-
+    
     @PostMapping
     public ResponseEntity<TipoPersonaJuridicaEntity> crear(@RequestBody TipoPersonaJuridicaEntity request) {
         TipoPersonaJuridicaEntity creado = service.crearTipoPersonaJuridica(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
-
+    
     @PutMapping("/{id}")
     public ResponseEntity<TipoPersonaJuridicaEntity> actualizar(
             @PathVariable Integer id,
-            @RequestBody TipoPersonaJuridicaEntity request) {
+            @RequestBody TipoPersonaJuridicaEntity request
+    ) {
         TipoPersonaJuridicaEntity actualizado = service.actualizarTipoPersonaJuridica(id, request);
         return ResponseEntity.ok(actualizado);
     }
-
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         service.eliminarTipoPersonaJuridica(id);
         return ResponseEntity.ok("Tipo persona jurídica eliminado correctamente");
     }
-
+    
     @GetMapping
     public ResponseEntity<List<TipoPersonaJuridicaEntity>> listar() {
         List<TipoPersonaJuridicaEntity> lista = service.listarTiposPersonaJuridica();
-        if (lista.isEmpty()) return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        if(lista.isEmpty()) return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         return ResponseEntity.ok(lista);
     }
-
+    
     @GetMapping("/{id}")
     public ResponseEntity<TipoPersonaJuridicaEntity> obtener(@PathVariable Integer id) {
         TipoPersonaJuridicaEntity tipo = service.obtenerTipoPersonaJuridicaPorId(id);

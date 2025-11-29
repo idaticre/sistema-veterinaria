@@ -9,10 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Implementación del servicio para la gestión de tipos de recordatorio.
- * Permite crear, actualizar, eliminar y listar los tipos registrados.
- */
+
 @Service
 @RequiredArgsConstructor
 public class TipoRecordatorioServiceImpl implements TipoRecordatorioService {

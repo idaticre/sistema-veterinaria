@@ -5,7 +5,8 @@ import com.vet.manadawoof.dtos.response.ApiResponse;
 import com.vet.manadawoof.dtos.response.ProveedorResponseDTO;
 import com.vet.manadawoof.service.ProveedorService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,26 +15,17 @@ import java.util.List;
 @RequestMapping("/api/proveedores")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
-// Controlador REST que expone los endpoints para la gestión de proveedores.
-// Maneja operaciones CRUD básicas e interactúa con el servicio correspondiente.
 public class ProveedorRestController {
     
-    // Inyección del servicio de proveedores mediante constructor (gracias a @RequiredArgsConstructor)
     private final ProveedorService service;
     
-    /**
-     * Endpoint para registrar un nuevo proveedor.
-     * Valida si la respuesta del servicio contiene un error y devuelve el estado HTTP apropiado.
-     */
     @PostMapping("/registrar")
     public ResponseEntity<ApiResponse<ProveedorResponseDTO>> registrar(@RequestBody ProveedorRequestDTO dto) {
         ProveedorResponseDTO response = service.registrar(dto);
         if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(false, response.getMensaje(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, response.getMensaje(), null));
         }
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(true, response.getMensaje(), response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response.getMensaje(), response));
     }
     
     /**
@@ -44,10 +36,8 @@ public class ProveedorRestController {
     public ResponseEntity<ApiResponse<ProveedorResponseDTO>> actualizar(@RequestBody ProveedorRequestDTO dto) {
         ProveedorResponseDTO response = service.actualizar(dto);
         if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(false, response.getMensaje(), null));
-        }
-        return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, response.getMensaje(), null));
+        } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
     }
     
     /**
@@ -66,10 +56,8 @@ public class ProveedorRestController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ProveedorResponseDTO>> obtenerPorId(@PathVariable Long id) {
-        ProveedorResponseDTO proveedor = service.obtenerPorId(id);
-        if(proveedor == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(false, "Proveedor no encontrado", null));
+        ProveedorResponseDTO proveedor = service.obtenerPorId(id); if(proveedor == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, "Proveedor no encontrado", null));
         return ResponseEntity.ok(new ApiResponse<>(true, "Proveedor encontrado", proveedor));
     }
     
@@ -82,13 +70,10 @@ public class ProveedorRestController {
         try {
             ProveedorResponseDTO response = service.eliminar(id);
             if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ApiResponse<>(false, response.getMensaje(), null));
-            }
-            return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, response.getMensaje(), null));
+            } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
         }
     }
 }

@@ -11,7 +11,6 @@ CREATE DATABASE vet_manada_woof;
 USE vet_manada_woof;
 -- ========================================
 -- BLOQUE 01: Administracion
--- gestiona la información de entidades, colaboradores, entre otros
 -- ========================================
 
 -- ========================================

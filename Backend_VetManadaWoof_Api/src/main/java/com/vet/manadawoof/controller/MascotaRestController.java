@@ -4,26 +4,23 @@ import com.vet.manadawoof.dtos.request.MascotaRequestDTO;
 import com.vet.manadawoof.dtos.response.ApiResponse;
 import com.vet.manadawoof.dtos.response.MascotaResponseDTO;
 import com.vet.manadawoof.service.MascotaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
-
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5173") // Permitir llamadas desde frontend
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
-@RequestMapping("/api/mascotas") // Ruta base de la API de mascotas
+@RequestMapping("/api/mascotas")
 @RequiredArgsConstructor
 public class MascotaRestController {
     
-    // Inyección de servicio de negocio de mascotas
     private final MascotaService mascotaService;
     
-    // Listar todas las mascotas registradas
-    // GET /api/mascotas
+    
     @GetMapping
     public ResponseEntity<ApiResponse<List<MascotaResponseDTO>>> listar() {
         List<MascotaResponseDTO> lista = mascotaService.listarMascotas(); // Obtener lista de mascotas
@@ -31,13 +28,12 @@ public class MascotaRestController {
                 .body(new ApiResponse<>(true, "Lista de mascotas obtenida correctamente", lista));
     }
     
-    // Obtener una mascota específica por su ID
-    // GET /api/mascotas/{id}
+    
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<MascotaResponseDTO>> obtenerPorId(@PathVariable("id") Long id) {
         MascotaResponseDTO mascota;
         try {
-            // Buscar en la lista filtrando por ID
+            
             mascota = mascotaService.listarMascotas()
                     .stream()
                     .filter(m -> m.getId().equals(id))

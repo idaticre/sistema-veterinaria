@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// Controlador que gestiona los tamaños de las mascotas (pequeño, mediano, grande, etc.)
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/tamanos")
@@ -22,35 +21,30 @@ public class TamanoMascRestController {
     @PostMapping
     // Crea un nuevo tamaño de mascota y devuelve el registro creado
     public ResponseEntity<TamanoMascEntity> crear(@RequestBody TamanoMascEntity entity) {
-        TamanoMascEntity creado = service.crear(entity);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+        TamanoMascEntity creado = service.crear(entity); return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
     
     @PutMapping
     // Actualiza la información de un tamaño existente
     public ResponseEntity<TamanoMascEntity> actualizar(@RequestBody TamanoMascEntity entity) {
-        TamanoMascEntity actualizado = service.actualizar(entity);
-        return ResponseEntity.ok(actualizado);
+        TamanoMascEntity actualizado = service.actualizar(entity); return ResponseEntity.ok(actualizado);
     }
     
     @DeleteMapping("/{id}")
     // Elimina un tamaño según su identificador
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        String mensaje = service.eliminar(id);
-        return ResponseEntity.ok(mensaje);
+        String mensaje = service.eliminar(id); return ResponseEntity.ok(mensaje);
     }
     
     @GetMapping
     // Devuelve una lista con todos los tamaños registrados
     public ResponseEntity<List<TamanoMascEntity>> listar() {
-        List<TamanoMascEntity> list = service.listar();
-        return ResponseEntity.ok(list);
+        List<TamanoMascEntity> list = service.listar(); return ResponseEntity.ok(list);
     }
     
     @GetMapping("/{id}")
     // Obtiene un tamaño específico por su ID
     public ResponseEntity<TamanoMascEntity> obtener(@PathVariable Integer id) {
-        TamanoMascEntity entity = service.obtenerPorId(id);
-        return ResponseEntity.ok(entity);
+        TamanoMascEntity entity = service.obtenerPorId(id); return ResponseEntity.ok(entity);
     }
 }

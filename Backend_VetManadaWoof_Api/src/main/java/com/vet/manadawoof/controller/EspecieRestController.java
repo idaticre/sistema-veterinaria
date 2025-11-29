@@ -1,6 +1,5 @@
 package com.vet.manadawoof.controller;
 
-import com.vet.manadawoof.entity.EspecialidadEntity;
 import com.vet.manadawoof.entity.EspecieEntity;
 import com.vet.manadawoof.service.EspecieService;
 import lombok.RequiredArgsConstructor;
@@ -20,31 +19,26 @@ public class EspecieRestController {
     
     @PostMapping
     public ResponseEntity<EspecieEntity> crear(@RequestBody EspecieEntity entity) {
-        EspecieEntity creado = service.crear(entity);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+        EspecieEntity creado = service.crear(entity); return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
     
     @PutMapping
     public ResponseEntity<EspecieEntity> actualizar(@RequestBody EspecieEntity entity) {
-        EspecieEntity actualizado = service.actualizar(entity);
-        return ResponseEntity.ok(actualizado);
+        EspecieEntity actualizado = service.actualizar(entity); return ResponseEntity.ok(actualizado);
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        String mensaje = service.eliminar(id);
-        return ResponseEntity.ok(mensaje);
+        String mensaje = service.eliminar(id); return ResponseEntity.ok(mensaje);
     }
     
     @GetMapping
     public ResponseEntity<List<EspecieEntity>> listar() {
-        List<EspecieEntity> list = service.listar();
-        return ResponseEntity.ok(list);
+        List<EspecieEntity> list = service.listar(); return ResponseEntity.ok(list);
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<EspecieEntity> obtener(@PathVariable Integer id) {
-        EspecieEntity entity = service.obtenerPorId(id);
-        return ResponseEntity.ok(entity);
+        EspecieEntity entity = service.obtenerPorId(id); return ResponseEntity.ok(entity);
     }
 }

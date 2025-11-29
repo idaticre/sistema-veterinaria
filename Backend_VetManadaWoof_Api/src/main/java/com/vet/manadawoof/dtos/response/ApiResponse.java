@@ -1,6 +1,8 @@
 package com.vet.manadawoof.dtos.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 // DTO genérico de respuesta para cualquier operación
 @Data

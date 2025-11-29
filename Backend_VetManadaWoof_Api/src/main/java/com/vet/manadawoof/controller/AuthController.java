@@ -1,9 +1,10 @@
 
 package com.vet.manadawoof.controller;
 
-import com.vet.manadawoof.dtos.response.JwtResponseDTO;
 import com.vet.manadawoof.dtos.request.LoginRequestDTO;
+import com.vet.manadawoof.dtos.response.JwtResponseDTO;
 import com.vet.manadawoof.service.JwtService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,8 +13,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,4 +68,3 @@ public class AuthController {
         return ResponseEntity.status(401).body("Token inválido");
     }
 }
-

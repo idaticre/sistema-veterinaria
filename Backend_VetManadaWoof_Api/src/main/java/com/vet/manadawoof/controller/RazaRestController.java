@@ -2,7 +2,7 @@ package com.vet.manadawoof.controller;
 
 import com.vet.manadawoof.entity.RazaEntity;
 import com.vet.manadawoof.service.RazaService;
-import lombok.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173")
-// Controlador que expone los endpoints para la gestión de razas de mascotas
 @RestController
 @RequestMapping("/api/razas")
 @RequiredArgsConstructor

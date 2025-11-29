@@ -1,8 +1,10 @@
 package com.vet.manadawoof.dtos.request;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-// DTO para recibir solicitudes de asignación/actualización/eliminación
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -10,6 +12,6 @@ import lombok.*;
 public class UsuarioRolRequestDTO {
     
     private String accion;       // 'ASIGNAR', 'ELIMINAR' o 'ACTUALIZAR'
-    private Integer idUsuario;   // ID del usuario
-    private Integer idRol;       // ID del rol
+    private Integer idUsuario;
+    private Integer idRol;
 }

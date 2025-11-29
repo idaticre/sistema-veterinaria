@@ -14,38 +14,39 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
 public class UsuarioRestController {
-
+    
     private final UsuarioService service;
-
+    
     @PostMapping
     public ResponseEntity<UsuarioEntity> crear(@RequestBody UsuarioEntity request) {
         UsuarioEntity creado = service.crearUsuario(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
-
+    
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioEntity> actualizar(
             @PathVariable Integer id,
-            @RequestBody UsuarioEntity request) {
+            @RequestBody UsuarioEntity request
+    ) {
         UsuarioEntity actualizado = service.actualizarUsuario(id, request);
         return ResponseEntity.ok(actualizado);
     }
-
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         service.eliminarUsuario(id);
         return ResponseEntity.ok("UsuarioEntity eliminado correctamente");
     }
-
+    
     @GetMapping
     public ResponseEntity<List<UsuarioEntity>> listar() {
         List<UsuarioEntity> lista = service.listarUsuarios();
-        if (lista.isEmpty()) {
+        if(lista.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
         return ResponseEntity.ok(lista);
     }
-
+    
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioEntity> obtener(@PathVariable Integer id) {
         UsuarioEntity usuario = service.obtenerUsuarioPorId(id);

@@ -1,11 +1,12 @@
 package com.vet.manadawoof.dtos.request;
 
 import com.vet.manadawoof.enums.TipoMarca;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * DTO para registrar o actualizar la asistencia de un colaborador.
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

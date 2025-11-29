@@ -15,11 +15,7 @@ import java.io.Serializable;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "recordatorios_agenda", indexes = {
-        @Index(name = "idx_recordatorio_agenda", columnList = "id_agenda"),
-        @Index(name = "idx_recordatorio_fecha", columnList = "fecha_recordatorio"),
-        @Index(name = "idx_recordatorio_enviado", columnList = "enviado")
-})
+@Table(name = "recordatorios_agenda")
 public class RecordatorioAgendaEntity implements Serializable {
     
     private static final long serialVersionUID = 1L;

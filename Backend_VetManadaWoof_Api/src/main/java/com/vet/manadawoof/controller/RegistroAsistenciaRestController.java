@@ -22,9 +22,6 @@ public class RegistroAsistenciaRestController {
     
     private final RegistroAsistenciaService service;
     
-    /**
-     * Registrar marca de asistencia (entrada, lunch, salida...)
-     */
     @PostMapping("/registrar")
     public ResponseEntity<ApiResponseWithMetadata<RegistroAsistenciaResponseDTO>> registrarAsistencia(
             @Valid @RequestBody RegistrarAsistenciaRequestDTO request
@@ -69,10 +66,7 @@ public class RegistroAsistenciaRestController {
         }
     }
     
-    /**
-     * Reporte completo de asistencias por rango de fechas
-     * Ahora soporta filtro opcional por colaborador
-     */
+    
     @PostMapping("/rango")
     public ResponseEntity<ApiResponseWithMetadata<List<RegistroAsistenciaResponseDTO>>> verAsistenciaPorRango(
             @Valid @RequestBody FiltroAsistenciaRequestDTO filtro
