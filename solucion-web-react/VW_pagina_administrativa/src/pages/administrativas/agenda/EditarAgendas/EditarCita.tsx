@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./EditarCita.css";
+import IST from "../../../../components/proteccion/IST";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
@@ -35,19 +36,34 @@ function EditarCita() {
   const [busqueda, setBusqueda] = useState("");
   const [filtroFecha, setFiltroFecha] = useState("");
 
+  // AGREGADO: Estados para clientes, mascotas y colaboradores
+  const [clientes, setClientes] = useState<any[]>([]);
+  const [mascotas, setMascotas] = useState<any[]>([]);
+  const [colaboradores, setColaboradores] = useState<any[]>([]);
+
   const [nuevoEvento, setNuevoEvento] = useState({
     summary: "",
     description: "",
+    dni: "", // AGREGADO
     cliente: "",
+    clienteId: 0, // AGREGADO
     mascota: "",
     servicio: "",
     veterinario: "",
+    colaborador: "", // AGREGADO
     date: "",
     startTime: "10:00",
     endTime: "11:00",
     duracion: "",
     estado: "",
   });
+
+  // ================== AGREGADO: CARGAR CLIENTES / COLABORADORES / MASCOTAS ==================
+  useEffect(() => {
+    IST.get("/clientes").then((r) => setClientes(r.data.data.filter((c: any) => c.activo)));
+    IST.get("/colaboradores").then((r) => setColaboradores(r.data.data.filter((c: any) => c.activo)));
+    IST.get("/mascotas").then((res) => setMascotas(res.data.data)).catch(() => setMascotas([]));
+  }, []);
 
   // ================== CARGA GAPI Y GIS ==================
   useEffect(() => {
@@ -82,12 +98,10 @@ function EditarCita() {
             "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
           callback: (tokenResponse: any) => {
             if (tokenResponse.access_token) {
-              // ⭐ AGREGADO: cuando recibimos el token, lo seteamos en gapi...
               window.gapi.client.setToken({
                 access_token: tokenResponse.access_token,
               });
 
-              // ⭐ AGREGADO: guardamos token en localStorage para persistir sesión entre componentes y recargas
               try {
                 localStorage.setItem("google_token", tokenResponse.access_token);
               } catch (err) {
@@ -107,7 +121,6 @@ function EditarCita() {
     cargarGis();
   }, []);
 
-  // ⭐ AGREGADO: Restaurar sesión automáticamente si hay token en localStorage
   useEffect(() => {
     if (!gapiInited || !gisInited) return;
 
@@ -121,11 +134,9 @@ function EditarCita() {
     })();
 
     if (savedToken) {
-      // asignamos token a gapi para que las llamadas funcionen sin pedir login de nuevo
       window.gapi.client.setToken({ access_token: savedToken });
       setIsSignedIn(true);
       setStatus("🔓 Sesión restaurada automáticamente");
-      // cargarEventos se disparará por el useEffect en isSignedIn true
     }
   }, [gapiInited, gisInited]);
 
@@ -137,7 +148,6 @@ function EditarCita() {
   }, [gapiInited, gisInited]);
 
   // ================== SESIÓN ==================
-  // ⭐ Cambiado para usar prompt vacío y permitir renovación silenciosa cuando sea posible
   const iniciarSesion = () => tokenClient?.requestAccessToken({ prompt: "consent" });
 
   const cerrarSesion = () => {
@@ -147,7 +157,6 @@ function EditarCita() {
       window.gapi.client.setToken(null);
     }
 
-    // ⭐ AGREGADO: borrar token de localStorage para que no se restaure automáticamente
     try {
       localStorage.removeItem("google_token");
     } catch (err) {
@@ -181,7 +190,6 @@ function EditarCita() {
       });
 
       const eventosObtenidos = (res.result.items || []).filter((evento: Evento) => {
-        // Filtrar eventos de cumpleaños o sin descripción estructurada
         const tieneDescripcionEstructurada = evento.description?.includes("Cliente:") || 
                                             evento.description?.includes("Mascota:");
         return tieneDescripcionEstructurada;
@@ -205,12 +213,30 @@ function EditarCita() {
     let filtrados = eventos;
 
     if (busqueda) {
-      const busquedaLower = busqueda.toLowerCase();
-      filtrados = filtrados.filter(
-        (e) =>
-          e.summary?.toLowerCase().includes(busquedaLower) ||
-          e.description?.toLowerCase().includes(busquedaLower)
-      );
+      const busquedaStr = busqueda.trim();
+      filtrados = filtrados.filter((e) => {
+        // Buscar en el título (summary)
+        const enTitulo = e.summary?.includes(busquedaStr) || 
+                        e.summary?.toLowerCase().includes(busquedaStr.toLowerCase());
+        
+        // Buscar en la descripción completa
+        const enDescripcion = e.description?.includes(busquedaStr) || 
+                             e.description?.toLowerCase().includes(busquedaStr.toLowerCase());
+        
+        // AGREGADO: Buscar por DNI del cliente aunque no esté en la descripción
+        const detalles = e.description?.split("\n").reduce((acc: any, linea) => {
+          const [clave, valor] = linea.split(":");
+          if (clave && valor) acc[clave.trim()] = valor.trim();
+          return acc;
+        }, {});
+        
+        const clienteNombre = detalles?.Cliente;
+        const clienteEncontrado = clientes.find(c => c.nombre === clienteNombre);
+        const dniCliente = clienteEncontrado?.documento || "";
+        const enDNI = dniCliente.includes(busquedaStr);
+        
+        return enTitulo || enDescripcion || enDNI;
+      });
     }
 
     if (filtroFecha) {
@@ -223,12 +249,17 @@ function EditarCita() {
     }
 
     setEventosFiltrados(filtrados);
-  }, [busqueda, filtroFecha, eventos]);
+  }, [busqueda, filtroFecha, eventos, clientes]);
 
   // ================== GUARDAR EVENTO ==================
   const guardarEvento = async () => {
     if (!nuevoEvento.cliente || !nuevoEvento.mascota || !nuevoEvento.date)
       return alert("Completa los campos obligatorios (*)");
+    
+    // Validar que haya DNI
+    if (!nuevoEvento.dni) {
+      return alert("⚠️ El DNI es obligatorio. Por favor ingresa el DNI del cliente.");
+    }
 
     const start = new Date(`${nuevoEvento.date}T${nuevoEvento.startTime}`);
     const duracionMin = parseInt(nuevoEvento.duracion || "30", 10);
@@ -239,19 +270,22 @@ function EditarCita() {
     if (end <= start)
       return alert("⚠️ La hora de fin debe ser posterior a la de inicio.");
 
+    // MODIFICADO: Incluir DNI y colaborador en la descripción (sin espacios extra)
     const evento = {
       summary: `${nuevoEvento.servicio} - ${nuevoEvento.mascota} 🐾`,
-      description: `
-      Cliente: ${nuevoEvento.cliente}
-      Mascota: ${nuevoEvento.mascota}
-      Servicio: ${nuevoEvento.servicio}
-      Veterinario: ${nuevoEvento.veterinario}
-      Estado: ${nuevoEvento.estado}
-      Observaciones: ${nuevoEvento.description || "Ninguna"}
-      `,
+      description: `DNI: ${nuevoEvento.dni}
+Cliente: ${nuevoEvento.cliente}
+Mascota: ${nuevoEvento.mascota}
+Servicio: ${nuevoEvento.servicio}
+Colaborador: ${nuevoEvento.colaborador || nuevoEvento.veterinario}
+Estado: ${nuevoEvento.estado}
+Observaciones: ${nuevoEvento.description || "Ninguna"}`,
       start: { dateTime: start.toISOString(), timeZone: "America/Lima" },
       end: { dateTime: end.toISOString(), timeZone: "America/Lima" },
     };
+
+    console.log("📝 Guardando evento con DNI:", nuevoEvento.dni);
+    console.log("📄 Descripción completa:", evento.description);
 
     try {
       if (editandoEvento) {
@@ -290,13 +324,26 @@ function EditarCita() {
         return acc;
       }, {}) || {};
 
+    // AGREGADO: Buscar cliente por nombre para obtener DNI y clienteId
+    const clienteEncontrado = clientes.find(c => c.nombre === detalles["Cliente"]);
+    
+    // Si no encontramos el cliente por nombre, intentar por DNI de la descripción
+    const clientePorDNI = !clienteEncontrado && detalles["DNI"] 
+      ? clientes.find(c => c.documento === detalles["DNI"])
+      : null;
+
+    const clienteFinal = clienteEncontrado || clientePorDNI;
+
     setNuevoEvento({
       summary: e.summary || "",
       description: detalles["Observaciones"] || "",
-      cliente: detalles["Cliente"] || "",
+      dni: detalles["DNI"] || clienteFinal?.documento || "", // AGREGADO
+      cliente: detalles["Cliente"] || clienteFinal?.nombre || "",
+      clienteId: clienteFinal?.id || 0, // AGREGADO
       mascota: detalles["Mascota"] || "",
       servicio: detalles["Servicio"] || "",
-      veterinario: detalles["Veterinario"] || "",
+      veterinario: detalles["Veterinario"] || detalles["Colaborador"] || "",
+      colaborador: detalles["Colaborador"] || detalles["Veterinario"] || "", // AGREGADO
       date: inicio.toISOString().split("T")[0],
       startTime: inicio.toTimeString().slice(0, 5),
       endTime: fin.toTimeString().slice(0, 5),
@@ -343,7 +390,7 @@ function EditarCita() {
                 <div className="filtro-busqueda">
                   <input
                     type="text"
-                    placeholder="🔍 Buscar por cliente, mascota o servicio..."
+                    placeholder="🔍 Buscar por DNI, cliente, mascota o servicio..."
                     value={busqueda}
                     onChange={(e) => setBusqueda(e.target.value)}
                   />
@@ -395,6 +442,11 @@ function EditarCita() {
                         return acc;
                       }, {});
 
+                    // AGREGADO: Buscar DNI del cliente si no está en la descripción
+                    const clienteNombre = detalles?.Cliente;
+                    const clienteEncontrado = clientes.find(c => c.nombre === clienteNombre);
+                    const dniMostrar = detalles?.DNI || clienteEncontrado?.documento || "N/A";
+
                     const fechaInicio = new Date(e.start.dateTime);
                     const fechaFin = new Date(e.end.dateTime);
 
@@ -409,6 +461,9 @@ function EditarCita() {
 
                         <div className="cita-info">
                           <p>
+                            <strong>📄 DNI:</strong> {dniMostrar}
+                          </p>
+                          <p>
                             <strong>👤 Cliente:</strong> {detalles?.Cliente || "N/A"}
                           </p>
                           <p>
@@ -418,8 +473,8 @@ function EditarCita() {
                             <strong>💉 Servicio:</strong> {detalles?.Servicio || "N/A"}
                           </p>
                           <p>
-                            <strong>👨‍⚕️ Veterinario:</strong>{" "}
-                            {detalles?.Veterinario || "N/A"}
+                            <strong>👨‍⚕️ Colaborador:</strong>{" "}
+                            {detalles?.Colaborador || detalles?.Veterinario || "N/A"}
                           </p>
                           <p>
                             <strong>📅 Fecha:</strong>{" "}
@@ -470,27 +525,63 @@ function EditarCita() {
             <h3>{editandoEvento ? "✏️ Editar cita" : "➕ Nueva cita"}</h3>
 
             <div className="form-grid">
+              {/* AGREGADO: Campo DNI con autocompletado */}
+              <div className="form-group">
+                <label>DNI *</label>
+                <input
+                  type="text"
+                  value={nuevoEvento.dni}
+                  onChange={(e) => {
+                    const dni = e.target.value;
+                    setNuevoEvento({ ...nuevoEvento, dni });
+                    const encontrado = clientes.find((c) => c.documento === dni);
+                    if (encontrado) {
+                      setNuevoEvento((p) => ({ 
+                        ...p, 
+                        cliente: encontrado.nombre, 
+                        clienteId: encontrado.id, 
+                        mascota: "" 
+                      }));
+                    } else {
+                      setNuevoEvento((p) => ({ 
+                        ...p, 
+                        cliente: "", 
+                        clienteId: 0, 
+                        mascota: "" 
+                      }));
+                    }
+                  }}
+                />
+              </div>
+
               <div className="form-group">
                 <label>Cliente (Dueño) *</label>
                 <input
                   type="text"
                   value={nuevoEvento.cliente}
-                  onChange={(e) =>
-                    setNuevoEvento({ ...nuevoEvento, cliente: e.target.value })
-                  }
+                  disabled
+                  style={{ background: "#f0f0f0" }}
                 />
               </div>
 
+              {/* MODIFICADO: Select de mascotas filtrado por clienteId */}
               <div className="form-group">
                 <label>Mascota *</label>
-                <input
-                  type="text"
+                <select
                   value={nuevoEvento.mascota}
                   onChange={(e) =>
                     setNuevoEvento({ ...nuevoEvento, mascota: e.target.value })
                   }
-                  disabled={!nuevoEvento.cliente.trim()}
-                />
+                  disabled={!nuevoEvento.clienteId}
+                >
+                  <option value="">Seleccione mascota...</option>
+                  {mascotas
+                    .filter(m => m.idCliente === nuevoEvento.clienteId)
+                    .map((m) => (
+                      <option key={m.id} value={m.nombre}>{m.nombre}</option>
+                    ))
+                  }
+                </select>
               </div>
 
               <div className="form-group">
@@ -510,16 +601,25 @@ function EditarCita() {
                 </select>
               </div>
 
+              {/* AGREGADO: Select de colaboradores */}
               <div className="form-group">
-                <label>Veterinario</label>
-                <input
-                  type="text"
-                  value={nuevoEvento.veterinario}
+                <label>Colaborador *</label>
+                <select
+                  value={nuevoEvento.colaborador || nuevoEvento.veterinario}
                   onChange={(e) =>
-                    setNuevoEvento({ ...nuevoEvento, veterinario: e.target.value })
+                    setNuevoEvento({ 
+                      ...nuevoEvento, 
+                      colaborador: e.target.value,
+                      veterinario: e.target.value 
+                    })
                   }
-                  disabled={!nuevoEvento.mascota.trim()}
-                />
+                  disabled={!nuevoEvento.servicio}
+                >
+                  <option value="">Seleccione colaborador...</option>
+                  {colaboradores.map((c) => (
+                    <option key={c.id} value={c.nombre}>{c.nombre}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
