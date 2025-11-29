@@ -177,13 +177,13 @@ select {
   border-radius: 6px;
 }
 
-.acciones-de-registro {
+.acciones-de-registro-GM {
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
 }
 
-.acciones-de-registro button {
+.acciones-de-registro-GM button {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   border: none;
@@ -191,12 +191,12 @@ select {
   font-weight: bold;
 }
 
-.acciones-de-registro button:first-child {
+.acciones-de-registro-GM button:first-child {
   background-color: #4caf50;
   color: white;
 }
 
-.acciones-de-registro button:last-child {
+.acciones-de-registro-GM button:last-child {
   background-color: #f44336;
   color: white;
 }

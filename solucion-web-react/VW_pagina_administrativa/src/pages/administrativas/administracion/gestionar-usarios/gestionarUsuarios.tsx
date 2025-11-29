@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
-import type { UsuarioRequest, UsuarioResponse, ColaboradorResponse, ColaboradorRequest } from "../../../../components/interfaces/interfaces";
-import axios from 'axios';
+import type { UsuarioRequest, UsuarioResponse } from "../../../../components/interfaces/interfaces";
+import IST from '../../../../components/proteccion/IST';
 
 const gestionarUsuarios: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);
@@ -12,7 +12,6 @@ const gestionarUsuarios: React.FC = () => {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [edicion, setEdicion] = useState<UsuarioRequest | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
-    const baseURL = "http://localhost:8088/api";
 
     // Efecto de cerrar ventana
     useEffect(() => {
@@ -35,7 +34,7 @@ const gestionarUsuarios: React.FC = () => {
     useEffect(() => {listarUsuarios();}, []);
     const listarUsuarios = async () => {
         try {
-            const respuesta = await axios.get(`${baseURL}/usuarios`);
+            const respuesta = await IST.get(`/usuarios`);
             const lista = Array.isArray(respuesta.data)
             ? respuesta.data
             : respuesta.data.data;
@@ -47,16 +46,18 @@ const gestionarUsuarios: React.FC = () => {
         } catch (error) {console.error("Error al obtener los usuarios", error);}
     };
 
-    // Formulario nuevo y vacío
+    /* Formulario nuevo y vacío
     const abrirFormularioNuevo = () => {
         const nuevo: UsuarioRequest = {
             username: "",
             passwordHash: "",
-            activo: true
+            activo: true,
+            fechaCreacion: new Date().toISOString()
         }
         setEdicion(nuevo);
         setMostrarModal(true);
     };
+    */
 
     // Formulario para editar
     const abrirFormularioEditar = (usuario: UsuarioResponse) => {
@@ -64,7 +65,8 @@ const gestionarUsuarios: React.FC = () => {
             id: usuario.id,
             username: usuario.username,
             passwordHash: usuario.passwordHash,
-            activo: usuario.activo,      
+            activo: usuario.activo,
+            fechaCreacion: usuario.fechaCreacion
         }
         setEdicion(editado);
         setMostrarModal(true);
@@ -73,9 +75,12 @@ const gestionarUsuarios: React.FC = () => {
     // Guardar
     const guardarUsuario = async () => {
         if (!edicion) return;
+        if (!edicion.username.trim()) {alert("Ingrese un nombre de usuario"); return;}
+        if (!edicion.passwordHash.trim()) {alert("Ingrese una contraseña"); return;}
+
         try {
-            if (edicion.id && edicion.id > 0) {await axios.put(`${baseURL}/usuarios/${edicion.id}`, edicion);}
-            else {await axios.post(`${baseURL}/usuarios`, edicion);}
+            if (edicion.id && edicion.id > 0) {await IST.put(`/usuarios/${edicion.id}`, edicion);}
+            else {await IST.post(`/usuarios`, edicion);}
             listarUsuarios();
             setEdicion(null);
             setMostrarModal(false);
@@ -85,10 +90,10 @@ const gestionarUsuarios: React.FC = () => {
         }
     };
 
-    // Eliminar
+    /* Eliminar
     const eliminarUsuario = async (id: number) => {
         try {
-            await axios.delete(`${baseURL}/usuarios/${id}`);
+            await IST.delete(`/usuarios/${id}`);
             listarUsuarios();
             alert("Eliminación exitosa");
         } catch (error) {
@@ -96,6 +101,7 @@ const gestionarUsuarios: React.FC = () => {
             console.error("Error al eliminar: ", error);
         }
     }
+    */
 
     return (
         <div id="cuerpo-main">
@@ -105,23 +111,25 @@ const gestionarUsuarios: React.FC = () => {
                     <div className="encabezado"><h2>Lista de usuarios</h2></div>
                     <div className="goated">
                         <div className="barra-buscador"><input type="text" placeholder="Ingrese el nombre del usuario que desea buscar 🔍" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/></div>
-                        <button className="boton-goated anadir-a-goated animacion-goated" onClick={abrirFormularioNuevo}>Registrar usuario</button>
+                        {/*<button className="boton-goated anadir-a-goated animacion-goated" onClick={abrirFormularioNuevo}>Registrar usuario</button>*/}
                     </div>
                     <table className="GM-table">
                         <thead className="GM-thead">
                             <tr className="GM-tr">
                                 <th className="GM-th" style={{width:"150px"}}>Usuario</th>
-                                <th className="GM-th" style={{width:"20px"}}>Acciones</th>
+                                <th className="GM-th" style={{width:"150px"}}>Fecha de creación</th>
+                                {/*<th className="GM-th" style={{width:"20px"}}>Acciones</th>*/}
                             </tr>
                         </thead>
                         <tbody>
                             {filtrado.map((registro) => (
                                 <tr key={registro.id}>
                                     <td className="GM-td">{registro.username}</td>
-                                    <td className="GM-td">
+                                    <td className="GM-td">{registro.fechaCreacion}</td>
+                                    {/*<td className="GM-td">
                                         <button className="boton-verde" onClick={() => abrirFormularioEditar(registro)}>Editar</button>
                                         <button className="boton-rojo" onClick={() => eliminarUsuario(registro.id)}>Eliminar</button>
-                                    </td>
+                                    </td>*/}
                                 </tr>
                             ))}
                         </tbody>
@@ -137,7 +145,7 @@ const gestionarUsuarios: React.FC = () => {
                         <input type="password" placeholder="Ingrese una contraseña" value={edicion.passwordHash} onChange={(e) => setEdicion(prev => prev ? { ...prev, passwordHash: e.target.value } : null)}/>
                         <div className="acciones-de-registro">
                             <button className="boton-verde" onClick={guardarUsuario}>Guardar</button>
-                            <button style={{background:"#c82333"}} onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
+                            <button onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
                         </div>
                     </div>
                 </div>
@@ -146,7 +154,3 @@ const gestionarUsuarios: React.FC = () => {
     )
 }
 export default gestionarUsuarios;
-/*
-    1) Falta mostrar el colaborador asignado al usuario
-    2) Falta actualizar el colaborador asignado al usuario
-*/

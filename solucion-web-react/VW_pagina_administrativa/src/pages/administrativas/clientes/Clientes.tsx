@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import './clientes.css';
-import IST from '../../../components/proteccion_momentanea/IST';
+import IST from '../../../components/proteccion/IST';
 import { Link, useNavigate } from 'react-router-dom';
-import type { ClienteResponse } from '../../../components/interfaces/interfaces';
+import type { ClienteResponse, MascotaResponse } from '../../../components/interfaces/interfaces';
 
+type Mascotaextendido = MascotaResponse & { nombre_raza?: string; nombre_especie?: string;
+   nombre_estado?: string};
 
 function Lst_clientes() {
   const [minimizado, setMinimizado] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [filtrados, setFiltrados] = useState<ClienteResponse[]>([]);
+  const [mascota, setMascota] = useState<Mascotaextendido[]>([]);
   const [clientes, setClientes] = useState<ClienteResponse[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteResponse | null>(null);
   const navigate = useNavigate();
@@ -17,7 +20,7 @@ function Lst_clientes() {
   useEffect(() => {
     IST.get("/clientes")
       .then(res => {
-        console.log("clientes:", res.data);
+        console.log("clientes:", res.data);//quitar
         const lista = res.data.data;
 
         const activos = lista.filter((cliente: ClienteResponse) =>cliente.activo === true);
@@ -35,6 +38,47 @@ function Lst_clientes() {
         }
       });
   }, []);
+
+  useEffect(() => {
+    IST
+      .get<{ data: MascotaResponse[] }>("/mascotas")
+      .then(async (res) => {
+        const lista = res.data.data;
+
+        const mascotasConExtras = await Promise.all(
+          lista.map(async (m: MascotaResponse) => {
+            try {
+              const [razaRes, especieRes, estadoRes] = await Promise.all([
+                IST.get(`/razas/${m.idRaza}`),
+                IST.get(`/especies/${m.idEspecie}`),
+                IST.get(`/estado-mascota/${m.idEstado}`)
+              ]);
+
+              return {
+                ...m,
+                nombre_raza: razaRes.data.nombre,
+                nombre_especie: especieRes.data.nombre,
+                nombre_estado: estadoRes.data.nombre,
+              };
+            } catch (error) {
+              console.error("Error al obtener datos", error);
+              return {
+                ...m,
+                nombre_raza: "Desconocido",
+                nombre_especie: "Desconocido",
+                nombre_estado: "Desconocido",
+              };
+            }
+          })
+        );
+
+        setMascota(mascotasConExtras);
+      })
+      .catch((err) => console.error("Error en la carga de mascotas", err));
+  }, []);
+
+
+  const mascotaDueño = clienteSeleccionado? mascota.filter(masc => masc.idCliente == clienteSeleccionado.id): [];
 
   const handleDelete = (id?: number) => {
     if (id === undefined) return; 
@@ -116,7 +160,7 @@ function Lst_clientes() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>  
+                  </table>
                 </div>
             </section>
             {clienteSeleccionado && (
@@ -155,12 +199,27 @@ function Lst_clientes() {
                         <td>{clienteSeleccionado.direccion}</td>
                       </tr>
                     </table>
-                    <div className='VDCliente_foto'>
-                      <img src="/kayn.jpg" alt="" />
+                    <div className='VDCliente_mis_mascotas'>
+                      {mascotaDueño.length === 0 ? (
+                        <p>NO HAY MASCOTAS A SU NOMBRE</p>
+                      ):(
+                        mascotaDueño.map((masc) => (
+                          <div className='masc_dueño'>
+                              <div className='masc_dueño_img'>
+                                <img src={masc.foto} alt="" />
+                              </div>
+                              <div className='masc_dueño_dataS masc_superior'>
+                                <p>{masc.nombre}</p>
+                                <span>{masc.nombre_estado}</span>
+                              </div>
+                              <div className='masc_dueño_dataS masc_inferior'>
+                                <p>Especie: {masc.nombre_especie}</p>
+                                <span>Raza: {masc.nombre_raza}</span>
+                              </div>
+                          </div>
+                        ))
+                      )}
                     </div>
-                  </div>
-                  <div className='VDCliente_mis_mascotas'>
-                    <p>Diseño Pendiente</p>
                   </div>
                 </div>
               </div>

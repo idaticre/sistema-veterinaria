@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import "./Admin_index.css"
-import type { ClienteResponse } from "../../../components/interfaces/interfaces";
-import IST from "../../../components/proteccion_momentanea/IST";
+import type { ClienteResponse, MascotaResponse } from "../../../components/interfaces/interfaces";
+import IST from "../../../components/proteccion/IST";
 
 function Admin_index() {
     const [minimizado, setMinimizado] = useState(false);
     const [clientes, setClientes] = useState<ClienteResponse[]>([]);
+    const [mascota, setMascota] = useState<MascotaResponse[]>([]);
     const COLORS = ['#f79f4eff', '#b34d16ff', '#9b7200ff']; 
 
     const data = [
@@ -32,19 +33,27 @@ function Admin_index() {
     ];
 
     useEffect(() => {
-        IST.get("/clientes")
-        .then(res => {
-            console.log("clientes:", res.data);
-            const lista = res.data.data;
+        const cargarDatos = async () => {
+            try {
+                const clientesRes = await IST.get("/clientes");
+                const mascotasRes = await IST.get("/mascotas");
 
-            const activos = lista.filter((cliente: ClienteResponse) =>cliente.activo === true);
+                // Procesar clientes
+                const listaClientes = clientesRes.data.data;
+                const activos = listaClientes.filter((c: ClienteResponse) => c.activo === true);
+                setClientes(activos);
 
-            setClientes(activos);
-        })
-        .catch(err => {
-            console.error("Error en la carga de datos", err);
-        });
+                // Procesar mascotas
+                setMascota(mascotasRes.data.data);
+
+            } catch (err) {
+                console.error("Error al cargar datos:", err);
+            }
+        };
+
+        cargarDatos();
     }, []);
+
 
     return (
         <>
@@ -70,7 +79,7 @@ function Admin_index() {
                             <div id="conteo_mascotas">
                                 <div>
                                     <strong>Mascotas</strong>
-                                    <p>16</p>
+                                    <p>{mascota.length}</p>
                                 </div>
                                 <img src="/8334302.png" alt="" />
                             </div>

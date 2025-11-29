@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa';
 import './regis_mascotas.css';
 import type { Razas, Especie, MascotaRequest, ClienteResponse, Estado_Mascota, Tamaño_Mascota, Etapa_Mascota, MascotaResponse } from '../../../components/interfaces/interfaces';
-import IST from '../../../components/proteccion_momentanea/IST';
+import IST from '../../../components/proteccion/IST';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+type Mascotaextendido = MascotaResponse & { nombre_dueño?: string;};
 
 function Regis_mascotas() {
     const [minimizado, setMinimizado] = useState(false);
@@ -33,13 +35,13 @@ function Regis_mascotas() {
     const [factorDea, setFactorDea] = useState(false);
     const [agresividad, setAgresividad] = useState(false);
     const [foto, setFoto] = useState("");
+    const [fotoFile, setFotoFile] = useState<File | null>(null);
 
     const [busqueda, setBusqueda] = useState(""); 
     const [resultados, setResultados] = useState<ClienteResponse[]>([]);
-    const [duenoSeleccionado, setDuenoSeleccionado] = useState<ClienteResponse | null>(null);
 
     const location = useLocation();
-    const mascotaSelecc = location.state?.mascotaSeleccionado as MascotaResponse | undefined;
+    const mascotaSelecc = location.state?.mascotaSeleccionado as Mascotaextendido | undefined;
 
     const navigate = useNavigate();
 
@@ -88,83 +90,92 @@ function Regis_mascotas() {
             setFactorDea(mascotaSelecc.factorDea || false);
             setAgresividad(mascotaSelecc.agresividad || false);
             setFoto(mascotaSelecc.foto || "");
+            setImagenMascota(mascotaSelecc.foto || null);
         }
     }, [mascotaSelecc]);
 
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        try {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("nombreMascota", nombre || "mascota");
+        // Guardamos el archivo para subirlo después
+        setFotoFile(file);
 
-            const res = await IST.post("/archivos/subir", formData, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
-
-            const urlBackend = res.data; // URL generada por Spring
-            setFoto(urlBackend);
-
-            // preview
-            const reader = new FileReader();
-            reader.onloadend = () => setImagenMascota(reader.result as string);
-            reader.readAsDataURL(file);
-
-        } catch (err) {
-            console.error("Error al subir imagen:", err);
-            alert("No se pudo subir la imagen ❌");
-        }
+        // Vista previa
+        const reader = new FileReader();
+        reader.onloadend = () => setImagenMascota(reader.result as string);
+        reader.readAsDataURL(file);
     };
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const nuevaMascota: MascotaRequest = {
-        nombre,
-        sexo,
-        idCliente,
-        idRaza,
-        idEspecie,
-        idEstado,
-        fechaNacimiento,
-        pelaje,
-        idTamano,
-        idEtapa,
-        esterilizado,
-        alergias,
-        peso,
-        chip,
-        pedigree,
-        factorDea,
-        agresividad,
-        foto,
-        };
+        try {
+            let fotoURL = foto;
 
-        if(mascotaSelecc){
-            IST.put(`/mascotas/actualizar/${mascotaSelecc.id}`, nuevaMascota)
-            .then(res => {
-            console.log("cliente actualizado:", res.data);
-            alert("Mascota actualizada correctamente ✅");
-            navigate("/administracion/mascotas/lista"); 
-            })
-            .catch(err => {
-            console.error("Error al actualizar mascota", err);
-            alert("Error al actualizar mascota ❌");
-            });
-        }else{
-            IST.post("/mascotas/crear", nuevaMascota)
-            .then(res => {
-                console.log("Respuesta del servidor:", res.data);
-                alert("Mascota registrada correctamente ✅");
-                navigate("/administracion/mascotas/lista"); 
-            })
-            .catch(err => {
-                console.error("Error al registrar mascota:", err);
-                alert("Error al registrar mascota ❌");
-            });
-        }
+            // Si se seleccionó una imagen, la subimos
+            if (fotoFile) {
+                const formData = new FormData();
+                formData.append("file", fotoFile);
+                
+                const nombreArchivoExistente = mascotaSelecc?.foto?.split("/").pop();
+                if (nombreArchivoExistente) {
+                    formData.append("nombreExistente", nombreArchivoExistente);
+                } else {
+                    formData.append("nombreMascota", nombre || "mascota");
+                }
+
+                const res = await IST.post("/archivos/subir", formData);
+                fotoURL = res.data;
+            }
+
+            const nuevaMascota: MascotaRequest = {
+            nombre,
+            sexo,
+            idCliente,
+            idRaza,
+            idEspecie,
+            idEstado,
+            fechaNacimiento,
+            pelaje,
+            idTamano,
+            idEtapa,
+            esterilizado,
+            alergias,
+            peso,
+            chip,
+            pedigree,
+            factorDea,
+            agresividad,
+            foto: fotoURL,
+            };
+
+            if(mascotaSelecc){
+                IST.put(`/mascotas/actualizar/${mascotaSelecc.id}`, nuevaMascota)
+                .then(res => {
+                    console.log("cliente actualizado:", res.data);
+                    alert("Mascota actualizada correctamente ✅");
+                    navigate("/administracion/mascotas/lista"); 
+                })
+                .catch(err => {
+                    console.error("Error al actualizar mascota", err);
+                    alert("Error al actualizar mascota ❌");
+                });
+            }else{
+                IST.post("/mascotas/crear", nuevaMascota)
+                .then(res => {
+                    console.log("Respuesta del servidor:", res.data);
+                    alert("Mascota registrada correctamente ✅");
+                    navigate("/administracion/mascotas/lista"); 
+                })
+            }
+
+        }catch(err) {
+            console.error("Error al registrar mascota:", err);
+            alert("Error al registrar mascota ❌");
+        };
+        
     };
 
     const handleBusqueda = (valor: string) => {
@@ -179,6 +190,31 @@ function Regis_mascotas() {
         );
         console.log("Coincidencias encontradas:", filtrados);
         setResultados(filtrados);
+    };
+
+    const eliminarFoto = async () => {
+        const nombreArchivo = mascotaSelecc?.foto?.split("/").pop();
+        if (!nombreArchivo) return;
+
+        try {
+            const formData = new FormData();
+            formData.append("nombreArchivo", nombreArchivo);
+
+            await IST.post("/archivos/eliminar", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            console.log("Imagen eliminada correctamente");
+
+            setImagenMascota(null);
+            setFotoFile(null);
+            setFoto("");
+
+            alert("Imagen eliminada ✔");
+        } catch (error) {
+            console.error("Error eliminando archivo:", error);
+            alert("Error eliminando la imagen ❌");
+        }
     };
 
     return (
@@ -282,8 +318,16 @@ function Regis_mascotas() {
                                                             "🐕"
                                                             )}
                                                         </div>
+                                                        {imagenMascota && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={eliminarFoto}
+                                                                className="remove-photo-btn"
+                                                            >
+                                                                Quitar imagen ❌
+                                                            </button>
+                                                        )}
                                                     </div>
-
                                                 </section>
 
                                                 <div className="form-group">
@@ -363,16 +407,12 @@ function Regis_mascotas() {
                                                     <input type="checkbox" id="agresividad" name="agresividad" checked={agresividad} onChange={(e) => setAgresividad(e.target.checked)}/>
                                                 </div>
                                             </div>
-
-                                            
-
                                             <div className="owner-info">
                                                 <h4>Dueño</h4>
-
                                                 <div className="owner-search">
                                                     <input
                                                     type="text"
-                                                    placeholder="Buscar cliente por nombre"
+                                                    placeholder= {mascotaSelecc? mascotaSelecc.nombre_dueño : "Buscar cliente por nombre"}
                                                     value={busqueda}
                                                     onChange={(e) => handleBusqueda(e.target.value)}
                                                     />
@@ -386,7 +426,6 @@ function Regis_mascotas() {
                                                         <li
                                                             key={cliente.id}
                                                             onClick={() => {
-                                                            setDuenoSeleccionado(cliente);
                                                             setBusqueda(cliente.nombre);
                                                             setIdCliente(cliente.id);
                                                             setResultados([]);
@@ -396,15 +435,6 @@ function Regis_mascotas() {
                                                         </li>
                                                         ))}
                                                     </ul>
-                                                )}
-
-                                                {duenoSeleccionado && (
-                                                    <div className="owner-details" style={{ marginTop: "10px" }}>
-                                                    <div><strong>Nombre:</strong> {duenoSeleccionado.nombre}</div>
-                                                    <div><strong>DNI:</strong> {duenoSeleccionado.documento}</div>
-                                                    <div><strong>Teléfono:</strong> {duenoSeleccionado.telefono}</div>
-                                                    <div><strong>Email:</strong> {duenoSeleccionado.correo}</div>
-                                                    </div>
                                                 )}
                                             </div>
                                                     

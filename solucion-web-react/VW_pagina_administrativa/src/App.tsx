@@ -36,9 +36,9 @@ import Parametros_y_promociones from './pages/administrativas/administracion/par
 import AsignarRolesPermisos from './pages/administrativas/administracion/Asignar-Gestionar-Roles/AsignarRolesPermisos';
 
 import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
-import RutaProtegida from './components/proteccion_momentanea/IPRT';
-import RutaProtegidaPorRol from './components/proteccion_momentanea/IPRR';
-import IPRR from './components/proteccion_momentanea/IPRR';
+import RutaProtegida from './components/proteccion/IPRT';
+import RutaProtegidaPorRol from './components/proteccion/IPRR';
+import IPRR from './components/proteccion/IPRR';
 import Inventario from './pages/distribucion/Inventario';
 
 function App() {

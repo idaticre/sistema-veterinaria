@@ -3,7 +3,7 @@ import Br_administrativa from '../../../components/barra_administrativa/Br_admin
 import { Link } from 'react-router-dom';
 import './lst_mascotas.css'
 import type { MascotaResponse } from '../../../components/interfaces/interfaces';
-import IST from '../../../components/proteccion_momentanea/IST';
+import IST from '../../../components/proteccion/IST';
 
 type Mascotaextendido = MascotaResponse & { nombre_dueño?: string; nombre_raza?: string; nombre_especie?: string;
    nombre_estado?: string; nombre_tamaño?: string; nombre_etapa?: string };
@@ -116,20 +116,25 @@ function Lst_mascotas() {
                 </div>
                 <section className='tabla_registosM'>
                   <div id='lista_mascotas'>
-                      {filtrados.map((mascota) =>(
-                        <div className={`registro_mascota ${mascotaSeleccionado?.id === mascota.id? "seleccionado":""}`} onClick={() => setMascotaSeleccionado(mascota)} key={mascota.id}>
-                          <div className='icono_mascota'>
-                            {mascota.nombre.charAt(0).toUpperCase()}
-                          </div>
-                          <div className='datosB_mascota'>
-                            <p>{mascota.nombre}</p>
-                            <p>Dueño: {mascota.nombre_dueño} <br /> {mascota.nombre_especie} | {mascota.nombre_raza} </p>
-                          </div>
-                          <div className='estado_mascota'>
-                            <p>{mascota.nombre_estado}</p>
-                          </div>
-                        </div>
-                      ))}
+                      {filtrados.length > 0? (
+                          filtrados.map((mascota) =>(
+                            <div className={`registro_mascota ${mascotaSeleccionado?.id === mascota.id? "seleccionado":""}`} onClick={() => setMascotaSeleccionado(mascota)} key={mascota.id}>
+                              <div className='icono_mascota'>
+                                {mascota.nombre.charAt(0).toUpperCase()}
+                              </div>
+                              <div className='datosB_mascota'>
+                                <p>{mascota.nombre}</p>
+                                <p>Dueño: {mascota.nombre_dueño} <br /> {mascota.nombre_especie} | {mascota.nombre_raza} </p>
+                              </div>
+                              <div className='estado_mascota'>
+                                <p>{mascota.nombre_estado}</p>
+                              </div>
+                            </div>
+                          ))
+                        ):(
+                          <p>❌ Mascota no encontrada </p>
+                        )
+                      }
                   </div>
                   <div className='Datos_mascotaR'>
                       <div className='registro_mascotaR'>
@@ -168,7 +173,7 @@ function Lst_mascotas() {
                                       <td colSpan={3}>{mascotaSeleccionado.nombre_tamaño}</td>
                                     </tr>
                                   </table>
-                                  <img src="/guardados/mascotas/canino1_1763079136619.png" alt="" />
+                                  <img src={mascotaSeleccionado.foto} alt="" />
                                 </section>
                                 <table>
                                   <tr>
@@ -179,7 +184,7 @@ function Lst_mascotas() {
                                 <table>
                                   <tr>
                                     <td>Pelaje: {mascotaSeleccionado.pelaje}</td>
-                                    <td>Alergias:{mascotaSeleccionado.alergias}</td>
+                                    <td>Alergias: {mascotaSeleccionado.alergias}</td>
                                     <td>estado: {mascotaSeleccionado.nombre_estado}</td>
                                   </tr>
                                 </table>

@@ -12,7 +12,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
     const [openMenu, setOpenMenu] = useState<MenuKey>(null);
     const [minimizado,setMinimizado] = useState(false)
 
-    const nombreUsuario = sessionStorage.getItem("username");
+    const nombreUsuario = sessionStorage.getItem("usuario");
 
     const rolesGuardados = sessionStorage.getItem("roles");
     const roles: string[] = rolesGuardados ? JSON.parse(rolesGuardados) : [];
@@ -105,7 +105,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <span>Inicio</span>
                                 </Link>
                             </li>
-                            {RolesPermitidos("ADMINISTRADOR GENERAL", "") && (
+                            {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "cliente"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("cliente")}
                                 >
@@ -116,11 +116,13 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                     <ul ref={clienteRef} className="submenu">
                                         <li><Link to="/administracion/cliente/lista" className="sub_opcion">Lista de clientes</Link></li>
-                                        <li><Link to="/administracion/cliente/registro" className="sub_opcion">Registrar cliente</Link></li>
+                                        {!RolesPermitidos("AUXILIAR GROOMERS") && (
+                                            <li><Link to="/administracion/cliente/registro" className="sub_opcion">Registrar cliente</Link></li>
+                                        )}
                                     </ul>
                                 </li>
                             )}
-                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
+                            {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "mascotas"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("mascotas")}
                                 >
@@ -131,9 +133,30 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                     <ul ref={mascotasRef} className="submenu">
                                         <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Mascotas registradas</Link></li>
-                                        <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Registrar mascota</Link></li>
-                                        <li><Link to="/administracion/mascotas/espcies_razas" className="sub_opcion">Especies y razas</Link></li>
-                                        <li><Link to="/administracion/mascotas/vacunas" className="sub_opcion">Vacunas disponibles</Link></li>
+                                        {!RolesPermitidos("AUXILIAR GROOMERS") && (
+                                            <>
+                                                <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Registrar mascota</Link></li>
+                                                <li><Link to="/administracion/mascotas/espcies_razas" className="sub_opcion">Especies y razas</Link></li>
+                                                <li><Link to="/administracion/mascotas/vacunas" className="sub_opcion">Vacunas disponibles</Link></li>
+                                            </>
+                                        )}
+                                    </ul>
+                                </li>
+                            )}
+                            {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS") && (
+                                <li className={`opcion opcion_desplegable ${openMenu === "agenda"?"toggle_submenu":""}`} 
+                                    onClick={() => toggleMenu("agenda")}
+                                >
+                                    <Link to="" className="enlace_opcion">
+                                        <i className="fa-solid fa-calendar-days"></i>
+                                        <span>Agenda</span>
+                                        <i className={`fa-solid ${openMenu === "agenda" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    </Link>
+                                    <ul ref={agendaRef} className="submenu">
+                                        <li><Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
+                                        {!RolesPermitidos("AUXILIAR GROOMERS") && (
+                                            <li><Link to="/administracion/agenda/EditarCita" className="sub_opcion">Editar cita</Link></li>
+                                        )}
                                     </ul>
                                 </li>
                             )}
@@ -153,21 +176,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                 </li>
                             )}
-                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
-                                <li className={`opcion opcion_desplegable ${openMenu === "agenda"?"toggle_submenu":""}`} 
-                                    onClick={() => toggleMenu("agenda")}
-                                >
-                                    <Link to="" className="enlace_opcion">
-                                        <i className="fa-solid fa-calendar-days"></i>
-                                        <span>Agenda</span>
-                                        <i className={`fa-solid ${openMenu === "agenda" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
-                                    </Link>
-                                    <ul ref={agendaRef} className="submenu">
-                                        <li><Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
-                                        <li><Link to="/administracion/agenda/EditarCita" className="sub_opcion">Editar cita</Link></li>
-                                    </ul>
-                                </li>
-                            )}
+                            {/*
                             {RolesPermitidos("ADMINISTRADOR GENERAL") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("distribucion")}
@@ -181,23 +190,29 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                         <li><Link to="/administracion/distribucion/inventario" className="sub_opcion">Inventario</Link></li>
                                         <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Ordenes de compra</Link></li>
                                         <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Proveedores</Link></li>
+                                                
                                     </ul>
                                 </li>
                             )}
+                            */}
+                            {/*
                             <li className={`opcion opcion_desplegable ${openMenu === "venta"?"toggle_submenu":""}`} 
-                                onClick={() => toggleMenu("venta")}
-                            >
+                                onClick={() => toggleMenu("venta")}>
                                 <Link to="" className="enlace_opcion">
                                     <i className="fa-solid fa-cart-shopping"></i>
                                     <span>Ventas</span>
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={ventaRef} className="submenu">
+                                    
                                     <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestion de ventas</Link></li>
                                     <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Facturación electronica</Link></li>
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Notas de credito</Link></li>
+                                    
                                 </ul>
                             </li>
+                            */}
+                            
                             <li className={`opcion opcion_desplegable ${openMenu === "informe"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("informe")}
                             >
@@ -207,48 +222,51 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={informRef} className="submenu">
-                                    <li><Link to="/administracion/reportes_e_informes/clientes" className="sub_opcion">Clientes</Link></li>
-                                    {/*
-                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Ventas</Link></li>
+                                    {/*<li><Link to="/administracion/mascotas/lista" className="sub_opcion">Ventas</Link></li>
                                     <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Financieros</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Inventarios</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Proveedores</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Caja general</Link></li>
-                                    */}
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Inventarios</Link></li>*/}
+                                    <li><Link to="/administracion/reportes_e_informes/clientes" className="sub_opcion">Clientes</Link></li>
+                                    {/*<li><Link to="/administracion/mascotas/especies" className="sub_opcion">Proveedores</Link></li>
+                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Caja general</Link></li>*/}
                                 </ul>
                             </li>
-                            <li className={`opcion opcion_desplegable ${openMenu === "administracion"?"toggle_submenu":""}`} 
-                                onClick={() => toggleMenu("administracion")}
-                            >
-                                <Link to="" className="enlace_opcion"> 
-                                    <i className="fa-solid fa-toolbox"></i>
-                                    <span>Administracion</span>
-                                    <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
-                                </Link>
-                                <ul ref={adminRef} className="submenu">
-                                    <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestión de colaboradores</Link></li>
-                                    <li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos a colaboradores</Link></li>
-                                    <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Horarios de colaboradores</Link></li>
-                                    <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
-                                    <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
-                                    <li><Link to="/administracion/administracion/dashboard_administrativo" className="sub_opcion">Dashboard Administrativo</Link></li>
-                                    
-                                </ul>
-                            </li>
-                            <li className={`opcion opcion_desplegable ${openMenu === "seguridad"?"toggle_submenu":""}`} 
-                                onClick={() => toggleMenu("seguridad")}
-                            >
-                                <Link to="" className="enlace_opcion"> 
-                                    <i className="fa-solid fa-shield-halved"></i>
-                                    <span>Seguridad y Mantenimiento</span>
-                                    <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
-                                </Link>
-                                <ul ref={seguridadRef   } className="submenu">
-                                    <li><Link to="/administracion/administracion/gestionar_usuarios" className="sub_opcion">Usuarios del sistema</Link></li>
-                                    <li><Link to="/administracion/administracion/Asignar_roles_y_permisos" className="sub_opcion">Asignar y gestionar roles</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Copia de seguridad</Link></li>
-                                </ul>
-                            </li>
+                            
+                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
+                                <li className={`opcion opcion_desplegable ${openMenu === "administracion"?"toggle_submenu":""}`} 
+                                    onClick={() => toggleMenu("administracion")}
+                                >
+                                    <Link to="" className="enlace_opcion"> 
+                                        <i className="fa-solid fa-toolbox"></i>
+                                        <span>Administracion</span>
+                                        <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    </Link>
+                                    <ul ref={adminRef} className="submenu">
+                                        <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestión de colaboradores</Link></li>
+                                        {/*<li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos a colaboradores</Link></li>*/}
+                                        <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Horarios de colaboradores</Link></li>
+                                        <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
+                                        <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
+                                        {<li><Link to="/administracion/administracion/dashboard_administrativo" className="sub_opcion">Dashboard de colaboradore</Link></li>}
+                                        
+                                    </ul>
+                                </li>
+                            )}
+                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
+                                <li className={`opcion opcion_desplegable ${openMenu === "seguridad"?"toggle_submenu":""}`} 
+                                    onClick={() => toggleMenu("seguridad")}
+                                >
+                                    <Link to="" className="enlace_opcion"> 
+                                        <i className="fa-solid fa-shield-halved"></i>
+                                        <span>Seguridad y Mantenimiento</span>
+                                        <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    </Link>
+                                    <ul ref={seguridadRef   } className="submenu">
+                                        <li><Link to="/administracion/administracion/gestionar_usuarios" className="sub_opcion">Usuarios del sistema</Link></li>
+                                        <li><Link to="/administracion/administracion/Asignar_roles_y_permisos" className="sub_opcion">Asignar y gestionar roles</Link></li>
+                                        {/*<li><Link to="/administracion/mascotas/especies" className="sub_opcion">Copia de seguridad</Link></li>*/}
+                                    </ul>
+                                </li>
+                            )}
                         </ul>
                     </div>
                     <div id="br_footer">
@@ -265,7 +283,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <img src="/baño.png" alt="" />
                             </div>
                             <div id="inf_user">
-                                <span className="nombre_user">{nombreUsuario }</span>
+                                <span className="nombre_user">{nombreUsuario}</span>
                                 <span className="mail_user">123456@gmail.com</span>
                             </div>
                             <div className="user_icon">
