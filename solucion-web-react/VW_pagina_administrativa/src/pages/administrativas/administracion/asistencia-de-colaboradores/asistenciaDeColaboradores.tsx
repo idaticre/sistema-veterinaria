@@ -26,6 +26,8 @@ interface RegistroAsistenciaBackend {
   horaSalida?: string;
   estadoAsistencia?: string;
   estadoFinal?: string;
+
+  descansoProgramado?: boolean; // 🔥 AGREGADO
 }
 
 export default function AsistenciaColaboradores() {
@@ -51,7 +53,6 @@ export default function AsistenciaColaboradores() {
         }));
         setColaboradores(normalized);
 
-        // 🔥 Restaurar colaborador con registro de hoy de localStorage
         const savedRegistroKey = Object.keys(localStorage).find((key) =>
           key.startsWith("registroHoy_")
         );
@@ -91,6 +92,7 @@ export default function AsistenciaColaboradores() {
       const res = await IST.post("/asistencias/rango", body);
       const lista: RegistroAsistenciaBackend[] = res.data?.data ?? [];
       const registro = lista.length > 0 ? lista[0] : null;
+
       setRegistroHoy(registro);
 
       if (registro) {
@@ -141,11 +143,15 @@ export default function AsistenciaColaboradores() {
       return;
     }
 
-    if (!puedeMarcarTipo(tipo)) {
-      alert("No puedes marcar este tipo ahora.");
+    // 🔥 Mostrar mensaje si es día de descanso
+    if (registroHoy?.descansoProgramado) {
+      alert("Hoy es un día de descanso programado. No se puede registrar asistencia.");
       return;
     }
 
+    
+
+   
     setLoadingAction(true);
 
     const body = {
@@ -169,15 +175,17 @@ export default function AsistenciaColaboradores() {
 
       alert(data.mensaje ?? "Marcación registrada.");
 
-      // 🔥 Actualizar registro en vivo y localStorage
+      // 🔥 Actualizar el registro en memoria y localStorage
       setRegistroHoy((prev) => {
         const base = prev ? { ...prev } : {};
+
         if (data.horaMarcacion) {
           if (tipo === "ENTRADA") base.horaEntrada = data.horaMarcacion;
           if (tipo === "LUNCH_IN") base.horaLunchInicio = data.horaMarcacion;
           if (tipo === "LUNCH_OUT") base.horaLunchFin = data.horaMarcacion;
           if (tipo === "SALIDA") base.horaSalida = data.horaMarcacion;
         }
+
         base.horaMarcacion = data.horaMarcacion;
         base.estadoAsistencia = data.estadoAsistencia ?? data.estadoFinal;
 
@@ -230,18 +238,42 @@ export default function AsistenciaColaboradores() {
             </div>
           )}
 
-          {/* PANEL DE MARCACIÓN */}
+          {/* PANEL */}
           {colaboradorSeleccionado && (
             <div className="panel-registro">
               <h3>👤 {colaboradorSeleccionado.nombre}</h3>
               <p><strong>Código:</strong> {colaboradorSeleccionado.codigoColaborador}</p>
 
               <div className="acciones-asistencia">
-                <button disabled={!puedeMarcarTipo("ENTRADA") || loadingAction} onClick={() => marcarAsistencia("ENTRADA")}>🕒 Entrada</button>
-                <button disabled={!puedeMarcarTipo("LUNCH_IN") || loadingAction} onClick={() => marcarAsistencia("LUNCH_IN")}>🍽️ Inicio Almuerzo</button>
-                <button disabled={!puedeMarcarTipo("LUNCH_OUT") || loadingAction} onClick={() => marcarAsistencia("LUNCH_OUT")}>🍴 Fin Almuerzo</button>
-                <button disabled={!puedeMarcarTipo("SALIDA") || loadingAction} onClick={() => marcarAsistencia("SALIDA")}>🏁 Salida Final</button>
-              </div>
+  <button
+    disabled={loadingAction}
+    onClick={() => marcarAsistencia("ENTRADA")}
+  >
+    🕒 Entrada
+  </button>
+
+  <button
+    disabled={loadingAction}
+    onClick={() => marcarAsistencia("LUNCH_IN")}
+  >
+    🍽️ Inicio Almuerzo
+  </button>
+
+  <button
+    disabled={loadingAction}
+    onClick={() => marcarAsistencia("LUNCH_OUT")}
+  >
+    🍴 Fin Almuerzo
+  </button>
+
+  <button
+    disabled={loadingAction}
+    onClick={() => marcarAsistencia("SALIDA")}
+  >
+    🏁 Salida Final
+  </button>
+</div>
+
 
               <h4>📅 Registro del día</h4>
               <div className="tabla-asistencia">
