@@ -19,7 +19,7 @@ public class HistoriaClinicaResponseDTO {
     private Long idMascota;
     private LocalDate fechaApertura;
     private String observacionesGenerales;
-    private Boolean activa;
+    private Boolean activo;
     private LocalDateTime fechaRegistro;
     
     // Mensaje de respuesta del SP

@@ -23,28 +23,41 @@ public class PagoAgendaRestController {
     public ResponseEntity<ApiResponse<PagoAgendaResponseDTO>> crear(@RequestBody PagoAgendaRequestDTO dto) {
         PagoAgendaResponseDTO response = service.crear(dto);
         
-        if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
+        if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR")) {
             return ResponseEntity.ok(new ApiResponse<>(false, response.getMensaje(), null));
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response.getMensaje(), response));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(true, response.getMensaje(), response));
     }
     
     @DeleteMapping("/eliminar/{idPago}/{idAgenda}")
-    public ResponseEntity<ApiResponse<PagoAgendaResponseDTO>> eliminar(@PathVariable Long idPago, @PathVariable Long idAgenda) {
-        try {
-            PagoAgendaResponseDTO response = service.eliminar(idPago, idAgenda);
-            
-            if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, response.getMensaje(), null));
-            } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
+    public ResponseEntity<ApiResponse<PagoAgendaResponseDTO>> eliminar(
+            @PathVariable Long idPago,
+            @PathVariable Long idAgenda
+    ) {
+        PagoAgendaResponseDTO response = service.eliminar(idPago, idAgenda);
+        
+        if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(false, response.getMensaje(), null));
         }
+        return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PagoAgendaResponseDTO>> obtenerPorId(@PathVariable Long id) {
+        PagoAgendaResponseDTO pago = service.obtenerPorId(id);
+        
+        if(pago == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(false, "Pago no encontrado", null));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Pago encontrado", pago));
     }
     
     @GetMapping("/agenda/{idAgenda}")
     public ResponseEntity<ApiResponse<List<PagoAgendaResponseDTO>>> listarPorAgenda(@PathVariable Long idAgenda) {
         List<PagoAgendaResponseDTO> pagos = service.listarPorAgenda(idAgenda);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Pagos obtenidos correctamente", pagos));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Pagos obtenidos", pagos));
     }
 }

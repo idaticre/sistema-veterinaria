@@ -14,11 +14,7 @@ import java.time.LocalDateTime;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "historia_clinica_archivos", indexes = {
-        @Index(name = "idx_archivo_registro", columnList = "id_registro_atencion"),
-        @Index(name = "idx_archivo_tipo", columnList = "id_tipo_archivo"),
-        @Index(name = "idx_archivo_codigo", columnList = "codigo", unique = true)
-})
+@Table(name = "historia_clinica_archivos")
 public class HistoriaClinicaArchivoEntity implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -31,12 +27,11 @@ public class HistoriaClinicaArchivoEntity implements Serializable {
     private String codigo;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_registro_atencion", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_archivo_registro"))
+    @JoinColumn(name = "id_registro_atencion", nullable = false)
     private HistoriaClinicaRegistroEntity registroAtencion;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_tipo_archivo", foreignKey = @ForeignKey(name = "fk_archivo_tipo"))
+    @JoinColumn(name = "id_tipo_archivo")
     private TipoArchivoClinicoEntity tipoArchivo;
     
     @Column(name = "nombre_archivo", length = 128, nullable = false)

@@ -1,41 +1,24 @@
 package com.vet.manadawoof.mapper;
 
 import com.vet.manadawoof.dtos.response.PagoAgendaResponseDTO;
+import com.vet.manadawoof.entity.AgendaPagoEntity;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
 
 @Component
 public class PagoAgendaMapper {
     
-    /**
-     * Mapea una fila de resultado SQL a PagoAgendaResponseDTO
-     * Usado en listarPorAgenda() y obtenerPorId()
-     */
-    public PagoAgendaResponseDTO toDto(Object[] row) {
+    public PagoAgendaResponseDTO toDto(AgendaPagoEntity entity) {
+        if(entity == null) return null;
+        
         return PagoAgendaResponseDTO.builder()
-                .id(((Number) row[0]).longValue())
-                .codigo((String) row[1])
-                .idAgenda(((Number) row[2]).longValue())
-                .idMedioPago(((Number) row[3]).intValue())
-                .idUsuario(row[4] != null ? ((Number) row[4]).intValue() : null)
-                .monto((BigDecimal) row[5])
-                .fechaPago(row[6] != null ? ((Timestamp) row[6]).toLocalDateTime() : null)
-                .observaciones((String) row[7])
+                .id(entity.getId())
+                .codigo(entity.getCodigo())
+                .idAgenda(entity.getAgenda() != null ? entity.getAgenda().getId() : null)
+                .idMedioPago(entity.getMedioPago() != null ? entity.getMedioPago().getId() : null)
+                .idUsuario(entity.getUsuario() != null ? entity.getUsuario().getId() : null)
+                .monto(entity.getMonto())
+                .fechaPago(entity.getFechaPago())
+                .observaciones(entity.getObservaciones())
                 .build();
-    }
-    
-    /**
-     * Mapea con totales calculados (para CREATE/DELETE)
-     */
-    public PagoAgendaResponseDTO toDto(Object[] row, BigDecimal totalAbonado,
-                                       BigDecimal saldoPendiente, String mensaje
-    ) {
-        PagoAgendaResponseDTO dto = toDto(row);
-        dto.setTotalAbonado(totalAbonado);
-        dto.setSaldoPendiente(saldoPendiente);
-        dto.setMensaje(mensaje);
-        return dto;
     }
 }

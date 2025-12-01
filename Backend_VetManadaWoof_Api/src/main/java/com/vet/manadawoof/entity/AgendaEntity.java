@@ -17,8 +17,7 @@ import java.util.List;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "agenda", indexes = {
-        @Index(name = "idx_agenda_cliente", columnList = "id_cliente"), @Index(name = "idx_agenda_mascota", columnList = "id_mascota"), @Index(name = "idx_agenda_estado", columnList = "id_estado"), @Index(name = "idx_agenda_cliente_fecha", columnList = "id_cliente, fecha"), @Index(name = "idx_agenda_fecha", columnList = "fecha")})
+@Table(name = "agenda")
 public class AgendaEntity implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -30,15 +29,15 @@ public class AgendaEntity implements Serializable {
     private String codigo;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_cliente", nullable = false, foreignKey = @ForeignKey(name = "fk_agenda_cliente"))
+    @JoinColumn(name = "id_cliente", nullable = false)
     private ClienteEntity cliente;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_mascota", nullable = false, foreignKey = @ForeignKey(name = "fk_agenda_mascota"))
+    @JoinColumn(name = "id_mascota", nullable = false)
     private MascotaEntity mascota;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_medio_solicitud", foreignKey = @ForeignKey(name = "fk_agenda_medio"))
+    @JoinColumn(name = "id_medio_solicitud")
     private MedioSolicitudEntity medioSolicitud;
     
     @Column(nullable = false)
@@ -58,7 +57,7 @@ public class AgendaEntity implements Serializable {
     private java.math.BigDecimal totalCita = java.math.BigDecimal.ZERO;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_estado", nullable = false, foreignKey = @ForeignKey(name = "fk_agenda_estado"))
+    @JoinColumn(name = "id_estado", nullable = false)
     private EstadoAgendaEntity estado;
     
     @Column(length = 256)

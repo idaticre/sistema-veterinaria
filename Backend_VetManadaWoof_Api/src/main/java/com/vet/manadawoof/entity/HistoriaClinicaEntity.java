@@ -2,6 +2,8 @@ package com.vet.manadawoof.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -15,8 +17,7 @@ import java.time.LocalDateTime;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "historia_clinica", indexes = {
-        @Index(name = "idx_historia_mascota", columnList = "id_mascota", unique = true), @Index(name = "idx_historia_codigo", columnList = "codigo", unique = true)})
+@Table(name = "historia_clinica")
 public class HistoriaClinicaEntity implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -28,7 +29,7 @@ public class HistoriaClinicaEntity implements Serializable {
     private String codigo;
     
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_mascota", nullable = false, unique = true, foreignKey = @ForeignKey(name = "fk_historia_mascota"))
+    @JoinColumn(name = "id_mascota", nullable = false, unique = true)
     private MascotaEntity mascota;
     
     @Column(name = "fecha_apertura", nullable = false)
@@ -37,8 +38,9 @@ public class HistoriaClinicaEntity implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String observacionesGenerales;
     
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 1")
-    private Boolean activa = true;
+    @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
+    @JdbcTypeCode(SqlTypes.BIT)
+    private Boolean activo;
     
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

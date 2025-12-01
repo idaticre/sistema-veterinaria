@@ -16,6 +16,8 @@ public interface IngresoServicioService {
     // Elimina un servicio
     IngresoServicioResponseDTO eliminar(Long idIngreso, Long idAgenda);
     
+    IngresoServicioResponseDTO obtenerPorId(Long id);
+    
     // Lista servicios de una cita
     List<IngresoServicioResponseDTO> listarPorAgenda(Long idAgenda);
 }

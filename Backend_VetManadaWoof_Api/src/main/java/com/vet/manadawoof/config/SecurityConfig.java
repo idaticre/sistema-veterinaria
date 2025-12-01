@@ -52,13 +52,27 @@ public class SecurityConfig {
                         // Endpoints que requieren roles específicos
                         
                         //Permisos de solo Admin
-                        .requestMatchers("/api/asignaciones/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/agenda/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/archivos/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/archivos-clinicos/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/asistencias/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/atenciones-medicas/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/asignaciones-horarios/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/atenciones-medicas/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/clientes/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/colaboradores/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/dias/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/empresas/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/entidades/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/estado-asistencia/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/horarios-trabajo/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/historia-clinica/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/horarios-base-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/ingresos-servicios/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/mascotas/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/medicamentos-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/pagos-agenda/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/proveedores/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/recordatorios-agenda/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/usuarios-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/vacunas-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/veterinarios/**").hasAuthority("ADMINISTRADOR GENERAL")
                         
                         //Permisos del Auxiliar Caja
                         

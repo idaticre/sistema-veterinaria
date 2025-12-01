@@ -13,8 +13,7 @@ import java.io.Serializable;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "ingresos_servicios", indexes = {
-        @Index(name = "idx_ingresos_servicios_servicio", columnList = "id_servicio"), @Index(name = "idx_ingresos_servicios_colab", columnList = "id_colaborador"), @Index(name = "idx_ingresos_servicios_vet", columnList = "id_veterinario"), @Index(name = "idx_ingresos_servicios_colab_fecha", columnList = "id_colaborador, fecha_registro")})
+@Table(name = "ingresos_servicios")
 public class IngresoServicioEntity implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -27,19 +26,19 @@ public class IngresoServicioEntity implements Serializable {
     private String codigo;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_agenda", nullable = false, foreignKey = @ForeignKey(name = "fk_ingreso_agenda"))
+    @JoinColumn(name = "id_agenda", nullable = false)
     private AgendaEntity agenda;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_servicio", nullable = false, foreignKey = @ForeignKey(name = "fk_ingreso_servicio"))
+    @JoinColumn(name = "id_servicio", nullable = false)
     private ServicioEntity servicio;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_colaborador", foreignKey = @ForeignKey(name = "fk_ingreso_colab"))
+    @JoinColumn(name = "id_colaborador")
     private ColaboradorEntity colaborador;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_veterinario", foreignKey = @ForeignKey(name = "fk_ingreso_vet"))
+    @JoinColumn(name = "id_veterinario")
     private VeterinarioEntity veterinario;
     
     @Column

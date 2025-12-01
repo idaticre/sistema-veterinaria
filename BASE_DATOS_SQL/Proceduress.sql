@@ -1,18 +1,11 @@
--- ================================================================
 -- SCRIPT: PROCEDIMIENTOS ALMACENADOS CRUD - SISTEMA VETERINARIA_WOOF
--- ================================================================
 USE vet_manada_woof;
-
--- BLOQUE 01 PROCEDIMIENTOS ALMACENADOS CRUD
-
 -- ========================================
--- SP: gestionar_rol_usuario
--- Asigna o elimina roles de usuarios.
--- Un usuario puede tener varios roles y un rol puede estar en varios usuarios.
+-- SP: gestionar_rol_usuario // Asigna o elimina roles de usuarios 
+-- usuario puede tener varios roles y un rol puede estar en varios usuarios.
 -- ========================================
 DROP PROCEDURE IF EXISTS gestionar_rol_usuario;
 DELIMITER $$
-
 CREATE PROCEDURE gestionar_rol_usuario(
     IN p_accion VARCHAR(10),
     IN p_id_usuario INT,
@@ -26,7 +19,6 @@ main_block: BEGIN
     DECLARE v_fecha_inicio DATE;
     DECLARE v_tiene_roles_previos INT DEFAULT 0;
     DECLARE v_horarios_insertados INT DEFAULT 0;
-
     SET p_accion = UPPER(TRIM(p_accion));
 
     IF NOT EXISTS (SELECT 1 FROM usuarios WHERE id = p_id_usuario) THEN
@@ -39,8 +31,18 @@ main_block: BEGIN
         LEAVE main_block;
     END IF;
 
-    SELECT username INTO v_nombre_usuario FROM usuarios WHERE id = p_id_usuario;
-    SELECT nombre INTO v_nombre_rol FROM roles WHERE id = p_id_rol;
+SELECT 
+    username
+INTO v_nombre_usuario FROM
+    usuarios
+WHERE
+    id = p_id_usuario;
+SELECT 
+    nombre
+INTO v_nombre_rol FROM
+    roles
+WHERE
+    id = p_id_rol;
 
     IF p_accion = 'ASIGNAR' THEN
         IF EXISTS (SELECT 1 FROM usuarios_roles WHERE id_usuario = p_id_usuario AND id_rol = p_id_rol) THEN
@@ -49,9 +51,12 @@ main_block: BEGIN
         END IF;
 
         -- Verificar si ya tiene otros roles asignados
-        SELECT COUNT(*) INTO v_tiene_roles_previos
-        FROM usuarios_roles
-        WHERE id_usuario = p_id_usuario;
+SELECT 
+    COUNT(*)
+INTO v_tiene_roles_previos FROM
+    usuarios_roles
+WHERE
+    id_usuario = p_id_usuario;
 
         -- Insertar rol
         INSERT INTO usuarios_roles (id_usuario, id_rol)
@@ -67,16 +72,9 @@ main_block: BEGIN
             IF v_id_colaborador IS NOT NULL THEN
                 SET v_fecha_inicio = CURDATE();
                 
-                -- INSERTAR TODOS LOS HORARIOS EN UNA SOLA OPERACION (SIN CURSOR)
-                INSERT INTO asignacion_horarios (
-                    id_colaborador,
-                    id_horario_base,
-                    id_dia_semana,
-                    fecha_inicio_vigencia,
-                    fecha_fin_vigencia,
-                    motivo_cambio,
-                    activo
-                )
+                -- INSERTAR TODOS LOS HORARIOS
+                INSERT INTO asignacion_horarios (id_colaborador, id_horario_base, id_dia_semana,
+												fecha_inicio_vigencia, fecha_fin_vigencia, motivo_cambio, activo)
                 SELECT 
                     v_id_colaborador,
                     hbr.id_horario_base,
@@ -95,7 +93,6 @@ main_block: BEGIN
                         AND ah.activo = 1
                         AND ah.fecha_fin_vigencia IS NULL
                   );
-                
                 -- Contar cuantos horarios se insertaron
                 SET v_horarios_insertados = ROW_COUNT();
                 
@@ -117,7 +114,10 @@ main_block: BEGIN
             LEAVE main_block;
         END IF;
 
-        DELETE FROM usuarios_roles WHERE id_usuario = p_id_usuario AND id_rol = p_id_rol;
+DELETE FROM usuarios_roles 
+WHERE
+    id_usuario = p_id_usuario
+    AND id_rol = p_id_rol;
         SET p_mensaje = CONCAT('Rol ', v_nombre_rol, ' eliminado correctamente.');
 
     ELSE
@@ -1868,7 +1868,6 @@ DELIMITER ;
 -- ========================================
 -- SP: REGISTRAR_MASCOTA
 -- Registra una nueva mascota validando cliente, duplicados y consistencia de datos.
--- Genera código único y crea historia clínica inicial.
 -- ========================================
 DROP PROCEDURE IF EXISTS registrar_mascota;
 DELIMITER $$
@@ -2469,16 +2468,12 @@ DELIMITER ;
 
 -- ===========================================================================================================================================
 -- ===========================================================================================================================================
--- ===========================================================================================================================================
-USE vet_manada_woof;
-
--- ========================================
--- SP 1: GESTIONAR AGENDA (Crear/Actualizar)
--- ========================================
-DROP PROCEDURE IF EXISTS sp_gestionar_agenda;
+-- ==========================================
+--  GESTIONAR AGENDA (CREAR/ACTUALIZAR CITAS)
+-- ==========================================
+DROP PROCEDURE IF EXISTS gestionar_agenda;
 DELIMITER $$
-
-CREATE PROCEDURE sp_gestionar_agenda(
+CREATE PROCEDURE gestionar_agenda(
     IN p_accion VARCHAR(10),
     IN p_id_agenda BIGINT,
     IN p_id_cliente BIGINT,
@@ -2501,9 +2496,7 @@ main_block: BEGIN
     
     SET p_accion = UPPER(TRIM(p_accion));
     
-    -- ========================================
     -- VALIDACIONES GENERALES
-    -- ========================================
     IF p_accion NOT IN ('CREAR', 'ACTUALIZAR') THEN
         SET p_mensaje = 'ERROR: Acción no válida. Use "CREAR" o "ACTUALIZAR".';
         LEAVE main_block;
@@ -2549,51 +2542,30 @@ main_block: BEGIN
     -- ========================================
     IF p_accion = 'CREAR' THEN
         
-        -- Validar duplicados: misma mascota, misma fecha y hora
         SELECT COUNT(*) INTO v_existe_cita
         FROM agenda
         WHERE id_mascota = p_id_mascota
           AND fecha = p_fecha
           AND hora = p_hora
-          AND id_estado NOT IN (4, 6); -- Excluir CANCELADA y NO ASISTIÓ
+          AND id_estado NOT IN (4, 6);
         
         IF v_existe_cita > 0 THEN
             SET p_mensaje = 'ERROR: Ya existe una cita para esta mascota en la misma fecha y hora.';
             LEAVE main_block;
         END IF;
         
-        -- Generar código único usando UUID (más seguro que MAX(id))
         SET v_nuevo_codigo = CONCAT('AG-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
         
-        -- Verificar que el código no exista (por si acaso)
         WHILE EXISTS (SELECT 1 FROM agenda WHERE codigo = v_nuevo_codigo) DO
             SET v_nuevo_codigo = CONCAT('AG-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
         END WHILE;
         
         INSERT INTO agenda (
-            codigo,
-            id_cliente,
-            id_mascota,
-            id_medio_solicitud,
-            fecha,
-            hora,
-            duracion_estimada_min,
-            abono_inicial,
-            total_cita,
-            id_estado,
-            observaciones
+            codigo, id_cliente, id_mascota, id_medio_solicitud, fecha, hora,
+            duracion_estimada_min, abono_inicial, total_cita, id_estado, observaciones
         ) VALUES (
-            v_nuevo_codigo,
-            p_id_cliente,
-            p_id_mascota,
-            p_id_medio_solicitud,
-            p_fecha,
-            p_hora,
-            p_duracion_estimada_min,
-            p_abono_inicial,
-            0, -- Se actualizará al agregar servicios
-            p_id_estado,
-            p_observaciones
+            v_nuevo_codigo, p_id_cliente, p_id_mascota, p_id_medio_solicitud,
+            p_fecha, p_hora, p_duracion_estimada_min, p_abono_inicial, 0, p_id_estado, p_observaciones
         );
         
         SET p_id_resultado = LAST_INSERT_ID();
@@ -2615,16 +2587,13 @@ main_block: BEGIN
             LEAVE main_block;
         END IF;
         
-        -- Obtener estado actual
         SELECT id_estado INTO v_estado_actual FROM agenda WHERE id = p_id_agenda;
         
-        -- No permitir actualizar citas canceladas o ya atendidas
-        IF v_estado_actual IN (4, 5) THEN -- CANCELADA, ATENDIDA
+        IF v_estado_actual IN (4, 5) THEN
             SET p_mensaje = 'ERROR: No se puede actualizar una cita cancelada o atendida.';
             LEAVE main_block;
         END IF;
         
-        -- Validar duplicados: misma mascota, misma fecha y hora (excluyendo la cita actual)
         SELECT COUNT(*) INTO v_existe_cita
         FROM agenda
         WHERE id_mascota = p_id_mascota
@@ -2659,12 +2628,11 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- SP 2: GESTIONAR INGRESO SERVICIO (Crear/Actualizar/Eliminar lógico)
+-- GESTIONAR INGRESO SERVICIO (CREAR/ACTUALIZAR/ELIMINAR)
 -- ========================================
-DROP PROCEDURE IF EXISTS sp_gestionar_ingreso_servicio;
+DROP PROCEDURE IF EXISTS gestionar_ingreso_servicio;
 DELIMITER $$
-
-CREATE PROCEDURE sp_gestionar_ingreso_servicio(
+CREATE PROCEDURE gestionar_ingreso_servicio(
     IN p_accion VARCHAR(10),
     IN p_id_ingreso BIGINT,
     IN p_id_agenda BIGINT,
@@ -2687,9 +2655,7 @@ main_block: BEGIN
     
     SET p_accion = UPPER(TRIM(p_accion));
     
-    -- ========================================
     -- VALIDACIONES GENERALES
-    -- ========================================
     IF p_accion NOT IN ('CREAR', 'ACTUALIZAR', 'ELIMINAR') THEN
         SET p_mensaje = 'ERROR: Acción no válida. Use "CREAR", "ACTUALIZAR" o "ELIMINAR".';
         LEAVE main_block;
@@ -2700,17 +2666,14 @@ main_block: BEGIN
         LEAVE main_block;
     END IF;
     
-    -- Validar estado de la cita
     SELECT id_estado INTO v_estado_cita FROM agenda WHERE id = p_id_agenda;
     
-    IF v_estado_cita IN (4, 5) THEN -- CANCELADA, ATENDIDA
+    IF v_estado_cita IN (4, 5) THEN
         SET p_mensaje = 'ERROR: No se pueden agregar servicios a una cita cancelada o atendida.';
         LEAVE main_block;
     END IF;
     
-    -- ========================================
     -- CREAR NUEVO SERVICIO
-    -- ========================================
     IF p_accion = 'CREAR' THEN
         
         IF NOT EXISTS (SELECT 1 FROM servicios WHERE id = p_id_servicio) THEN
@@ -2743,19 +2706,15 @@ main_block: BEGIN
             LEAVE main_block;
         END IF;
         
-        -- Validar duplicados: mismo servicio en la misma cita (opcional, depende de tu lógica)
-        -- Si quieres permitir duplicados, comenta esto
         SELECT COUNT(*) INTO v_existe_servicio
         FROM ingresos_servicios
-        WHERE id_agenda = p_id_agenda
-          AND id_servicio = p_id_servicio;
+        WHERE id_agenda = p_id_agenda AND id_servicio = p_id_servicio;
         
         IF v_existe_servicio > 0 THEN
             SET p_mensaje = 'ERROR: Este servicio ya fue agregado a la cita. Use ACTUALIZAR para modificarlo.';
             LEAVE main_block;
         END IF;
         
-        -- Generar código único
         SET v_nuevo_codigo = CONCAT('IS-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
         
         WHILE EXISTS (SELECT 1 FROM ingresos_servicios WHERE codigo = v_nuevo_codigo) DO
@@ -2763,46 +2722,25 @@ main_block: BEGIN
         END WHILE;
         
         INSERT INTO ingresos_servicios (
-            codigo,
-            id_agenda,
-            id_servicio,
-            id_colaborador,
-            id_veterinario,
-            cantidad,
-            duracion_min,
-            valor_servicio,
-            observaciones
+            codigo, id_agenda, id_servicio, id_colaborador, id_veterinario,
+            cantidad, duracion_min, valor_servicio, observaciones
         ) VALUES (
-            v_nuevo_codigo,
-            p_id_agenda,
-            p_id_servicio,
-            p_id_colaborador,
-            p_id_veterinario,
-            p_cantidad,
-            p_duracion_min,
-            p_valor_servicio,
-            p_observaciones
+            v_nuevo_codigo, p_id_agenda, p_id_servicio, p_id_colaborador, p_id_veterinario,
+            p_cantidad, p_duracion_min, p_valor_servicio, p_observaciones
         );
         
         SET p_id_resultado = LAST_INSERT_ID();
         SET p_codigo = v_nuevo_codigo;
         
-        -- Actualizar total de la cita
         UPDATE agenda SET
-            total_cita = (
-                SELECT COALESCE(SUM(cantidad * valor_servicio), 0)
-                FROM ingresos_servicios
-                WHERE id_agenda = p_id_agenda
-            )
+            total_cita = (SELECT COALESCE(SUM(cantidad * valor_servicio), 0)
+                         FROM ingresos_servicios WHERE id_agenda = p_id_agenda)
         WHERE id = p_id_agenda;
         
         SELECT total_cita INTO p_nuevo_total_cita FROM agenda WHERE id = p_id_agenda;
-        
         SET p_mensaje = CONCAT('Servicio ', v_nuevo_codigo, ' agregado exitosamente.');
     
-    -- ========================================
     -- ACTUALIZAR SERVICIO EXISTENTE
-    -- ========================================
     ELSEIF p_accion = 'ACTUALIZAR' THEN
         
         IF p_id_ingreso IS NULL THEN
@@ -2822,6 +2760,11 @@ main_block: BEGIN
         
         IF p_id_veterinario IS NOT NULL AND NOT EXISTS (SELECT 1 FROM veterinarios WHERE id = p_id_veterinario) THEN
             SET p_mensaje = 'ERROR: Veterinario no existe.';
+            LEAVE main_block;
+        END IF;
+        
+        IF p_id_colaborador IS NOT NULL AND p_id_veterinario IS NOT NULL THEN
+            SET p_mensaje = 'ERROR: No puede asignar colaborador y veterinario al mismo tiempo.';
             LEAVE main_block;
         END IF;
         
@@ -2847,22 +2790,15 @@ main_block: BEGIN
         SELECT codigo INTO p_codigo FROM ingresos_servicios WHERE id = p_id_ingreso;
         SET p_id_resultado = p_id_ingreso;
         
-        -- Actualizar total de la cita
         UPDATE agenda SET
-            total_cita = (
-                SELECT COALESCE(SUM(cantidad * valor_servicio), 0)
-                FROM ingresos_servicios
-                WHERE id_agenda = p_id_agenda
-            )
+            total_cita = (SELECT COALESCE(SUM(cantidad * valor_servicio), 0)
+                         FROM ingresos_servicios WHERE id_agenda = p_id_agenda)
         WHERE id = p_id_agenda;
         
         SELECT total_cita INTO p_nuevo_total_cita FROM agenda WHERE id = p_id_agenda;
-        
         SET p_mensaje = CONCAT('Servicio ', p_codigo, ' actualizado exitosamente.');
     
-    -- ========================================
-    -- ELIMINAR SERVICIO (Elimina físicamente, ajusta según tu necesidad)
-    -- ========================================
+    -- ELIMINAR SERVICIO
     ELSEIF p_accion = 'ELIMINAR' THEN
         
         IF p_id_ingreso IS NULL THEN
@@ -2881,17 +2817,12 @@ main_block: BEGIN
         
         SET p_id_resultado = p_id_ingreso;
         
-        -- Actualizar total de la cita
         UPDATE agenda SET
-            total_cita = (
-                SELECT COALESCE(SUM(cantidad * valor_servicio), 0)
-                FROM ingresos_servicios
-                WHERE id_agenda = p_id_agenda
-            )
+            total_cita = (SELECT COALESCE(SUM(cantidad * valor_servicio), 0)
+                         FROM ingresos_servicios WHERE id_agenda = p_id_agenda)
         WHERE id = p_id_agenda;
         
         SELECT total_cita INTO p_nuevo_total_cita FROM agenda WHERE id = p_id_agenda;
-        
         SET p_mensaje = CONCAT('Servicio ', p_codigo, ' eliminado exitosamente.');
     
     END IF;
@@ -2900,12 +2831,11 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- SP 3: REGISTRAR PAGO AGENDA (Crear/Eliminar)
+-- GESTIONAR PAGO AGENDA (CREAR/ELIMINAR PAGOS)
 -- ========================================
-DROP PROCEDURE IF EXISTS sp_gestionar_pago_agenda;
+DROP PROCEDURE IF EXISTS gestionar_pago_agenda;
 DELIMITER $$
-
-CREATE PROCEDURE sp_gestionar_pago_agenda(
+CREATE PROCEDURE gestionar_pago_agenda(
     IN p_accion VARCHAR(10),
     IN p_id_pago BIGINT,
     IN p_id_agenda BIGINT,
@@ -2927,9 +2857,7 @@ main_block: BEGIN
     
     SET p_accion = UPPER(TRIM(p_accion));
     
-    -- ========================================
     -- VALIDACIONES GENERALES
-    -- ========================================
     IF p_accion NOT IN ('CREAR', 'ELIMINAR') THEN
         SET p_mensaje = 'ERROR: Acción no válida. Use "CREAR" o "ELIMINAR".';
         LEAVE main_block;
@@ -2940,9 +2868,7 @@ main_block: BEGIN
         LEAVE main_block;
     END IF;
     
-    -- ========================================
     -- CREAR NUEVO PAGO
-    -- ========================================
     IF p_accion = 'CREAR' THEN
         
         IF NOT EXISTS (SELECT 1 FROM medios_pago WHERE id = p_id_medio_pago) THEN
@@ -2960,60 +2886,43 @@ main_block: BEGIN
             LEAVE main_block;
         END IF;
         
-        -- Obtener total y abono actual de la cita
         SELECT total_cita, abono_inicial INTO v_total_cita, v_abono_actual
         FROM agenda WHERE id = p_id_agenda;
         
-        -- Calcular nuevo abono
+        IF v_total_cita = 0 THEN
+            SET p_mensaje = 'ERROR: La cita no tiene servicios asociados. Agregue servicios antes de registrar pagos.';
+            LEAVE main_block;
+        END IF;
+        
         SET v_nuevo_abono = v_abono_actual + p_monto;
         
-        -- Validar que no se pague más del total
         IF v_nuevo_abono > v_total_cita THEN
             SET p_mensaje = CONCAT('ERROR: El monto excede el total. Total: S/ ', v_total_cita, ', Ya abonado: S/ ', v_abono_actual);
             LEAVE main_block;
         END IF;
         
-        -- Generar código único
-        SET v_nuevo_codigo = CONCAT('PA-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
+        SET v_nuevo_codigo = CONCAT('AB-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
         
         WHILE EXISTS (SELECT 1 FROM agenda_pagos WHERE codigo = v_nuevo_codigo) DO
-            SET v_nuevo_codigo = CONCAT('PA-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
+            SET v_nuevo_codigo = CONCAT('AB-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
         END WHILE;
         
         INSERT INTO agenda_pagos (
-            codigo,
-            id_agenda,
-            id_medio_pago,
-            id_usuario,
-            monto,
-            fecha_pago,
-            observaciones
+            codigo, id_agenda, id_medio_pago, id_usuario, monto, fecha_pago, observaciones
         ) VALUES (
-            v_nuevo_codigo,
-            p_id_agenda,
-            p_id_medio_pago,
-            p_id_usuario,
-            p_monto,
-            NOW(),
-            p_observaciones
+            v_nuevo_codigo, p_id_agenda, p_id_medio_pago, p_id_usuario, p_monto, NOW(), p_observaciones
         );
         
         SET p_id_resultado = LAST_INSERT_ID();
         SET p_codigo = v_nuevo_codigo;
         
-        -- Actualizar abono en la agenda
-        UPDATE agenda SET
-            abono_inicial = v_nuevo_abono
-        WHERE id = p_id_agenda;
+        UPDATE agenda SET abono_inicial = v_nuevo_abono WHERE id = p_id_agenda;
         
         SET p_total_abonado = v_nuevo_abono;
         SET p_saldo_pendiente = v_total_cita - v_nuevo_abono;
-        
         SET p_mensaje = CONCAT('Pago ', v_nuevo_codigo, ' registrado exitosamente.');
     
-    -- ========================================
     -- ELIMINAR PAGO
-    -- ========================================
     ELSEIF p_accion = 'ELIMINAR' THEN
         
         IF p_id_pago IS NULL THEN
@@ -3026,41 +2935,35 @@ main_block: BEGIN
             LEAVE main_block;
         END IF;
         
-        SELECT codigo, monto INTO p_codigo, p_monto FROM agenda_pagos WHERE id = p_id_pago;
+        SELECT codigo INTO p_codigo FROM agenda_pagos WHERE id = p_id_pago;
         
         DELETE FROM agenda_pagos WHERE id = p_id_pago;
         
         SET p_id_resultado = p_id_pago;
         
-        -- Recalcular abono total
         SELECT COALESCE(SUM(monto), 0) INTO v_nuevo_abono
-        FROM agenda_pagos
-        WHERE id_agenda = p_id_agenda;
+        FROM agenda_pagos WHERE id_agenda = p_id_agenda;
         
-        UPDATE agenda SET
-            abono_inicial = v_nuevo_abono
-        WHERE id = p_id_agenda;
+        UPDATE agenda SET abono_inicial = v_nuevo_abono WHERE id = p_id_agenda;
         
         SELECT total_cita INTO v_total_cita FROM agenda WHERE id = p_id_agenda;
         
         SET p_total_abonado = v_nuevo_abono;
         SET p_saldo_pendiente = v_total_cita - v_nuevo_abono;
-        
         SET p_mensaje = CONCAT('Pago ', p_codigo, ' eliminado exitosamente.');
     
     END IF;
     
 END$$
 DELIMITER ;
-USE vet_manada_woof;
 
 -- ========================================
--- SP 1: CREAR HISTORIA CLÍNICA (una vez por mascota)
+-- CREAR HISTORIA CLÍNICA (una vez por mascota)
 -- ========================================
-DROP PROCEDURE IF EXISTS sp_crear_historia_clinica;
+DROP PROCEDURE IF EXISTS crear_historia_clinica;
 DELIMITER $$
 
-CREATE PROCEDURE sp_crear_historia_clinica(
+CREATE PROCEDURE crear_historia_clinica(
     IN p_id_mascota BIGINT,
     IN p_observaciones_generales TEXT,
     OUT p_id_historia BIGINT,
@@ -3070,44 +2973,29 @@ CREATE PROCEDURE sp_crear_historia_clinica(
 main_block: BEGIN
     DECLARE v_nuevo_codigo VARCHAR(16);
     
-    SET p_accion = 'CREAR';
-    
-    -- Validar que la mascota existe
     IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
         SET p_mensaje = 'ERROR: Mascota no existe.';
         LEAVE main_block;
     END IF;
     
-    -- Validar que la mascota no tenga ya una historia clínica
     IF EXISTS (SELECT 1 FROM historia_clinica WHERE id_mascota = p_id_mascota) THEN
         SELECT id, codigo INTO p_id_historia, p_codigo
-        FROM historia_clinica 
-        WHERE id_mascota = p_id_mascota;
+        FROM historia_clinica WHERE id_mascota = p_id_mascota;
         
         SET p_mensaje = CONCAT('ADVERTENCIA: La mascota ya tiene historia clínica: ', p_codigo);
         LEAVE main_block;
     END IF;
     
-    -- Generar código único
     SET v_nuevo_codigo = CONCAT('HIS-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
     
     WHILE EXISTS (SELECT 1 FROM historia_clinica WHERE codigo = v_nuevo_codigo) DO
         SET v_nuevo_codigo = CONCAT('HIS-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
     END WHILE;
     
-    -- Insertar historia clínica
     INSERT INTO historia_clinica (
-        codigo,
-        id_mascota,
-        fecha_apertura,
-        observaciones_generales,
-        activa
+        codigo, id_mascota, fecha_apertura, observaciones_generales, activo
     ) VALUES (
-        v_nuevo_codigo,
-        p_id_mascota,
-        CURDATE(),
-        p_observaciones_generales,
-        1
+        v_nuevo_codigo, p_id_mascota, CURDATE(), p_observaciones_generales, 1
     );
     
     SET p_id_historia = LAST_INSERT_ID();
@@ -3118,12 +3006,230 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- SP 2: REGISTRAR ATENCIÓN MÉDICA (cada consulta)
+-- registrar_cita_atendida
+-- Esta es la FUNCIÓN CENTRAL para capturar TODAS las citas
 -- ========================================
-DROP PROCEDURE IF EXISTS sp_registrar_atencion_medica;
+DROP PROCEDURE IF EXISTS registrar_cita_atendida;
 DELIMITER $$
-
-CREATE PROCEDURE sp_registrar_atencion_medica(
+CREATE PROCEDURE registrar_cita_atendida(
+    IN p_id_agenda BIGINT,
+    IN p_id_veterinario BIGINT,
+    IN p_id_colaborador BIGINT,
+    IN p_tipo_visita VARCHAR(32),
+    
+    -- DATOS CLÍNICOS (Opcionales - NULL si no es médico)
+    IN p_motivo_consulta VARCHAR(256),
+    IN p_anamnesis TEXT,
+    IN p_examen_fisico TEXT,
+    IN p_signos_vitales VARCHAR(256),
+    IN p_peso_kg DECIMAL(6,2),
+    IN p_temperatura_c DECIMAL(4,2),
+    IN p_diagnostico TEXT,
+    IN p_tratamiento TEXT,
+    IN p_proximo_control DATE,
+    
+    -- DATOS ESTÉTICA (Opcionales)
+    IN p_estado_pelaje VARCHAR(128),
+    IN p_condicion_piel VARCHAR(128),
+    IN p_observaciones_grooming TEXT,
+    
+    -- DATOS HOSPEDAJE (Opcionales)
+    IN p_comportamiento_hospedaje TEXT,
+    IN p_alimentacion_hospedaje VARCHAR(256),
+    IN p_actividad_hospedaje TEXT,
+    
+    -- NOTAS GENERALES
+    IN p_observaciones TEXT,
+    
+    OUT p_id_registro BIGINT,
+    OUT p_codigo_registro VARCHAR(16),
+    OUT p_mensaje VARCHAR(255)
+)
+main_block: BEGIN
+    DECLARE v_nuevo_codigo VARCHAR(16);
+    DECLARE v_id_mascota BIGINT;
+    DECLARE v_id_cliente BIGINT;
+    DECLARE v_id_historia BIGINT;
+    DECLARE v_fecha_atencion DATE;
+    DECLARE v_hora_inicio TIME;
+    DECLARE v_estado_abierta INT;
+    DECLARE v_total_cita DECIMAL(10,2);
+    DECLARE v_abono_total DECIMAL(10,2);
+    DECLARE v_estado_cita INT;
+    
+    -- Validar que la cita existe
+    IF NOT EXISTS (SELECT 1 FROM agenda WHERE id = p_id_agenda) THEN
+        SET p_mensaje = 'ERROR: Cita no existe.';
+        LEAVE main_block;
+    END IF;
+    
+    -- Obtener datos de la cita
+    SELECT id_mascota, id_cliente, fecha, hora, total_cita, abono_inicial, id_estado
+    INTO v_id_mascota, v_id_cliente, v_fecha_atencion, v_hora_inicio, v_total_cita, v_abono_total, v_estado_cita
+    FROM agenda WHERE id = p_id_agenda;
+    
+    -- Validar que la cita no está cancelada
+    IF v_estado_cita IN (4, 6) THEN
+        SET p_mensaje = 'ERROR: No se puede registrar atención en una cita cancelada o sin asistencia.';
+        LEAVE main_block;
+    END IF;
+    
+    -- Validar veterinario si se proporciona
+    IF p_id_veterinario IS NOT NULL AND NOT EXISTS (SELECT 1 FROM veterinarios WHERE id = p_id_veterinario) THEN
+        SET p_mensaje = 'ERROR: Veterinario no existe.';
+        LEAVE main_block;
+    END IF;
+    
+    -- Validar colaborador si se proporciona
+    IF p_id_colaborador IS NOT NULL AND NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
+        SET p_mensaje = 'ERROR: Colaborador no existe.';
+        LEAVE main_block;
+    END IF;
+    
+    -- Obtener o crear historia clínica para la mascota
+    SELECT id INTO v_id_historia
+    FROM historia_clinica
+    WHERE id_mascota = v_id_mascota;
+    
+    IF v_id_historia IS NULL THEN
+        -- Crear historia clínica automáticamente
+        INSERT INTO historia_clinica (
+            codigo,
+            id_mascota,
+            fecha_apertura,
+            observaciones_generales,
+            activo
+        ) VALUES (
+            CONCAT('HIS-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0')),
+            v_id_mascota,
+            CURDATE(),
+            'Historia automáticamente creada al registrar primera atención.',
+            1
+        );
+        
+        SET v_id_historia = LAST_INSERT_ID();
+    END IF;
+    
+    -- Obtener estado ABIERTA
+    SELECT id INTO v_estado_abierta
+    FROM estado_historia_clinica
+    WHERE nombre = 'ABIERTA'
+    LIMIT 1;
+    
+    IF v_estado_abierta IS NULL THEN
+        SET p_mensaje = 'ERROR: Estado ABIERTA no existe en el catálogo.';
+        LEAVE main_block;
+    END IF;
+    
+    -- Generar código único para el registro
+    SET v_nuevo_codigo = CONCAT('REG-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
+    
+    WHILE EXISTS (SELECT 1 FROM historia_clinica_registros WHERE codigo = v_nuevo_codigo) DO
+        SET v_nuevo_codigo = CONCAT('REG-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
+    END WHILE;
+    
+    -- Calcular saldo pendiente
+    SET p_peso_kg = COALESCE(p_peso_kg, 0);
+    
+    -- Insertar registro de atención (COMPLETO, captando toda la cita)
+    INSERT INTO historia_clinica_registros (
+        codigo,
+        id_historia_clinica,
+        id_agenda,
+        id_veterinario,
+        id_colaborador,
+        fecha_atencion,
+        hora_inicio,
+        tipo_visita,
+        total_cita,
+        abono_total,
+        saldo_pendiente,
+        
+        -- Datos clínicos
+        motivo_consulta,
+        anamnesis,
+        examen_fisico,
+        signos_vitales,
+        peso_kg,
+        temperatura_c,
+        diagnostico,
+        tratamiento,
+        proximo_control,
+        
+        -- Datos estética
+        estado_pelaje,
+        condicion_piel,
+        observaciones_grooming,
+        
+        -- Datos hospedaje
+        comportamiento_hospedaje,
+        alimentacion_hospedaje,
+        actividad_hospedaje,
+        
+        -- Notas generales
+        observaciones,
+        id_estado
+    ) VALUES (
+        v_nuevo_codigo,
+        v_id_historia,
+        p_id_agenda,
+        p_id_veterinario,
+        p_id_colaborador,
+        v_fecha_atencion,
+        v_hora_inicio,
+        COALESCE(p_tipo_visita, 'GENERAL'),
+        v_total_cita,
+        v_abono_total,
+        (v_total_cita - v_abono_total),
+        
+        -- Datos clínicos
+        p_motivo_consulta,
+        p_anamnesis,
+        p_examen_fisico,
+        p_signos_vitales,
+        p_peso_kg,
+        p_temperatura_c,
+        p_diagnostico,
+        p_tratamiento,
+        p_proximo_control,
+        
+        -- Datos estética
+        p_estado_pelaje,
+        p_condicion_piel,
+        p_observaciones_grooming,
+        
+        -- Datos hospedaje
+        p_comportamiento_hospedaje,
+        p_alimentacion_hospedaje,
+        p_actividad_hospedaje,
+        
+        -- Notas generales
+        p_observaciones,
+        v_estado_abierta
+    );
+    
+    SET p_id_registro = LAST_INSERT_ID();
+    SET p_codigo_registro = v_nuevo_codigo;
+    
+    -- Actualizar estado de la cita a ATENDIDA (id = 5)
+    UPDATE agenda SET id_estado = 5 WHERE id = p_id_agenda;
+    
+    SET p_mensaje = CONCAT(
+        'Cita atendida y registrada: ',
+        v_nuevo_codigo,
+        ' | Total: S/', FORMAT(v_total_cita, 2),
+        ' | Abonado: S/', FORMAT(v_abono_total, 2),
+        ' | Saldo: S/', FORMAT((v_total_cita - v_abono_total), 2)
+    );
+    
+END$$
+DELIMITER ;
+-- ========================================
+-- REGISTRAR ATENCIÓN  (cada consulta)
+-- ========================================
+DROP PROCEDURE IF EXISTS registrar_atencion;
+DELIMITER $$
+CREATE PROCEDURE registrar_atencion(
     IN p_id_historia_clinica BIGINT,
     IN p_id_agenda BIGINT,
     IN p_id_veterinario BIGINT,
@@ -3149,100 +3255,65 @@ main_block: BEGIN
     DECLARE v_nuevo_codigo VARCHAR(16);
     DECLARE v_estado_abierta INT;
     
-    -- Validar que la historia existe
     IF NOT EXISTS (SELECT 1 FROM historia_clinica WHERE id = p_id_historia_clinica) THEN
         SET p_mensaje = 'ERROR: Historia clínica no existe.';
         LEAVE main_block;
     END IF;
     
-    -- Validar que la historia está activa
-    IF NOT EXISTS (SELECT 1 FROM historia_clinica WHERE id = p_id_historia_clinica AND activa = 1) THEN
+    IF NOT EXISTS (SELECT 1 FROM historia_clinica WHERE id = p_id_historia_clinica AND activo = 1) THEN
         SET p_mensaje = 'ERROR: Historia clínica no está activa.';
         LEAVE main_block;
     END IF;
     
-    -- Validar agenda si se proporciona
     IF p_id_agenda IS NOT NULL AND NOT EXISTS (SELECT 1 FROM agenda WHERE id = p_id_agenda) THEN
         SET p_mensaje = 'ERROR: Agenda no existe.';
         LEAVE main_block;
     END IF;
     
-    -- Validar veterinario si se proporciona
     IF p_id_veterinario IS NOT NULL AND NOT EXISTS (SELECT 1 FROM veterinarios WHERE id = p_id_veterinario) THEN
         SET p_mensaje = 'ERROR: Veterinario no existe.';
         LEAVE main_block;
     END IF;
     
-    -- Validar colaborador si se proporciona
     IF p_id_colaborador IS NOT NULL AND NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_id_colaborador) THEN
         SET p_mensaje = 'ERROR: Colaborador no existe.';
         LEAVE main_block;
     END IF;
     
-    -- Validar fecha
     IF p_fecha_atencion IS NULL THEN
         SET p_mensaje = 'ERROR: Fecha de atención es obligatoria.';
         LEAVE main_block;
     END IF;
     
-    -- Obtener estado "ABIERTA"
     SELECT id INTO v_estado_abierta 
-    FROM estado_historia_clinica 
-    WHERE nombre LIKE 'ABIERTA%' 
-    LIMIT 1;
+		FROM estado_historia_clinica 
+		WHERE nombre = 'ABIERTA';
+
+	IF v_estado_abierta IS NULL THEN
+		SET p_mensaje = 'ERROR: Estado ABIERTA no existe en el catálogo.';
+		LEAVE main_block;
+	END IF;
     
-    IF v_estado_abierta IS NULL THEN
-        SET v_estado_abierta = 1; -- Fallback al ID 1
-    END IF;
-    
-    -- Generar código único
+    IF p_hora_fin IS NOT NULL AND p_hora_fin <= p_hora_inicio THEN
+		SET p_mensaje = 'ERROR: Hora fin debe ser posterior a hora inicio.';
+		LEAVE main_block;
+	END IF;
     SET v_nuevo_codigo = CONCAT('REG-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
     
     WHILE EXISTS (SELECT 1 FROM historia_clinica_registros WHERE codigo = v_nuevo_codigo) DO
         SET v_nuevo_codigo = CONCAT('REG-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
     END WHILE;
     
-    -- Insertar registro de atención
     INSERT INTO historia_clinica_registros (
-        codigo,
-        id_historia_clinica,
-        id_agenda,
-        id_veterinario,
-        id_colaborador,
-        fecha_atencion,
-        hora_inicio,
-        hora_fin,
-        motivo_consulta,
-        anamnesis,
-        examen_fisico,
-        signos_vitales,
-        peso_kg,
-        temperatura_c,
-        diagnostico,
-        tratamiento,
-        observaciones,
-        proximo_control,
-        id_estado
+        codigo, id_historia_clinica, id_agenda, id_veterinario, id_colaborador,
+        fecha_atencion, hora_inicio, hora_fin, motivo_consulta, anamnesis,
+        examen_fisico, signos_vitales, peso_kg, temperatura_c, diagnostico,
+        tratamiento, observaciones, proximo_control, id_estado
     ) VALUES (
-        v_nuevo_codigo,
-        p_id_historia_clinica,
-        p_id_agenda,
-        p_id_veterinario,
-        p_id_colaborador,
-        p_fecha_atencion,
-        p_hora_inicio,
-        p_hora_fin,
-        p_motivo_consulta,
-        p_anamnesis,
-        p_examen_fisico,
-        p_signos_vitales,
-        p_peso_kg,
-        p_temperatura_c,
-        p_diagnostico,
-        p_tratamiento,
-        p_observaciones,
-        p_proximo_control,
-        v_estado_abierta
+        v_nuevo_codigo, p_id_historia_clinica, p_id_agenda, p_id_veterinario, p_id_colaborador,
+        p_fecha_atencion, p_hora_inicio, p_hora_fin, p_motivo_consulta, p_anamnesis,
+        p_examen_fisico, p_signos_vitales, p_peso_kg, p_temperatura_c, p_diagnostico,
+        p_tratamiento, p_observaciones, p_proximo_control, v_estado_abierta
     );
     
     SET p_id_registro = LAST_INSERT_ID();
@@ -3253,16 +3324,17 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- SP 3: ACTUALIZAR ATENCIÓN MÉDICA
+-- ACTUALIZAR ATENCIÓN
 -- ========================================
-DROP PROCEDURE IF EXISTS sp_actualizar_atencion_medica;
+DROP PROCEDURE IF EXISTS actualizar_atencion;
 DELIMITER $$
-
-CREATE PROCEDURE sp_actualizar_atencion_medica(
+CREATE PROCEDURE actualizar_atencion(
     IN p_id_registro BIGINT,
     IN p_id_veterinario BIGINT,
     IN p_id_colaborador BIGINT,
     IN p_hora_fin TIME,
+    
+    -- DATOS CLÍNICOS
     IN p_motivo_consulta VARCHAR(256),
     IN p_anamnesis TEXT,
     IN p_examen_fisico TEXT,
@@ -3271,14 +3343,29 @@ CREATE PROCEDURE sp_actualizar_atencion_medica(
     IN p_temperatura_c DECIMAL(4,2),
     IN p_diagnostico TEXT,
     IN p_tratamiento TEXT,
-    IN p_observaciones TEXT,
     IN p_proximo_control DATE,
+    
+    -- DATOS ESTÉTICA
+    IN p_estado_pelaje VARCHAR(128),
+    IN p_condicion_piel VARCHAR(128),
+    IN p_observaciones_grooming TEXT,
+    
+    -- DATOS HOSPEDAJE
+    IN p_comportamiento_hospedaje TEXT,
+    IN p_alimentacion_hospedaje VARCHAR(256),
+    IN p_actividad_hospedaje TEXT,
+    
+    -- NOTAS GENERALES
+    IN p_observaciones TEXT,
     IN p_id_estado INT,
+    
     OUT p_codigo VARCHAR(16),
     OUT p_mensaje VARCHAR(255)
 )
 main_block: BEGIN
     DECLARE v_estado_actual INT;
+    DECLARE v_id_estado_cerrada INT;
+    DECLARE v_id_estado_anulada INT;
     
     -- Validar que el registro existe
     IF NOT EXISTS (SELECT 1 FROM historia_clinica_registros WHERE id = p_id_registro) THEN
@@ -3288,15 +3375,25 @@ main_block: BEGIN
     
     -- Obtener estado actual y código
     SELECT id_estado, codigo INTO v_estado_actual, p_codigo
-    FROM historia_clinica_registros 
+    FROM historia_clinica_registros
     WHERE id = p_id_registro;
     
-    -- Evitar modificar si está cerrado o anulado
-    IF v_estado_actual IN (
-        SELECT id FROM estado_historia_clinica 
-        WHERE nombre IN ('CERRADA', 'ANULADA')
-    ) THEN
-        SET p_mensaje = CONCAT('ERROR: Registro ', p_codigo, ' no puede modificarse (estado cerrado/anulado).');
+    -- Obtener IDs de estados no editables
+    SELECT id INTO v_id_estado_cerrada
+    FROM estado_historia_clinica
+    WHERE nombre = 'CERRADA';
+    
+    SELECT id INTO v_id_estado_anulada
+    FROM estado_historia_clinica
+    WHERE nombre = 'ANULADA';
+    
+    -- No permitir editar si está cerrado o anulado
+    IF v_estado_actual IN (v_id_estado_cerrada, v_id_estado_anulada) THEN
+        SET p_mensaje = CONCAT(
+            'ERROR: Registro ',
+            p_codigo,
+            ' no puede modificarse (estado cerrado/anulado).'
+        );
         LEAVE main_block;
     END IF;
     
@@ -3312,11 +3409,13 @@ main_block: BEGIN
         LEAVE main_block;
     END IF;
     
-    -- Actualizar registro
+    -- Actualizar registro (COALESCE mantiene valores anteriores si no se pasan nuevos)
     UPDATE historia_clinica_registros SET
         id_veterinario = COALESCE(p_id_veterinario, id_veterinario),
         id_colaborador = COALESCE(p_id_colaborador, id_colaborador),
         hora_fin = COALESCE(p_hora_fin, hora_fin),
+        
+        -- Datos clínicos
         motivo_consulta = COALESCE(p_motivo_consulta, motivo_consulta),
         anamnesis = COALESCE(p_anamnesis, anamnesis),
         examen_fisico = COALESCE(p_examen_fisico, examen_fisico),
@@ -3325,8 +3424,20 @@ main_block: BEGIN
         temperatura_c = COALESCE(p_temperatura_c, temperatura_c),
         diagnostico = COALESCE(p_diagnostico, diagnostico),
         tratamiento = COALESCE(p_tratamiento, tratamiento),
-        observaciones = COALESCE(p_observaciones, observaciones),
         proximo_control = COALESCE(p_proximo_control, proximo_control),
+        
+        -- Datos estética
+        estado_pelaje = COALESCE(p_estado_pelaje, estado_pelaje),
+        condicion_piel = COALESCE(p_condicion_piel, condicion_piel),
+        observaciones_grooming = COALESCE(p_observaciones_grooming, observaciones_grooming),
+        
+        -- Datos hospedaje
+        comportamiento_hospedaje = COALESCE(p_comportamiento_hospedaje, comportamiento_hospedaje),
+        alimentacion_hospedaje = COALESCE(p_alimentacion_hospedaje, alimentacion_hospedaje),
+        actividad_hospedaje = COALESCE(p_actividad_hospedaje, actividad_hospedaje),
+        
+        -- Notas generales
+        observaciones = COALESCE(p_observaciones, observaciones),
         id_estado = COALESCE(p_id_estado, id_estado)
     WHERE id = p_id_registro;
     
@@ -3336,309 +3447,66 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- SP 4: SUBIR ARCHIVO CLÍNICO
+-- ELIMINAR ATENCION
+-- Responsabilidad: Eliminar un registro
 -- ========================================
-DROP PROCEDURE IF EXISTS sp_subir_archivo_clinico;
+DROP PROCEDURE IF EXISTS eliminar_atencion;
 DELIMITER $$
-
-CREATE PROCEDURE sp_subir_archivo_clinico(
-    IN p_id_registro_atencion BIGINT,
-    IN p_id_tipo_archivo INT,
-    IN p_nombre_archivo VARCHAR(128),
-    IN p_extension_archivo VARCHAR(32),
-    IN p_descripcion VARCHAR(256),
-    OUT p_id_archivo BIGINT,
+CREATE PROCEDURE eliminar_atencion(
+    IN p_id_registro BIGINT,
     OUT p_codigo VARCHAR(16),
     OUT p_mensaje VARCHAR(255)
 )
 main_block: BEGIN
-    DECLARE v_nuevo_codigo VARCHAR(16);
+    DECLARE v_estado_actual INT;
+    DECLARE v_id_estado_temporal INT;
+    DECLARE v_id_estado_abierta INT;
     
     -- Validar que el registro existe
-    IF NOT EXISTS (SELECT 1 FROM historia_clinica_registros WHERE id = p_id_registro_atencion) THEN
-        SET p_mensaje = 'ERROR: Registro de atención no existe.';
-        LEAVE main_block;
-    END IF;
-    
-    -- Validar tipo de archivo si se proporciona
-    IF p_id_tipo_archivo IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tipos_archivo_clinico WHERE id = p_id_tipo_archivo) THEN
-        SET p_mensaje = 'ERROR: Tipo de archivo no existe.';
-        LEAVE main_block;
-    END IF;
-    
-    -- Validar nombre de archivo
-    IF p_nombre_archivo IS NULL OR TRIM(p_nombre_archivo) = '' THEN
-        SET p_mensaje = 'ERROR: Nombre de archivo es obligatorio.';
-        LEAVE main_block;
-    END IF;
-    
-    -- Generar código único
-    SET v_nuevo_codigo = CONCAT('ARC-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
-    
-    WHILE EXISTS (SELECT 1 FROM historia_clinica_archivos WHERE codigo = v_nuevo_codigo) DO
-        SET v_nuevo_codigo = CONCAT('ARC-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
-    END WHILE;
-    
-    -- Insertar archivo
-    INSERT INTO historia_clinica_archivos (
-        codigo,
-        id_registro_atencion,
-        id_tipo_archivo,
-        nombre_archivo,
-        extension_archivo,
-        descripcion,
-        fecha_subida
-    ) VALUES (
-        v_nuevo_codigo,
-        p_id_registro_atencion,
-        p_id_tipo_archivo,
-        p_nombre_archivo,
-        p_extension_archivo,
-        p_descripcion,
-        NOW()
-    );
-    
-    SET p_id_archivo = LAST_INSERT_ID();
-    SET p_codigo = v_nuevo_codigo;
-    SET p_mensaje = CONCAT('Archivo ', v_nuevo_codigo, ' subido exitosamente.');
-    
-END$$
-DELIMITER ;
-
--- ========================================
--- SP 5: CONSULTAR HISTORIAL COMPLETO DE MASCOTA
--- ========================================
-DROP PROCEDURE IF EXISTS sp_consultar_historial_mascota;
-DELIMITER $$
-
-CREATE PROCEDURE sp_consultar_historial_mascota(
-    IN p_id_mascota BIGINT,
-    OUT p_mensaje VARCHAR(255)
-)
-BEGIN
-    DECLARE v_id_historia BIGINT;
-    
-    IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
-        SET p_mensaje = 'ERROR: Mascota no existe.';
-    ELSE
-        -- Obtener ID de historia
-        SELECT id INTO v_id_historia 
-        FROM historia_clinica 
-        WHERE id_mascota = p_id_mascota;
-        
-        IF v_id_historia IS NULL THEN
-            SET p_mensaje = 'ADVERTENCIA: Mascota no tiene historia clínica creada.';
-        ELSE
-            SET p_mensaje = 'Consulta exitosa.';
-            
-            -- ========================================
-            -- RESULTADO 1: INFO GENERAL MASCOTA + HISTORIA
-            -- ========================================
-            SELECT 
-                m.id AS mascota_id,
-                m.nombre AS mascota_nombre,
-                m.especie,
-                m.raza,
-                m.fecha_nacimiento,
-                m.sexo,
-                m.color,
-                m.chip_identificacion,
-                
-                hc.id AS historia_id,
-                hc.codigo AS historia_codigo,
-                hc.fecha_apertura,
-                hc.observaciones_generales,
-                hc.activa,
-                
-                (SELECT COUNT(*) 
-                 FROM historia_clinica_registros 
-                 WHERE id_historia_clinica = hc.id) AS total_atenciones,
-                 
-                (SELECT MAX(fecha_atencion) 
-                 FROM historia_clinica_registros 
-                 WHERE id_historia_clinica = hc.id) AS ultima_atencion
-                
-            FROM mascotas m
-            INNER JOIN historia_clinica hc ON hc.id_mascota = m.id
-            WHERE m.id = p_id_mascota;
-            
-            -- ========================================
-            -- RESULTADO 2: TODOS LOS REGISTROS DE ATENCIÓN
-            -- ========================================
-            SELECT 
-                reg.id AS registro_id,
-                reg.codigo AS registro_codigo,
-                reg.fecha_atencion,
-                reg.hora_inicio,
-                reg.hora_fin,
-                reg.motivo_consulta,
-                reg.anamnesis,
-                reg.examen_fisico,
-                reg.signos_vitales,
-                reg.peso_kg,
-                reg.temperatura_c,
-                reg.diagnostico,
-                reg.tratamiento,
-                reg.observaciones,
-                reg.proximo_control,
-                reg.fecha_registro,
-                
-                a.codigo AS agenda_codigo,
-                a.fecha AS fecha_cita,
-                a.hora AS hora_cita,
-                
-                CONCAT(vet.nombres, ' ', vet.apellidos) AS veterinario_nombre,
-                vet.cmp AS veterinario_cmp,
-                
-                CONCAT(col.nombres, ' ', col.apellidos) AS colaborador_nombre,
-                
-                ehc.nombre AS estado,
-                
-                -- Servicios realizados en esa atención
-                (SELECT GROUP_CONCAT(s.nombre SEPARATOR ', ')
-                 FROM ingresos_servicios ins
-                 INNER JOIN servicios s ON ins.id_servicio = s.id
-                 WHERE ins.id_agenda = reg.id_agenda) AS servicios_realizados,
-                
-                -- Total de la cita
-                (SELECT a.total_cita
-                 FROM agenda a
-                 WHERE a.id = reg.id_agenda) AS total_cita,
-                
-                -- Total pagado
-                (SELECT COALESCE(SUM(ap.monto), 0)
-                 FROM agenda_pagos ap
-                 WHERE ap.id_agenda = reg.id_agenda) AS total_pagado,
-                 
-                -- Cantidad de archivos
-                (SELECT COUNT(*)
-                 FROM historia_clinica_archivos
-                 WHERE id_registro_atencion = reg.id) AS total_archivos
-                
-            FROM historia_clinica_registros reg
-            LEFT JOIN agenda a ON reg.id_agenda = a.id
-            LEFT JOIN veterinarios vet ON reg.id_veterinario = vet.id
-            LEFT JOIN colaboradores col ON reg.id_colaborador = col.id
-            LEFT JOIN estado_historia_clinica ehc ON reg.id_estado = ehc.id
-            WHERE reg.id_historia_clinica = v_id_historia
-            ORDER BY reg.fecha_atencion DESC, reg.hora_inicio DESC;
-            
-            -- ========================================
-            -- RESULTADO 3: ARCHIVOS MÉDICOS
-            -- ========================================
-            SELECT 
-                hca.id AS archivo_id,
-                hca.codigo AS archivo_codigo,
-                hca.nombre_archivo,
-                hca.extension_archivo,
-                hca.descripcion,
-                hca.fecha_subida,
-                
-                tac.nombre AS tipo_archivo,
-                tac.descripcion AS tipo_descripcion,
-                
-                reg.codigo AS registro_codigo,
-                reg.fecha_atencion,
-                reg.motivo_consulta
-                
-            FROM historia_clinica_archivos hca
-            INNER JOIN historia_clinica_registros reg ON hca.id_registro_atencion = reg.id
-            LEFT JOIN tipos_archivo_clinico tac ON hca.id_tipo_archivo = tac.id
-            WHERE reg.id_historia_clinica = v_id_historia
-            ORDER BY hca.fecha_subida DESC;
-        END IF;
-    END IF;
-END$$
-DELIMITER ;
-
--- ========================================
--- SP 6: CONSULTAR UN REGISTRO ESPECÍFICO
--- ========================================
-DROP PROCEDURE IF EXISTS sp_consultar_registro_atencion;
-DELIMITER $$
-
-CREATE PROCEDURE sp_consultar_registro_atencion(
-    IN p_id_registro BIGINT,
-    OUT p_mensaje VARCHAR(255)
-)
-BEGIN
-    
     IF NOT EXISTS (SELECT 1 FROM historia_clinica_registros WHERE id = p_id_registro) THEN
         SET p_mensaje = 'ERROR: Registro de atención no existe.';
-    ELSE
-        SET p_mensaje = 'Consulta exitosa.';
-        
-        -- RESULTADO 1: Datos del registro
-        SELECT 
-            reg.id,
-            reg.codigo,
-            reg.fecha_atencion,
-            reg.hora_inicio,
-            reg.hora_fin,
-            reg.motivo_consulta,
-            reg.anamnesis,
-            reg.examen_fisico,
-            reg.signos_vitales,
-            reg.peso_kg,
-            reg.temperatura_c,
-            reg.diagnostico,
-            reg.tratamiento,
-            reg.observaciones,
-            reg.proximo_control,
-            reg.fecha_registro,
-            
-            hc.codigo AS historia_codigo,
-            
-            m.id AS mascota_id,
-            m.nombre AS mascota_nombre,
-            m.especie,
-            m.raza,
-            
-            CONCAT(c.nombres, ' ', c.apellidos) AS cliente_nombre,
-            c.telefono AS cliente_telefono,
-            
-            a.codigo AS agenda_codigo,
-            
-            CONCAT(vet.nombres, ' ', vet.apellidos) AS veterinario_nombre,
-            
-            ehc.nombre AS estado
-            
-        FROM historia_clinica_registros reg
-        INNER JOIN historia_clinica hc ON reg.id_historia_clinica = hc.id
-        INNER JOIN mascotas m ON hc.id_mascota = m.id
-        INNER JOIN clientes c ON m.id_cliente = c.id
-        LEFT JOIN agenda a ON reg.id_agenda = a.id
-        LEFT JOIN veterinarios vet ON reg.id_veterinario = vet.id
-        LEFT JOIN estado_historia_clinica ehc ON reg.id_estado = ehc.id
-        WHERE reg.id = p_id_registro;
-        
-        -- RESULTADO 2: Archivos de este registro
-        SELECT 
-            hca.id,
-            hca.codigo,
-            hca.nombre_archivo,
-            hca.extension_archivo,
-            hca.descripcion,
-            hca.fecha_subida,
-            
-            tac.nombre AS tipo_archivo
-            
-        FROM historia_clinica_archivos hca
-        LEFT JOIN tipos_archivo_clinico tac ON hca.id_tipo_archivo = tac.id
-        WHERE hca.id_registro_atencion = p_id_registro
-        ORDER BY hca.fecha_subida;
+        LEAVE main_block;
     END IF;
+    
+    -- Obtener estado actual y código
+    SELECT id_estado, codigo INTO v_estado_actual, p_codigo
+    FROM historia_clinica_registros
+    WHERE id = p_id_registro;
+    
+    -- Obtener IDs de estados permitidos
+    SELECT id INTO v_id_estado_temporal
+    FROM estado_historia_clinica
+    WHERE nombre = 'TEMPORAL';
+    
+    SELECT id INTO v_id_estado_abierta
+    FROM estado_historia_clinica
+    WHERE nombre = 'ABIERTA';
+    
+    -- Solo permitir eliminar si está en TEMPORAL o ABIERTA
+    IF v_estado_actual NOT IN (v_id_estado_temporal, v_id_estado_abierta) THEN
+        SET p_mensaje = CONCAT(
+            'ERROR: Registro ',
+            p_codigo,
+            ' no puede eliminarse. Solo se pueden eliminar registros en estado TEMPORAL o ABIERTA.'
+        );
+        LEAVE main_block;
+    END IF;
+    
+    -- Eliminar el registro
+    DELETE FROM historia_clinica_registros WHERE id = p_id_registro;
+    
+    SET p_mensaje = CONCAT('Registro ', p_codigo, ' eliminado exitosamente.');
     
 END$$
 DELIMITER ;
 
 -- ========================================
--- SP 7: ELIMINAR ARCHIVO CLÍNICO
+-- ELIMINAR ARCHIVO CLÍNICO
 -- ========================================
-DROP PROCEDURE IF EXISTS sp_eliminar_archivo_clinico;
+DROP PROCEDURE IF EXISTS eliminar_archivo_clinico;
 DELIMITER $$
 
-CREATE PROCEDURE sp_eliminar_archivo_clinico(
+CREATE PROCEDURE eliminar_archivo_clinico(
     IN p_id_archivo BIGINT,
     OUT p_codigo VARCHAR(16),
     OUT p_mensaje VARCHAR(255)

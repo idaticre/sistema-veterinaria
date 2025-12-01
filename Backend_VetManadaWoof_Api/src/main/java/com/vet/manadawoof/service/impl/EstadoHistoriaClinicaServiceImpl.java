@@ -33,7 +33,7 @@ public class EstadoHistoriaClinicaServiceImpl implements EstadoHistoriaClinicaSe
         });
         
         existente.setNombre(entity.getNombre()); existente.setDescripcion(entity.getDescripcion());
-        existente.setActivo(entity.getActivo()); return repository.save(existente);
+        return repository.save(existente);
     }
     
     @Override

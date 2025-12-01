@@ -1330,13 +1330,11 @@ CREATE INDEX idx_recordatorio_enviado ON recordatorios_agenda(enviado);
 -- ========================================
 -- TABLA: estado_historia_clinica
 -- Define los estados posibles del ciclo de una historia clínica.
--- Ejemplo: ABIERTA, EN REVISIÓN, CERRADA.
 -- ========================================
 CREATE TABLE estado_historia_clinica (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) NOT NULL UNIQUE,
-    descripcion VARCHAR(128),
-    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1))
+    descripcion VARCHAR(128)
 );
 INSERT INTO estado_historia_clinica (nombre, descripcion) VALUES
 ('ABIERTA', 'Historia clínica en proceso de registro o atención activa.'),
@@ -1414,7 +1412,7 @@ CREATE TABLE historia_clinica (
     id_mascota BIGINT NOT NULL UNIQUE,  -- UNIQUE: solo 1 historia por mascota
     fecha_apertura DATE NOT NULL DEFAULT (CURDATE()),
     observaciones_generales TEXT,
-    activa TINYINT NOT NULL DEFAULT 1 CHECK (activa IN (0,1)),
+    activo TINYINT NOT NULL DEFAULT 1 CHECK (activo IN (0,1)),
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -1425,29 +1423,55 @@ ALTER TABLE historia_clinica
 CREATE INDEX idx_historia_mascota ON historia_clinica(id_mascota);
 
 -- ========================================
--- TABLA: historia_clinica_registros (CADA ATENCIÓN MÉDICA)
+-- TABLA: historia_clinica_registros (CADA ATENCIÓN)
 -- ========================================
-CREATE TABLE historia_clinica_registros (
+CREATE TABLE IF NOT EXISTS historia_clinica_registros (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     codigo VARCHAR(16) NOT NULL UNIQUE,
     id_historia_clinica BIGINT NOT NULL,
-    id_agenda BIGINT NULL,
+    id_agenda BIGINT NOT NULL UNIQUE,
     id_veterinario BIGINT NULL,
     id_colaborador BIGINT NULL,
+    
+    -- INFORMACIÓN ADMINISTRATIVA
     fecha_atencion DATE NOT NULL,
     hora_inicio TIME NOT NULL,
     hora_fin TIME NULL,
-    motivo_consulta VARCHAR(256),
-    anamnesis TEXT,
-    examen_fisico TEXT,
-    signos_vitales VARCHAR(256),
-    peso_kg DECIMAL(6,2),
-    temperatura_c DECIMAL(4,2),
-    diagnostico TEXT,
-    tratamiento TEXT,
-    observaciones TEXT,
-    proximo_control DATE,
-    id_estado INT,
+    tipo_visita VARCHAR(32) NOT NULL DEFAULT 'GENERAL',
+        -- GENERAL, MÉDICA, ESTÉTICA, HOSPEDAJE, CONSULTA, PROCEDIMIENTO, etc.
+    total_cita DECIMAL(10,2) DEFAULT 0 CHECK (total_cita >= 0),
+    abono_total DECIMAL(10,2) DEFAULT 0 CHECK (abono_total >= 0),
+    saldo_pendiente DECIMAL(10,2) DEFAULT 0 CHECK (saldo_pendiente >= 0),
+    
+    -- INFORMACIÓN CLÍNICA (Opcional - puede ser NULL si no es médico)
+    motivo_consulta VARCHAR(256) NULL,
+    anamnesis TEXT NULL,
+    examen_fisico TEXT NULL,
+    signos_vitales VARCHAR(256) NULL,
+    peso_kg DECIMAL(6,2) NULL,
+    temperatura_c DECIMAL(4,2) NULL,
+    diagnostico TEXT NULL,
+    tratamiento TEXT NULL,
+    proximo_control DATE NULL,
+    
+    -- INFORMACIÓN ESTÉTICA (Si aplica)
+    estado_pelaje VARCHAR(128) NULL,
+        -- "Normal", "Seco", "Grasoso", "Irritado", etc.
+    condicion_piel VARCHAR(128) NULL,
+    observaciones_grooming TEXT NULL,
+    
+    -- INFORMACIÓN HOSPEDAJE (Si aplica)
+    comportamiento_hospedaje TEXT NULL,
+        -- "Tranquilo", "Ansioso", "Activo", etc.
+    alimentacion_hospedaje VARCHAR(256) NULL,
+        -- Qué comió, cuándo, cuánto
+    actividad_hospedaje TEXT NULL,
+        -- Resumen de paseos y juego
+    
+    -- NOTAS GENERALES
+    observaciones TEXT NULL,
+    id_estado INT NOT NULL,
+    
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -1455,7 +1479,7 @@ ALTER TABLE historia_clinica_registros
     ADD CONSTRAINT fk_registro_historia FOREIGN KEY (id_historia_clinica) 
         REFERENCES historia_clinica(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_registro_agenda FOREIGN KEY (id_agenda) 
-        REFERENCES agenda(id) ON DELETE SET NULL ON UPDATE CASCADE,
+        REFERENCES agenda(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_registro_veterinario FOREIGN KEY (id_veterinario) 
         REFERENCES veterinarios(id) ON DELETE SET NULL ON UPDATE CASCADE,
     ADD CONSTRAINT fk_registro_colaborador FOREIGN KEY (id_colaborador) 
@@ -1468,6 +1492,8 @@ CREATE INDEX idx_registro_agenda ON historia_clinica_registros(id_agenda);
 CREATE INDEX idx_registro_fecha ON historia_clinica_registros(fecha_atencion);
 CREATE INDEX idx_registro_veterinario ON historia_clinica_registros(id_veterinario);
 CREATE INDEX idx_registro_estado ON historia_clinica_registros(id_estado);
+CREATE INDEX idx_registro_tipo_visita ON historia_clinica_registros(tipo_visita);
+
 
 -- ========================================
 -- TABLA: historia_clinica_archivos (ARCHIVOS POR REGISTRO)

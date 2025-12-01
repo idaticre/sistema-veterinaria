@@ -13,6 +13,8 @@ public interface PagoAgendaService {
     // Elimina un pago
     PagoAgendaResponseDTO eliminar(Long idPago, Long idAgenda);
     
+    PagoAgendaResponseDTO obtenerPorId(Long id);
+    
     // Lista pagos de una cita
     List<PagoAgendaResponseDTO> listarPorAgenda(Long idAgenda);
 }

@@ -28,6 +28,4 @@ public class EstadoHistoriaClinicaEntity implements Serializable {
     @Column(length = 128)
     private String descripcion;
     
-    @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 1")
-    private Boolean activo = true;
 }

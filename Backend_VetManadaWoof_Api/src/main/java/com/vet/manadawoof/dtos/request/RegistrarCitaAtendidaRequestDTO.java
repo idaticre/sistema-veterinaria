@@ -1,9 +1,11 @@
+// ========================================
+// NUEVO DTO: RegistrarCitaAtendidaRequestDTO
+// Para el procedimiento: registrar_cita_atendida()
+// Responsabilidad: Marcar cita como ATENDIDA + crear registro
+// ========================================
 package com.vet.manadawoof.dtos.request;
 
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,34 +13,25 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AtencionMedicaRequestDTO {
+public class RegistrarCitaAtendidaRequestDTO {
     
-    // Para actualizar
-    private Long id;
-    
-    @NotNull(message = "Historia clínica es obligatoria")
-    private Long idHistoriaClinica;
-    
+    @NotNull(message = "ID de agenda es obligatorio")
     private Long idAgenda;
     
     private Long idVeterinario;
     
     private Long idColaborador;
     
-    @NotNull(message = "Fecha de atención es obligatoria")
-    private LocalDate fechaAtencion;
+    @NotNull(message = "Tipo de visita es obligatorio")
+    @Pattern(regexp = "MÉDICA|ESTÉTICA|HOSPEDAJE|GENERAL", message = "Tipo de visita debe ser: MÉDICA, ESTÉTICA, HOSPEDAJE o GENERAL")
+    private String tipoVisita;
     
-    @NotNull(message = "Hora inicio es obligatoria")
-    private LocalTime horaInicio;
-    
-    private LocalTime horaFin;
-    
+    // DATOS CLÍNICOS (Opcionales - NULL si no aplica)
     @Size(max = 256, message = "Motivo de consulta no debe superar 256 caracteres")
     private String motivoConsulta;
     
@@ -61,11 +54,9 @@ public class AtencionMedicaRequestDTO {
     
     private String tratamiento;
     
-    private String observaciones;
-    
     private LocalDate proximoControl;
     
-    // NUEVOS CAMPOS: Soportar estética y hospedaje
+    // DATOS ESTÉTICA (Opcionales - NULL si no aplica)
     @Size(max = 128, message = "Estado del pelaje no debe superar 128 caracteres")
     private String estadoPelaje;
     
@@ -74,6 +65,7 @@ public class AtencionMedicaRequestDTO {
     
     private String observacionesGrooming;
     
+    // DATOS HOSPEDAJE (Opcionales - NULL si no aplica)
     private String comportamientoHospedaje;
     
     @Size(max = 256, message = "Alimentación no debe superar 256 caracteres")
@@ -81,5 +73,6 @@ public class AtencionMedicaRequestDTO {
     
     private String actividadHospedaje;
     
-    private Integer idEstado;
+    // NOTAS GENERALES
+    private String observaciones;
 }

@@ -13,11 +13,7 @@ import java.io.Serializable;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "agenda_pagos", indexes = {
-        @Index(name = "idx_agendapagos_agenda", columnList = "id_agenda"),
-        @Index(name = "idx_agendapagos_mediopago", columnList = "id_medio_pago"),
-        @Index(name = "idx_agendapagos_fecha", columnList = "fecha_pago")
-})
+@Table(name = "agenda_pagos")
 public class AgendaPagoEntity implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -29,15 +25,15 @@ public class AgendaPagoEntity implements Serializable {
     private String codigo;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_agenda", nullable = false, foreignKey = @ForeignKey(name = "fk_agendapago_agenda"))
+    @JoinColumn(name = "id_agenda", nullable = false)
     private AgendaEntity agenda;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_medio_pago", nullable = false, foreignKey = @ForeignKey(name = "fk_agendapago_mediopago"))
+    @JoinColumn(name = "id_medio_pago", nullable = false)
     private MedioPagoEntity medioPago;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario", foreignKey = @ForeignKey(name = "fk_agendapago_usuario"))
+    @JoinColumn(name = "id_usuario")
     private UsuarioEntity usuario;
     
     @Column(nullable = false, precision = 10, scale = 2)

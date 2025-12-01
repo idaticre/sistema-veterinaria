@@ -810,6 +810,11 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+										"type": "text"
 									}
 								],
 								"body": {
@@ -885,7 +890,7 @@
 									},
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDIwNzkwNywiZXhwIjoxNzY0Mjk0MzA3fQ.Qgky_UdUYeRRzMaszX-aab1AQScAkyabm-OGYAOlErA",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
 										"type": "text"
 									}
 								],
@@ -2199,7 +2204,13 @@
 							"name": "Mascotas",
 							"request": {
 								"method": "POST",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": "{\r\n  \"nombre\": \"Luna\",\r\n  \"sexo\": \"H\",\r\n  \"idCliente\": 1,\r\n  \"idRaza\": 3,\r\n  \"idEspecie\": 2,\r\n  \"fechaNacimiento\": \"2021-11-05\",\r\n  \"pelaje\": \"Largo y sedoso\",\r\n  \"idTamano\": 2,\r\n  \"idEtapa\": 3,\r\n  \"esterilizado\": true,\r\n  \"alergias\": \"Polen y polvo\",\r\n  \"peso\": 5.4,\r\n  \"chip\": true,\r\n  \"pedigree\": false,\r\n  \"factorDea\": true,\r\n  \"agresividad\": false,\r\n  \"foto\": \"https://misfotos.com/luna.jpg\",\r\n  \"idColaborador\": null,\r\n  \"idVeterinario\": null\r\n}\r\n",
@@ -2537,6 +2548,11 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+										"type": "text"
 									}
 								],
 								"body": {
@@ -2549,7 +2565,7 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:8088/api/agenda",
+									"raw": "http://localhost:8088/api/agenda?page=0&size=10",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -2558,6 +2574,16 @@
 									"path": [
 										"api",
 										"agenda"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
 									]
 								}
 							},
@@ -2642,7 +2668,7 @@
 							"response": []
 						},
 						{
-							"name": "Abono de una Cita",
+							"name": "Abonos de una cita",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2665,7 +2691,7 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:8088/api/pagos-agenda/agenda/10",
+									"raw": "http://localhost:8088/api/pagos-agenda/agenda/1",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -2675,7 +2701,46 @@
 										"api",
 										"pagos-agenda",
 										"agenda",
-										"10"
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Consulta abonos por ID",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/pagos-agenda/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"pagos-agenda",
+										"1"
 									]
 								}
 							},
@@ -2923,11 +2988,16 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idCliente\": 1,\r\n  \"idMascota\": 1,\r\n  \"fecha\": \"2025-12-02\",\r\n  \"hora\": \"11:00:00\",\r\n  \"idEstado\": 1,\r\n  \"idMedioSolicitud\": 1,\r\n  \"duracionEstimadaMin\": null,\r\n  \"abonoInicial\": 0,\r\n  \"observaciones\": \"Primera consulta\"\r\n}",
+									"raw": "{\r\n  \"idCliente\": 1,\r\n  \"idMascota\": 1,\r\n  \"idMedioSolicitud\": 1,\r\n  \"fecha\": \"2026-01-20\",\r\n  \"hora\": \"10:30:00\",\r\n  \"duracionEstimadaMin\": 30,\r\n  \"idEstado\": 1,\r\n  \"abonoInicial\": 50.00,\r\n  \"observaciones\": \"Consulta de rutina\"\r\n}\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2959,11 +3029,16 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idServicio\": 5,\r\n  \"idVeterinario\": 1,\r\n  \"cantidad\": 1,\r\n  \"duracionMin\": 30,\r\n  \"valorServicio\": 180,\r\n  \"observaciones\": \"Baño y corte\"\r\n}",
+									"raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idServicio\": 1,\r\n  \"idColaborador\": 1,\r\n  \"idVeterinario\": null,\r\n  \"cantidad\": 1,\r\n  \"duracionMin\": 30,\r\n  \"valorServicio\": 100.00,\r\n  \"observaciones\": \"Baño y corte de uñas\"\r\n}\r\n\r\n/*\r\n// si quiero registrar con veterinario\r\n{\r\n  \"idAgenda\": 1,\r\n  \"idServicio\": 2,\r\n  \"idColaborador\": null,\r\n  \"idVeterinario\": 1,\r\n  \"cantidad\": 1,\r\n  \"duracionMin\": 45,\r\n  \"valorServicio\": 150.00,\r\n  \"observaciones\": \"Consulta médica y análisis\"\r\n}\r\n*/",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2987,7 +3062,7 @@
 							"response": []
 						},
 						{
-							"name": "Abono de Cita",
+							"name": "Abono pago de Cita",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -2995,11 +3070,16 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MDA5OSwiZXhwIjoxNzY0NjQ2NDk5fQ.fVDvdDfxjymnXw6YMUpOgDEgvBha4WMDYuKdJ2kvx8k",
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idMedioPago\": 1,\r\n  \"idUsuario\": 2,\r\n  \"monto\": 180,\r\n  \"observaciones\": \"Pago con transferencia\"\r\n}",
+									"raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idMedioPago\": 1,\r\n  \"idUsuario\": 1,\r\n  \"monto\": 50.00,\r\n  \"observaciones\": \"Pago parcial de consulta\"\r\n}\r\n\r\n\r\n/*\r\n\r\n// pagos con tarjeta ejemplo \r\n{\r\n  \"idAgenda\": 1,\r\n  \"idMedioPago\": 2,\r\n  \"idUsuario\": 1,\r\n  \"monto\": 150.00,\r\n  \"observaciones\": \"Tarjeta Visa\"\r\n}\r\n\r\n*/",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3036,11 +3116,16 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"id\": 1,\r\n  \"idCliente\": 1,\r\n  \"idMascota\": 1,\r\n  \"fecha\": \"2025-12-02\",\r\n  \"hora\": \"14:30:00\",\r\n  \"idEstado\": 2,\r\n  \"observaciones\": \"Cambio de horario\"\r\n}",
+									"raw": "{\r\n  \"id\": 1,\r\n  \"idCliente\": 1,\r\n  \"idMascota\": 1,\r\n  \"idMedioSolicitud\": 2,\r\n  \"fecha\": \"2026-01-21\",\r\n  \"hora\": \"14:00:00\",\r\n  \"duracionEstimadaMin\": 45,\r\n  \"idEstado\": 5,\r\n  \"abonoInicial\": 50.00,\r\n  \"observaciones\": \"Consulta de seguimiento\"\r\n}\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3076,7 +3161,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idIngreso\": 15,\r\n  \"idAgenda\": 10,\r\n  \"cantidad\": 2,\r\n  \"valorServicio\": 360000,\r\n  \"observaciones\": \"Se agregaron uñas\"\r\n}",
+									"raw": "{\r\n  \"idIngreso\": 1,\r\n  \"idAgenda\": 1,\r\n  \"idServicio\": 1,\r\n  \"idColaborador\": 2,\r\n  \"idVeterinario\": null,\r\n  \"cantidad\": 2,\r\n  \"duracionMin\": 60,\r\n  \"valorServicio\": 200.00,\r\n  \"observaciones\": \"Baño, corte y spa\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3191,7 +3276,139 @@
 					"name": "Consultas",
 					"item": [
 						{
-							"name": "Cosultar historial por mascota",
+							"name": "Historias Clinicas",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Historia Clinica x cod",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Historia Clinica x mascota",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/historia-clinica/mascota/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"historia-clinica",
+										"mascota",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "H Clinica  Mascota completa",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -3224,6 +3441,175 @@
 										"api",
 										"historia-clinica",
 										"historial-mascota",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atenciones Medicas",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// Aplica para vacunaciones\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/atenciones-medicas/historia-paginado/1?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"atenciones-medicas",
+										"historia-paginado",
+										"1"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atenciones Medicas x Veterinario",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// Aplica para vacunaciones\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/atenciones-medicas/veterinario/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"atenciones-medicas",
+										"veterinario",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atenciones Medicas x cod",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// Aplica para vacunaciones\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/atenciones-medicas/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"atenciones-medicas",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atenciones Medicas x H Clinica",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// Aplica para vacunaciones\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/atenciones-medicas/historia/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"atenciones-medicas",
+										"historia",
 										"1"
 									]
 								}
@@ -3269,7 +3655,7 @@
 							"response": []
 						},
 						{
-							"name": "Consultar por id de atencion",
+							"name": "Registros de atencion x id",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -3345,6 +3731,135 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Archivos H Clinica x Id",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/archivos-clinicos/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"archivos-clinicos",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Archivos H Clinicas",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/archivos-clinicos/registro-paginado/1?page=0&size=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"archivos-clinicos",
+										"registro-paginado",
+										"1"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Archivos H Clinica x Atencion",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/archivos-clinicos/registro/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"archivos-clinicos",
+										"registro",
+										"1"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -3360,11 +3875,16 @@
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idMascota\": 1,\r\n  \"observacionesGenerales\": \"Mascota rescatada\"\r\n}",
+									"raw": "{\r\n  \"idMascota\": 1,\r\n  \"observacionesGenerales\": \"Mascota sana, sin alergias conocidas. Vacunado al día.\"\r\n}\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3388,7 +3908,7 @@
 							"response": []
 						},
 						{
-							"name": "Guardar cita en h clinica",
+							"name": "Registrar una cita especial en HC",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -3400,7 +3920,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idHistoriaClinica\": 1,\r\n  \"idAgenda\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"fechaAtencion\": \"2025-12-02\",\r\n  \"horaInicio\": \"11:00:00\",\r\n  \"horaFin\": \"11:45:00\",\r\n  \"motivoConsulta\": \"Vacunación\",\r\n  \"pesoKg\": 9.2,\r\n  \"temperaturaC\": 38.8,\r\n  \"diagnostico\": \"Sano\",\r\n  \"tratamiento\": \"Vacuna aplicada\",\r\n  \"observaciones\": \"Todo bien\"\r\n}",
+									"raw": "{\r\n  \"idHistoriaClinica\": 1,\r\n  \"idAgenda\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"idColaborador\": null,\r\n  \"fechaAtencion\": \"2025-12-14\",\r\n  \"horaInicio\": \"10:00:00\",\r\n  \"horaFin\": \"10:30:00\",\r\n  \"motivoConsulta\": \"Consulta de rutina\",\r\n  \"anamnesis\": \"Mascota presenta buen apetito y energía normal\",\r\n  \"examenFisico\": \"Sin hallazgos relevantes\",\r\n  \"signosVitales\": \"FC: 80, FR: 20, PA: 120/80\",\r\n  \"pesoKg\": 25.50,\r\n  \"temperaturaC\": 38.50,\r\n  \"diagnostico\": \"Animal sano\",\r\n  \"tratamiento\": \"Vacunación anual\",\r\n  \"observaciones\": \"Continuar con plan preventivo\",\r\n  \"proximoControl\": \"2026-03-14\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3408,7 +3928,7 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:8088/api/historia-clinica/registrar-atencion",
+									"raw": "http://localhost:8088/api/atenciones-medicas/crear",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -3416,15 +3936,56 @@
 									"port": "8088",
 									"path": [
 										"api",
-										"historia-clinica",
-										"registrar-atencion"
+										"atenciones-medicas",
+										"crear"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "Actualizar una cita en h clinica",
+							"name": "Registrar Cita Atendida en HC",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"tipoVisita\": \"MEDICA\",\r\n  \"motivoConsulta\": \"Vacunación\",\r\n  \"diagnostico\": \"Apto\",\r\n  \"tratamiento\": \"Vacuna IM\",\r\n  \"pesoKg\": 12.5,\r\n  \"temperaturaC\": 38.5,\r\n  \"proximoControl\": \"2026-02-25\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/atenciones-medicas/registrar-cita-atendida",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"atenciones-medicas",
+										"registrar-cita-atendida"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Registrar una atencion",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -3436,7 +3997,84 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n  \"idRegistro\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"horaFin\": \"12:00:00\",\r\n  \"pesoKg\": 9.3,\r\n  \"idEstado\": 2,\r\n  \"observaciones\": \"Paciente muy colaborador\"\r\n}",
+									"raw": "{\r\n  \"idHistoriaClinica\": 1,\r\n  \"idAgenda\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"idColaborador\": null,\r\n  \"fechaAtencion\": \"2025-12-14\",\r\n  \"horaInicio\": \"10:00:00\",\r\n  \"horaFin\": \"10:30:00\",\r\n  \"motivoConsulta\": \"Consulta de rutina\",\r\n  \"anamnesis\": \"Mascota presenta buen apetito y energía normal\",\r\n  \"examenFisico\": \"Sin hallazgos relevantes\",\r\n  \"signosVitales\": \"FC: 80, FR: 20, PA: 120/80\",\r\n  \"pesoKg\": 25.50,\r\n  \"temperaturaC\": 38.50,\r\n  \"diagnostico\": \"Animal sano\",\r\n  \"tratamiento\": \"Vacunación anual\",\r\n  \"observaciones\": \"Continuar con plan preventivo\",\r\n  \"proximoControl\": \"2026-03-14\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/atenciones-medicas/crear",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"atenciones-medicas",
+										"crear"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Subir Archivo a H Clinica",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idRegistroAtencion\": 1,\r\n  \"idTipoArchivo\": 1,\r\n  \"nombreArchivo\": \"radiografia_torax\",\r\n  \"extensionArchivo\": \"jpg\",\r\n  \"descripcion\": \"Radiografía de tórax - sin hallazgos relevantes\"\r\n}\r\n\r\n/*\r\n\r\n// otro ejemplo de examen de sangre \r\n{\r\n  \"idRegistroAtencion\": 1,\r\n  \"idTipoArchivo\": 5,\r\n  \"nombreArchivo\": \"hemograma_completo\",\r\n  \"extensionArchivo\": \"pdf\",\r\n  \"descripcion\": \"Hemograma: Resultados normales\"\r\n}\r\n*/",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/archivos-clinicos/subir",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"archivos-clinicos",
+										"subir"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Actualizaciones",
+					"item": [
+						{
+							"name": "Actualizar una cita en h clinica",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"id\": 1,\r\n  \"idHistoriaClinica\": 1,\r\n  \"horaFin\": \"11:00:00\",\r\n  \"diagnostico\": \"Animal en buen estado de salud\",\r\n  \"tratamiento\": \"Vacunación anual y desparasitación\",\r\n  \"observaciones\": \"Plan actualizado\",\r\n  \"proximoControl\": \"2026-03-14\",\r\n  \"idEstado\": 2\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3454,42 +4092,6 @@
 										"api",
 										"historia-clinica",
 										"actualizar-atencion"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Subir un archivo de mascota",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n  \"idRegistroAtencion\": 2,\r\n  \"idTipoArchivo\": 1,\r\n  \"nombreArchivo\": \"certificado_2025.pdf\",\r\n  \"extensionArchivo\": \"pdf\",\r\n  \"descripcion\": \"Certificado vacunación\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8088/api/historia-clinica/subir-archivo",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8088",
-									"path": [
-										"api",
-										"historia-clinica",
-										"subir-archivo"
 									]
 								}
 							},
@@ -3531,6 +4133,43 @@
 										"api",
 										"historia-clinica",
 										"eliminar-archivo",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Archivos H Clinica",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8088/api/archivos-clinicos/eliminar/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"api",
+										"archivos-clinicos",
+										"eliminar",
 										"1"
 									]
 								}

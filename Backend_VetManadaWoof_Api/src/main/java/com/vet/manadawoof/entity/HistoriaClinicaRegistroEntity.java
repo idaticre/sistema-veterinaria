@@ -17,8 +17,7 @@ import java.time.LocalTime;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "historia_clinica_registros", indexes = {
-        @Index(name = "idx_registro_historia", columnList = "id_historia_clinica"), @Index(name = "idx_registro_agenda", columnList = "id_agenda"), @Index(name = "idx_registro_fecha", columnList = "fecha_atencion"), @Index(name = "idx_registro_veterinario", columnList = "id_veterinario"), @Index(name = "idx_registro_estado", columnList = "id_estado"), @Index(name = "idx_registro_codigo", columnList = "codigo", unique = true)})
+@Table(name = "historia_clinica_registros")
 public class HistoriaClinicaRegistroEntity implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -31,21 +30,22 @@ public class HistoriaClinicaRegistroEntity implements Serializable {
     private String codigo;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_historia_clinica", nullable = false, foreignKey = @ForeignKey(name = "fk_registro_historia"))
+    @JoinColumn(name = "id_historia_clinica", nullable = false)
     private HistoriaClinicaEntity historiaClinica;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_agenda", foreignKey = @ForeignKey(name = "fk_registro_agenda"))
+    @JoinColumn(name = "id_agenda", nullable = false, unique = true)
     private AgendaEntity agenda;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_veterinario", foreignKey = @ForeignKey(name = "fk_registro_veterinario"))
+    @JoinColumn(name = "id_veterinario")
     private VeterinarioEntity veterinario;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_colaborador", foreignKey = @ForeignKey(name = "fk_registro_colaborador"))
+    @JoinColumn(name = "id_colaborador")
     private ColaboradorEntity colaborador;
     
+    // ADMINISTRATIVO
     @Column(name = "fecha_atencion", nullable = false)
     private LocalDate fechaAtencion;
     
@@ -55,16 +55,29 @@ public class HistoriaClinicaRegistroEntity implements Serializable {
     @Column(name = "hora_fin")
     private LocalTime horaFin;
     
-    @Column(length = 256)
+    @Column(name = "tipo_visita", length = 32, nullable = false)
+    private String tipoVisita = "GENERAL";
+    
+    @Column(name = "total_cita", precision = 10, scale = 2)
+    private BigDecimal totalCita = BigDecimal.ZERO;
+    
+    @Column(name = "abono_total", precision = 10, scale = 2)
+    private BigDecimal abonoTotal = BigDecimal.ZERO;
+    
+    @Column(name = "saldo_pendiente", precision = 10, scale = 2)
+    private BigDecimal saldoPendiente = BigDecimal.ZERO;
+    
+    // CLÍNICO
+    @Column(name = "motivo_consulta", length = 256)
     private String motivoConsulta;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", name = "anamnesis")
     private String anamnesis;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", name = "examen_fisico")
     private String examenFisico;
     
-    @Column(length = 256)
+    @Column(name = "signos_vitales", length = 256)
     private String signosVitales;
     
     @Column(name = "peso_kg", precision = 6, scale = 2)
@@ -79,18 +92,38 @@ public class HistoriaClinicaRegistroEntity implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String tratamiento;
     
+    @Column(name = "proximo_control")
+    private LocalDate proximoControl;
+    
+    // ESTÉTICO
+    @Column(name = "estado_pelaje", length = 128)
+    private String estadoPelaje;
+    
+    @Column(name = "condicion_piel", length = 128)
+    private String condicionPiel;
+    
+    @Column(name = "observaciones_grooming", columnDefinition = "TEXT")
+    private String observacionesGrooming;
+    
+    // HOSPEDAJE
+    @Column(name = "comportamiento_hospedaje", columnDefinition = "TEXT")
+    private String comportamientoHospedaje;
+    
+    @Column(name = "alimentacion_hospedaje", length = 256)
+    private String alimentacionHospedaje;
+    
+    @Column(name = "actividad_hospedaje", columnDefinition = "TEXT")
+    private String actividadHospedaje;
+    
+    // NOTAS GENERALES
     @Column(columnDefinition = "TEXT")
     private String observaciones;
     
-    @Column
-    private LocalDate proximoControl;
-    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_estado", foreignKey = @ForeignKey(name = "fk_registro_estado"))
+    @JoinColumn(name = "id_estado", nullable = false)
     private EstadoHistoriaClinicaEntity estado;
     
     @Column(name = "fecha_registro", nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime fechaRegistro;
     
     @PrePersist
