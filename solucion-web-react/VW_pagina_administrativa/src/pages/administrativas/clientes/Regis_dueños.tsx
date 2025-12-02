@@ -18,6 +18,7 @@ function regis_dueños() {
   const [direccion, setDireccion] = useState("");
   const [ciudad, setCiudad] = useState("");
   const [distrito, setDistrito] = useState("");
+  const [representante, setRepresentante] = useState("");
   const [activo, setActivo] = useState(true);
   const location = useLocation();
   const clienteSelecc = location.state?.cliente as ClienteResponse | undefined;
@@ -49,6 +50,7 @@ function regis_dueños() {
       setDireccion(clienteSelecc.direccion || "");
       setCiudad(clienteSelecc.ciudad || "");
       setDistrito(clienteSelecc.distrito || "");
+      setRepresentante(clienteSelecc.representante || "");
       setActivo(clienteSelecc.activo ?? true);
       setEsPersonaJuridica(esJuridica);
       
@@ -107,6 +109,7 @@ function regis_dueños() {
       direccion,
       ciudad,
       distrito,
+      representante : esPersonaJuridica ? representante : "" , 
       activo
     };
 
@@ -249,7 +252,19 @@ function regis_dueños() {
                       />
                     </div>
                   </div>
-
+                  <div className="form-group full-width">
+                    {esPersonaJuridica && 
+                      <div className="form-group full-width">
+                        <label htmlFor="representante">Representante</label>
+                        <input 
+                          type="text" 
+                          value={representante} 
+                          onChange={(e) => setRepresentante(e.target.value)} 
+                          placeholder="Nombre del Representante"
+                        />
+                      </div>
+                    }
+                  </div>
                   <div className="form-row"> 
                     <div className="form-group">
                       <label htmlFor="telefono">Teléfono</label>

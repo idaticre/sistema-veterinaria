@@ -194,6 +194,12 @@ function Lst_clientes() {
                         <td><strong>Telefono:</strong></td>
                         <td>{clienteSeleccionado.telefono}</td>
                       </tr>
+                      {clienteSeleccionado.idTipoPersonaJuridica == 2  && (
+                        <tr>
+                          <td><strong>representante:</strong></td>
+                          <td>{clienteSeleccionado.representante}</td>
+                        </tr>
+                      )}
                       <tr>
                         <td><strong>Dirección:</strong></td>
                         <td>{clienteSeleccionado.direccion}</td>

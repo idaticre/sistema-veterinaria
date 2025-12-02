@@ -121,7 +121,7 @@ function Lst_mascotas() {
                 <div id='encabezado'><h2>Lista de mascotas</h2></div>
                 <div id='buscador'>
                   <div id='br_buscador'>
-                    <input type="text" placeholder='Ingrese el nombre del cliente que desea buscar' value={busqueda}
+                    <input type="text" placeholder='Ingrese el nombre de la mascota' value={busqueda}
                       onChange={(e) => setBusqueda(e.target.value)}/>
                   </div>
                   <Link to="/administracion/mascotas/registro"><button className="anadir-goated">➕AÑADIR</button></Link>

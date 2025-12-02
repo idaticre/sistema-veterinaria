@@ -26,6 +26,7 @@ export interface ClienteResquest{
     direccion: string;
     ciudad: string;
     distrito: string;
+    representante?: string;
     activo: boolean;
 }
 
@@ -157,6 +158,7 @@ export interface ClienteResponse{
     ciudad: string;
     distrito: string;
     activo: boolean;
+    representante?: string;
     fechaRegistro: string;
     mensaje: string;
 }
