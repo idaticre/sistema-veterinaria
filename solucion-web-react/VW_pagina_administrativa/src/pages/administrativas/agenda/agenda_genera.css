@@ -244,9 +244,9 @@ main.minimize {
 
 .modal-content {
   width: auto;          /* Se adapta, pero… */
-  min-width: 900px;     /* 👈 ANCHO MÍNIMO PARA QUE NO SEA ANGOSTO */
+  min-width: 950px;     /* 👈 ANCHO MÍNIMO PARA QUE NO SEA ANGOSTO */
   max-width: 95vw;      /* No se sale de la pantalla */
-  max-height: 95vh;     /* No se sale verticalmente */
+  max-height: 70vh;     /* No se sale verticalmente */
 
   background: #ffffff;
   border-radius: 18px;

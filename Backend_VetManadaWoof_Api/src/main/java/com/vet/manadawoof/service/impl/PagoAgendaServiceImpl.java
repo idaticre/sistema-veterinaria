@@ -44,19 +44,38 @@ public class PagoAgendaServiceImpl implements PagoAgendaService {
         
         sp.execute();
         
-        Long idResultado = ((Number) sp.getOutputParameterValue("p_id_resultado")).longValue();
+        // 1. Obtener el valor de salida como Object
+        Object resultIdObject = sp.getOutputParameterValue("p_id_resultado");
+        
+        // 2. Obtener los demás parámetros de salida
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
         BigDecimal totalAbonado = (BigDecimal) sp.getOutputParameterValue("p_total_abonado");
         BigDecimal saldoPendiente = (BigDecimal) sp.getOutputParameterValue("p_saldo_pendiente");
         
+        // 3. Manejar error de negocio devuelto por el SP
         if(mensaje != null && mensaje.startsWith("ERROR")) {
             return PagoAgendaResponseDTO.builder().mensaje(mensaje).build();
         }
         
+        // 4. 🔑 CORRECCIÓN: Verificar si el ID de resultado es NULL
+        if (resultIdObject == null || !(resultIdObject instanceof Number)) {
+            // Esto asegura que no se lance el NullPointerException
+            return PagoAgendaResponseDTO.builder()
+                .mensaje("ERROR: La operación fue exitosa, pero no se recuperó el ID del pago. Revise el SP 'gestionar_pago_agenda'.").build();
+        }
+        
+        // 5. Conversión segura del ID
+        Long idResultado = ((Number) resultIdObject).longValue();
+        
         PagoAgendaResponseDTO response = obtenerPorId(idResultado);
-        response.setTotalAbonado(totalAbonado);
-        response.setSaldoPendiente(saldoPendiente);
-        response.setMensaje(mensaje);
+        
+        // 6. Asignar los demás datos al DTO de respuesta
+        if (response != null) {
+            response.setTotalAbonado(totalAbonado);
+            response.setSaldoPendiente(saldoPendiente);
+            response.setMensaje(mensaje);
+        }
+        
         return response;
     }
     

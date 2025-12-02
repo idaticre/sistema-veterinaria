@@ -50,13 +50,13 @@ public class AgendaServiceImpl implements AgendaService {
         
         sp.execute();
         
-        Long idResultado = ((Number) sp.getOutputParameterValue("p_id_resultado")).longValue();
+        Object resultIdObject = sp.getOutputParameterValue("p_id_resultado");
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
         
         if(mensaje != null && mensaje.startsWith("ERROR")) {
             return AgendaResponseDTO.builder().mensaje(mensaje).build();
         }
-        
+        Long idResultado = ((Number) sp.getOutputParameterValue("p_id_resultado")).longValue();
         return obtenerPorId(idResultado);
     }
     
@@ -81,13 +81,13 @@ public class AgendaServiceImpl implements AgendaService {
         
         sp.execute();
         
-        Long idResultado = ((Number) sp.getOutputParameterValue("p_id_resultado")).longValue();
+        Object resultIdObject = sp.getOutputParameterValue("p_id_resultado");
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
         
         if(mensaje != null && mensaje.startsWith("ERROR")) {
             return AgendaResponseDTO.builder().mensaje(mensaje).build();
         }
-        
+        Long idResultado = ((Number) sp.getOutputParameterValue("p_id_resultado")).longValue();
         return obtenerPorId(idResultado);
     }
     
