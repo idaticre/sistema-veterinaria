@@ -204,19 +204,21 @@ function Lst_clientes() {
                         <p>NO HAY MASCOTAS A SU NOMBRE</p>
                       ):(
                         mascotaDueño.map((masc) => (
-                          <div className='masc_dueño'>
-                              <div className='masc_dueño_img'>
-                                <img src={masc.foto} alt="" />
-                              </div>
-                              <div className='masc_dueño_dataS masc_superior'>
-                                <p>{masc.nombre}</p>
-                                <span>{masc.nombre_estado}</span>
-                              </div>
-                              <div className='masc_dueño_dataS masc_inferior'>
-                                <p>Especie: {masc.nombre_especie}</p>
-                                <span>Raza: {masc.nombre_raza}</span>
-                              </div>
-                          </div>
+                          <Link to="/administracion/mascotas/lista" state={{ idMascota: masc.id }}>
+                            <div className='masc_dueño'>
+                                <div className='masc_dueño_img'>
+                                  <img src={masc.foto} alt="" />
+                                </div>
+                                <div className='masc_dueño_dataS masc_superior'>
+                                  <p>{masc.nombre}</p>
+                                  <span>{masc.nombre_estado}</span>
+                                </div>
+                                <div className='masc_dueño_dataS masc_inferior'>
+                                  <p>Especie: {masc.nombre_especie}</p>
+                                  <span>Raza: {masc.nombre_raza}</span>
+                                </div>
+                            </div>
+                          </Link>
                         ))
                       )}
                     </div>

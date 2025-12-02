@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
 import './regis_dueños.css'
 import type { tipo_doc, ClienteResponse, ClienteResquest } from '../../../components/interfaces/interfaces';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import IST from '../../../components/proteccion/IST';
 
 function regis_dueños() {
@@ -142,6 +142,7 @@ function regis_dueños() {
 
         <main className={minimizado ? 'minimize' : ''}>
           <div className="container">
+            <Link className='boton_retorno' to="/administracion/cliente/lista"><i className="fa-solid fa-backward"></i></Link>
             <h2><i className="icon-user"></i> Registro Cliente</h2>
             
             <div className="form-box">

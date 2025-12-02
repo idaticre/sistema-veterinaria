@@ -161,6 +161,7 @@
 
 .DmascotaR_contenido_superior img {
   max-width: 35%;
+  height: 20rem;
   border-radius: 8px;
   object-fit: cover;
   border: 2px solid #eee;

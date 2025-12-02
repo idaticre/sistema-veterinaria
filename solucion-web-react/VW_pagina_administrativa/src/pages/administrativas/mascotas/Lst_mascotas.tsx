@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './lst_mascotas.css'
 import type { MascotaResponse } from '../../../components/interfaces/interfaces';
 import IST from '../../../components/proteccion/IST';
@@ -14,6 +14,9 @@ function Lst_mascotas() {
   const [filtrados, setFiltrados] = useState<Mascotaextendido[]>([]);
   const [mascotas, setMascotas] = useState<Mascotaextendido[]>([]);
   const [mascotaSeleccionado, setMascotaSeleccionado] = useState<Mascotaextendido | null>(null);
+  const location = useLocation();
+  const idMDCS = location.state?.idMascota ?? null;
+  
   useEffect(() => {
     IST
       .get<{ data: MascotaResponse[] }>("/mascotas")
@@ -58,6 +61,15 @@ function Lst_mascotas() {
 
         setMascotas(mascotasConExtras);
         setFiltrados(mascotasConExtras);
+
+        if (idMDCS) {
+          const encontrada = mascotasConExtras.find(m => m.id === idMDCS);
+          
+          if (encontrada) {
+            setMascotaSeleccionado(encontrada);
+          }
+        }
+
       })
       .catch((err) => console.error("Error en la carga de mascotas", err));
   }, []);

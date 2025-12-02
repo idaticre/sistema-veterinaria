@@ -5,6 +5,7 @@ import { useState } from "react";
 function Login() {
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
+  const [mostrarPass, setMostrarPass] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -17,18 +18,22 @@ function Login() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: usuario, 
+          username: usuario,
           password: password,
         }),
       });
 
-      const data = await response.json();
-      console.log("Respuesta del servidor:", data); //quitar o modificar despues
+      if (!response.ok) {
+        alert("Credenciales incorrectas");
+        setUsuario("");
+        setPassword("");
+        return;
+      }
 
-      if (response.ok && data.token) {
-        console.log("Login exitoso:", data.username);
+      const data = await response.json(); 
+      console.log("Respuesta del servidor:", data);
 
-        // Guarda los datos en localStorage o si quiero que sea mientras la pestaña este abierta sessionStorage
+      if (data.token) {
         sessionStorage.setItem("token", data.token);
         sessionStorage.setItem("usuario", data.username);
         sessionStorage.setItem("roles", JSON.stringify(data.roles));
@@ -63,12 +68,15 @@ function Login() {
           <div className="casilla_login">
             <label>Contraseña:</label>
             <input
-              type="password"
+              type={mostrarPass ? "text" : "password"}
               placeholder="Ingrese su contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <span className="mostrar_contra" onClick={() => setMostrarPass(!mostrarPass)}>
+              {mostrarPass ? <i className="fa-solid fa-eye-slash"></i> : <i className="fa-solid fa-eye"></i>}
+            </span>
           </div>
           <button type="submit" className="btn_login">Ingresar</button>
         </form>

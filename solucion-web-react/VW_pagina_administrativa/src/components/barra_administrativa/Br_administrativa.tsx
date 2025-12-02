@@ -106,41 +106,26 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 </Link>
                             </li>
                             {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS") && (
-                                <li className={`opcion opcion_desplegable ${openMenu === "cliente"?"toggle_submenu":""}`} 
-                                    onClick={() => toggleMenu("cliente")}
-                                >
-                                    <Link to="" className="enlace_opcion">
+                                <li className="opcion opcion_simple">
+                                    <Link to="/administracion/cliente/lista" className="enlace_opcion">
                                         <i className="fa-solid fa-user"></i>
-                                        <span>Cliente</span>
-                                        <i className={`fa-solid ${openMenu === "cliente" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                        <span>Gestión de clientes</span>
                                     </Link>
-                                    <ul ref={clienteRef} className="submenu">
-                                        <li><Link to="/administracion/cliente/lista" className="sub_opcion">Lista de clientes</Link></li>
-                                        {!RolesPermitidos("AUXILIAR GROOMERS") && (
-                                            <li><Link to="/administracion/cliente/registro" className="sub_opcion">Registrar cliente</Link></li>
-                                        )}
-                                    </ul>
                                 </li>
                             )}
                             {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS") && (
-                                <li className={`opcion opcion_desplegable ${openMenu === "mascotas"?"toggle_submenu":""}`} 
-                                    onClick={() => toggleMenu("mascotas")}
-                                >
-                                    <Link to="" className="enlace_opcion">
+                                <li className="opcion opcion_simple">
+                                    <Link to="/administracion/mascotas/lista" className="enlace_opcion">
                                         <i className="fa-solid fa-shield-dog"></i>
-                                        <span>Mascotas</span>
-                                        <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                        <span>Gestión Mascotas</span>
+                                        {/*<i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>*/}
                                     </Link>
-                                    <ul ref={mascotasRef} className="submenu">
-                                        <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Mascotas registradas</Link></li>
+                                    {/*<ul ref={mascotasRef} className="submenu">
+                                        <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestion de Mascotas</Link></li>
                                         {!RolesPermitidos("AUXILIAR GROOMERS") && (
-                                            <>
-                                                <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Registrar mascota</Link></li>
-                                                <li><Link to="/administracion/mascotas/espcies_razas" className="sub_opcion">Especies y razas</Link></li>
-                                                <li><Link to="/administracion/mascotas/vacunas" className="sub_opcion">Vacunas disponibles</Link></li>
-                                            </>
+                                            <li><Link to="/administracion/mascotas/vacunas" className="sub_opcion">Vacunas disponibles</Link></li>
                                         )}
-                                    </ul>
+                                    </ul>*/}
                                 </li>
                             )}
                             {RolesPermitidos("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS") && (
@@ -160,14 +145,14 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </ul>
                                 </li>
                             )}
-                            {RolesPermitidos("ADMINISTRADOR GENERAL") && (
+                            {/*{RolesPermitidos("ADMINISTRADOR GENERAL") && (
                                 <li className="opcion opcion_simple">
                                     <Link to="#" className="enlace_opcion">
                                         <i className="fa-solid fa-folder"></i>
                                         <span>Historial Médico</span>
                                     </Link>
                                 </li>
-                            )}
+                            )}*/}
                             {RolesPermitidos("ADMINISTRADOR GENERAL") && (
                                 <li className="opcion opcion_simple">
                                     <Link to="/administracion/servicios" className="enlace_opcion">

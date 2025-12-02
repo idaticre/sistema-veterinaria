@@ -176,6 +176,21 @@ main.minimize{
             margin-left: 50px ;
         }
 
+        .btn_quitar_foto{
+            margin-top: 10px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn_quitar_foto:hover{
+            background-color: #c9302c;  
+        }
+
         .submit-btn {
             background: #4caf50;
             color: white;
@@ -255,7 +270,7 @@ main.minimize{
             border-radius: 8px;
             cursor: pointer;
         }
-        /* Contenedor general del buscador */
+        
         .owner-search {
             position: relative;
             display: flex;

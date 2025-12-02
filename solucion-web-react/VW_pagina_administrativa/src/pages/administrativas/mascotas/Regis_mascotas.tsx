@@ -3,7 +3,7 @@ import Br_administrativa from '../../../components/barra_administrativa/Br_admin
 import './regis_mascotas.css';
 import type { Razas, Especie, MascotaRequest, ClienteResponse, Estado_Mascota, Tamaño_Mascota, Etapa_Mascota, MascotaResponse } from '../../../components/interfaces/interfaces';
 import IST from '../../../components/proteccion/IST';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 type Mascotaextendido = MascotaResponse & { nombre_dueño?: string;};
 
@@ -181,40 +181,54 @@ function Regis_mascotas() {
     const handleBusqueda = (valor: string) => {
         setBusqueda(valor);
         console.log("Buscando:", valor);
+        
         if (valor.trim() === "") {
             setResultados([]);
             return;
         }
-        const filtrados = dueños.filter((d) =>
-            d.nombre.toLowerCase().includes(valor.toLowerCase())
-        );
+        const filtrados = dueños.filter((d) =>{
+            const nombreCoincide = d.nombre.toLowerCase().includes(valor.toLowerCase());
+            const documentoCoincide = d.documento.toString().includes(valor);
+            return nombreCoincide || documentoCoincide;
+        });
         console.log("Coincidencias encontradas:", filtrados);
         setResultados(filtrados);
     };
-
+    
     const eliminarFoto = async () => {
         const nombreArchivo = mascotaSelecc?.foto?.split("/").pop();
-        if (!nombreArchivo) return;
 
-        try {
-            const formData = new FormData();
-            formData.append("nombreArchivo", nombreArchivo);
+        const esImagenBD =
+            nombreArchivo && imagenMascota?.includes(nombreArchivo);
 
-            await IST.post("/archivos/eliminar", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+        if (esImagenBD) {
+            try {
+                const formData = new FormData();
+                formData.append("nombreArchivo", nombreArchivo);
 
-            console.log("Imagen eliminada correctamente");
+                await IST.post("/archivos/eliminar", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
 
-            setImagenMascota(null);
-            setFotoFile(null);
-            setFoto("");
+                console.log("Imagen eliminada del servidor ✔");
 
-            alert("Imagen eliminada ✔");
-        } catch (error) {
-            console.error("Error eliminando archivo:", error);
-            alert("Error eliminando la imagen ❌");
+                setImagenMascota(null);
+                setFotoFile(null);
+                setFoto("");
+
+                alert("Imagen eliminada ✔");
+
+                return;
+            } catch (error) {
+                console.error("Error eliminando archivo:", error);
+                alert("Error eliminando la imagen ❌");
+                return;
+            }
         }
+
+        setImagenMascota(null);
+        setFotoFile(null);
+        setFoto("");
     };
 
     return (
@@ -223,6 +237,7 @@ function Regis_mascotas() {
                 <Br_administrativa onMinimizeChange={setMinimizado} />
                 <main className={minimizado ? 'minimize' : ''}>
                     <div className="content-section hidden" id="nueva-mascota-section">
+                            <Link className='boton_retorno' to="/administracion/mascotas/lista"><i className="fa-solid fa-backward"></i></Link>
                             <div className="form-header">
                                 <h2>Información de la Mascota</h2>
                             </div>
@@ -259,7 +274,9 @@ function Regis_mascotas() {
                                                             
                                                         <div className="form-group">
                                                             <label>Especie *</label>
-                                                            <select value={idEspecie} onChange={(e) => setIdEspecie(Number(e.target.value))} required>
+                                                            <select value={idEspecie} onChange={(e) => {
+                                                                    setIdEspecie(Number(e.target.value)); 
+                                                                    setIdRaza(0); }} required>
                                                                 <option value="">Seleccionar especie</option>
                                                                 {especies.map((esp) => (
                                                                     <option key={esp.id} value={esp.id}>{esp.nombre}</option>
@@ -269,11 +286,13 @@ function Regis_mascotas() {
                                                                 
                                                         <div className="form-group">
                                                             <label>Raza *</label>
-                                                            <select value={idRaza} onChange={(e) => setIdRaza(Number(e.target.value))} required>
+                                                            <select value={idRaza} onChange={(e) => setIdRaza(Number(e.target.value))} required disabled ={!idEspecie}>
                                                                 <option value="">Seleccionar raza</option>
-                                                                {razas.map((r) => (
-                                                                    <option key={r.id} value={r.id}>{r.nombre}</option>
-                                                                ))}
+                                                                {razas.filter((r) => r.idEspecie == idEspecie)
+                                                                    .map((r)=>(
+                                                                        <option key={r.id} value={r.id}>{r.nombre}</option>
+                                                                    )) 
+                                                                }
                                                             </select>
                                                         </div>
                                                                 
@@ -322,7 +341,7 @@ function Regis_mascotas() {
                                                             <button
                                                                 type="button"
                                                                 onClick={eliminarFoto}
-                                                                className="remove-photo-btn"
+                                                                className="btn_quitar_foto"
                                                             >
                                                                 Quitar imagen ❌
                                                             </button>
@@ -343,7 +362,7 @@ function Regis_mascotas() {
                                                         </div>
                                                     </div>
                                                 </div>
-
+                                               
                                                 <div className="form-group">
                                                     <label htmlFor="estado">Estado *</label>
                                                     <select id="estado" name="estado" value={idEstado} onChange={(e) => setIdEstado(Number(e.target.value))} required>

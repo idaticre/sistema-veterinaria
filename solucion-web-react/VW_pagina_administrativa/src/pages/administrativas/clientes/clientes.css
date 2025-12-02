@@ -187,6 +187,11 @@
   width: 57%;
 }
 
+.VDCliente_mis_mascotas a{
+  text-decoration: none; 
+  color: inherit; 
+}
+
 .masc_dueño {
   max-width: 700px;
   background: #f8f8f8;
@@ -195,6 +200,10 @@
   margin: 15px auto;
   border: 2px solid #ddd;
   position: relative;
+}
+
+.masc_dueño:hover{
+  background-color: #b3f9ed;
 }
 
 .masc_dueño_img img {
