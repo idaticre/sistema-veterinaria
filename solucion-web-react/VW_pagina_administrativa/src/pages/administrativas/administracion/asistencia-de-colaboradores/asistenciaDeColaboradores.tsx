@@ -3,10 +3,12 @@ import IST from "../../../../components/proteccion/IST";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./asistencia.css";
 
+// 🔥 AGREGAMOS EL CAMPO 'documento' a la interfaz Colaborador
 interface Colaborador {
   id: number;
   codigoColaborador: string;
   nombre: string;
+  documento: string; // <-- AGREGADO
   correo?: string;
   telefono?: string;
   activo: boolean;
@@ -33,6 +35,7 @@ interface RegistroAsistenciaBackend {
 export default function AsistenciaColaboradores() {
   const [minimizado, setMinimizado] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  // 'colaboradores' sigue cargando la lista completa al inicio
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [colaboradorSeleccionado, setColaboradorSeleccionado] = useState<Colaborador | null>(null);
   const [registroHoy, setRegistroHoy] = useState<RegistroAsistenciaBackend | null>(null);
@@ -41,7 +44,7 @@ export default function AsistenciaColaboradores() {
 
   const hoyStr = () => new Date().toISOString().split("T")[0];
 
-  /* ============================ CARGAR COLABORADORES ============================ */
+  /* ============================ CARGAR COLABORADORES (SIN CAMBIOS) ============================ */
   useEffect(() => {
     IST.get("/colaboradores")
       .then((res) => {
@@ -50,6 +53,8 @@ export default function AsistenciaColaboradores() {
           ...c,
           id: Number(c.id),
           activo: Boolean(c.activo),
+          // 🔥 Mapeamos el campo 'documento' que viene del DTO
+          documento: c.documento, 
         }));
         setColaboradores(normalized);
 
@@ -73,12 +78,17 @@ export default function AsistenciaColaboradores() {
       });
   }, []);
 
-  /* ============================ FILTRAR ============================ */
-  const filtrados = colaboradores.filter((c) =>
-    c.nombre?.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  /* ============================ FILTRAR (Lógica Modificada) ============================ */
+  // 🔥 Ahora filtra por nombre O documento
+  const filtrados = colaboradores.filter((c) => {
+    const busquedaLower = busqueda.toLowerCase();
+    return (
+      c.nombre?.toLowerCase().includes(busquedaLower) ||
+      c.documento?.toLowerCase().includes(busquedaLower) // <-- NUEVA CONDICIÓN
+    );
+  });
 
-  /* ============================ CARGAR REGISTRO HOY ============================ */
+  /* ============================ CARGAR REGISTRO HOY (SIN CAMBIOS) ============================ */
   const cargarRegistroHoy = async (idColaborador: number) => {
     setLoadingRegistroHoy(true);
     try {
@@ -106,7 +116,7 @@ export default function AsistenciaColaboradores() {
     }
   };
 
-  /* ============================ SELECCIONAR COLABORADOR ============================ */
+  /* ============================ SELECCIONAR COLABORADOR (SIN CAMBIOS) ============================ */
   const seleccionarColaborador = (c: Colaborador) => {
     const normalized = {
       ...c,
@@ -119,7 +129,7 @@ export default function AsistenciaColaboradores() {
     cargarRegistroHoy(normalized.id);
   };
 
-  /* ============================ REGLAS ============================ */
+  /* ============================ REGLAS (SIN CAMBIOS) ============================ */
   const haMarcadoTipoHoy = (tipo: TipoMarcaFrontend) => {
     if (!registroHoy) return false;
     if (tipo === "ENTRADA") return !!registroHoy.horaEntrada;
@@ -136,7 +146,7 @@ export default function AsistenciaColaboradores() {
     return true;
   };
 
-  /* ============================ MARCAR ASISTENCIA ============================ */
+  /* ============================ MARCAR ASISTENCIA (SIN CAMBIOS) ============================ */
   const marcarAsistencia = async (tipo: TipoMarcaFrontend) => {
     if (!colaboradorSeleccionado) {
       alert("Selecciona un colaborador.");
@@ -150,8 +160,6 @@ export default function AsistenciaColaboradores() {
     }
 
     
-
-   
     setLoadingAction(true);
 
     const body = {
@@ -217,7 +225,8 @@ export default function AsistenciaColaboradores() {
           <div id="buscador">
             <input
               type="text"
-              placeholder="Buscar colaborador..."
+              // 🔥 Texto actualizado para indicar la nueva capacidad de búsqueda
+              placeholder="Buscar por nombre o documento..." 
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
@@ -232,8 +241,8 @@ export default function AsistenciaColaboradores() {
                   className={`item-colaborador ${colaboradorSeleccionado?.id === c.id ? "seleccionado" : ""}`}
                   onClick={() => seleccionarColaborador(c)}
                 >
-                  {c.nombre} ({c.codigoColaborador})
-                </div>
+                  {/* 🔥 CAMBIO CLAVE: Mostramos el documento en lugar de codigoColaborador */}
+                  {c.nombre} **({c.documento})** </div>
               ))}
             </div>
           )}
@@ -242,37 +251,38 @@ export default function AsistenciaColaboradores() {
           {colaboradorSeleccionado && (
             <div className="panel-registro">
               <h3>👤 {colaboradorSeleccionado.nombre}</h3>
-              <p><strong>Código:</strong> {colaboradorSeleccionado.codigoColaborador}</p>
+              {/* 🔥 CAMBIO CLAVE: Mostramos el documento en el panel */}
+              <p><strong>Documento:</strong> {colaboradorSeleccionado.documento}</p>
 
               <div className="acciones-asistencia">
-  <button
-    disabled={loadingAction}
-    onClick={() => marcarAsistencia("ENTRADA")}
-  >
-    🕒 Entrada
-  </button>
+                <button
+                  disabled={loadingAction}
+                  onClick={() => marcarAsistencia("ENTRADA")}
+                >
+                  🕒 Entrada
+                </button>
 
-  <button
-    disabled={loadingAction}
-    onClick={() => marcarAsistencia("LUNCH_IN")}
-  >
-    🍽️ Inicio Almuerzo
-  </button>
+                <button
+                  disabled={loadingAction}
+                  onClick={() => marcarAsistencia("LUNCH_IN")}
+                >
+                  🍽️ Inicio Almuerzo
+                </button>
 
-  <button
-    disabled={loadingAction}
-    onClick={() => marcarAsistencia("LUNCH_OUT")}
-  >
-    🍴 Fin Almuerzo
-  </button>
+                <button
+                  disabled={loadingAction}
+                  onClick={() => marcarAsistencia("LUNCH_OUT")}
+                >
+                  🍴 Fin Almuerzo
+                </button>
 
-  <button
-    disabled={loadingAction}
-    onClick={() => marcarAsistencia("SALIDA")}
-  >
-    🏁 Salida Final
-  </button>
-</div>
+                <button
+                  disabled={loadingAction}
+                  onClick={() => marcarAsistencia("SALIDA")}
+                >
+                  🏁 Salida Final
+                </button>
+              </div>
 
 
               <h4>📅 Registro del día</h4>
