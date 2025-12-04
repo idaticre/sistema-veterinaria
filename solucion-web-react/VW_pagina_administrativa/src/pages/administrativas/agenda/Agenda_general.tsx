@@ -56,16 +56,18 @@ interface ServicioDetalle {
 const ID_USUARIO_DEFAULT = 1;
 const ID_MEDIO_PAGO_DEFAULT = 1;
 
-// --- FUNCIÓN AUXILIAR: Extraer detalles de texto de Google Calendar (se mantiene) ---
+// --- FUNCIÓN AUXILIAR: Extraer detalles de texto de Google Calendar (ACTUALIZADA con S/) ---
 const extraerDetallesGC = (summary: string, description?: string) => {
     let cliente = 'N/A';
     let mascota = 'N/A';
     let costoTotal = 'N/A';
 
-    const summaryMatch = summary.match(/(.*?) - Total: \$(\d+\.?\d*)/);
+    // Regex modificado para aceptar '$' o 'S/'
+    const summaryMatch = summary.match(/(.*?) - Total: [\$S\/](\d+\.?\d*)/);
     if (summaryMatch) {
         mascota = summaryMatch[1].trim();
-        costoTotal = `$${parseFloat(summaryMatch[2]).toFixed(2)}`;
+        // Formato de salida con S/
+        costoTotal = `S/${parseFloat(summaryMatch[2]).toFixed(2)}`;
     } else {
         mascota = summary.split(' - ')[0].trim();
     }
@@ -77,9 +79,11 @@ const extraerDetallesGC = (summary: string, description?: string) => {
         }
 
         if (costoTotal === 'N/A') {
-            const costoMatch = description.match(/Costo Total:\s*\$(\d+\.?\d*)/i);
+            // Regex modificado para aceptar '$' o 'S/'
+            const costoMatch = description.match(/Costo Total:\s*[\$S\/](\d+\.?\d*)/i);
             if (costoMatch) {
-                costoTotal = `$${parseFloat(costoMatch[1]).toFixed(2)}`;
+                // Formato de salida con S/
+                costoTotal = `S/${parseFloat(costoMatch[1]).toFixed(2)}`;
             }
         }
     }
@@ -382,7 +386,7 @@ function Agenda_general() {
     setServiciosRegistrados(prev => prev.filter((_, i) => i !== index));
   };
 
-  // --- FUNCIÓN PRINCIPAL DE GUARDADO (SIN CAMBIOS) ---
+  // --- FUNCIÓN PRINCIPAL DE GUARDADO (ACTUALIZADA con S/ y Recordatorios) ---
   const guardarEvento = async () => {
     if (!nuevoEvento.cliente || !nuevoEvento.mascota || !nuevoEvento.dni)
       return alert("Completa los campos de Cliente, DNI y Mascota.");
@@ -439,15 +443,26 @@ function Agenda_general() {
     };
 
     // 2. PREPARAR DATOS PARA GOOGLE CALENDAR (GC)
+    // Se usa S/ en lugar de $
     const serviciosListaGC = serviciosRegistrados.map(s =>
-        `• ${s.nombre_servicio} (${s.cantidad}x $${s.valor_servicio.toFixed(2)})  Subtotal: $${s.subtotal.toFixed(2)} con ${s.nombre_veterinario}. Adicionales: ${s.adicionales || 'N/A'}`
+        `• ${s.nombre_servicio} (${s.cantidad}x S/${s.valor_servicio.toFixed(2)})  Subtotal: S/${s.subtotal.toFixed(2)} con ${s.nombre_veterinario}. Adicionales: ${s.adicionales || 'N/A'}`
     ).join('\n');
 
     const eventoResource = {
-        summary: `${nuevoEvento.mascota} - Total: $${totalCosto.toFixed(2)}`,
-        description: `**CLIENTE Y MASCOTA**\nCliente: ${nuevoEvento.cliente} (DNI: ${nuevoEvento.dni})\nMascota: ${nuevoEvento.mascota}\nEstado: ${nuevoEvento.estado}\nCosto Total: $${totalCosto.toFixed(2)}\nDuración Total: ${duracionCitaTotal} min\n\n**SERVICIOS REGISTRADOS**\n${serviciosListaGC}\n\n**ADELANTO/ABONO:** $${bonoTemporal.toFixed(2)}\n\n**OBSERVACIONES**\n${nuevoEvento.description || 'No hay observaciones adicionales.'}`.trim(),
+        // Se usa S/ en lugar de $
+        summary: `${nuevoEvento.mascota} - Total: S/${totalCosto.toFixed(2)}`,
+        // Se usa S/ en lugar de $
+        description: `**CLIENTE Y MASCOTA**\nCliente: ${nuevoEvento.cliente} (DNI: ${nuevoEvento.dni})\nMascota: ${nuevoEvento.mascota}\nEstado: ${nuevoEvento.estado}\nCosto Total: S/${totalCosto.toFixed(2)}\nDuración Total: ${duracionCitaTotal} min\n\n**SERVICIOS REGISTRADOS**\n${serviciosListaGC}\n\n**ADELANTO:** S/${bonoTemporal.toFixed(2)}\n\n**OBSERVACIONES**\n${nuevoEvento.description || 'No hay observaciones adicionales.'}`.trim(),
         start: { dateTime: start.toISOString(), timeZone: "America/Lima" },
         end: { dateTime: end.toISOString(), timeZone: "America/Lima" },
+        // Implementación de Recordatorios
+        reminders: {
+            useDefault: false, 
+            overrides: [
+                { method: 'email', minutes: 43200 }, // 1 mes antes
+                { method: 'popup', minutes: 30 }      // 30 minutos antes
+            ]
+        }
     };
 
 
@@ -587,7 +602,6 @@ function Agenda_general() {
                     <div key={`gc-${e.id}`} className="cita-card gc-cita">
                       <p><strong>Cliente:</strong> {detalles.Cliente || 'N/A'}</p>
                       <p><strong>Mascota:</strong> {detalles.Mascota || 'N/A'}</p>
-                      <p><strong>Costo Total:</strong> {detalles["Costo Total"] || 'N/A'}</p>
                       <p><strong>Hora:</strong> {inicio} - {fin}</p>
                       <p><strong>Día:</strong> {dia}</p>
                       <button className="btn-mas-info" onClick={() => navigate(`/administracion/agenda/EditarCita`)}>📄 Más información</button>
@@ -708,8 +722,8 @@ function Agenda_general() {
                     <th>Responsable</th>
                     <th>Cantidad</th>
                     <th>Duración Total</th>
-                    <th>Valor Servicio</th>
-                    <th>Subtotal</th>
+                    <th>Valor Servicio (S/)</th>
+                    <th>Subtotal (S/)</th>
                     <th>Acción</th>
                   </tr>
                 </thead>
@@ -720,8 +734,8 @@ function Agenda_general() {
                       <td>{s.nombre_veterinario}</td>
                       <td>{s.cantidad}</td>
                       <td>{s.duracion_total} min</td>
-                      <td>{s.valor_servicio.toFixed(2)}</td>
-                      <td>{s.subtotal.toFixed(2)}</td>
+                      <td>S/{s.valor_servicio.toFixed(2)}</td> {/* AÑADIDO S/ */}
+                      <td>S/{s.subtotal.toFixed(2)}</td> {/* AÑADIDO S/ */}
                       <td><button type="button" className="btn-eliminar" onClick={() => eliminarServicio(index)}>🗑️</button></td>
                   </tr>
                   ))}
@@ -734,17 +748,17 @@ function Agenda_general() {
                   </tr>
                   <tr>
                     <td colSpan={5} style={{ textAlign: "right", fontWeight: "bold" }}>Total Servicios:</td>
-                    <td style={{ fontWeight: "bold" }}>{totalCosto.toFixed(2)}</td>
+                    <td style={{ fontWeight: "bold" }}>S/{totalCosto.toFixed(2)}</td> {/* AÑADIDO S/ */}
                     <td></td>
                   </tr>
                   <tr className="bono-row">
                     <td colSpan={5} style={{ textAlign: "right", fontWeight: "bold" }}>Adelanto:</td>
-                    <td style={{ fontWeight: "bold", color: "red" }}>{bonoTemporal.toFixed(2)}</td>
+                    <td style={{ fontWeight: "bold", color: "red" }}>S/{bonoTemporal.toFixed(2)}</td> {/* AÑADIDO S/ */}
                     <td></td>
                   </tr>
                   <tr className="total-row">
                     <td colSpan={5} style={{ textAlign: "right" }}>Pendiente de Pago:</td>
-                    <td id="totalCitaDisplay"><strong>{Math.max(0, totalCosto - bonoTemporal).toFixed(2)}</strong></td>
+                    <td id="totalCitaDisplay"><strong>S/{Math.max(0, totalCosto - bonoTemporal).toFixed(2)}</strong></td> {/* AÑADIDO S/ */}
                     <td></td>
                   </tr>
                 </tfoot>
