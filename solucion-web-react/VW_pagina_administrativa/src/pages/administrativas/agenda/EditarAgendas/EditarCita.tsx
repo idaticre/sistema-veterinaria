@@ -78,7 +78,7 @@ interface ServicioBase {
 
 
 // --- CONSTANTES DEL BACKEND Y ESTADOS TERMINALES ---
-const ESTADOS_NO_EDITABLES = ['CANCELADA', 'ATENDIDA', 'NO ASISTIÓ'];
+const ESTADOS_NO_EDITABLES = ['CANCELADA', 'ATENDIDA'];
 const ID_MEDIO_SOLICITUD_DEFAULT = 4;
 
 const CLIENTES_SIMULADOS: EntityBase[] = []; 
@@ -103,7 +103,8 @@ const getDetallesMascotaCliente = (cita: CitaBD, clientes: EntityBase[], mascota
     };
 };
 
-// 🚨 FUNCIÓN MEJORADA: BUSCAR EL ID DE GOOGLE CALENDAR
+// 🚨 FUNCIÓN CORREGIDA Y MEJORADA: BUSCAR EL ID DE GOOGLE CALENDAR
+// Soluciona el problema de citas duplicadas validando la HORA exacta.
 const buscarIdGoogleCalendar = async (cita: CitaBD, cliente: EntityBase): Promise<string | undefined> => {
     if (!window.gapi || !window.gapi.client || !window.gapi.client.calendar) {
         return undefined; 
@@ -114,39 +115,57 @@ const buscarIdGoogleCalendar = async (cita: CitaBD, cliente: EntityBase): Promis
     const endOfDay = new Date(`${cita.fecha}T23:59:59`).toISOString();
     
     // Intento 1: Buscar por Documento (DNI) es más preciso
-    let queryTerm = cliente.documento || "";
+    let queryTerm = cliente.documento || cliente.nombre || "";
+    if (!queryTerm) return undefined;
     
-    const ejecutarBusqueda = async (q: string) => {
-        try {
-            const res = await window.gapi.client.calendar.events.list({
-                calendarId: "primary",
-                timeMin: startOfDay,
-                timeMax: endOfDay,
-                q: q,
-                singleEvents: true,
-                maxResults: 10,
-            });
-            // Filtramos resultados para asegurar coincidencia
-            return res.result.items.find((event: any) => 
-                (event.description && event.description.includes(cliente.nombre)) || 
-                (event.summary && event.summary.includes(cliente.nombre)) ||
-                (event.description && event.description.includes(cliente.documento))
-            );
-        } catch (e) {
-            console.warn("Error en búsqueda GC con query:", q, e);
-            return null;
-        }
-    };
+    try {
+        const res = await window.gapi.client.calendar.events.list({
+            calendarId: "primary",
+            timeMin: startOfDay,
+            timeMax: endOfDay,
+            q: queryTerm,
+            singleEvents: true,
+            maxResults: 20, // Traemos un margen amplio para filtrar nosotros
+        });
+        
+        const eventosEncontrados = res.result.items;
+        if (!eventosEncontrados || eventosEncontrados.length === 0) return undefined;
 
-    // 1. Buscamos por DNI
-    let eventoEncontrado = queryTerm ? await ejecutarBusqueda(queryTerm) : null;
+        // 🔍 LÓGICA DE FILTRADO EXACTO
+        const eventoCorrecto = eventosEncontrados.find((event: any) => {
+            // 1. Prioridad: Buscar si ya tiene nuestro ID en la descripción (Huella Digital)
+            if (event.description && event.description.includes(`[REF_ID:${cita.id}]`)) {
+                return true;
+            }
 
-    // 2. Si falla, buscamos por Nombre del Cliente
-    if (!eventoEncontrado && cliente.nombre) {
-        eventoEncontrado = await ejecutarBusqueda(cliente.nombre);
+            // 2. Respaldo: Verificar la HORA exacta (Solución al problema 10am vs 11am)
+            if (event.start && event.start.dateTime) {
+                const eventDate = new Date(event.start.dateTime);
+                // Extraemos hora y minuto de la cita (formato "HH:mm:ss")
+                const [citaHora, citaMin] = cita.hora.split(':').map(Number);
+                
+                const coincideHora = eventDate.getHours() === citaHora;
+                // Damos un margen de 2 minutos por si hubo un ligero desfase manual
+                const coincideMin = Math.abs(eventDate.getMinutes() - citaMin) <= 2;
+
+                if (coincideHora && coincideMin) {
+                    // Verificación extra de texto para evitar falsos positivos con otros clientes
+                    const textoCoincide = 
+                        (event.description && event.description.includes(cliente.documento)) || 
+                        (event.summary && event.summary.includes(cliente.nombre));
+                    
+                    return textoCoincide;
+                }
+            }
+            return false;
+        });
+
+        return eventoCorrecto ? eventoCorrecto.id : undefined;
+
+    } catch (e) {
+        console.warn("Error en búsqueda GC con query:", queryTerm, e);
+        return undefined;
     }
-
-    return eventoEncontrado ? eventoEncontrado.id : undefined;
 };
 
 // 🚨 FUNCIÓN PARA PARSEAR SERVICIOS DESDE LA DESCRIPCIÓN DE GC
@@ -779,7 +798,9 @@ function EditarCita() {
                             `Duración Total: ${duracionFinal} min\n\n` + // Usamos la DURACIÓN TOTAL CALCULADA
                             `**SERVICIOS REGISTRADOS**\n${serviciosListaGC}\n\n` + 
                             `**ADELANTO/ABONO:** $${citaEditada.abonoInicial.toFixed(2)}\n\n` + 
-                            `**OBSERVACIONES**\n${nuevoEvento.observaciones || 'No hay observaciones adicionales.'}`.trim(), 
+                            `**OBSERVACIONES**\n${nuevoEvento.observaciones || 'No hay observaciones adicionales.'}\n\n` +
+                            `--------------------------------\n` +
+                            `[REF_ID:${citaEditada.id}]`.trim(), // 🚨 AGREGAMOS EL ID ÚNICO AQUÍ
                         
                         start: { dateTime: newStart.toISOString(), timeZone: "America/Lima" }, 
                         end: { dateTime: newEnd.toISOString(), timeZone: "America/Lima" }, 
