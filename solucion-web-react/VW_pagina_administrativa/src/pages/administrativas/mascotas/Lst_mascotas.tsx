@@ -160,45 +160,51 @@ function Lst_mascotas() {
                               <div className='DmascotaR_contenido_info'>
                                 <section className='DmascotaR_contenido_superior'>
                                   <table>
-                                    <tr>
-                                      <td><strong>Codigo:</strong></td>
-                                      <td colSpan={3}>{mascotaSeleccionado.codigo}</td>
-                                    </tr>
-                                    <tr>
-                                      <td><strong>Dueño:</strong></td>
-                                      <td colSpan={3}>{mascotaSeleccionado.nombre_dueño}</td>
-                                    </tr>
-                                    <tr>
-                                      <td><strong>Especie:</strong></td>
-                                      <td>{mascotaSeleccionado.nombre_especie}</td>
-                                      <td><strong>Raza:</strong></td>
-                                      <td>{mascotaSeleccionado.nombre_raza}</td>
-                                    </tr>
-                                    <tr>
-                                      <td><strong>Sexo:</strong></td>
-                                      <td>{mascotaSeleccionado.sexo == "M"? "Macho":"Hembra"}</td>
-                                      <td><strong>Etapa:</strong></td>
-                                      <td>{mascotaSeleccionado.nombre_etapa}</td>
-                                    </tr>
-                                    <tr>
-                                      <td><strong>Tamaño:</strong></td>
-                                      <td colSpan={3}>{mascotaSeleccionado.nombre_tamaño}</td>
-                                    </tr>
+                                    <tbody>
+                                      <tr>
+                                        <td><strong>Codigo:</strong></td>
+                                        <td colSpan={3}>{mascotaSeleccionado.codigo}</td>
+                                      </tr>
+                                      <tr>
+                                        <td><strong>Dueño:</strong></td>
+                                        <td colSpan={3}>{mascotaSeleccionado.nombre_dueño}</td>
+                                      </tr>
+                                      <tr>
+                                        <td><strong>Especie:</strong></td>
+                                        <td>{mascotaSeleccionado.nombre_especie}</td>
+                                        <td><strong>Raza:</strong></td>
+                                        <td>{mascotaSeleccionado.nombre_raza}</td>
+                                      </tr>
+                                      <tr>
+                                        <td><strong>Sexo:</strong></td>
+                                        <td>{mascotaSeleccionado.sexo == "M"? "Macho":"Hembra"}</td>
+                                        <td><strong>Etapa:</strong></td>
+                                        <td>{mascotaSeleccionado.nombre_etapa}</td>
+                                      </tr>
+                                      <tr>
+                                        <td><strong>Tamaño:</strong></td>
+                                        <td colSpan={3}>{mascotaSeleccionado.nombre_tamaño}</td>
+                                      </tr>
+                                    </tbody>
                                   </table>
                                   <img src={mascotaSeleccionado.foto} alt="" />
                                 </section>
                                 <table>
-                                  <tr>
-                                    <td><strong>Fecha de nacimiento:</strong></td>
-                                    <td>{mascotaSeleccionado.fechaNacimiento}</td>
-                                  </tr>
+                                  <tbody>
+                                    <tr>
+                                      <td><strong>Fecha de nacimiento:</strong></td>
+                                      <td>{mascotaSeleccionado.fechaNacimiento}</td>
+                                    </tr>
+                                  </tbody>
                                 </table>
                                 <table>
-                                  <tr>
-                                    <td>Pelaje: {mascotaSeleccionado.pelaje}</td>
-                                    <td>Alergias: {mascotaSeleccionado.alergias}</td>
-                                    <td>estado: {mascotaSeleccionado.nombre_estado}</td>
-                                  </tr>
+                                  <tbody>
+                                    <tr>
+                                      <td>Pelaje: {mascotaSeleccionado.pelaje}</td>
+                                      <td>Alergias: {mascotaSeleccionado.alergias}</td>
+                                      <td>estado: {mascotaSeleccionado.nombre_estado}</td>
+                                    </tr>
+                                  </tbody>
                                 </table>
                                 <div>
                                   <span><strong>Castrado/a: </strong>{mascotaSeleccionado.esterilizado? "✅":"❌"}</span>
@@ -208,6 +214,7 @@ function Lst_mascotas() {
                                   <span><strong>Agresivo: </strong>{mascotaSeleccionado.agresividad? "✅":"❌"}</span>
                                 </div>
                                 <Link to="/administracion/mascotas/registro" state={{ mascotaSeleccionado }}><button>Editar</button></Link>
+                                <Link to='/administracion/historia-clinica' state={{ mascotaSeleccionado }}><button>Historia Clinica</button></Link>
                                 <button onClick={() => {handleDelete(mascotaSeleccionado.id)}}>Eliminar</button>
                               </div>  
                             </div>
@@ -222,7 +229,6 @@ function Lst_mascotas() {
                   </div>
                 </section>
           </section>
-          
         </main>
       </div>
     </>

@@ -1,0 +1,101 @@
+/* ======================= */
+/*       CONTENEDOR        */
+/* ======================= */
+
+.historialM {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.boton_retorno:hover {
+  color: #2b6cb0;
+  transform: translateX(-4px);
+}
+
+.historiales{
+    background-color: rgb(243, 164, 61);
+    padding: 1rem;
+    flex: 1;
+    border-radius: 5px;
+}
+
+.historial_encabezado {
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.historial_encabezado h3 {
+  font-size: 22px;
+  font-weight: bold;
+  color: #2d3748;
+}
+
+.historial_encabezado p {
+  font-size: 14px;
+  color: #4a5568;
+}
+
+
+.filtro_historial {
+  padding: 15px 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filtro_historial input[type="date"] {
+    width: 14%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+    font-size: 1rem;
+}
+
+.citas_mascota {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.citas_mascota p {
+  margin: 0;
+}
+
+.citas_mascota_encabezado {
+  background: #2b6cb0;
+  display: flex;
+  padding: 10px;
+  border-radius: 10px 10px 0 0;
+  color: white;
+  font-weight: bold;
+  justify-content: space-between;
+}
+
+.citas_mascota_datos {
+  background: white;
+  padding: 15px;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 15px;
+  color: #2d3748;
+  border: 1px solid #e2e8f0;
+}
+
+
+@media (max-width: 600px) {
+  .historial_encabezado {
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+  }
+
+  .citas_mascota_datos {
+    font-size: 14px;
+  }
+}

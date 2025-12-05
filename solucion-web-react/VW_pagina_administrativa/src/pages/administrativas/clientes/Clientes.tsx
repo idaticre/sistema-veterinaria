@@ -20,7 +20,7 @@ function Lst_clientes() {
   useEffect(() => {
     IST.get("/clientes")
       .then(res => {
-        console.log("clientes:", res.data);//quitar
+        console.log("clientes:", res.data);
         const lista = res.data.data;
 
         const activos = lista.filter((cliente: ClienteResponse) =>cliente.activo === true);

@@ -40,6 +40,7 @@ import RutaProtegida from './components/proteccion/IPRT';
 import RutaProtegidaPorRol from './components/proteccion/IPRR';
 import IPRR from './components/proteccion/IPRR';
 import Inventario from './pages/distribucion/Inventario';
+import HistorialM from './pages/administrativas/mascotas/historial clinico/HistorialM';
 
 function App() {
 
@@ -74,6 +75,9 @@ function App() {
         </Route>
 
         {/* Historial médico */}
+        <Route element={<IPRR roles={['ADMINISTRADOR GENERAL']}/>}>
+          <Route path='/administracion/historia-clinica' element={<HistorialM/>}/>
+        </Route>
         
         {/* Servicios*/}
         <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA"]} />}>

@@ -263,6 +263,35 @@ export interface veterinarioResponse{
     mensaje: string;
 }
 
+export interface HistorialCResponse {
+  id: number;
+  codigo: string;
+  idMascota: number;
+  fechaApertura: string;
+  observacionesGenerales: string | null;
+  activo: boolean;
+  fechaRegistro: string;
+  mensaje: string | null;
+}
+
+export interface CitaResponse {
+  id: number;
+  codigo: string;
+  idCliente: number;
+  idMascota: number;
+  idMedioSolicitud: number;
+  fecha: string;         
+  hora: string;            
+  duracionEstimadaMin: number;
+  abonoInicial: string;     
+  totalCita: string;      
+  idEstado: number;
+  observaciones: string | null;
+  fechaRegistro: string;   
+  mensaje: string | null;
+}
+
+
 export interface Especialidad {
   id?: number;
   nombre: string;

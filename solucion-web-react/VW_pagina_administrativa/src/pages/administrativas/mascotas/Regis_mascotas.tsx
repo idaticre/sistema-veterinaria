@@ -164,9 +164,25 @@ function Regis_mascotas() {
                 });
             }else{
                 IST.post("/mascotas/crear", nuevaMascota)
-                .then(res => {
+                .then(async res => {
                     console.log("Respuesta del servidor:", res.data);
                     alert("Mascota registrada correctamente ✅");
+
+                    const idHistoriaMascota = res.data.data.id;
+
+                    if (idHistoriaMascota) {
+                        
+                        const historia_clinica = {
+                            idMascota: idHistoriaMascota
+                        };
+
+                        try{ 
+                            await IST.post("/historia-clinica/crear", historia_clinica);
+                        } catch (error) {
+                            console.error("Error al crear historia clínica", error);
+                        }
+                    };
+
                     navigate("/administracion/mascotas/lista"); 
                 })
             }
@@ -470,4 +486,3 @@ function Regis_mascotas() {
 }
 
 export default Regis_mascotas
-
