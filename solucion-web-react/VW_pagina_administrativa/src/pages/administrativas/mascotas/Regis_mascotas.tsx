@@ -75,6 +75,7 @@ function Regis_mascotas() {
         if (mascotaSelecc) {
             setNombre(mascotaSelecc.nombre || "");
             setSexo(mascotaSelecc.sexo as "M" | "H" | undefined);
+            setIdCliente(mascotaSelecc.idCliente || 0);
             setIdRaza(mascotaSelecc.idRaza || 0);
             setIdEspecie(mascotaSelecc.idEspecie || 0);
             setIdEstado(mascotaSelecc.idEstado || 0);
