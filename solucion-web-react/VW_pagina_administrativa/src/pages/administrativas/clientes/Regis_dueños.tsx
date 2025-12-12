@@ -16,7 +16,7 @@ function regis_dueños() {
   const [correo, setCorreo] = useState("");
   const [telefono, setTelefono] = useState("");
   const [direccion, setDireccion] = useState("");
-  const [ciudad, setCiudad] = useState("");
+  const [ciudad, setCiudad] = useState("Lima");
   const [distrito, setDistrito] = useState("");
   const [representante, setRepresentante] = useState("");
   const [activo, setActivo] = useState(true);

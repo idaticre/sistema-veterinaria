@@ -19,7 +19,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/atenciones-medicas")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
 public class AtencionMedicaRestController {
     
     private final AtencionMedicaService service;

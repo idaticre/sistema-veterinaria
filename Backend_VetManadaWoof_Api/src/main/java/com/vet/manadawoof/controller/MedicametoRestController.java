@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 // Controlador REST para gestión de medicamentos
-@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/medicamentos")
 @RequiredArgsConstructor

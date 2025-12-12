@@ -30,12 +30,6 @@ function Lst_clientes() {
       })
       .catch(err => {
         console.error("Error en la carga de datos", err);
-
-        if (err.response && err.response.status === 401) {
-          alert("Tu sesión ha expirado. Inicia sesión nuevamente.");
-          localStorage.clear();
-          navigate("/login")
-        }
       });
   }, []);
 
@@ -170,40 +164,42 @@ function Lst_clientes() {
                   <h2>Información del Cliente</h2>
                   <div className='VDCliente_contenido_info'>
                     <table >
-                      <tr>
-                        <td><strong>ID:</strong></td>
-                        <td>{clienteSeleccionado.id}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>DNI:</strong></td>
-                        <td>{clienteSeleccionado.documento}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Nombre:</strong></td>
-                        <td>{clienteSeleccionado.nombre}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Apellidos:</strong></td>
-                        <td>{clienteSeleccionado.ciudad}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Correo:</strong></td>
-                        <td>{clienteSeleccionado.correo}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Telefono:</strong></td>
-                        <td>{clienteSeleccionado.telefono}</td>
-                      </tr>
-                      {clienteSeleccionado.idTipoPersonaJuridica == 2  && (
+                      <tbody>
                         <tr>
-                          <td><strong>representante:</strong></td>
-                          <td>{clienteSeleccionado.representante}</td>
+                          <td><strong>ID:</strong></td>
+                          <td>{clienteSeleccionado.id}</td>
                         </tr>
-                      )}
-                      <tr>
-                        <td><strong>Dirección:</strong></td>
-                        <td>{clienteSeleccionado.direccion}</td>
-                      </tr>
+                        <tr>
+                          <td><strong>DNI:</strong></td>
+                          <td>{clienteSeleccionado.documento}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Nombre:</strong></td>
+                          <td>{clienteSeleccionado.nombre}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Ciudad:</strong></td>
+                          <td>{clienteSeleccionado.ciudad}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Correo:</strong></td>
+                          <td>{clienteSeleccionado.correo}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Telefono:</strong></td>
+                          <td>{clienteSeleccionado.telefono}</td>
+                        </tr>
+                        {clienteSeleccionado.idTipoPersonaJuridica == 2  && (
+                          <tr>
+                            <td><strong>representante:</strong></td>
+                            <td>{clienteSeleccionado.representante}</td>
+                          </tr>
+                        )}
+                        <tr>
+                          <td><strong>Dirección:</strong></td>
+                          <td>{clienteSeleccionado.direccion}</td>
+                        </tr>
+                      </tbody>  
                     </table>
                     <div className='VDCliente_mis_mascotas'>
                       {mascotaDueño.length === 0 ? (

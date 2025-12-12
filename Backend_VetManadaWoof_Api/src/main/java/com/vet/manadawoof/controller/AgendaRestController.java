@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/agenda")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
 public class AgendaRestController {
     
     private final AgendaService service;

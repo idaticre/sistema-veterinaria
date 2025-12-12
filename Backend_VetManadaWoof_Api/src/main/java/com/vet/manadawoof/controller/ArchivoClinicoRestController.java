@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/archivos-clinicos")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
 public class ArchivoClinicoRestController {
     
     private final ArchivoClinicoService service;

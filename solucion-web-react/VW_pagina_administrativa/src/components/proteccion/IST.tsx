@@ -15,11 +15,6 @@ IST.interceptors.request.use((config) => {
 IST.interceptors.response.use(
   (response) => response,
   (error) => {
-    /*if (error.response && error.response.status === 401) {
-      alert("Tu sesión ha expirado. Inicia sesión nuevamente.");
-      localStorage.clear();
-      window.location.href = "/administracion/login";
-    }*/
     return Promise.reject(error);
   }
 );

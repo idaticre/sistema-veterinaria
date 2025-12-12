@@ -155,7 +155,7 @@ function Regis_mascotas() {
             if(mascotaSelecc){
                 IST.put(`/mascotas/actualizar/${mascotaSelecc.id}`, nuevaMascota)
                 .then(res => {
-                    console.log("cliente actualizado:", res.data);
+                    console.log("Mascota actualizada:", res.data);
                     alert("Mascota actualizada correctamente ✅");
                     navigate("/administracion/mascotas/lista"); 
                 })
