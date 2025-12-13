@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
-import "./Agenda_genera.css";
+import "./Agenda_general.css";
 import IST from "../../../components/proteccion/IST";
 import axios from "axios"; 
 
