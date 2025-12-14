@@ -50,14 +50,27 @@ function HistorialM() {
             <main className={minimizado ? 'minimize' : ''}>
                 <section className='historiales'>
                     <Link className='boton_retorno' to="/administracion/mascotas/lista"><i className="fa-solid fa-backward"></i></Link>
-                    <div className='historial_encabezado'>
-                        <h3>HISTORIAL: {historiaClinica?.codigo}</h3>
-                        <div className='datos_encabezado_historial'>
-                            <p>Fecha de apertura: <span>{historiaClinica?.fechaApertura}</span></p>
+                    <div className="historial_encabezado">
+                        <h3>HISTORIAL CLÍNICO</h3>
+                        <div className="codigo_historial">
+                            Código: <span>{historiaClinica?.codigo}</span>
                         </div>
-                        <div className='datos_encabezado_mascota'>
-                            <p>Mascota: <span>{mascotaHS?.nombre}</span></p>
-                            <p>Dueño: <span>{mascotaHS?.nombre_dueño}</span></p>
+
+                        <div className="datos_historial">
+                            <div className="bloque_datos">
+                            <p>Fecha de apertura</p>
+                            <span>{historiaClinica?.fechaApertura}</span>
+                            </div>
+
+                            <div className="bloque_datos">
+                            <p>Mascota</p>
+                            <span>{mascotaHS?.nombre}</span>
+                            </div>
+
+                            <div className="bloque_datos">
+                            <p>Dueño</p>
+                            <span>{mascotaHS?.nombre_dueño}</span>
+                            </div>
                         </div>
                     </div>
                     <div className='filtro_historial'>

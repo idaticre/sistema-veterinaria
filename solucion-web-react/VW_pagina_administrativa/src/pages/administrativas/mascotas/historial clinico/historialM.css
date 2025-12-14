@@ -1,6 +1,4 @@
-/* ======================= */
-/*       CONTENEDOR        */
-/* ======================= */
+
 
 .historialM {
   width: 100%;
@@ -21,23 +19,63 @@
 }
 
 .historial_encabezado {
-  padding: 20px;
+  background: #e3e2e2d5;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
   margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1rem;
 }
 
+/* Título */
 .historial_encabezado h3 {
-  font-size: 22px;
-  font-weight: bold;
-  color: #2d3748;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  letter-spacing: 0.5px;
 }
 
-.historial_encabezado p {
-  font-size: 14px;
-  color: #4a5568;
+/* Código */
+.codigo_historial {
+  font-size: 0.9rem;
+  color: #6b7280;
 }
+
+.codigo_historial span {
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+/* Contenedor de datos */
+.datos_historial {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Bloques */
+.bloque_datos p {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #6b7280;
+  letter-spacing: 0.6px;
+}
+
+.bloque_datos span {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
 
 
 .filtro_historial {
