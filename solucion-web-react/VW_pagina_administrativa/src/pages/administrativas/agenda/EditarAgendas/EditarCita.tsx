@@ -109,11 +109,9 @@ const buscarIdGoogleCalendar = async (cita: CitaBD, cliente: EntityBase, mascota
         return undefined; 
     }
     
-    // Asegurar rango de búsqueda de 00:00 a 23:59 LOCAL
     const startOfDay = new Date(`${cita.fecha}T00:00:00`).toISOString();
     const endOfDay = new Date(`${cita.fecha}T23:59:59`).toISOString();
     
-    // Intento 1: Buscar por Documento (DNI) es más preciso
     let queryTerm = cliente.documento || cliente.nombre || "";
     if (!queryTerm) return undefined;
     
@@ -124,36 +122,28 @@ const buscarIdGoogleCalendar = async (cita: CitaBD, cliente: EntityBase, mascota
             timeMax: endOfDay,
             q: queryTerm,
             singleEvents: true,
-            maxResults: 50, // Aumentado para asegurar que traiga todas las citas del día
+            maxResults: 50,
         });
         
         const eventosEncontrados = res.result.items;
         if (!eventosEncontrados || eventosEncontrados.length === 0) return undefined;
 
-        // 🔍 LÓGICA DE FILTRADO EXACTO
         const eventoCorrecto = eventosEncontrados.find((event: any) => {
-            // 1. Prioridad ABSOLUTA: Buscar si ya tiene nuestro ID en la descripción (Huella Digital)
             if (event.description && event.description.includes(`[REF_ID:${cita.id}]`)) {
                 return true;
             }
 
-            // 2. Respaldo: Verificar HORA + MASCOTA (Solución al problema de citas dobles)
             if (event.start && event.start.dateTime) {
                 const eventDate = new Date(event.start.dateTime);
                 const [citaHora, citaMin] = cita.hora.split(':').map(Number);
-                
                 const coincideHora = eventDate.getHours() === citaHora;
                 const coincideMin = Math.abs(eventDate.getMinutes() - citaMin) <= 2;
 
                 if (coincideHora && coincideMin) {
-                    // Validamos que el título del evento contenga el nombre de la mascota
-                    // Esto diferencia a "Juan - Rex" de "Juan - Luna" a la misma hora
                     const nombreMascota = mascota.nombre.toLowerCase();
                     const tituloEvento = (event.summary || "").toLowerCase();
                     const descEvento = (event.description || "").toLowerCase();
-
                     const coincideMascota = tituloEvento.includes(nombreMascota) || descEvento.includes(nombreMascota);
-
                     return coincideMascota;
                 }
             }
@@ -172,37 +162,28 @@ const buscarIdGoogleCalendar = async (cita: CitaBD, cliente: EntityBase, mascota
 const parsearServiciosGC = (description: string, colaboradores: EntityBase[], serviciosDisponibles: ServicioBase[]): ServicioDetalle[] => {
     if (!description) return [];
 
-    // 1. Definimos las Expresiones Regulares
     const regexPrincipal = /\*\*SERVICIOS REGISTRADOS\*\*((.|\n)*?)\*\*ADELANTO/i;
     const regexAlternativo = /\*\*SERVICIOS REGISTRADOS\*\*((.|\n)*)/i;
 
-    // 2. Variable para almacenar el texto crudo encontrado
     let textoServicios = "";
-
-    // 3. Intentamos con el Regex Principal
     const matchPrincipal = description.match(regexPrincipal);
     
     if (matchPrincipal && matchPrincipal[1]) {
         textoServicios = matchPrincipal[1];
     } else {
-        // 4. Si falla, intentamos con el Alternativo (hasta el final del texto)
         const matchAlternativo = description.match(regexAlternativo);
         if (matchAlternativo && matchAlternativo[1]) {
             textoServicios = matchAlternativo[1];
         } else {
-            // Si ninguno encuentra nada, retornamos vacío
             return [];
         }
     }
 
-    // 5. Procesamiento del texto (Ahora es seguro porque textoServicios es string)
     const lineas = textoServicios.trim().split('\n').filter(l => l.trim().startsWith('•'));
     const resultados: ServicioDetalle[] = [];
 
     lineas.forEach(linea => {
-        // Regex para extraer datos de la línea
         const match = linea.match(/•\s*(.*?)\s*\((\d+)x\s*(?:S\/|\$)\s*(\d+(\.\d+)?)\)\s*Subtotal:\s*(?:S\/|\$)\s*(\d+(\.\d+)?)\s*con\s*(.*?)\.\s*Adicionales:\s*(.*)/i);
-
         if (match) {
             const nombreServicioRaw = match[1].trim();
             const cantidad = parseInt(match[2]);
@@ -210,15 +191,8 @@ const parsearServiciosGC = (description: string, colaboradores: EntityBase[], se
             const subtotal = parseFloat(match[5]);
             const nombreVetRaw = match[7].trim();
             const adicionalesRaw = match[8].trim();
-
-            // Búsqueda insensible a mayúsculas
-            const servicioBase = serviciosDisponibles.find(s => 
-                s.nombre.trim().toLowerCase() === nombreServicioRaw.toLowerCase()
-            );
-            
-            const veterinario = colaboradores.find(c => 
-                c.nombre.trim().toLowerCase() === nombreVetRaw.toLowerCase()
-            );
+            const servicioBase = serviciosDisponibles.find(s => s.nombre.trim().toLowerCase() === nombreServicioRaw.toLowerCase());
+            const veterinario = colaboradores.find(c => c.nombre.trim().toLowerCase() === nombreVetRaw.toLowerCase());
 
             const idServicio = servicioBase ? servicioBase.id : 0;
             const idVeterinario = veterinario ? veterinario.id : (colaboradores[0]?.id || 0);
@@ -239,8 +213,6 @@ const parsearServiciosGC = (description: string, colaboradores: EntityBase[], se
             });
         }
     });
-
-    console.log("🛠 Servicios recuperados de GC:", resultados);
     return resultados;
 };
 
@@ -424,7 +396,14 @@ function EditarCita() {
                 callback: (tokenResponse: any) => {
                     if (tokenResponse.access_token) {
                         window.gapi.client.setToken({ access_token: tokenResponse.access_token });
+                        
+                        // 🟢 GUARDAMOS TOKEN Y FECHA DE EXPIRACIÓN (1 Hora aprox)
+                        const expiresIn = tokenResponse.expires_in || 3599; // Segundos
+                        const expirationTime = Date.now() + (expiresIn * 1000);
+                        
                         localStorage.setItem("google_token_editor", tokenResponse.access_token);
+                        localStorage.setItem("google_token_expires", expirationTime.toString());
+
                         setIsSignedIn(true);
                         setStatus("✅ Google Calendar autenticado.");
                     }
@@ -440,24 +419,51 @@ function EditarCita() {
         if (gapiInited && gisInited) setStatus("🔌 Google Calendar listo.");
     }, [gapiInited, gisInited]);
 
+    // 🟢 VERIFICACIÓN DE SESIÓN AL CARGAR LA PÁGINA
     useEffect(() => {
         if (!gapiInited || !gisInited) return;
-        const saved = localStorage.getItem("google_token_editor");
-        if (saved) {
-            window.gapi.client.setToken({ access_token: saved });
-            setIsSignedIn(true);
-            setStatus("🔓 Google Calendar sesión restaurada.");
+        
+        const savedToken = localStorage.getItem("google_token_editor");
+        const savedExpiry = localStorage.getItem("google_token_expires");
+
+        if (savedToken && savedExpiry) {
+            // Verificamos si la fecha actual es MENOR a la fecha de expiración
+            if (Date.now() < parseInt(savedExpiry)) {
+                window.gapi.client.setToken({ access_token: savedToken });
+                setIsSignedIn(true);
+                setStatus("🔓 Google Calendar sesión restaurada.");
+            } else {
+                // Si ya expiró, limpiamos todo y obligamos a loguear
+                console.warn("Token expirado, cerrando sesión local.");
+                localStorage.removeItem("google_token_editor");
+                localStorage.removeItem("google_token_expires");
+                setIsSignedIn(false);
+                setStatus("⚠️ Sesión caducada. Inicie sesión nuevamente.");
+            }
         }
     }, [gapiInited, gisInited]);
 
     const iniciarSesion = () => tokenClient?.requestAccessToken();
+    
     const cerrarSesion = () => {
         const token = window.gapi.client.getToken();
         if (token) window.google.accounts.oauth2.revoke(token.access_token);
         window.gapi.client.setToken(null);
         localStorage.removeItem("google_token_editor");
+        localStorage.removeItem("google_token_expires");
         setIsSignedIn(false);
         setStatus("🚪 Google Calendar sesión cerrada.");
+    };
+    
+    // 🟢 FUNCIÓN DE VALIDACIÓN PARA USAR ANTES DE EDITAR/BORRAR
+    const checkTokenValidity = () => {
+        const savedExpiry = localStorage.getItem("google_token_expires");
+        if (!savedExpiry || Date.now() > parseInt(savedExpiry)) {
+            alert("⌛ Su sesión de Google ha caducado. Por favor, inicie sesión nuevamente.");
+            cerrarSesion(); // Esto limpiará el estado y mostrará el botón de login
+            return false;
+        }
+        return true;
     };
 
 
@@ -568,6 +574,9 @@ function EditarCita() {
             return;
         }
 
+        // 🟢 VALIDACIÓN DE CADUCIDAD DEL TOKEN
+        if (!checkTokenValidity()) return;
+
         const estado = estadosAgenda.find(e => e.id === cita.idEstado);
         const estadoNombre = estado?.nombre.toUpperCase() || 'N/A';
         
@@ -672,6 +681,9 @@ function EditarCita() {
             return;
         }
 
+        // 🟢 VALIDACIÓN DE CADUCIDAD DEL TOKEN
+        if (!checkTokenValidity()) return;
+
         if (!confirm("¿Marcar esta cita como CANCELADA?")) return;
 
         try {
@@ -727,6 +739,9 @@ function EditarCita() {
             return alert("🚫 ERROR: No se encontró el ID de la cita para actualizar.");
         }
         
+        // 🟢 VALIDACIÓN DE CADUCIDAD DEL TOKEN
+        if (isSignedIn && !checkTokenValidity()) return;
+
         if (nuevoEvento.mascotaId === 0) return alert("Debe seleccionar una mascota.");
         if (nuevoEvento.colaboradorId === 0) return alert("Debe seleccionar un colaborador."); 
         if (nuevoEvento.duracionEstimadaMin <= 0) return alert("La duración estimada debe ser mayor a 0 (Agregue servicios).");
@@ -784,7 +799,7 @@ function EditarCita() {
 
                     // 🚨 Reconstrucción del texto de servicios
                     const serviciosListaGC = serviciosRegistrados.map(s =>
-                        `• ${s.nombre_servicio} (${s.cantidad}x S/ ${s.valor_servicio.toFixed(2)})  Subtotal: S/ ${s.subtotal.toFixed(2)} con ${s.nombre_veterinario}. Adicionales: ${s.adicionales || 'N/A'}`
+                        `• ${s.nombre_servicio} (${s.cantidad}x S/ ${s.valor_servicio.toFixed(2)})  Subtotal: S/ ${s.subtotal.toFixed(2)} con ${s.nombre_veterinario}. Adicionales: ${s.adicionales || 'N/A'}`
                     ).join('\n');
                     
                     const updatedEventResource = {
