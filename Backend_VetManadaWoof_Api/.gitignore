@@ -18,7 +18,7 @@ build/
 # Archivos de configuración sensibles
 # ============================================
 # No subir credenciales reales
-src/main/resources/application.properties
+# src/main/resources/application.properties
 
 # ============================================
 # STS (Spring Tool Suite)
