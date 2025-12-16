@@ -2,49 +2,94 @@ import { useEffect, useState } from "react";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import "./Admin_index.css"
-import type { ClienteResponse, MascotaResponse } from "../../../components/interfaces/interfaces";
+import type { UsuarioResponse, ClienteResponse,  MascotaResponse, CitaResponse, CitaPorEstado, MascotaPorEspecie } from "../../../components/interfaces/interfaces";
 import IST from "../../../components/proteccion/IST";
 
 function Admin_index() {
     const [minimizado, setMinimizado] = useState(false);
     const [clientes, setClientes] = useState<ClienteResponse[]>([]);
     const [mascota, setMascota] = useState<MascotaResponse[]>([]);
+    const [usuarios, setUsuarios] = useState<UsuarioResponse[]>([]);
+    const [agenda, setAgenda] = useState<CitaResponse[]>([]);
+    const [citaEs, setCitaEs] = useState<CitaPorEstado[]>([]);
+    const [mascotaEsp, setMascotaEsp] = useState<MascotaPorEspecie[]>([]);
     const COLORS = ['#f79f4eff', '#b34d16ff', '#9b7200ff']; 
 
-    const data = [
-        { name: 'Canino', cantidad: 10 },
-        { name: 'Felino', cantidad: 60 },
-        { name: 'Ave', cantidad: 12 }
-    ];
-
-    const citas = [
-        { name: 'Pendientes', cantidad: 9 },
-        { name: 'Realizadas', cantidad: 30 }
-    ];
-
-    const ventas = [
-        { name: 'Enero', cantidad: 90},
-        { name: 'Febrero', cantidad: 45 },
-        { name: 'Marzo', cantidad: 75 },
-        { name: 'Abril', cantidad: 60 },
-        { name: 'Mayo', cantidad: 95 },
-        { name: 'Junio', cantidad: 80 },
-        { name: 'Julio', cantidad: 50 },
-    ];
+    interface CitasPorMes {
+        nombre: string;  
+        cantidad: number;
+    }
+    const [citasM, setCitasM] = useState<CitasPorMes[]>([]);
 
     useEffect(() => {
         const cargarDatos = async () => {
             try {
                 const clientesRes = await IST.get("/clientes");
                 const mascotasRes = await IST.get("/mascotas");
+                const especieRes = await IST.get("/especies")
+                const usuariosRes = await IST.get("/usuarios");
+                const citasRes = await IST.get("/agenda");
+                const estadoCRes = await IST.get("/estados-agenda");
 
-                // Procesar clientes
                 const listaClientes = clientesRes.data.data;
                 const activos = listaClientes.filter((c: ClienteResponse) => c.activo === true);
                 setClientes(activos);
-
-                // Procesar mascotas
                 setMascota(mascotasRes.data.data);
+                setUsuarios(usuariosRes.data);
+                setAgenda(citasRes.data.data.content);
+
+
+                const citas = citasRes.data.data.content;
+                const estadosC = estadoCRes.data;
+                const especies = especieRes.data;
+                const mascotas = mascotasRes.data.data;
+
+                const estadosMap = estadosC.reduce((acc: any, estado: any) => {
+                    acc[estado.id] = estado.nombre;
+                    return acc;
+                }, {});
+
+
+                const conteo: Record<string, number> = {};
+
+                citas.forEach((cita: any) => {
+                    const nombreEstado = estadosMap[cita.idEstado] || "DESCONOCIDO";
+                    conteo[nombreEstado] = (conteo[nombreEstado] || 0) + 1;
+                });
+
+                const dataPie: CitaPorEstado[] = Object.entries(conteo).map(
+                    ([nombre, cantidad]) => ({
+                        nombre,
+                        cantidad 
+                    })
+                );
+                setCitaEs(dataPie);
+
+                const especiesMap: Record<number, string> = especies.reduce(
+                    (acc: Record<number, string>, especie: any) => {
+                        acc[especie.id] = especie.nombre;
+                        return acc;
+                    },
+                    {}
+                );
+
+                const conteoM: Record<string, number> = {};
+
+                mascotas.forEach((mascota: any) => {
+                const nombreEspecie =
+                    especiesMap[mascota.idEspecie] || "SIN ESPECIE";
+
+                    conteoM[nombreEspecie] = (conteoM[nombreEspecie] || 0) + 1;
+                });
+
+                const dataPieEspecies: MascotaPorEspecie[] =
+                Object.entries(conteoM).map(([nombre, cantidad]) => ({
+                    nombre,
+                    cantidad
+                }));
+
+                setMascotaEsp(dataPieEspecies);
+
 
             } catch (err) {
                 console.error("Error al cargar datos:", err);
@@ -53,6 +98,52 @@ function Admin_index() {
 
         cargarDatos();
     }, []);
+
+    function obtenerUltimos7Meses() {
+        const meses: string[] = [];
+        const hoy = new Date();
+
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+            const label = d.toLocaleString("es-PE", {
+            month: "short",
+            year: "numeric"
+            });
+            meses.push(label);
+        }
+
+        return meses;
+    }
+
+    useEffect(() => {
+        if (!agenda.length) return;
+
+        const meses = obtenerUltimos7Meses();
+
+        const conteo: Record<string, number> = {};
+        meses.forEach(m => (conteo[m] = 0));
+
+        agenda.forEach(cita => {
+            if (!cita.fechaRegistro) return;
+
+            const fecha = new Date(cita.fechaRegistro);
+            const label = fecha.toLocaleString("es-PE", {
+            month: "short",
+            year: "numeric"
+            });
+
+            if (conteo[label] !== undefined) {
+            conteo[label]++;
+            }
+        });
+
+        const dataChart: CitasPorMes[] = meses.map(mes => ({
+            nombre: mes,
+            cantidad: conteo[mes]
+        }));
+
+        setCitasM(dataChart);
+    }, [agenda]);
 
 
     return (
@@ -65,7 +156,7 @@ function Admin_index() {
                             <div id="conteo_usuario">
                                 <div>
                                     <strong>Usuarios</strong>
-                                    <p>2</p>
+                                    <p>{usuarios.length}</p>
                                 </div>
                                 <img src="/2830573.png" alt="" />
                             </div>
@@ -86,7 +177,7 @@ function Admin_index() {
                             <div id="conteo_citas">
                                 <div>
                                     <strong>Citas Registradas</strong>
-                                    <p>10</p>
+                                    <p>{agenda.length}</p>
                                 </div>
                                 <img src="/1005764.png" alt="" />
                             </div>
@@ -98,15 +189,16 @@ function Admin_index() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={data}
+                                        data={mascotaEsp}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={60}
                                         outerRadius={90}
                                         paddingAngle={5}
                                         dataKey="cantidad"
+                                        nameKey="nombre"
                                     >
-                                        {data.map((_entry, index) => (
+                                        {mascotaEsp.map((_entry, index) => (
                                         <Cell key={index} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
@@ -127,15 +219,16 @@ function Admin_index() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={citas}
+                                        data={citaEs}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={60}
                                         outerRadius={90}
                                         paddingAngle={5}
                                         dataKey="cantidad"
+                                        nameKey="nombre"
                                     >
-                                        {citas.map((_entry, index) => (
+                                        {citaEs.map((_entry, index) => (
                                         <Cell key={index} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
@@ -152,11 +245,11 @@ function Admin_index() {
                         <div id="grafico_barra">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart
-                                    data={ventas}
+                                    data={citasM}
                                     margin={{ top: 20, right: 30, left: 20}}
                                 >
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" stroke="black"/>
+                                    <XAxis dataKey="nombre" stroke="black"/>
                                     <YAxis stroke="black" />
                                     <Tooltip />
                                     <Bar dataKey="cantidad" fill="#f1c461ff" />

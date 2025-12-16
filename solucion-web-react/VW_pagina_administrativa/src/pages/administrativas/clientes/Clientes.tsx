@@ -177,6 +177,12 @@ function Lst_clientes() {
                           <td><strong>Nombre:</strong></td>
                           <td>{clienteSeleccionado.nombre}</td>
                         </tr>
+                        {clienteSeleccionado.representante &&
+                          <tr>
+                            <td><strong>Representante:</strong></td>
+                            <td>{clienteSeleccionado.representante}</td>
+                          </tr>
+                        }
                         <tr>
                           <td><strong>Ciudad:</strong></td>
                           <td>{clienteSeleccionado.ciudad}</td>

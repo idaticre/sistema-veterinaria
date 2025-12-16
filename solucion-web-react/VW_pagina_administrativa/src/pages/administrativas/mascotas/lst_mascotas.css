@@ -51,7 +51,7 @@
 }
 
 .registro_mascota:hover {
-  background-color: #f8f8f8;
+  background-color: #fee7a9;
 }
 
 .icono_mascota {
@@ -73,6 +73,7 @@
   display: flex;
   flex-direction: column;
   color: #333;
+  max-width: 70%;
 }
 
 .datosB_mascota p {
@@ -91,6 +92,13 @@
   font-size: 0.85rem;
   letter-spacing: 0.3px;
 }
+
+.estado_mascota {
+  margin-left: auto;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
 
 .registro_mascota.seleccionado {
   border: 0.2rem solid #f59e0b;

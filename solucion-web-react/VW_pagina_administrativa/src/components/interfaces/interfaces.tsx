@@ -378,3 +378,19 @@ export interface dueñoNom{
     id: number;
     nombre?: string; 
 }
+
+export interface agenda_estado{
+    id: number;
+    nombre: string;
+    description: string;
+}
+
+export interface CitaPorEstado {
+  nombre: string;
+  cantidad: number;
+}
+
+export interface MascotaPorEspecie{
+    nombre: string;
+    cantidad: number;
+}
