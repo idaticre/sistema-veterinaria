@@ -24,6 +24,25 @@ function regis_dueños() {
   const clienteSelecc = location.state?.cliente as ClienteResponse | undefined;
   const navigate = useNavigate();
 
+  //distritos
+  const distritosLima = [
+    { id: 1, nombre: "Ancón" },{ id: 2, nombre: "Ate" },{ id: 3, nombre: "Barranco" },
+    { id: 4, nombre: "Breña" },{ id: 5, nombre: "Carabayllo" },{ id: 6, nombre: "Chaclacayo" },
+    { id: 7, nombre: "Chorrillos" },{ id: 8, nombre: "Cieneguilla" },{ id: 9, nombre: "Comas" },
+    { id: 10, nombre: "El Agustino" },{ id: 11, nombre: "Independencia" },{ id: 12, nombre: "Jesús María" },
+    { id: 13, nombre: "La Molina" },{ id: 14, nombre: "La Victoria" },{ id: 15, nombre: "Lima" },
+    { id: 16, nombre: "Lince" },{ id: 17, nombre: "Los Olivos" },{ id: 18, nombre: "Lurigancho" },
+    { id: 19, nombre: "Lurín" },{ id: 20, nombre: "Magdalena del Mar" },{ id: 21, nombre: "Miraflores" },
+    { id: 22, nombre: "Pachacámac" },{ id: 23, nombre: "Pucusana" },{ id: 24, nombre: "Pueblo Libre" },
+    { id: 25, nombre: "Puente Piedra" },{ id: 26, nombre: "Punta Hermosa" },{ id: 27, nombre: "Punta Negra" },
+    { id: 28, nombre: "Rímac" },{ id: 29, nombre: "San Bartolo" },{ id: 30, nombre: "San Borja" },
+    { id: 31, nombre: "San Isidro" },{ id: 32, nombre: "San Juan de Lurigancho" },{ id: 33, nombre: "San Juan de Miraflores" },
+    { id: 34, nombre: "San Luis" },{ id: 35, nombre: "San Martín de Porres" },{ id: 36, nombre: "San Miguel" },
+    { id: 37, nombre: "Santa Anita" },{ id: 38, nombre: "Santa María del Mar" },{ id: 39, nombre: "Santa Rosa" },
+    { id: 40, nombre: "Santiago de Surco" },{ id: 41, nombre: "Surquillo" },{ id: 42, nombre: "Villa El Salvador" },
+    { id: 43, nombre: "Villa María del Triunfo" }
+  ];
+
   // Estado para controlar si es persona jurídica
   const [esPersonaJuridica, setEsPersonaJuridica] = useState(false);
 
@@ -227,7 +246,7 @@ function regis_dueños() {
                       >
                         <option value="0" disabled>Elija documento</option>
                         {tipoDoc
-                          .filter((TD) => esPersonaJuridica ? TD.id === 2 : true) // Solo RUC para jurídicas
+                          .filter((TD) => esPersonaJuridica ? TD.id === 2 : TD.id !== 2) // Solo RUC para jurídicas
                           .map((TD) => (
                             <option key={TD.id} value={TD.id}>{TD.descripcion}</option>
                           ))
@@ -298,12 +317,17 @@ function regis_dueños() {
                     </div>
                     <div className="form-group">
                       <label htmlFor="distrito">Distrito</label>
-                      <input 
-                        type="text" 
-                        value={distrito} 
+                      <select
+                        value={distrito}
                         onChange={(e) => setDistrito(e.target.value)}
-                        placeholder="Distrito" 
-                      />
+                      >
+                        <option value="">Seleccione un distrito</option>
+                        {distritosLima.map((dist) => (
+                          <option key={dist.id} value={dist.nombre}>
+                            {dist.nombre}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
