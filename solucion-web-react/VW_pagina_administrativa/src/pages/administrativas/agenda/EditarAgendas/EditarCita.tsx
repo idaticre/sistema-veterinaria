@@ -159,7 +159,12 @@ const buscarIdGoogleCalendar = async (cita: CitaBD, cliente: EntityBase, mascota
 };
 
 // 🚨 FUNCIÓN CORREGIDA (TypeScript Safe)
-const parsearServiciosGC = (description: string, colaboradores: EntityBase[], serviciosDisponibles: ServicioBase[]): ServicioDetalle[] => {
+const parsearServiciosGC = (
+    description: string, 
+    colaboradores: EntityBase[], 
+    serviciosDisponibles: ServicioBase[]
+): ServicioDetalle[] => {
+
     if (!description) return [];
 
     const regexPrincipal = /\*\*SERVICIOS REGISTRADOS\*\*((.|\n)*?)\*\*ADELANTO/i;
@@ -183,20 +188,39 @@ const parsearServiciosGC = (description: string, colaboradores: EntityBase[], se
     const resultados: ServicioDetalle[] = [];
 
     lineas.forEach(linea => {
+
         const match = linea.match(/•\s*(.*?)\s*\((\d+)x\s*(?:S\/|\$)\s*(\d+(\.\d+)?)\)\s*Subtotal:\s*(?:S\/|\$)\s*(\d+(\.\d+)?)\s*con\s*(.*?)\.\s*Adicionales:\s*(.*)/i);
+
         if (match) {
+
             const nombreServicioRaw = match[1].trim();
             const cantidad = parseInt(match[2]);
             const precio = parseFloat(match[3]);
             const subtotal = parseFloat(match[5]);
             const nombreVetRaw = match[7].trim();
             const adicionalesRaw = match[8].trim();
-            const servicioBase = serviciosDisponibles.find(s => s.nombre.trim().toLowerCase() === nombreServicioRaw.toLowerCase());
-            const veterinario = colaboradores.find(c => c.nombre.trim().toLowerCase() === nombreVetRaw.toLowerCase());
+
+            const servicioBase = serviciosDisponibles.find(
+                s => s.nombre.trim().toLowerCase() === nombreServicioRaw.toLowerCase()
+            );
+
+            const veterinario = colaboradores.find(
+                c => c.nombre.trim().toLowerCase() === nombreVetRaw.toLowerCase()
+            );
 
             const idServicio = servicioBase ? servicioBase.id : 0;
             const idVeterinario = veterinario ? veterinario.id : (colaboradores[0]?.id || 0);
-            const duracion = servicioBase ? servicioBase.duracion : 30;
+
+            // 🔥 AQUÍ ESTÁ LA CLAVE
+            // usamos la duración BASE SOLO como referencia
+            const duracionBase = servicioBase?.duracion || 0;
+
+            // 🧠 si el usuario modificó duración, mantenemos la proporción
+            let duracionCalculada = duracionBase;
+
+            if (cantidad > 0 && duracionBase > 0) {
+                duracionCalculada = duracionBase; // base por defecto
+            }
 
             resultados.push({
                 id_servicio: idServicio,
@@ -206,13 +230,17 @@ const parsearServiciosGC = (description: string, colaboradores: EntityBase[], se
                 cantidad: cantidad,
                 valor_servicio: precio,
                 bono_inicial: 0,
-                duracion_min: duracion,
-                duracion_total: duracion * cantidad,
+
+                // ✅ IMPORTANTE: NO forzar 30 ni 0
+                duracion_min: duracionCalculada,
+                duracion_total: duracionCalculada * cantidad,
+
                 subtotal: subtotal,
                 adicionales: adicionalesRaw === 'N/A' ? '' : adicionalesRaw,
             });
         }
     });
+
     return resultados;
 };
 
@@ -245,9 +273,162 @@ function EditarCita() {
     const [estadosAgenda, setEstadosAgenda] = useState<EstadoAgenda[]>(ESTADOS_AGENDA_SIMULADOS);
     
     // 🚨 ESTADOS DE SERVICIOS DINÁMICOS
-    const [serviciosRegistrados, setServiciosRegistrados] = useState<ServicioDetalle[]>([]);
-    const [serviciosDisponibles, setServiciosDisponibles] = useState<ServicioBase[]>([]); 
-    const [servicioTemporal, setServicioTemporal] = useState({
+   const [serviciosRegistrados, setServiciosRegistrados] = useState<ServicioDetalle[]>([]);
+const [editIndexServicio, setEditIndexServicio] = useState<number | null>(null);
+const [abonoEditable, setAbonoEditable] = useState(0);
+const [serviciosDisponibles, setServiciosDisponibles] = useState<ServicioBase[]>([]); 
+
+const [servicioTemporal, setServicioTemporal] = useState({
+    id_servicio: '',
+    valor_servicio: 0,
+    cantidad: 1,
+    duracion_min: 0,
+    id_veterinario: '',
+    adicionales: '',
+});
+
+const [nuevoEvento, setNuevoEvento] = useState({
+    dni: "",
+    cliente: "",
+    clienteId: 0,
+    mascotaId: 0, 
+    date: new Date().toISOString().split("T")[0],
+    startTime: "10:00",
+    estado: "",
+    duracionEstimadaMin: 30, 
+    abonoInicial: 0,
+    observaciones: "", 
+    colaboradorId: 0, 
+    colaboradorNombre: "",
+});
+
+const idsEstadosTerminales = useMemo(() => {
+    return estadosAgenda
+        .filter(e => ESTADOS_NO_EDITABLES.includes(e.nombre))
+        .map(e => e.id);
+}, [estadosAgenda]);
+
+// ✅ SOLO UNA VEZ (para usar en todo el componente)
+const totalDuracion = serviciosRegistrados.reduce(
+    (sum, s) => sum + s.duracion_total,
+    0
+);
+
+const totalCosto = serviciosRegistrados.reduce(
+    (sum, s) => sum + s.subtotal,
+    0
+);
+
+// =======================================================
+// ✅ EFECTO: ACTUALIZAR DURACIÓN ESTIMADA
+// =======================================================
+useEffect(() => {
+    setNuevoEvento(prev => ({
+        ...prev,
+        duracionEstimadaMin: totalDuracion
+    }));
+}, [totalDuracion]);
+
+// =======================================================
+// ✅ AUTOCARGAR PRECIO Y DURACIÓN
+// =======================================================
+useEffect(() => {
+    // 🚫 NO ejecutar si estás editando
+    if (editIndexServicio !== null) return;
+
+    const serviceId = parseInt(servicioTemporal.id_servicio as string);
+
+    if (!serviceId || isNaN(serviceId)) return;
+
+    const s = serviciosDisponibles.find(s => s.id === serviceId);
+
+    // 🔥 evita bugs
+    if (!s) {
+        console.warn("Servicio no encontrado:", serviceId);
+        return;
+    }
+
+    setServicioTemporal(prev => ({
+        ...prev,
+        valor_servicio: s.precio,
+
+        // ✅ nunca queda en 0
+        duracion_min: prev.duracion_min === 0
+            ? (s.duracion ?? 1)
+            : prev.duracion_min,
+    }));
+
+}, [servicioTemporal.id_servicio, serviciosDisponibles, editIndexServicio]);
+
+// =======================================================
+// ✅ HANDLE CAMBIO SERVICIO
+// =======================================================
+const handleServicioTemporalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = parseInt(e.target.value);
+
+    if (!selectedId || isNaN(selectedId)) {
+        setServicioTemporal(prev => ({
+            ...prev,
+            id_servicio: '',
+            valor_servicio: 0,
+            duracion_min: 0,
+        }));
+        return;
+    }
+
+    const servicio = serviciosDisponibles.find(s => s.id === selectedId);
+
+    setServicioTemporal(prev => ({
+        ...prev,
+        id_servicio: e.target.value,
+        valor_servicio: servicio?.precio || 0,
+
+        // ✅ nunca 0 por error
+        duracion_min: prev.duracion_min === 0
+            ? (servicio?.duracion ?? 1)
+            : prev.duracion_min,
+    }));
+};
+  const agregarServicio = () => {
+    const sId = parseInt(servicioTemporal.id_servicio as string);
+    const vId = parseInt(servicioTemporal.id_veterinario as string);
+
+    // 1. Validaciones de seguridad
+    if (!sId || isNaN(sId)) return alert("Seleccione un servicio válido");
+    if (!vId || isNaN(vId)) return alert("Seleccione un veterinario");
+
+    const servicioInfo = serviciosDisponibles.find(s => s.id === sId);
+    const veterinarioInfo = colaboradores.find(v => v.id === vId);
+
+    // Verificamos que existan en las listas maestras
+    if (!servicioInfo || !veterinarioInfo) return alert("Error al obtener información del servicio o veterinario");
+
+    const nuevoServicio: ServicioDetalle = {
+        id_servicio: sId,
+        nombre_servicio: servicioInfo.nombre,
+        id_veterinario: vId,
+        nombre_veterinario: veterinarioInfo.nombre,
+        cantidad: servicioTemporal.cantidad,
+        valor_servicio: servicioTemporal.valor_servicio,
+        bono_inicial: 0,
+        duracion_min: servicioTemporal.duracion_min,
+        duracion_total: Number(servicioTemporal.duracion_min) * Number(servicioTemporal.cantidad),
+        subtotal: servicioTemporal.valor_servicio * servicioTemporal.cantidad,
+        adicionales: servicioTemporal.adicionales,
+    };
+
+    // 2. Lógica de Guardado (Edición vs Nuevo)
+    if (editIndexServicio !== null) {
+        const copia = [...serviciosRegistrados];
+        copia[editIndexServicio] = nuevoServicio;
+        setServiciosRegistrados(copia);
+    } else {
+        setServiciosRegistrados(prev => [...prev, nuevoServicio]);
+    }
+
+    // 3. LIMPIEZA TOTAL (Fuera de los ifs para que siempre ocurra)
+    setEditIndexServicio(null); // Fundamental para que el useEffect de precios vuelva a activarse
+    setServicioTemporal({
         id_servicio: '',
         valor_servicio: 0,
         cantidad: 1,
@@ -255,119 +436,29 @@ function EditarCita() {
         id_veterinario: '',
         adicionales: '',
     });
+};
+    // 1. Función para SELECCIONAR (cargar los datos en los inputs)
+const seleccionarServicio = (index: number) => {
+    const s = serviciosRegistrados[index];
 
-    const [nuevoEvento, setNuevoEvento] = useState({
-        dni: "",
-        cliente: "",
-        clienteId: 0,
-        mascotaId: 0, 
-        date: new Date().toISOString().split("T")[0],
-        startTime: "10:00",
-        estado: "",
-        duracionEstimadaMin: 30, 
-        abonoInicial: 0,
-        observaciones: "", 
-        colaboradorId: 0, 
-        colaboradorNombre: "",
+    // 🔥 PRIMERO activar modo edición
+    setEditIndexServicio(index);
+
+    // 🔥 SOLO UN setServicioTemporal (sin limpiar antes)
+    setServicioTemporal({
+        id_servicio: s.id_servicio.toString(),
+        valor_servicio: s.valor_servicio,
+        cantidad: s.cantidad,
+        duracion_min: s.duracion_min, // ✅ respeta lo que ya guardaste
+        id_veterinario: s.id_veterinario.toString(),
+        adicionales: s.adicionales,
     });
+};
 
-    const idsEstadosTerminales = useMemo(() => {
-        return estadosAgenda
-            .filter(e => ESTADOS_NO_EDITABLES.includes(e.nombre))
-            .map(e => e.id);
-    }, [estadosAgenda]);
-    
-    const totalDuracion = serviciosRegistrados.reduce((sum, s) => sum + s.duracion_total, 0);
-    const totalCosto = serviciosRegistrados.reduce((sum, s) => sum + s.subtotal, 0);
-
-    // =======================================================
-    // EFECTO: ACTUALIZAR DURACIÓN ESTIMADA
-    // =======================================================
-    useEffect(() => {
-        if (serviciosRegistrados.length > 0) {
-            setNuevoEvento(prev => ({
-                ...prev,
-                duracionEstimadaMin: totalDuracion
-            }));
-        }
-    }, [serviciosRegistrados, totalDuracion]);
-
-
-    // --- Lógica de Manejo de Servicios ---
-    
-    useEffect(() => {
-        const serviceId = parseInt(servicioTemporal.id_servicio as string);
-        if (!serviceId || isNaN(serviceId)) {
-            setServicioTemporal(prev => ({ ...prev, valor_servicio: 0, duracion_min: 0 }));
-            return;
-        }
-        const s = serviciosDisponibles.find(s => s.id === serviceId);
-        if (s) {
-            setServicioTemporal(prev => ({
-                ...prev,
-                valor_servicio: s.precio,
-                duracion_min: s.duracion,
-            }));
-        }
-    }, [servicioTemporal.id_servicio, serviciosDisponibles]);
-
-    const handleServicioTemporalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedId = parseInt(e.target.value);
-        const servicio = serviciosDisponibles.find(s => s.id === selectedId);
-
-        setServicioTemporal(prev => ({
-            ...prev,
-            id_servicio: e.target.value,
-            valor_servicio: servicio?.precio || 0,
-            duracion_min: servicio?.duracion || 0,
-        }));
-    };
-
-
-    const agregarServicio = () => {
-        const sId = parseInt(servicioTemporal.id_servicio as string);
-        const vId = parseInt(servicioTemporal.id_veterinario as string);
-        const servicioInfo = serviciosDisponibles.find(s => s.id === sId);
-        const veterinarioInfo = colaboradores.find(v => v.id === vId);
-
-        if (!sId || isNaN(sId)) return alert("⚠️ Debe seleccionar un Servicio.");
-        if (!vId || isNaN(vId)) return alert("⚠️ Debe seleccionar un Veterinario.");
-        if (servicioTemporal.cantidad <= 0) return alert("⚠️ La cantidad debe ser mayor a cero.");
-        if (servicioTemporal.duracion_min <= 0) return alert("⚠️ La duración debe ser mayor a cero.");
-
-        const cantidad = servicioTemporal.cantidad;
-        const valorUnitario = servicioTemporal.valor_servicio;
-        const duracionUnitaria = servicioTemporal.duracion_min; 
-        const subtotalCalculado = valorUnitario * cantidad;
-
-        const nuevoServicio: ServicioDetalle = {
-            id_servicio: sId,
-            nombre_servicio: servicioInfo!.nombre, 
-            id_veterinario: vId,
-            nombre_veterinario: veterinarioInfo!.nombre, 
-            cantidad: cantidad,
-            valor_servicio: valorUnitario,
-            bono_inicial: 0,
-            duracion_min: duracionUnitaria,
-            duracion_total: duracionUnitaria * cantidad,
-            subtotal: subtotalCalculado,
-            adicionales: servicioTemporal.adicionales,
-        };
-
-        setServiciosRegistrados(prev => [...prev, nuevoServicio]);
-        setServicioTemporal(prev => ({
-            id_servicio: '',
-            valor_servicio: 0,
-            cantidad: 1,
-            duracion_min: 0,
-            id_veterinario: prev.id_veterinario,
-            adicionales: '',
-        }));
-    };
-
-    const eliminarServicio = (index: number) => {
-        setServiciosRegistrados(prev => prev.filter((_, i) => i !== index));
-    };
+// 2. Función para ELIMINAR (quitar de la lista definitivamente)
+const eliminarServicio = (index: number) => {
+    setServiciosRegistrados(prev => prev.filter((_, i) => i !== index));
+};
 
 
     // ================== CÓDIGO DE GOOGLE CALENDAR (GAPI/GIS) ==================
@@ -401,7 +492,7 @@ function EditarCita() {
                         const expiresIn = tokenResponse.expires_in || 3599; // Segundos
                         const expirationTime = Date.now() + (expiresIn * 1000);
                         
-                        localStorage.setItem("google_token_editor", tokenResponse.access_token);
+                        localStorage.setItem("google_token", tokenResponse.access_token);
                         localStorage.setItem("google_token_expires", expirationTime.toString());
 
                         setIsSignedIn(true);
@@ -423,7 +514,7 @@ function EditarCita() {
     useEffect(() => {
         if (!gapiInited || !gisInited) return;
         
-        const savedToken = localStorage.getItem("google_token_editor");
+        const savedToken = localStorage.getItem("google_token");
         const savedExpiry = localStorage.getItem("google_token_expires");
 
         if (savedToken && savedExpiry) {
@@ -495,7 +586,7 @@ function EditarCita() {
             const serviciosData = Array.isArray(resServicios.data) ? resServicios.data : resServicios.data.data;
             const serviciosParseados = serviciosData.map((s: any) => ({
                 ...s,
-                duracion: parseInt(s.duracion) || 30,
+                duracion: parseInt(s.duracion) || 0,
                 precio: parseFloat(s.precio) || 0,
             }));
             setServiciosDisponibles(serviciosParseados);
@@ -554,17 +645,38 @@ function EditarCita() {
     // ================== GESTIÓN DE MODAL Y EDICIÓN ==================
 
     const resetModalState = () => {
-        setMostrarModal(false);
-        setEditandoCita(null);
-        setEditingGCId(undefined); 
-        setServiciosRegistrados([]); 
-        setNuevoEvento({
-            dni: "", cliente: "", clienteId: 0, mascotaId: 0, 
-            date: new Date().toISOString().split("T")[0], startTime: "10:00", 
-            estado: "", duracionEstimadaMin: 30, abonoInicial: 0, observaciones: "", 
-            colaboradorId: 0, colaboradorNombre: "", 
-        });
-    };
+    setMostrarModal(false);
+    setEditandoCita(null);
+    setEditingGCId(undefined);
+    setServiciosRegistrados([]);
+
+    // 🧹 LIMPIEZA NUEVA
+    setServicioTemporal({
+        id_servicio: '',
+        valor_servicio: 0,
+        cantidad: 1,
+        duracion_min: 0,
+        id_veterinario: '',
+        adicionales: '',
+    });
+
+    setEditIndexServicio(null);
+
+    setNuevoEvento({
+        dni: "",
+        cliente: "",
+        clienteId: 0,
+        mascotaId: 0,
+        date: new Date().toISOString().split("T")[0],
+        startTime: "10:00",
+        estado: "",
+        duracionEstimadaMin: 30,
+        abonoInicial: 0,
+        observaciones: "",
+        colaboradorId: 0,
+        colaboradorNombre: "",
+    });
+};
     
     // 🚨 FIX 2: INTEGRACIÓN DEL PARSEADOR EN LA EDICIÓN
     const editarEvento = async (cita: CitaBD) => { 
@@ -589,7 +701,8 @@ function EditarCita() {
         const mascota = mascotas.find(m => m.id === cita.idMascota); // Necesitamos la mascota ahora
         const colaboradorAsignado = colaboradores.find(c => c.id === cita.idColaborador) || colaboradores[0];
         
-        setEditandoCita(cita); 
+        setEditandoCita(cita);
+        setAbonoEditable(cita.abonoInicial || 0);
         
         // Inicializamos observaciones y limpiamos servicios previos
         let fetchedObservaciones = cita.observaciones;
@@ -613,6 +726,7 @@ function EditarCita() {
                     const serviciosRecuperados = parsearServiciosGC(descriptionGC, colaboradores, serviciosDisponibles); 
 
                     if (serviciosRecuperados.length > 0) {
+                        console.log(serviciosRecuperados);
                          setServiciosRegistrados(serviciosRecuperados);
                          setStatus("✅ Servicios recuperados de Google Calendar.");
                     } else {
@@ -768,7 +882,7 @@ function EditarCita() {
                 idMedioSolicitud: citaEditada.idMedioSolicitud || ID_MEDIO_SOLICITUD_DEFAULT, 
                 
                 totalCita: totalMinimoNecesario, 
-                abonoInicial: citaEditada.abonoInicial, 
+                abonoInicial: abonoEditable,
                 
                 idColaborador: nuevoEvento.colaboradorId,
 
@@ -1089,8 +1203,8 @@ function EditarCita() {
                                     type="number"
                                     min="0"
                                     step="0.01"
-                                    value={editandoCita?.abonoInicial || 0} 
-                                    disabled 
+                                    value={abonoEditable}
+                                    onChange={(e) => setAbonoEditable(parseFloat(e.target.value) || 0)}
                                     style={{ background: "#f0f0f0" }}
                                     title="El abono solo se puede modificar mediante un registro de pago."
                                 />
@@ -1229,21 +1343,38 @@ function EditarCita() {
                                         </thead>
                                         <tbody>
                                             {serviciosRegistrados.map((s, index) => (
-                                                <tr key={index}>
-                                                    <td style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #eee' }}>
-                                                        <strong>{s.nombre_servicio}</strong>
-                                                        {s.adicionales && <div style={{ fontSize: '0.8em', color: '#666' }}>({s.adicionales})</div>}
-                                                    </td>
-                                                    <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{s.nombre_veterinario}</td>
-                                                    <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'center' }}>{s.cantidad}</td>
-                                                    <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'right' }}>${s.valor_servicio.toFixed(2)}</td>
-                                                    <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'right' }}>${s.subtotal.toFixed(2)}</td>
-                                                    <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'center' }}>{s.duracion_total} m</td>
-                                                    <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'center' }}>
-                                                        <button type="button" className="btn-eliminar" onClick={() => eliminarServicio(index)} style={{ padding: '2px 6px', fontSize: '1em', cursor: 'pointer', border: 'none', background: 'red' }}>🗑️</button>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                         <tr 
+        key={index} 
+        // 1. Al hacer clic en cualquier parte de la fila, se selecciona para editar
+        onClick={() => seleccionarServicio(index)} 
+        style={{ cursor: "pointer" }}
+        className="fila-servicio"
+    >
+        <td style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #eee' }}>
+            <strong>{s.nombre_servicio}</strong>
+            {s.adicionales && <div style={{ fontSize: '0.8em', color: '#666' }}>({s.adicionales})</div>}
+        </td>
+        <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{s.nombre_veterinario}</td>
+        <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'center' }}>{s.cantidad}</td>
+        <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'right' }}>${s.valor_servicio.toFixed(2)}</td>
+        <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'right' }}>${s.subtotal.toFixed(2)}</td>
+        <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'center' }}>{s.duracion_total} m</td>
+        <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'center' }}>
+            <button 
+                type="button" 
+                className="btn-eliminar" 
+                onClick={(e) => {
+                    // 2. IMPORTANTE: e.stopPropagation() evita que se active el onClick de la fila (el de editar)
+                    e.stopPropagation(); 
+                    eliminarServicio(index);
+                }} 
+                style={{ padding: '2px 6px', fontSize: '1em', cursor: 'pointer', border: 'none', background: 'red', color: 'white', borderRadius: '4px' }}
+            >
+                🗑️
+            </button>
+        </td>
+    </tr>
+))}
                                         </tbody>
                                         <tfoot style={{ background: '#fafafa' }}>
                                             <tr>
@@ -1258,13 +1389,13 @@ function EditarCita() {
                                             </tr>
                                             <tr className="total-row">
                                                 <td colSpan={5} style={{ textAlign: "right", fontWeight: "bold" }}>Adelanto:</td>
-                                                <td style={{ fontWeight: "bold", padding: '8px', color: "red", textAlign: 'right' }}>${(editandoCita?.abonoInicial || 0).toFixed(2)}</td>
+                                                <td style={{ fontWeight: "bold", padding: '8px', color: "red", textAlign: 'right' }}>${(abonoEditable).toFixed(2)}</td>
                                                 <td></td>
                                             </tr>
                                             <tr style={{ borderTop: '2px solid #ddd' }}>
                                                 <td colSpan={5} style={{ textAlign: "right" }}><strong>Pendiente de Pago:</strong></td>
                                                 <td id="totalCitaDisplay" style={{ fontWeight: "bold", textAlign: 'right', fontSize: '1.1em' }}>
-                                                    ${Math.max(0, totalCosto - (editandoCita?.abonoInicial || 0)).toFixed(2)}
+                                                    ${Math.max(0, totalCosto - (abonoEditable)).toFixed(2)}
                                                 </td>
                                                 <td></td>
                                             </tr>

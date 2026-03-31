@@ -231,17 +231,27 @@ function Agenda_general() {
     script.src = "https://accounts.google.com/gsi/client";
     script.onload = () => {
       const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
-        callback: (tokenResponse: any) => {
-          if (tokenResponse.access_token) {
-            window.gapi.client.setToken({ access_token: tokenResponse.access_token });
-            localStorage.setItem("google_token", tokenResponse.access_token);
-            setIsSignedIn(true);
-            cargarEventos();
-          }
-        },
-      });
+  client_id: CLIENT_ID,
+  scope: "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
+  callback: (tokenResponse: any) => {
+    if (tokenResponse.access_token) {
+
+      window.gapi.client.setToken({
+        access_token: tokenResponse.access_token,
+      });
+
+      // ✅ CALCULAR EXPIRACIÓN (1 hora)
+      const expirationTime = Date.now() + (tokenResponse.expires_in * 1000);
+
+      // ✅ GUARDAR EN LOCALSTORAGE
+      localStorage.setItem("google_token", tokenResponse.access_token);
+      localStorage.setItem("google_token_expires", expirationTime.toString());
+
+      setIsSignedIn(true);
+      cargarEventos();
+    }
+  },
+});
       setTokenClient(client);
       setGisInited(true);
     };
@@ -249,19 +259,29 @@ function Agenda_general() {
   }, []);
 
   useEffect(() => {
-    if (gapiInited && gisInited) setStatus("✅ Google Calendar listo para usar");
-  }, [gapiInited, gisInited]);
+  if (!gapiInited || !gisInited) return;
 
-  useEffect(() => {
-    if (!gapiInited || !gisInited) return;
-    const saved = localStorage.getItem("google_token");
-    if (saved) {
-      window.gapi.client.setToken({ access_token: saved });
-      setIsSignedIn(true);
-      setStatus("🔓 Sesión restaurada automáticamente");
-      cargarEventos();
-    }
-  }, [gapiInited, gisInited]);
+  const savedToken = localStorage.getItem("google_token");
+  const savedExpiry = localStorage.getItem("google_token_expires");
+
+  if (savedToken && savedExpiry) {
+    const now = Date.now();
+
+    if (now < parseInt(savedExpiry)) {
+      // ✅ Token válido
+      window.gapi.client.setToken({ access_token: savedToken });
+      setIsSignedIn(true);
+      setStatus("🔓 Sesión restaurada automáticamente");
+      cargarEventos();
+    } else {
+      // ❌ Token expirado
+      localStorage.removeItem("google_token");
+      localStorage.removeItem("google_token_expires");
+      setIsSignedIn(false);
+      setStatus("⚠️ Sesión expirada, vuelve a iniciar sesión");
+    }
+  }
+}, [gapiInited, gisInited]);
 
   const iniciarSesion = () => tokenClient?.requestAccessToken();
   const cerrarSesion = () => {
@@ -452,7 +472,8 @@ function Agenda_general() {
         // Se usa S/ en lugar de $
         summary: `${nuevoEvento.mascota} - Total: S/${totalCosto.toFixed(2)}`,
         // Se usa S/ en lugar de $
-        description: `**CLIENTE Y MASCOTA**\nCliente: ${nuevoEvento.cliente} (DNI: ${nuevoEvento.dni})\nMascota: ${nuevoEvento.mascota}\nEstado: ${nuevoEvento.estado}\nCosto Total: S/${totalCosto.toFixed(2)}\nDuración Total: ${duracionCitaTotal} min\n\n**SERVICIOS REGISTRADOS**\n${serviciosListaGC}\n\n**ADELANTO:** S/${bonoTemporal.toFixed(2)}\n\n**OBSERVACIONES**\n${nuevoEvento.description || 'No hay observaciones adicionales.'}`.trim(),
+        description: `**CLIENTE Y MASCOTA**\nCliente: ${nuevoEvento.cliente} (DNI: ${nuevoEvento.dni})\nMascota: ${nuevoEvento.mascota}\nEstado: ${nuevoEvento.estado}\nCosto Total: S/${totalCosto.toFixed(2)}\nDuración Total: ${duracionCitaTotal} min\n\n**SERVICIOS REGISTRADOS**\n${serviciosListaGC}\n\n**ADELANTO** S/${bonoTemporal.toFixed(2)}\n\n**OBSERVACIONES**\n${nuevoEvento.description || 'No hay observaciones adicionales.'} [DATA_JSON]
+        ${JSON.stringify(serviciosRegistrados)}`.trim(),
         start: { dateTime: start.toISOString(), timeZone: "America/Lima" },
         end: { dateTime: end.toISOString(), timeZone: "America/Lima" },
         // Implementación de Recordatorios
