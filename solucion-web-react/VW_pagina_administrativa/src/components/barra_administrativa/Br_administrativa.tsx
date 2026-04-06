@@ -228,7 +228,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <ul ref={adminRef} className="submenu">
                                         <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestión de colaboradores</Link></li>
                                         {/*<li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos a colaboradores</Link></li>*/}
-                                        <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Horarios de colaboradores</Link></li>
+                                        {/*<li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Horarios de colaboradores</Link></li>*/}
                                         <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
                                         <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
                                         {<li><Link to="/administracion/administracion/dashboard_administrativo" className="sub_opcion">Dashboard de colaboradore</Link></li>}
