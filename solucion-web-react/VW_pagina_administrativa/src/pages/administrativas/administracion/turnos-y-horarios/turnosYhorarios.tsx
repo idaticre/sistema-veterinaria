@@ -1,3 +1,4 @@
+/*
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
 import "./turnosYhorarios.css"
@@ -36,66 +37,6 @@ function turnosYhorarios() {
             { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
             { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "17:00" },
             { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
-            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
-            ],
-        },
-        {
-            ID: 2,
-            NOMBRE: "Ana Torres",
-            HORARIO: [
-            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
-            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
-            ],
-        },
-        {
-            ID: 3,
-            NOMBRE: "Ana Torres",
-            HORARIO: [
-            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
-            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
-            ],
-        },
-        {
-            ID: 4,
-            NOMBRE: "Ana Torres",
-            HORARIO: [
-            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
-            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
-            ],
-        },
-        {
-            ID: 5,
-            NOMBRE: "Ana Torres",
-            HORARIO: [
-            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
-            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
-            ],
-        },
-        {
-            ID: 6,
-            NOMBRE: "Ana Torres",
-            HORARIO: [
-            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "09:00", HORA_FIN: "18:00" },
-            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "-", HORA_FIN: "-" },
             { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "08:00", HORA_FIN: "16:00" },
             ],
         }
@@ -140,12 +81,12 @@ function turnosYhorarios() {
             ID: colaboradores.length + 1,
             NOMBRE: "",
             HORARIO: [
-            { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
-            { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
-            { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
-            { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
-            { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
-            { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
+                { DIA: "Lunes", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
+                { DIA: "Martes", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
+                { DIA: "Miércoles", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
+                { DIA: "Jueves", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
+                { DIA: "Viernes", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
+                { DIA: "Sábado", TIPO_DIA: 1, HORA_INICIO: "", HORA_FIN: "" },
             ],
         }
         setEdicion(nuevo);
@@ -295,3 +236,4 @@ function turnosYhorarios() {
 };
 
 export default turnosYhorarios
+*/

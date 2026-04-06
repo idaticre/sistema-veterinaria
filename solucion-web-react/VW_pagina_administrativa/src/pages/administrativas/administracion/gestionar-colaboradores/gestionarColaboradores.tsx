@@ -230,9 +230,9 @@ const GestionarColaboradores: React.FC = () => {
             </main>
             
             {mostrarModal && edicion && (
-                <div className="ventana-overlay">
-                    <div className="contenido-ventana">
-                        <h3>Editando colaborador</h3>
+                <div className="ventana-overlay-collab">
+                    <div className="contenido-ventana-collab">
+                        <h3>Colaborador</h3>
                         <p><strong>Siendo registrado el:</strong> {edicion.fechaIngreso}</p>
                         <input type="text" placeholder="Nombre del colaborador" value={edicion?.nombre || ""} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, nombre: nuevoValor.target.value } : null)}/>
                         <select value={edicion?.sexo ?? "M"} onChange={(e) => setEdicion(edicion ? { ...edicion, sexo: e.target.value as "M" | "F" } : null)}>
@@ -272,7 +272,7 @@ const GestionarColaboradores: React.FC = () => {
                         <input type="text" placeholder="Distrito" value={edicion.distrito} onChange={(nuevoValor) => setEdicion(edicion ? { ...edicion, distrito: nuevoValor.target.value } : null)}/>
                         <div className="accDeReg">
                             <button onClick={guardarColaborador}>Guardar</button>
-                            <button className="" onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
+                            <button style={{backgroundColor:"red", color:"white"}} onClick={() => { setMostrarModal(false); setEdicion(null); }}>Cancelar</button>
                         </div>
                     </div>
                 </div>
@@ -280,7 +280,7 @@ const GestionarColaboradores: React.FC = () => {
 
             {mostrarModalInformativo && masInformacion && (
                 <div className="ventana-overlay">
-                    <div className="contenido-ventana">
+                    <div className="contenido-ventana-collab">
                         <h3>Información de {masInformacion.nombre}</h3>
                         <div className="info-extensiva"><strong>Sexo: </strong>{masInformacion.sexo === "M" ? "Masculino" : "Femenino"}</div>
                         <div className="info-extensiva"><strong>Ciudad: </strong>{masInformacion.ciudad}</div>

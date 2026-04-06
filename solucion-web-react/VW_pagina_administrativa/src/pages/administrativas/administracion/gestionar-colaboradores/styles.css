@@ -146,7 +146,7 @@ button {
 }
 
 /* Modal (ventana) */
-.ventana-overlay {
+.ventana-overlay-collab {
   position: fixed;
   top: 0;
   left: 0;
@@ -159,7 +159,7 @@ button {
   z-index: 2000;
 }
 
-.contenido-ventana {
+.contenido-ventana-collab {
   background: white;
   padding: 2rem;
   border-radius: 12px;
