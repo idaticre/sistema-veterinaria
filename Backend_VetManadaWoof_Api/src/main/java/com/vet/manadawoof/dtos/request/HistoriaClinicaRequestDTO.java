@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HistoriaClinicaRequestDTO {
-    
+
     @NotNull(message = "Mascota es obligatoria")
     private Long idMascota;
-    
+
     private String observacionesGenerales;
 }

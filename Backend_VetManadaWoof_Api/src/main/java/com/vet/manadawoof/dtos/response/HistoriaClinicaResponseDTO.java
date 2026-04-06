@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HistoriaClinicaResponseDTO {
-    
+
     private Long id;
     private String codigo;
     private Long idMascota;
@@ -21,7 +21,7 @@ public class HistoriaClinicaResponseDTO {
     private String observacionesGenerales;
     private Boolean activo;
     private LocalDateTime fechaRegistro;
-    
+
     // Mensaje de respuesta del SP
     private String mensaje;
 }

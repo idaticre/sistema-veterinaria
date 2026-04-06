@@ -18,42 +18,42 @@ import java.util.Map;
 @RequestMapping("/api/historia-clinica")
 @RequiredArgsConstructor
 public class HistoriaClinicaRestController {
-    
+
     private final HistoriaClinicaService service;
-    
+
     @PostMapping("/crear")
     public ResponseEntity<ApiResponse<HistoriaClinicaResponseDTO>> crear(@RequestBody HistoriaClinicaRequestDTO dto) {
         HistoriaClinicaResponseDTO response = service.crear(dto);
-        
-        if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR")) {
+
+        if (response.getMensaje() != null && response.getMensaje().startsWith("ERROR")) {
             return ResponseEntity.ok(new ApiResponse<>(false, response.getMensaje(), null));
         }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(true, response.getMensaje(), response));
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<HistoriaClinicaResponseDTO>> obtenerPorId(@PathVariable Long id) {
         HistoriaClinicaResponseDTO historia = service.obtenerPorId(id);
-        
-        if(historia == null) {
+
+        if (historia == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(false, "Historia clínica no encontrada", null));
         }
         return ResponseEntity.ok(new ApiResponse<>(true, "Historia clínica encontrada", historia));
     }
-    
+
     @GetMapping("/mascota/{idMascota}")
     public ResponseEntity<ApiResponse<HistoriaClinicaResponseDTO>> obtenerPorMascota(@PathVariable Long idMascota) {
         HistoriaClinicaResponseDTO historia = service.obtenerPorMascota(idMascota);
-        
-        if(historia == null) {
+
+        if (historia == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(false, "Historia clínica no encontrada para esta mascota", null));
         }
         return ResponseEntity.ok(new ApiResponse<>(true, "Historia clínica encontrada", historia));
     }
-    
+
     @GetMapping
     public ResponseEntity<ApiResponse<Page<HistoriaClinicaResponseDTO>>> listar(
             @RequestParam(defaultValue = "0") int page,
@@ -63,13 +63,13 @@ public class HistoriaClinicaRestController {
         Page<HistoriaClinicaResponseDTO> historias = service.listar(pageable);
         return ResponseEntity.ok(new ApiResponse<>(true, "Historias clínicas obtenidas", historias));
     }
-    
+
     @GetMapping("/historial-mascota/{idMascota}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> consultarHistorialMascota(@PathVariable Long idMascota) {
         Map<String, Object> resultado = service.consultarHistorialMascota(idMascota);
         String mensaje = (String) resultado.get("mensaje");
-        
-        if(mensaje != null && mensaje.startsWith("ERROR")) {
+
+        if (mensaje != null && mensaje.startsWith("ERROR")) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(false, mensaje, null));
         }

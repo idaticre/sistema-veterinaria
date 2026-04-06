@@ -6,9 +6,9 @@
 -- ========================================x
 -- 0. Creación de la Base de Datos
 -- ========================================
-DROP DATABASE IF EXISTS vet_manada_woof_loc;
-CREATE DATABASE vet_manada_woof_loc;
-USE vet_manada_woof_loc;
+DROP DATABASE IF EXISTS vet_manada_woof;
+CREATE DATABASE vet_manada_woof;
+USE vet_manada_woof;
 -- ========================================
 -- BLOQUE 01: Administracion
 -- ========================================

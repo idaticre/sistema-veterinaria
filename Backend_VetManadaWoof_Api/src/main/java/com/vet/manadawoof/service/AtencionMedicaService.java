@@ -9,20 +9,20 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface AtencionMedicaService {
-    
+
     AtencionMedicaResponseDTO registrarCitaAtendida(RegistrarCitaAtendidaRequestDTO dto);
-    
+
     AtencionMedicaResponseDTO crear(AtencionMedicaRequestDTO dto);
-    
+
     AtencionMedicaResponseDTO actualizar(AtencionMedicaRequestDTO dto);
-    
+
     AtencionMedicaResponseDTO eliminar(Long id);
-    
+
     AtencionMedicaResponseDTO obtenerPorId(Long id);
-    
+
     List<AtencionMedicaResponseDTO> listarPorHistoria(Long idHistoriaClinica);
-    
+
     Page<AtencionMedicaResponseDTO> listarPorHistoriaPaginado(Long idHistoriaClinica, Pageable pageable);
-    
+
     List<AtencionMedicaResponseDTO> listarPorVeterinario(Long idVeterinario);
 }

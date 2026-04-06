@@ -15,7 +15,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AtencionMedicaResponseDTO {
-    
+
     private Long id;
     private String codigo;
     private Long idHistoriaClinica;
@@ -37,7 +37,7 @@ public class AtencionMedicaResponseDTO {
     private LocalDate proximoControl;
     private Integer idEstado;
     private LocalDateTime fechaRegistro;
-    
+
     // Mensaje de respuesta
     private String mensaje;
 }
