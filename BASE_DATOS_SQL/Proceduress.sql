@@ -1,5 +1,5 @@
 -- SCRIPT: PROCEDIMIENTOS ALMACENADOS CRUD - SISTEMA VETERINARIA_WOOF
-USE vet_manada_woof;
+USE vet_manada_woof_loc;
 -- ========================================
 -- SP: gestionar_rol_usuario // Asigna o elimina roles de usuarios 
 -- usuario puede tener varios roles y un rol puede estar en varios usuarios.

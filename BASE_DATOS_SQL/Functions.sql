@@ -1,4 +1,4 @@
-USE vet_manada_woof;
+USE vet_manada_woof_loc;
 -- ========================================
 -- FUNCIÓN: obtener_horario_vigente
 -- Devuelve el id del horario_base aplicable a un colaborador en una fecha dada.

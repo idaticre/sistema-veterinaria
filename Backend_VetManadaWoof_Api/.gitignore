@@ -1,10 +1,5 @@
 # ============================================
-# Archivos de ayuda generados automáticamente
-# ============================================
-HELP.md
-
-# ============================================
-# Directorios de compilación de Maven y Gradle
+# Compilacion Maven / Gradle
 # ============================================
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -15,13 +10,12 @@ build/
 !**/src/test/**/build/
 
 # ============================================
-# Archivos de configuración sensibles
+# Configuracion local sensible
 # ============================================
-# No subir credenciales reales
-# src/main/resources/application.properties
+src/main/resources/application-dev.properties
 
 # ============================================
-# STS (Spring Tool Suite)
+# IDEs
 # ============================================
 .apt_generated
 .classpath
@@ -30,53 +24,20 @@ build/
 .settings
 .springBeans
 .sts4-cache
-
-# ============================================
-# IntelliJ IDEA
-# ============================================
 .idea/
 *.iws
 *.iml
 *.ipr
-
-# ============================================
-# NetBeans
-# ============================================
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-
-# ============================================
-# Visual Studio Code
-# ============================================
 .vscode/
 
 # ============================================
-# Archivos del sistema operativo
+# Sistema operativo
 # ============================================
 .DS_Store
 Thumbs.db
-
-# =============================================
-# SEGURIDAD / JWT / LOGIN → YO LOS BORRO Y GIT NUNCA ME MOLESTA
-# =============================================
-src/main/java/com/vet/manadawoof/config/Jwt*
-src/main/java/com/vet/manadawoof/config/*Security*
-src/main/java/com/vet/manadawoof/config/*Auth*
-src/main/java/com/vet/manadawoof/controller/*Auth*
-src/main/java/com/vet/manadawoof/controller/*Login*
-src/main/java/com/vet/manadawoof/dtos/*Login*
-src/main/java/com/vet/manadawoof/dtos/*Jwt*
-src/main/java/com/vet/manadawoof/security/**
-src/main/java/com/vet/manadawoof/service/*Jwt*
-src/main/java/com/vet/manadawoof/service/*Login*
-src/main/java/com/vet/manadawoof/jwt/**
-src/main/java/com/vet/manadawoof/filter/**
-src/main/java/com/vet/manadawoof/BCryptGenerator.*
-
-# Por si acaso hay alguna clase suelta con "Auth" o "Jwt" en cualquier lado
-**/*Auth*.java
-**/*Jwt*.java
-**/*Security*.java
+HELP.md

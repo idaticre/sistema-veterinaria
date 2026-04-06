@@ -3,12 +3,12 @@
 -- Este script contiene la definición inicial de la base de datos
 -- =========================================================
 
--- ========================================
+-- ========================================x
 -- 0. Creación de la Base de Datos
 -- ========================================
-DROP DATABASE IF EXISTS vet_manada_woof;
-CREATE DATABASE vet_manada_woof;
-USE vet_manada_woof;
+DROP DATABASE IF EXISTS vet_manada_woof_loc;
+CREATE DATABASE vet_manada_woof_loc;
+USE vet_manada_woof_loc;
 -- ========================================
 -- BLOQUE 01: Administracion
 -- ========================================
