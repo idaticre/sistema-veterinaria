@@ -1,5 +1,6 @@
 package com.vet.manadawoof.dtos.request;
 
+import com.vet.manadawoof.enums.TipoVisita;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,9 +25,8 @@ public class RegistrarCitaAtendidaRequestDTO {
 
     private Long idColaborador;
 
-    @NotBlank(message = "Tipo de visita es obligatorio")
-    @Size(max = 32, message = "Tipo de visita no debe superar 32 caracteres")
-    private String tipoVisita;
+    @NotNull(message = "Tipo de visita es obligatorio")
+    private TipoVisita tipoVisita;
 
     @Size(max = 256, message = "Motivo de consulta no debe superar 256 caracteres")
     private String motivoConsulta;

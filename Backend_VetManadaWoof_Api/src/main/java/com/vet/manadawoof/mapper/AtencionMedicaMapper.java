@@ -30,6 +30,12 @@ public class AtencionMedicaMapper {
                 .tratamiento(entity.getTratamiento())
                 .observaciones(entity.getObservaciones())
                 .proximoControl(entity.getProximoControl())
+                .estadoPelaje(entity.getEstadoPelaje())
+                .condicionPiel(entity.getCondicionPiel())
+                .observacionesGrooming(entity.getObservacionesGrooming())
+                .comportamientoHospedaje(entity.getComportamientoHospedaje())
+                .alimentacionHospedaje(entity.getAlimentacionHospedaje())
+                .actividadHospedaje(entity.getActividadHospedaje())
                 .idEstado(entity.getEstado() != null ? entity.getEstado().getId() : null)
                 .fechaRegistro(entity.getFechaRegistro())
                 .build();

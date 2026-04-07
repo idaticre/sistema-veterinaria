@@ -1,5 +1,5 @@
 # Copia este archivo como application.properties y llena tus datos locales
-
+server.port=8088
 spring.datasource.url                                   = jdbc:mysql://localhost:3306/vet_manada_woof
 spring.datasource.username                              = TU_USUARIO_MYSQL
 spring.datasource.password                              = TU_PASSWORD_MYSQL

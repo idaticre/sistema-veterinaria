@@ -25,6 +25,12 @@ public class AtencionMedicaResponseDTO {
     private LocalDate fechaAtencion;
     private LocalTime horaInicio;
     private LocalTime horaFin;
+    private String tipoVisita;
+    private BigDecimal totalCita;
+    private BigDecimal abonoTotal;
+    private BigDecimal saldoPendiente;
+
+    // CLÍNICO
     private String motivoConsulta;
     private String anamnesis;
     private String examenFisico;
@@ -33,8 +39,19 @@ public class AtencionMedicaResponseDTO {
     private BigDecimal temperaturaC;
     private String diagnostico;
     private String tratamiento;
-    private String observaciones;
     private LocalDate proximoControl;
+
+    // ESTÉTICO
+    private String estadoPelaje;
+    private String condicionPiel;
+    private String observacionesGrooming;
+
+    // HOSPEDAJE - faltaban
+    private String comportamientoHospedaje;
+    private String alimentacionHospedaje;
+    private String actividadHospedaje;
+
+    private String observaciones;
     private Integer idEstado;
     private LocalDateTime fechaRegistro;
 

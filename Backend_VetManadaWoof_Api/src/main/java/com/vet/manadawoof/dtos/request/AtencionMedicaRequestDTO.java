@@ -65,7 +65,6 @@ public class AtencionMedicaRequestDTO {
 
     private LocalDate proximoControl;
 
-    // NUEVOS CAMPOS: Soportar estética y hospedaje
     @Size(max = 128, message = "Estado del pelaje no debe superar 128 caracteres")
     private String estadoPelaje;
 
