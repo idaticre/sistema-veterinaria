@@ -34,8 +34,9 @@
 }
 
 #buscador button:hover {
-  background-color: #69f214db;
+  background-color: #69f214db !important;
 }
+
 #lista_clientes {
   width: 100%;
   background-color: #fff;

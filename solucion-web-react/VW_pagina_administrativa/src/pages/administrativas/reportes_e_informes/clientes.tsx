@@ -308,30 +308,32 @@ const GestionarColaboradores: React.FC = () => {
         <div id="cuerpo-main">
             <Br_administrativa onMinimizeChange={setMinimizado}/>
             <main className={minimizado ? "minimize" : ""}>
-                <section id="cuerpo">
-                    <div className="diva2">
-                        <h3>Cómo generar un reporte</h3>
-                        <ol>
-                            <li>Seleccione un cliente (si quiere incluir sus mascotas en el reporte, de click en la casilla)</li>
-                            <li>De click en el botón "Cargar datos". Si los datos fueron cargados exitosamente, el sistema se lo hará saber</li>
-                            <li>De click en generar PDF. Una ventana nueva se abrirá</li>
-                            <li>De click al botón de descargar en la esquina superior derecha para descargar el PDF</li>
-                        </ol>
-                    </div>
-                    <div className="diva">
-                        <div className="selecciones">
-                            <select className="combobo" value={clienteSeleccionado ?? ""} onChange={(cliente) => {const val = cliente.target.value; setClienteSeleccionado(val ? Number(val) : null);}}>
-                                <option value="">Seleccione un cliente</option>
-                                {clientes.map((cliente) => (<option key={cliente.id} value={cliente.id}>{cliente.nombre}</option>))}
-                            </select>
-                            <label className="checkbobo"><input type="checkbox" checked={incluirMascotas} onChange={(e) => setIncluirMascotas(e.target.checked)}/>Incluir mascotas</label>
+                <div className='Reporte'>
+                    <section id="cuerpo">
+                        <div className="diva2">
+                            <h3>Cómo generar un reporte</h3>
+                            <ol>
+                                <li>Seleccione un cliente (si quiere incluir sus mascotas en el reporte, de click en la casilla)</li>
+                                <li>De click en el botón "Cargar datos". Si los datos fueron cargados exitosamente, el sistema se lo hará saber</li>
+                                <li>De click en generar PDF. Una ventana nueva se abrirá</li>
+                                <li>De click al botón de descargar en la esquina superior derecha para descargar el PDF</li>
+                            </ol>
                         </div>
-                        <div className="botones-pdf">
-                            <button onClick={cargarDatos} className='amarillo'>Cargar datos</button>
-                            <button onClick={() => generarPDF(datosReporte)} disabled={!datosReporte} className='verde'>Generar PDF</button>
+                        <div className="diva">
+                            <div className="selecciones">
+                                <select className="combobo" value={clienteSeleccionado ?? ""} onChange={(cliente) => {const val = cliente.target.value; setClienteSeleccionado(val ? Number(val) : null);}}>
+                                    <option value="">Seleccione un cliente</option>
+                                    {clientes.map((cliente) => (<option key={cliente.id} value={cliente.id}>{cliente.nombre}</option>))}
+                                </select>
+                                <label className="checkbobo"><input type="checkbox" checked={incluirMascotas} onChange={(e) => setIncluirMascotas(e.target.checked)}/>Incluir mascotas</label>
+                            </div>
+                            <div className="botones-pdf">
+                                <button onClick={cargarDatos} className='amarillo'>Cargar datos</button>
+                                <button onClick={() => generarPDF(datosReporte)} disabled={!datosReporte} className='verde'>Generar PDF</button>
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                </div>    
             </main>
         </div>
     )

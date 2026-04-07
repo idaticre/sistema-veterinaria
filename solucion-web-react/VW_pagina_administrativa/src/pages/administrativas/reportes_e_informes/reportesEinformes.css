@@ -1,8 +1,8 @@
-main {
+/*main {                      recuerda que todos los estilos se comparten porfavor use una clase personalizada
     display: flex;
     align-items: center;
     justify-content: center;
-}
+}*/
 
 #cuerpo {
     display: flex;

@@ -3,6 +3,8 @@ import Br_administrativa from '../../../../components/barra_administrativa/Br_ad
 import type { CitaResponse, HistorialCResponse, MascotaResponse } from '../../../../components/interfaces/interfaces';
 import IST from '../../../../components/proteccion/IST';
 import { Link, useLocation } from 'react-router-dom';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import "./historialM.css"
 
 type Mascotaextendido = MascotaResponse & { nombre_dueño?: string; nombre_raza?: string; nombre_especie?: string;
@@ -14,7 +16,7 @@ function HistorialM() {
     const mascotaHS = location.state?.mascotaSeleccionado as Mascotaextendido | undefined;
     const [historiaClinica, setHistoriaClinica] = useState<HistorialCResponse | null>(null);
     const [citas, setCitas] = useState<CitaResponse[]>([]);
-    const [fechaFiltro, setFechaFiltro] = useState<string>("");
+    const [rangoFechas, setRangoFechas] = useState<[Date | null, Date | null]>([null, null]);
 
     useEffect(() => {
         IST.get(`/historia-clinica/${mascotaHS?.id}`)
@@ -33,16 +35,27 @@ function HistorialM() {
             const citasRegist = res.data.data.content;
             
             const concluidos = citasRegist.filter((cita: CitaResponse) => cita.idEstado === 5);
-
+            console.log("datos de historial:", res.data.data.content);
             setCitas(concluidos);
         })
         .catch(err => {
             console.error("Error en la carga de datos", err);
         });
-    })
+    }, []);
 
     const citasMascota = mascotaHS? citas.filter(cita => cita.idMascota == mascotaHS?.id) : [];
-    const citasFiltradas = fechaFiltro? citasMascota.filter(cita => cita.fechaRegistro.startsWith(fechaFiltro)) : citasMascota;
+    const citasFiltradas = rangoFechas[0]? citasMascota.filter(cita => {
+        const fechaCita = new Date(cita.fechaRegistro);
+
+        const citaDia = new Date(fechaCita.getFullYear(), fechaCita.getMonth(), fechaCita.getDate());
+        const inicioDia = new Date(rangoFechas[0]!.getFullYear(), rangoFechas[0]!.getMonth(), rangoFechas[0]!.getDate());
+        const finDia = rangoFechas[1]
+            ? new Date(rangoFechas[1]!.getFullYear(), rangoFechas[1]!.getMonth(), rangoFechas[1]!.getDate())
+            : inicioDia; 
+
+        return citaDia >= inicioDia && citaDia <= finDia;
+    }): citasMascota;
+
 
     return (
         <div className='historialM'>
@@ -51,45 +64,98 @@ function HistorialM() {
                 <section className='historiales'>
                     <Link className='boton_retorno' to="/administracion/mascotas/lista"><i className="fa-solid fa-backward"></i></Link>
                     <div className="historial_encabezado">
-                        <h3>HISTORIAL CLÍNICO</h3>
-                        <div className="codigo_historial">
-                            Código: <span>{historiaClinica?.codigo}</span>
-                        </div>
-
                         <div className="datos_historial">
-                            <div className="bloque_datos">
-                            <p>Fecha de apertura</p>
-                            <span>{historiaClinica?.fechaApertura}</span>
+                            <h3>HISTORIAL CLÍNICO: {historiaClinica?.codigo}</h3>
+                            <div className='DT_info'>
+                                <div className='DT_info_cas'>
+                                    <div className="DT_info_i">
+                                        <p>Nombre: </p>
+                                        <span>{mascotaHS?.nombre}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>Código: </p><span>{mascotaHS?.codigo}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>Fecha de apertura:</p>
+                                        <span>{historiaClinica?.fechaApertura}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>Dueño: </p>
+                                        <span>{mascotaHS?.nombre_dueño}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>Sexo:</p>
+                                        <span>{mascotaHS?.sexo == 'M'? 'macho': 'hembra'}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>Raza: </p>
+                                        <span>{mascotaHS?.nombre_raza}</span>
+                                    </div>
+                                </div>
+                                <div className='DT_info_cas'>
+                                    <div className="DT_info_i">
+                                        <p>tamaño: </p>
+                                        <span>{mascotaHS?.nombre_tamaño}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>Etapa: </p>
+                                        <span>{mascotaHS?.nombre_etapa}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>castrado: </p>
+                                        <span>{mascotaHS?.esterilizado? '✓':'✕'}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>Factor Dea:</p>
+                                        <span>{mascotaHS?.factorDea? '✓':'✕'}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>Pedigree: </p>
+                                        <span>{mascotaHS?.pedigree? '✓':'✕'}</span>
+                                    </div>
+                                    <div className="DT_info_i">
+                                        <p>Alergico: </p>
+                                        <span>{mascotaHS?.alergias}</span>
+                                    </div>
+                                </div>
                             </div>
-
-                            <div className="bloque_datos">
-                            <p>Mascota</p>
-                            <span>{mascotaHS?.nombre}</span>
-                            </div>
-
-                            <div className="bloque_datos">
-                            <p>Dueño</p>
-                            <span>{mascotaHS?.nombre_dueño}</span>
-                            </div>
+                        </div>        
+                        <div className='DT_foto'>
+                            <img src={mascotaHS?.foto} alt="" />
                         </div>
                     </div>
                     <div className='filtro_historial'>
-                        <input type="date" value={fechaFiltro} onChange={(e) => setFechaFiltro(e.target.value)}/>
+                        <DatePicker
+                            selectsRange
+                            startDate={rangoFechas[0]}
+                            endDate={rangoFechas[1]}
+                            onChange={(update) => setRangoFechas(update)}
+                            isClearable={true}
+                            className='ftr_fechas'
+                            dateFormat="yyyy/MM/dd"
+                            placeholderText="Fecha inicio - Fecha final"
+                        />
+                        {citasFiltradas.length === 0? (''):(
+                            <>
+                                <p>Citas encontras ({citasFiltradas.length})</p>
+                            </>
+                        )}
                     </div>
                     <div className='citas_mascota'>
                         {citasFiltradas.length === 0? (
-                            <p>sin citas a su nombre</p>
+                            <p>No hay registros</p>
                         ):(
                             citasFiltradas.map((CMT) =>(
                                 <>
                                     <div className='cita' key={CMT.id}>
                                         <div className='citas_mascota_encabezado'>
-                                            <p>{CMT.observaciones} </p><span>{new Date(CMT.fechaRegistro).toLocaleDateString("es-PE")}</span>
+                                            <p>servicio{/*CMT.observaciones*/} </p><span>{new Date(CMT.fechaRegistro).toLocaleDateString("es-PE")}</span>
                                         </div>
                                         <div className='citas_mascota_datos'>
                                             <p>Codigo: <span>{CMT.codigo}</span></p>
                                             <p>Hora: <span>{CMT.fechaRegistro.split("T")[1].slice(0,5)}</span></p>
                                             <p>Monto total: {CMT.totalCita}</p>
+                                            <p>Veterinario: Nombre colaborador</p>
                                         </div>
                                     </div>
                                 </>

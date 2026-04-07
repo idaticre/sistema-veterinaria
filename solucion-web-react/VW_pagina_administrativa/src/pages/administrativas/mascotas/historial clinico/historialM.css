@@ -1,5 +1,3 @@
-
-
 .historialM {
   width: 100%;
   height: 100%;
@@ -12,10 +10,10 @@
 }
 
 .historiales{
-    background-color: rgb(243, 164, 61);
-    padding: 1rem;
-    flex: 1;
-    border-radius: 5px;
+  background-color: rgb(255, 198, 122);
+  padding: 1rem;
+  flex: 1;
+  border-radius: 5px;
 }
 
 .historial_encabezado {
@@ -25,77 +23,96 @@
   margin-bottom: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   display: flex;
-  flex-direction: column;
-  align-items: center;
   gap: 1rem;
-}
-
-/* Título */
-.historial_encabezado h3 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0;
-  letter-spacing: 0.5px;
-}
-
-/* Código */
-.codigo_historial {
-  font-size: 0.9rem;
-  color: #6b7280;
-}
-
-.codigo_historial span {
-  font-weight: 600;
-  color: #f59e0b;
 }
 
 /* Contenedor de datos */
 .datos_historial {
   width: 100%;
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+}
+
+/* Título */
+.historial_encabezado h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #001C3D;
+  margin: 0;
+  letter-spacing: 0.5px;
+  text-decoration: underline;
+  border: none;
   text-align: center;
-  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.DT_info{
+  display: flex;
+}
+
+.DT_info_cas{
+  display: flex;
+  flex-direction: column;
+  gap: 0.49rem;
+  width: 50%;
+  color: #33475B;
+}
+
+.DT_info_i{
+  display: flex;
+  align-items: center;
+  height: 1.3rem;
 }
 
 /* Bloques */
-.bloque_datos p {
-  margin: 0;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: #6b7280;
-  letter-spacing: 0.6px;
+.DT_info_i p {
+  font-weight: bolder;
+  width: 12rem;
+  font-family:'Courier New', Courier, monospace;
+  text-transform: capitalize;
 }
 
-.bloque_datos span {
-  display: block;
-  margin-top: 0.2rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #111827;
+.DT_info_i span {
+  text-transform: capitalize;
+  font-family:'Courier New', Courier, monospace;
+  flex: 1;
 }
 
+.DT_foto{
+  width: 20%;
+}
 
+.DT_foto img{
+  border-radius: 10%;
+  width: 100%;
+}
 
 .filtro_historial {
   padding: 15px 0;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.filtro_historial input[type="date"] {
-    width: 14%;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e0;
-    font-size: 1rem;
+.filtro_historial p{
+  font-size: larger;
+  font-family:'Courier New', Courier, monospace;
+  font-weight: 800;
+}
+
+.ftr_fechas{
+  font-weight: 700;
 }
 
 .citas_mascota {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.cita{
+  flex: 1 1 19rem; 
+  max-width: 22rem;
 }
 
 .citas_mascota p {
