@@ -12,7 +12,7 @@ public class ApiResponse<T> {
     private boolean success;
     private String message;
     private T data;
-    
+
     // Constructor de apoyo cuando no hay datos
     public ApiResponse(boolean success, String message) {
         this.success = success;

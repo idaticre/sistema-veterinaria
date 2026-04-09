@@ -23,19 +23,19 @@ import java.sql.Time;
 @Service
 @RequiredArgsConstructor
 public class AgendaServiceImpl implements AgendaService {
-    
+
     @PersistenceContext
     private final EntityManager entityManager;
     private final AgendaRepository agendaRepository;
     private final AgendaMapper agendaMapper;
-    
+
     @Override
     @Transactional
     public AgendaResponseDTO crear(AgendaRequestDTO dto) {
         StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("gestionar_agenda");
-        
+
         registrarParametros(sp);
-        
+
         sp.setParameter("p_accion", "CREAR");
         sp.setParameter("p_id_agenda", null);
         sp.setParameter("p_id_cliente", dto.getIdCliente());
@@ -47,26 +47,26 @@ public class AgendaServiceImpl implements AgendaService {
         sp.setParameter("p_id_estado", dto.getIdEstado());
         sp.setParameter("p_abono_inicial", dto.getAbonoInicial() != null ? dto.getAbonoInicial() : BigDecimal.ZERO);
         sp.setParameter("p_observaciones", dto.getObservaciones());
-        
+
         sp.execute();
-        
+
         Object resultIdObject = sp.getOutputParameterValue("p_id_resultado");
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
-        
-        if(mensaje != null && mensaje.startsWith("ERROR")) {
+
+        if (mensaje != null && mensaje.startsWith("ERROR")) {
             return AgendaResponseDTO.builder().mensaje(mensaje).build();
         }
         Long idResultado = ((Number) sp.getOutputParameterValue("p_id_resultado")).longValue();
         return obtenerPorId(idResultado);
     }
-    
+
     @Override
     @Transactional
     public AgendaResponseDTO actualizar(AgendaRequestDTO dto) {
         StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("gestionar_agenda");
-        
+
         registrarParametros(sp);
-        
+
         sp.setParameter("p_accion", "ACTUALIZAR");
         sp.setParameter("p_id_agenda", dto.getId());
         sp.setParameter("p_id_cliente", dto.getIdCliente());
@@ -78,34 +78,34 @@ public class AgendaServiceImpl implements AgendaService {
         sp.setParameter("p_id_estado", dto.getIdEstado());
         sp.setParameter("p_abono_inicial", dto.getAbonoInicial() != null ? dto.getAbonoInicial() : BigDecimal.ZERO);
         sp.setParameter("p_observaciones", dto.getObservaciones());
-        
+
         sp.execute();
-        
+
         Object resultIdObject = sp.getOutputParameterValue("p_id_resultado");
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
-        
-        if(mensaje != null && mensaje.startsWith("ERROR")) {
+
+        if (mensaje != null && mensaje.startsWith("ERROR")) {
             return AgendaResponseDTO.builder().mensaje(mensaje).build();
         }
         Long idResultado = ((Number) sp.getOutputParameterValue("p_id_resultado")).longValue();
         return obtenerPorId(idResultado);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public Page<AgendaResponseDTO> listar(Pageable pageable) {
         Page<AgendaEntity> page = agendaRepository.findAll(pageable);
-        return page.map(agendaMapper :: toDto);
+        return page.map(agendaMapper::toDto);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public AgendaResponseDTO obtenerPorId(Long idAgenda) {
         AgendaEntity agenda = agendaRepository.findById(idAgenda).orElse(null);
-        if(agenda == null) return null;
+        if (agenda == null) return null;
         return agendaMapper.toDto(agenda);
     }
-    
+
     private void registrarParametros(StoredProcedureQuery sp) {
         sp.registerStoredProcedureParameter("p_accion", String.class, ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_id_agenda", Long.class, ParameterMode.IN);

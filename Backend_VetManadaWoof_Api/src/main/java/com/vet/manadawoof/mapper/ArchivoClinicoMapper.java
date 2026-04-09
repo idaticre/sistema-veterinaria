@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ArchivoClinicoMapper {
-    
+
     public ArchivoClinicoResponseDTO toDto(HistoriaClinicaArchivoEntity entity) {
-        if(entity == null) return null;
-        
+        if (entity == null) return null;
+
         return ArchivoClinicoResponseDTO.builder()
                 .id(entity.getId())
                 .codigo(entity.getCodigo())

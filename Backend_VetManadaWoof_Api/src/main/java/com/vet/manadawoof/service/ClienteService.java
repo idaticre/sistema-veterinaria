@@ -7,14 +7,14 @@ import java.util.List;
 
 public interface ClienteService {
     ClienteResponseDTO registrar(ClienteRequestDTO dto);
-    
+
     ClienteResponseDTO actualizar(Long idCliente, ClienteRequestDTO dto);
-    
+
     List<ClienteResponseDTO> listar();
-    
+
     ClienteResponseDTO obtenerPorId(Long idCliente);
-    
+
     // borrado lógico
     ClienteResponseDTO eliminar(Long idCliente);
-    
+
 }

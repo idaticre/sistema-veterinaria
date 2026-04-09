@@ -21,7 +21,7 @@ public class ColaboradorMapper {
     public ColaboradorResponseDTO toDto(Object[] entRow, Object[] colRow, String mensaje) {
         Long idEntidad = ((Number) entRow[0]).longValue();
         Integer idUsuario = colRow[2] != null ? ((Number) colRow[2]).intValue() : null;
-        
+
         return ColaboradorResponseDTO.builder().id(((Number) colRow[0]).longValue()) // id del colaborador
                 .codigoColaborador((String) colRow[1])
                 .idEntidad(idEntidad).
@@ -41,7 +41,7 @@ public class ColaboradorMapper {
                 .foto((String) colRow[4]).mensaje(mensaje)
                 .build();
     }
-    
+
     /**
      * ===============================================================
      * Convierte un DTO de solicitud (ColaboradorRequestDTO)
@@ -51,28 +51,33 @@ public class ColaboradorMapper {
      */
     public ColaboradorEntity toEntity(ColaboradorRequestDTO dto) {
         ColaboradorEntity entity = new ColaboradorEntity();
-        
+
         // --- Relación con Entidad ---
-        if(dto.getIdEntidad() != null) {
-            EntidadEntity entidad = new EntidadEntity(); entidad.setId(dto.getIdEntidad()); entity.setEntidad(entidad);
+        if (dto.getIdEntidad() != null) {
+            EntidadEntity entidad = new EntidadEntity();
+            entidad.setId(dto.getIdEntidad());
+            entity.setEntidad(entidad);
         }
-        
+
         // --- Relación con Usuario ---
-        if(dto.getIdUsuario() != null) {
-            UsuarioEntity usuario = new UsuarioEntity(); usuario.setId(dto.getIdUsuario()); entity.setUsuario(usuario);
+        if (dto.getIdUsuario() != null) {
+            UsuarioEntity usuario = new UsuarioEntity();
+            usuario.setId(dto.getIdUsuario());
+            entity.setUsuario(usuario);
         }
-        
+
         // Conversión de LocalDate a Date
-        if(dto.getFechaIngreso() != null) {
+        if (dto.getFechaIngreso() != null) {
             entity.setFechaIngreso(Date.valueOf(dto.getFechaIngreso()));
         }
-        
+
         // Asignar campos simples
-        entity.setFoto(dto.getFoto()); entity.setActivo(dto.getActivo() != null ? dto.getActivo() : true);
-        
+        entity.setFoto(dto.getFoto());
+        entity.setActivo(dto.getActivo() != null ? dto.getActivo() : true);
+
         return entity;
     }
-    
+
     // Convierte una fila combinada simple (JOIN colaboradores + entidades)
     // usada en listados u obtención individual.
     public ColaboradorResponseDTO toFullDto(Object[] row) {
@@ -93,10 +98,10 @@ public class ColaboradorMapper {
                 .distrito((String) row[16])
                 .build();
     }
-    
+
     // Variante extendida del mapeo completo (entidad + colaborador)
     // usada internamente por registrar() y actualizar().
-    
+
     public ColaboradorResponseDTO toFullDto(Object[] entRow, Object[] colRow, String mensaje) {
         return toDto(entRow, colRow, mensaje);
     }

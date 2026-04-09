@@ -1,9 +1,13 @@
-import { useEffect, useState } from 'react'
-import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
-import './regis_dueños.css'
-import type { tipo_doc, ClienteResponse, ClienteResquest } from '../../../components/interfaces/interfaces';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import IST from '../../../components/proteccion/IST';
+import { useEffect, useState } from "react";
+import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
+import "./regis_dueños.css";
+import type {
+  tipo_doc,
+  ClienteResponse,
+  ClienteResquest,
+} from "../../../components/interfaces/interfaces";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import IST from "../../../components/proteccion/IST";
 
 function regis_dueños() {
   const [minimizado, setMinimizado] = useState(false);
@@ -26,21 +30,49 @@ function regis_dueños() {
 
   //distritos
   const distritosLima = [
-    { id: 1, nombre: "Ancón" },{ id: 2, nombre: "Ate" },{ id: 3, nombre: "Barranco" },
-    { id: 4, nombre: "Breña" },{ id: 5, nombre: "Carabayllo" },{ id: 6, nombre: "Chaclacayo" },
-    { id: 7, nombre: "Chorrillos" },{ id: 8, nombre: "Cieneguilla" },{ id: 9, nombre: "Comas" },
-    { id: 10, nombre: "El Agustino" },{ id: 11, nombre: "Independencia" },{ id: 12, nombre: "Jesús María" },
-    { id: 13, nombre: "La Molina" },{ id: 14, nombre: "La Victoria" },{ id: 15, nombre: "Lima" },
-    { id: 16, nombre: "Lince" },{ id: 17, nombre: "Los Olivos" },{ id: 18, nombre: "Lurigancho" },
-    { id: 19, nombre: "Lurín" },{ id: 20, nombre: "Magdalena del Mar" },{ id: 21, nombre: "Miraflores" },
-    { id: 22, nombre: "Pachacámac" },{ id: 23, nombre: "Pucusana" },{ id: 24, nombre: "Pueblo Libre" },
-    { id: 25, nombre: "Puente Piedra" },{ id: 26, nombre: "Punta Hermosa" },{ id: 27, nombre: "Punta Negra" },
-    { id: 28, nombre: "Rímac" },{ id: 29, nombre: "San Bartolo" },{ id: 30, nombre: "San Borja" },
-    { id: 31, nombre: "San Isidro" },{ id: 32, nombre: "San Juan de Lurigancho" },{ id: 33, nombre: "San Juan de Miraflores" },
-    { id: 34, nombre: "San Luis" },{ id: 35, nombre: "San Martín de Porres" },{ id: 36, nombre: "San Miguel" },
-    { id: 37, nombre: "Santa Anita" },{ id: 38, nombre: "Santa María del Mar" },{ id: 39, nombre: "Santa Rosa" },
-    { id: 40, nombre: "Santiago de Surco" },{ id: 41, nombre: "Surquillo" },{ id: 42, nombre: "Villa El Salvador" },
-    { id: 43, nombre: "Villa María del Triunfo" }
+    { id: 1, nombre: "Ancón" },
+    { id: 2, nombre: "Ate" },
+    { id: 3, nombre: "Barranco" },
+    { id: 4, nombre: "Breña" },
+    { id: 5, nombre: "Carabayllo" },
+    { id: 6, nombre: "Chaclacayo" },
+    { id: 7, nombre: "Chorrillos" },
+    { id: 8, nombre: "Cieneguilla" },
+    { id: 9, nombre: "Comas" },
+    { id: 10, nombre: "El Agustino" },
+    { id: 11, nombre: "Independencia" },
+    { id: 12, nombre: "Jesús María" },
+    { id: 13, nombre: "La Molina" },
+    { id: 14, nombre: "La Victoria" },
+    { id: 15, nombre: "Lima" },
+    { id: 16, nombre: "Lince" },
+    { id: 17, nombre: "Los Olivos" },
+    { id: 18, nombre: "Lurigancho" },
+    { id: 19, nombre: "Lurín" },
+    { id: 20, nombre: "Magdalena del Mar" },
+    { id: 21, nombre: "Miraflores" },
+    { id: 22, nombre: "Pachacámac" },
+    { id: 23, nombre: "Pucusana" },
+    { id: 24, nombre: "Pueblo Libre" },
+    { id: 25, nombre: "Puente Piedra" },
+    { id: 26, nombre: "Punta Hermosa" },
+    { id: 27, nombre: "Punta Negra" },
+    { id: 28, nombre: "Rímac" },
+    { id: 29, nombre: "San Bartolo" },
+    { id: 30, nombre: "San Borja" },
+    { id: 31, nombre: "San Isidro" },
+    { id: 32, nombre: "San Juan de Lurigancho" },
+    { id: 33, nombre: "San Juan de Miraflores" },
+    { id: 34, nombre: "San Luis" },
+    { id: 35, nombre: "San Martín de Porres" },
+    { id: 36, nombre: "San Miguel" },
+    { id: 37, nombre: "Santa Anita" },
+    { id: 38, nombre: "Santa María del Mar" },
+    { id: 39, nombre: "Santa Rosa" },
+    { id: 40, nombre: "Santiago de Surco" },
+    { id: 41, nombre: "Surquillo" },
+    { id: 42, nombre: "Villa El Salvador" },
+    { id: 43, nombre: "Villa María del Triunfo" },
   ];
 
   // Estado para controlar si es persona jurídica
@@ -48,13 +80,13 @@ function regis_dueños() {
 
   useEffect(() => {
     IST.get("/tipo-documento")
-    .then(res => {
-      setTipDoc(res.data);
-    })
-    .catch(err => {
-      console.error("Error en la carga de datos", err)
-    });
-  }, [])
+      .then((res) => {
+        setTipDoc(res.data);
+      })
+      .catch((err) => {
+        console.error("Error en la carga de datos", err);
+      });
+  }, []);
 
   useEffect(() => {
     if (clienteSelecc) {
@@ -72,7 +104,7 @@ function regis_dueños() {
       setRepresentante(clienteSelecc.representante || "");
       setActivo(clienteSelecc.activo ?? true);
       setEsPersonaJuridica(esJuridica);
-      
+
       // Si es jurídica y no tiene tipo documento, asignar RUC por defecto
       if (esJuridica && !clienteSelecc.idTipoDocumento) {
         setIdTipoDocumento(2); // RUC
@@ -85,7 +117,7 @@ function regis_dueños() {
     const esJuridica = nuevoId === 2;
     setIdTipoPersonaJuridica(nuevoId);
     setEsPersonaJuridica(esJuridica);
-    
+
     // Si cambia a jurídica, forzar RUC y limpiar sexo
     if (esJuridica) {
       setIdTipoDocumento(2); // RUC
@@ -117,7 +149,7 @@ function regis_dueños() {
     }
 
     const nuevoCliente: ClienteResquest = {
-      idEntidad: clienteSelecc?.idEntidad ?? undefined, 
+      idEntidad: clienteSelecc?.idEntidad ?? undefined,
       idTipoPersonaJuridica,
       nombre,
       sexo: esPersonaJuridica ? undefined : sexo, // Solo enviar sexo para naturales
@@ -128,70 +160,90 @@ function regis_dueños() {
       direccion,
       ciudad,
       distrito,
-      representante : esPersonaJuridica ? representante : "" , 
-      activo
+      representante: esPersonaJuridica ? representante : "",
+      activo,
     };
 
     if (clienteSelecc) {
-      IST.put(`/clientes/actualizar/${clienteSelecc.id}`, nuevoCliente)
-        .then(res => {
+      IST.put(`/clientes/${clienteSelecc.id}`, nuevoCliente)
+        .then((res) => {
           console.log("cliente actualizado:", res.data);
           alert("Cliente actualizado correctamente ✅");
-          navigate("/administracion/cliente/lista"); 
+          navigate("/administracion/cliente/lista");
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Error al actualizar cliente", err);
           alert("Error al actualizar cliente ❌");
         });
     } else {
-      IST.post("/clientes/registrar", nuevoCliente)
-        .then(res => {
+      IST.post("/clientes", nuevoCliente)
+        .then((res) => {
           console.log("cliente creado:", res.data);
           alert("Entidad registrada correctamente ✅");
-          navigate("/administracion/cliente/lista"); 
+          navigate("/administracion/cliente/lista");
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Error al registrar entidad", err);
           alert("Error al registrar entidad ❌");
         });
     }
-  }
+  };
 
   return (
     <>
-      <div id='regis_dueños'>
+      <div id="regis_dueños">
         <Br_administrativa onMinimizeChange={setMinimizado} />
 
-        <main className={minimizado ? 'minimize' : ''}>
+        <main className={minimizado ? "minimize" : ""}>
           <div className="container">
-            <Link className='boton_retorno' to="/administracion/cliente/lista"><i className="fa-solid fa-backward"></i></Link>
-            <h2><i className="icon-user"></i> Registro Cliente</h2>
-            
+            <Link className="boton_retorno" to="/administracion/cliente/lista">
+              <i className="fa-solid fa-backward"></i>
+            </Link>
+            <h2>
+              <i className="icon-user"></i> Registro Cliente
+            </h2>
+
             <div className="form-box">
               <div className="form-section">
-                <h3><i className="icon-id-card"></i> Información General</h3>
+                <h3>
+                  <i className="icon-id-card"></i> Información General
+                </h3>
                 <form onSubmit={handleSubmit}>
                   {clienteSelecc && (
                     <div className="form-row">
                       <div className="form-group">
                         <label>ID</label>
-                        <input type="text" value={clienteSelecc.codigoCliente} disabled readOnly/>
+                        <input
+                          type="text"
+                          value={clienteSelecc.codigoCliente}
+                          disabled
+                          readOnly
+                        />
                       </div>
-                      <div className='form-group'>
+                      <div className="form-group">
                         <label>Fecha de registro</label>
-                        <input type="text" value={
-                          clienteSelecc.fechaRegistro ? 
-                          `${clienteSelecc.fechaRegistro.slice(11, 16)}  del  ${clienteSelecc.fechaRegistro.split('T')[0]}` : '' } disabled readOnly/>
+                        <input
+                          type="text"
+                          value={
+                            clienteSelecc.fechaRegistro
+                              ? `${clienteSelecc.fechaRegistro.slice(11, 16)}  del  ${clienteSelecc.fechaRegistro.split("T")[0]}`
+                              : ""
+                          }
+                          disabled
+                          readOnly
+                        />
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="tipoPersona">Tipo de Persona *</label>
-                      <select 
-                        value={idTipoPersonaJuridica} 
-                        onChange={(e) => handleTipoPersonaChange(Number(e.target.value))} 
+                      <select
+                        value={idTipoPersonaJuridica}
+                        onChange={(e) =>
+                          handleTipoPersonaChange(Number(e.target.value))
+                        }
                         required
                       >
                         <option value="1">Natural</option>
@@ -200,14 +252,20 @@ function regis_dueños() {
                     </div>
                     <div className="form-group">
                       <label htmlFor="nombre">
-                        {esPersonaJuridica ? "Razón Social *" : "Nombre Completo *"}
+                        {esPersonaJuridica
+                          ? "Razón Social *"
+                          : "Nombre Completo *"}
                       </label>
-                      <input 
-                        type="text" 
-                        value={nombre} 
-                        onChange={(e) => setNombre(e.target.value)} 
-                        placeholder={esPersonaJuridica ? "Razón Social de la empresa" : "Nombre completo del cliente"}
-                        required 
+                      <input
+                        type="text"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        placeholder={
+                          esPersonaJuridica
+                            ? "Razón Social de la empresa"
+                            : "Nombre completo del cliente"
+                        }
+                        required
                       />
                     </div>
                   </div>
@@ -217,43 +275,59 @@ function regis_dueños() {
                     <div className="form-group full-width">
                       <label>Género *</label>
                       <div className="radio-group">
-                        <input 
-                          type="radio" 
-                          name="genero" 
-                          value="M" 
-                          checked={sexo === "M"} 
-                          onChange={() => setSexo("M")} 
-                        /> Masculino
-                        <input 
-                          type="radio" 
-                          name="genero" 
-                          value="F" 
-                          checked={sexo === "F"} 
-                          onChange={() => setSexo("F")} 
-                        /> Femenino
+                        <input
+                          type="radio"
+                          name="genero"
+                          value="M"
+                          checked={sexo === "M"}
+                          onChange={() => setSexo("M")}
+                        />{" "}
+                        Masculino
+                        <input
+                          type="radio"
+                          name="genero"
+                          value="F"
+                          checked={sexo === "F"}
+                          onChange={() => setSexo("F")}
+                        />{" "}
+                        Femenino
                       </div>
                     </div>
                   )}
 
-                  <div className="form-row"> 
+                  <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="tipoDocumento">Tipo de documento *</label>
-                      <select 
-                        id="tipo_doc" 
-                        value={idTipoDocumento} 
-                        onChange={(e) => setIdTipoDocumento(Number(e.target.value))}
+                      <select
+                        id="tipo_doc"
+                        value={idTipoDocumento}
+                        onChange={(e) =>
+                          setIdTipoDocumento(Number(e.target.value))
+                        }
                         disabled={esPersonaJuridica} // Deshabilitado para jurídicas (siempre RUC)
                       >
-                        <option value="0" disabled>Elija documento</option>
+                        <option value="0" disabled>
+                          Elija documento
+                        </option>
                         {tipoDoc
-                          .filter((TD) => esPersonaJuridica ? TD.id === 2 : TD.id !== 2) // Solo RUC para jurídicas
+                          .filter((TD) =>
+                            esPersonaJuridica ? TD.id === 2 : TD.id !== 2,
+                          ) // Solo RUC para jurídicas
                           .map((TD) => (
-                            <option key={TD.id} value={TD.id}>{TD.descripcion}</option>
-                          ))
-                        }
+                            <option key={TD.id} value={TD.id}>
+                              {TD.descripcion}
+                            </option>
+                          ))}
                       </select>
                       {esPersonaJuridica && (
-                        <small style={{color: '#666', fontSize: '12px', display: 'block', marginTop: '5px'}}>
+                        <small
+                          style={{
+                            color: "#666",
+                            fontSize: "12px",
+                            display: "block",
+                            marginTop: "5px",
+                          }}
+                        >
                           Para personas jurídicas solo se permite RUC
                         </small>
                       )}
@@ -262,56 +336,60 @@ function regis_dueños() {
                       <label htmlFor="documento">
                         {esPersonaJuridica ? "RUC *" : "Número de documento *"}
                       </label>
-                      <input 
-                        type="text" 
-                        value={documento} 
-                        onChange={(e) => setDocumento(e.target.value)} 
-                        placeholder={esPersonaJuridica ? "Número de RUC" : "Número de documento"}
+                      <input
+                        type="text"
+                        value={documento}
+                        onChange={(e) => setDocumento(e.target.value)}
+                        placeholder={
+                          esPersonaJuridica
+                            ? "Número de RUC"
+                            : "Número de documento"
+                        }
                         required
                       />
                     </div>
                   </div>
                   <div className="form-group full-width">
-                    {esPersonaJuridica && 
+                    {esPersonaJuridica && (
                       <div className="form-group full-width">
                         <label htmlFor="representante">Representante</label>
-                        <input 
-                          type="text" 
-                          value={representante} 
-                          onChange={(e) => setRepresentante(e.target.value)} 
+                        <input
+                          type="text"
+                          value={representante}
+                          onChange={(e) => setRepresentante(e.target.value)}
                           placeholder="Nombre del Representante"
                         />
                       </div>
-                    }
+                    )}
                   </div>
-                  <div className="form-row"> 
+                  <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="telefono">Teléfono</label>
-                      <input 
-                        type="text" 
-                        value={telefono} 
-                        onChange={(e) => setTelefono(e.target.value)} 
+                      <input
+                        type="text"
+                        value={telefono}
+                        onChange={(e) => setTelefono(e.target.value)}
                         placeholder="Teléfono"
                       />
                     </div>
                     <div className="form-group">
                       <label htmlFor="email">Email</label>
-                      <input 
-                        type="email" 
-                        value={correo} 
-                        onChange={(e) => setCorreo(e.target.value)} 
+                      <input
+                        type="email"
+                        value={correo}
+                        onChange={(e) => setCorreo(e.target.value)}
                         placeholder="correo@ejemplo.com"
                       />
                     </div>
                   </div>
 
-                  <div className="form-row"> 
+                  <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="ciudad">Ciudad</label>
-                      <input 
-                        type="text" 
-                        value={ciudad} 
-                        onChange={(e) => setCiudad(e.target.value)} 
+                      <input
+                        type="text"
+                        value={ciudad}
+                        onChange={(e) => setCiudad(e.target.value)}
                         placeholder="Ciudad"
                       />
                     </div>
@@ -331,23 +409,23 @@ function regis_dueños() {
                     </div>
                   </div>
 
-                  <div className="form-row"> 
+                  <div className="form-row">
                     <div className="form-group full-width">
                       <label htmlFor="domicilio">Dirección</label>
-                      <input 
-                        type="text" 
-                        value={direccion} 
-                        onChange={(e) => setDireccion(e.target.value)} 
+                      <input
+                        type="text"
+                        value={direccion}
+                        onChange={(e) => setDireccion(e.target.value)}
                         placeholder="Dirección completa"
                       />
                     </div>
                   </div>
 
-                  <div className="form-row"> 
+                  <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="activo">Estado</label>
-                      <select 
-                        value={activo ? "true" : "false"} 
+                      <select
+                        value={activo ? "true" : "false"}
                         onChange={(e) => setActivo(e.target.value === "true")}
                       >
                         <option value="false">Inactivo</option>
@@ -357,7 +435,7 @@ function regis_dueños() {
                   </div>
 
                   <div className="form-group full-width">
-                    <button type='submit' className="btn">
+                    <button type="submit" className="btn">
                       {clienteSelecc ? "Actualizar" : "Guardar"}
                     </button>
                   </div>
@@ -366,9 +444,9 @@ function regis_dueños() {
             </div>
           </div>
         </main>
-      </div>    
+      </div>
     </>
-  )
+  );
 }
 
-export default regis_dueños
+export default regis_dueños;

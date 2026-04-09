@@ -6,12 +6,12 @@ import java.util.List;
 
 public interface RecordatorioAgendaService {
     RecordatorioAgendaEntity crear(RecordatorioAgendaEntity entity);
-    
+
     RecordatorioAgendaEntity actualizar(RecordatorioAgendaEntity entity);
-    
+
     String eliminar(Long id);
-    
+
     List<RecordatorioAgendaEntity> listar();
-    
+
     RecordatorioAgendaEntity obtenerPorId(Long id);
 }

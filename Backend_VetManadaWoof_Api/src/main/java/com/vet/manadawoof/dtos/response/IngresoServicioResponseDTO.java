@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IngresoServicioResponseDTO {
-    
+
     private Long id;
     private String codigo;
     private Long idAgenda;
@@ -25,10 +25,10 @@ public class IngresoServicioResponseDTO {
     private BigDecimal valorServicio;
     private String observaciones;
     private LocalDateTime fechaRegistro;
-    
+
     // Datos adicionales del SP
     private BigDecimal nuevoTotalCita;
-    
+
     // Mensaje de respuesta del SP
     private String mensaje;
 }

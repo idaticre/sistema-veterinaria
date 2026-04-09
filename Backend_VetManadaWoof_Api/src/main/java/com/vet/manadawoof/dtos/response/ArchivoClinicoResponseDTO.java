@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ArchivoClinicoResponseDTO {
-    
+
     private Long id;
     private String codigo;
     private Long idRegistroAtencion;
@@ -21,7 +21,7 @@ public class ArchivoClinicoResponseDTO {
     private String extensionArchivo;
     private String descripcion;
     private LocalDateTime fechaSubida;
-    
+
     // Mensaje de respuesta del SP
     private String mensaje;
 }

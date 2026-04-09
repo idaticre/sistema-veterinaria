@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class EntidadResponseDTO {
-    
+
     // Long para congruencia con Entity
     private Long id;
     private String codigo;
@@ -27,7 +27,7 @@ public class EntidadResponseDTO {
     private String ciudad;
     private String distrito;
     private String representante;
-    
+
     // Boolean para representar 1/0 en BD
     private Boolean activo;
     private String tipoDocumento;

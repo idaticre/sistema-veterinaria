@@ -15,57 +15,60 @@ import java.util.List;
 @RequestMapping("/api/clientes")
 @RequiredArgsConstructor
 public class ClienteRestController {
-    
+
     private final ClienteService service;
-    
-    @PostMapping("/registrar")
+
+    @PostMapping
     public ResponseEntity<ApiResponse<ClienteResponseDTO>> registrar(@RequestBody ClienteRequestDTO dto) {
         ClienteResponseDTO response = service.registrar(dto);
-        if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
+        if (response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, response.getMensaje(), null));
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response.getMensaje(), response));
     }
-    
-    @PutMapping("/actualizar/{id}")
+
+    @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ClienteResponseDTO>> actualizar(@PathVariable("id") Long idCliente, @RequestBody ClienteRequestDTO dto) {
         // Usamos el id del path para actualizar
         ClienteResponseDTO response = service.actualizar(idCliente, dto);
-        
+
         // Revisar mensaje de error
-        if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
+        if (response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, response.getMensaje(), null));
         }
         // Respuesta exitosa
         return ResponseEntity.ok(new ApiResponse<>(true, "Actualización exitosa", response));
     }
-    
-    
+
+
     // Listar todos los clientes
     @GetMapping
     public ResponseEntity<ApiResponse<List<ClienteResponseDTO>>> listar() {
         List<ClienteResponseDTO> clientes = service.listar();
         return ResponseEntity.ok(new ApiResponse<>(true, "Lista de clientes", clientes));
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ClienteResponseDTO>> obtenerPorId(@PathVariable("id") Long idCliente) {
-        ClienteResponseDTO cliente = service.obtenerPorId(idCliente); if(cliente == null) {
+        ClienteResponseDTO cliente = service.obtenerPorId(idCliente);
+        if (cliente == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, "Cliente no encontrado", null));
-        } return ResponseEntity.ok(new ApiResponse<>(true, "Cliente encontrado", cliente));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Cliente encontrado", cliente));
     }
-    
-    @DeleteMapping("/eliminar/{id}")
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<ClienteResponseDTO>> eliminar(@PathVariable("id") Long idCliente) {
         try {
             ClienteResponseDTO response = service.eliminar(idCliente);
-            if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
+            if (response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, response.getMensaje(), null));
-            } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+            }
+            return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
         }
     }
-    
-    
+
+
 }

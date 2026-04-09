@@ -14,30 +14,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ServicioRestController {
     private final ServicioService service;
-    
+
     @PostMapping
     public ResponseEntity<ServicioEntity> crear(@RequestBody ServicioEntity entity) {
         ServicioEntity creado = service.crear(entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
-    
+
     @PutMapping
     public ResponseEntity<ServicioEntity> actualizar(@RequestBody ServicioEntity entity) {
-        ServicioEntity actualizado = service.actualizar(entity); return ResponseEntity.ok(actualizado);
+        ServicioEntity actualizado = service.actualizar(entity);
+        return ResponseEntity.ok(actualizado);
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        String mensaje = service.eliminar(id); return ResponseEntity.ok(mensaje);
+        String mensaje = service.eliminar(id);
+        return ResponseEntity.ok(mensaje);
     }
-    
+
     @GetMapping
     public ResponseEntity<List<ServicioEntity>> listar() {
-        List<ServicioEntity> list = service.listar(); return ResponseEntity.ok(list);
+        List<ServicioEntity> list = service.listar();
+        return ResponseEntity.ok(list);
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<ServicioEntity> obtener(@PathVariable Integer id) {
-        ServicioEntity entity = service.obtenerPorId(id); return ResponseEntity.ok(entity);
+        ServicioEntity entity = service.obtenerPorId(id);
+        return ResponseEntity.ok(entity);
     }
 }

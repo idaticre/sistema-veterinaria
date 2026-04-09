@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResumenHorarioSemanalResponseDTO {
+
     private Long id;
     private String colaborador;
     private String lunes;

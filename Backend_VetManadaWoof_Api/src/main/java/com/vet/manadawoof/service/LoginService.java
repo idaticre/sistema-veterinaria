@@ -20,9 +20,9 @@ public class LoginService {
     public Optional<UsuarioEntity> verificarUsuario(String username, String password) {
         Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findByUsername(username);
 
-        if(usuarioOpt.isPresent()) {
+        if (usuarioOpt.isPresent()) {
             UsuarioEntity usuario = usuarioOpt.get();
-            if(usuario.getPasswordHash().equals(password)) {
+            if (usuario.getPasswordHash().equals(password)) {
                 return Optional.of(usuario);
             }
         }

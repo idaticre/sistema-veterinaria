@@ -14,7 +14,7 @@ public class ApiResponseWithMetadata<T> {
     private String message;
     private T data;
     private Metadata metadata;
-    
+
     // Constructor simple sin metadata
     public ApiResponseWithMetadata(Boolean success, String message, T data) {
         this.success = success;
@@ -22,7 +22,7 @@ public class ApiResponseWithMetadata<T> {
         this.data = data;
         this.metadata = null;
     }
-    
+
     @Data
     @Builder
     @AllArgsConstructor

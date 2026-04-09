@@ -15,8 +15,8 @@ public class MedicamentoMascotaMapper {
      * Convierte una Entity a ResponseDTO
      */
     public static MedicamentoMascotaResponseDTO toResponse(MedicamentoMascotaEntity entity) {
-        if(entity == null) return null;
-        
+        if (entity == null) return null;
+
         return MedicamentoMascotaResponseDTO.builder()
                 .id(entity.getId())
                 .codigo(entity.getCodigo())
@@ -33,27 +33,27 @@ public class MedicamentoMascotaMapper {
                 .fechaModificacion(entity.getFechaModificacion())
                 .build();
     }
-    
-    
+
+
     // Actualiza la Entity desde el RequestDTO
     // Solo actualiza los campos que no sean null
-    
+
     public static void updateEntityFromRequest(
             MedicamentoMascotaRequestDTO request, MedicamentoMascotaEntity entity,
             MascotaEntity mascota, MedicamentoEntity medicamento, AplicacionViaEntity via,
             ColaboradorEntity colaborador, VeterinarioEntity veterinario
     ) {
-        
-        if(request.getDosis() != null) entity.setDosis(request.getDosis());
-        if(request.getFechaAplicacion() != null) entity.setFechaAplicacion(request.getFechaAplicacion());
-        if(request.getObservaciones() != null) entity.setObservaciones(request.getObservaciones());
-        if(request.getActivo() != null) entity.setActivo(request.getActivo());
-        
+
+        if (request.getDosis() != null) entity.setDosis(request.getDosis());
+        if (request.getFechaAplicacion() != null) entity.setFechaAplicacion(request.getFechaAplicacion());
+        if (request.getObservaciones() != null) entity.setObservaciones(request.getObservaciones());
+        if (request.getActivo() != null) entity.setActivo(request.getActivo());
+
         // Relaciones
-        if(mascota != null) entity.setMascota(mascota);
-        if(medicamento != null) entity.setMedicamento(medicamento);
-        if(via != null) entity.setVia(via);
-        if(colaborador != null) entity.setColaborador(colaborador);
-        if(veterinario != null) entity.setVeterinario(veterinario);
+        if (mascota != null) entity.setMascota(mascota);
+        if (medicamento != null) entity.setMedicamento(medicamento);
+        if (via != null) entity.setVia(via);
+        if (colaborador != null) entity.setColaborador(colaborador);
+        if (veterinario != null) entity.setVeterinario(veterinario);
     }
 }

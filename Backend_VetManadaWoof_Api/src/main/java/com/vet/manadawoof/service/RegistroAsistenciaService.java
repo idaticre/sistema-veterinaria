@@ -9,9 +9,9 @@ import java.util.List;
 // Servicio para gestionar la asistencia de los colaboradores.
 
 public interface RegistroAsistenciaService {
-    
+
     RegistroAsistenciaResponseDTO registrar(RegistrarAsistenciaRequestDTO request);
-    
+
     List<RegistroAsistenciaResponseDTO> verAsistenciaPorRango(
             LocalDate fechaInicio,
             LocalDate fechaFin,

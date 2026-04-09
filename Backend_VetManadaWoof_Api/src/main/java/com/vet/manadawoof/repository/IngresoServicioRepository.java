@@ -9,8 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface IngresoServicioRepository extends JpaRepository<IngresoServicioEntity, Long> {
-    
+
     List<IngresoServicioEntity> findByAgendaId(Long idAgenda);
-    
+
     Optional<IngresoServicioEntity> findByCodigo(String codigo);
 }

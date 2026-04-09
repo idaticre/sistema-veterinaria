@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HistorialHorarioResponseDTO {
+
     private Long id;
     private Long idColaborador;
     private String colaborador;
@@ -22,7 +23,7 @@ public class HistorialHorarioResponseDTO {
     private String motivoCambio;
     private String estado;
     private String fechaRegistro;
-    
+
     // Contexto adicional
     private Boolean esVigente;
     private Integer diasRestantes;

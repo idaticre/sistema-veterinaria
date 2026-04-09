@@ -12,8 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class RegistrarAsistenciaRequestDTO {
+
     private Long idColaborador;
-    
+
     // ENTRADA, LUNCH_IN, LUNCH_OUT, SALIDA
     private TipoMarca tipoMarca;
 }

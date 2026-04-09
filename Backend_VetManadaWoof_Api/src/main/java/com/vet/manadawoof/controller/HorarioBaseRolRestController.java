@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HorarioBaseRolRestController {
     private final HorarioBaseRolService service;
-    
+
     @PostMapping
     public ResponseEntity<ApiResponse<HorarioBaseRolResponseDTO>> asignar(
             @Valid @RequestBody HorarioBaseRolRequestDTO request
@@ -31,7 +31,7 @@ public class HorarioBaseRolRestController {
                     .body(new ApiResponse<>(false, e.getMessage(), null));
         }
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         try {
@@ -43,14 +43,14 @@ public class HorarioBaseRolRestController {
                     .body(new ApiResponse<>(false, e.getMessage(), null));
         }
     }
-    
+
     @GetMapping
     public ResponseEntity<ApiResponse<List<HorarioBaseRolResponseDTO>>> listar() {
         List<HorarioBaseRolResponseDTO> lista = service.listarTodos();
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Lista de asignaciones obtenida correctamente", lista));
     }
-    
+
     @GetMapping("/rol/{idRol}")
     public ResponseEntity<ApiResponse<List<HorarioBaseRolResponseDTO>>> listarPorRol(
             @PathVariable Integer idRol
@@ -64,7 +64,7 @@ public class HorarioBaseRolRestController {
                     .body(new ApiResponse<>(false, e.getMessage(), null));
         }
     }
-    
+
     @GetMapping("/horario-base/{idHorarioBase}")
     public ResponseEntity<ApiResponse<List<HorarioBaseRolResponseDTO>>> listarPorHorarioBase(
             @PathVariable Integer idHorarioBase
@@ -78,7 +78,7 @@ public class HorarioBaseRolRestController {
                     .body(new ApiResponse<>(false, e.getMessage(), null));
         }
     }
-    
+
     @GetMapping("/dia/{idDiaSemana}")
     public ResponseEntity<ApiResponse<List<HorarioBaseRolResponseDTO>>> listarPorDia(
             @PathVariable Integer idDiaSemana
@@ -92,7 +92,7 @@ public class HorarioBaseRolRestController {
                     .body(new ApiResponse<>(false, e.getMessage(), null));
         }
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<HorarioBaseRolResponseDTO>> obtener(@PathVariable Long id) {
         try {

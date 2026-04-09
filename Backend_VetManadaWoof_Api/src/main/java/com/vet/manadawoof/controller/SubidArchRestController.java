@@ -1,14 +1,14 @@
 package com.vet.manadawoof.controller;
 
-import java.io.File;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/archivos")
@@ -18,11 +18,11 @@ public class SubidArchRestController {
     private static final String MULTIMEDIA = BASE + "multimedia/";
     private static final String DOCUMENTOS = BASE + "documentos/";
 
-    @PostMapping("/subir")
+    @PostMapping
     public ResponseEntity<String> subirArchivo(
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false) String nombreExistente,
-            @RequestParam(required = false) String nombreMascota) { 
+            @RequestParam(required = false) String nombreMascota) {
 
         try {
             if (file.isEmpty()) {
@@ -81,8 +81,8 @@ public class SubidArchRestController {
             return ResponseEntity.status(500).body("Error al subir archivo: " + e.getMessage());
         }
     }
-    
-    @PostMapping("/eliminar")
+
+    @PostMapping
     public ResponseEntity<String> eliminarArchivo(@RequestParam String nombreArchivo) {
         try {
             if (nombreArchivo == null || nombreArchivo.isEmpty()) {

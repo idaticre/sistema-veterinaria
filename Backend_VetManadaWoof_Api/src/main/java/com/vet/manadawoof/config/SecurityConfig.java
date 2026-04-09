@@ -22,17 +22,17 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
+
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    
+
     public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                           JwtAuthenticationFilter jwtAuthenticationFilter
     ) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-    
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -49,9 +49,9 @@ public class SecurityConfig {
                         // Endpoints públicos
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        
+
                         // Endpoints que requieren roles específicos
-                        
+
                         //Permisos de solo Admin
                         .requestMatchers("/api/agenda/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/archivos/**").hasAuthority("ADMINISTRADOR GENERAL")
@@ -74,28 +74,37 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/vacunas-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/veterinarios/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        
+
                         //Permisos del Auxiliar Caja
-                        
-                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA", "ADMINISTRADOR GENERAL")
-                        .requestMatchers(HttpMethod.POST, "/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
+
+                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority(
+                                "AUXILIAR CAJA", "ADMINISTRADOR GENERAL")
+                        .requestMatchers(HttpMethod.POST, "/api/mascotas/**").hasAnyAuthority(
+                                "ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
                         // (pendiente por hacer)
-                        .requestMatchers("/api/clientes/listar_solo_con_nombreymascota").hasAnyAuthority("AUXILIAR CAJA", "ADMINISTRADOR GENERAL")
+                        .requestMatchers("/api/clientes/listar_solo_con_nombreymascota").hasAnyAuthority(
+                                "AUXILIAR CAJA", "ADMINISTRADOR GENERAL")
                         // Permisos del Auxiliar Gromers
-                        
+
                         .requestMatchers("/api/public/**").permitAll()
-                        
+
                         // Endpoints que requieren roles específicos
                         .requestMatchers("/api/por_definir/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO")
-                        .requestMatchers("/api/por_definir/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
-                        
-                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA", "AUXILIAR GROMERS")
-                        .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
-                        .requestMatchers("/api/estados-agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
-                        .requestMatchers("/api/estados-mascota/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
+                        .requestMatchers("/api/por_definir/**").hasAnyAuthority(
+                                "ADMINISTRADOR GENERAL", "VETERINARIO")
+                        .requestMatchers("/api/por_definir/**").hasAnyAuthority(
+                                "ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
+
+                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority(
+                                "AUXILIAR CAJA", "AUXILIAR GROMERS")
+                        .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyAuthority(
+                                "ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
+                        .requestMatchers("/api/estados-agenda/**").hasAnyAuthority(
+                                "ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
+                        .requestMatchers("/api/estados-mascota/**").hasAnyAuthority(
+                                "ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
                         //.requestMatchers(HttpMethod.GET,"/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
-                        
+
                         // Permisos que todavia no han sido definido quienes seran los responsables
                         .requestMatchers("/api/canales-comunicacion/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/especialidades/**").hasAuthority("ADMINISTRADOR GENERAL")
@@ -120,42 +129,45 @@ public class SecurityConfig {
                         .requestMatchers("/api/vacunas-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/vacunas/**").hasAuthority("ADMINISTRADOR GENERAL")
                         .requestMatchers("/api/veterinarios/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        
-                        
-                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority("AUXILIAR CAJA")
-                        .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
-                        .requestMatchers("/api/colaboradores/**").hasAnyAuthority("ADMINISTRADOR GENERAL")
-                        
-                        
+
+
+                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority(
+                                "AUXILIAR CAJA")
+                        .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyAuthority(
+                                "ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
+                        .requestMatchers("/api/colaboradores/**").hasAnyAuthority(
+                                "ADMINISTRADOR GENERAL")
+
+
                         // Todos los demás endpoints requieren autenticación
-                        
+
                         .anyRequest().authenticated()
                 );
-        
+
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
-    
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173","https://vet-woof-admin.netlify.app"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://vet-woof-admin.netlify.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-    
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-    
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

@@ -11,28 +11,28 @@ import java.time.LocalDateTime;
 
 @Component
 public class ClienteMapper {
-    
+
     // ---------------- UTILIDAD PARA FECHAS ----------------
     private LocalDateTime parseFecha(Object obj) {
-        if(obj == null) return null;
-        if(obj instanceof Timestamp) return ((Timestamp) obj).toLocalDateTime();
-        if(obj instanceof LocalDateTime) return (LocalDateTime) obj;
+        if (obj == null) return null;
+        if (obj instanceof Timestamp) return ((Timestamp) obj).toLocalDateTime();
+        if (obj instanceof LocalDateTime) return (LocalDateTime) obj;
         return null;
     }
-    
+
     // ---------------- CONVERTIR FILAS SQL A DTO ----------------
     public ClienteResponseDTO toDto(Object[] entRow, Object[] cliRow, String mensaje) {
-        if(entRow == null || cliRow == null) return null;
-        
+        if (entRow == null || cliRow == null) return null;
+
         Long idEntidad = toLong(entRow[0]);
-        
+
         return ClienteResponseDTO.builder()
                 // Datos cliente
                 .id(toLong(cliRow[0]))
                 .codigoCliente(cliRow[1] != null ? cliRow[1].toString() : null)
                 .activo(cliRow[2] != null ? toBoolean(cliRow[2]) : true)
                 .fechaRegistro(parseFecha(cliRow[3]))
-                
+
                 // Datos entidad
                 .idEntidad(idEntidad)
                 .nombre(entRow[2] != null ? entRow[2].toString() : null)
@@ -51,26 +51,26 @@ public class ClienteMapper {
                 .mensaje(mensaje)
                 .build();
     }
-    
+
     // ---------------- CONVERTIR DTO A ENTIDAD ----------------
     public ClienteEntity toEntity(ClienteRequestDTO dto) {
         ClienteEntity entity = new ClienteEntity();
-        
-        if(dto.getIdEntidad() != null) {
+
+        if (dto.getIdEntidad() != null) {
             EntidadEntity entidad = new EntidadEntity();
             entidad.setId(dto.getIdEntidad());
             entity.setEntidad(entidad);
         }
-        
+
         entity.setActivo(dto.getActivo() != null ? dto.getActivo() : true);
-        
+
         return entity;
     }
-    
+
     // ---------------- CONVERTIR FILAS COMPLETAS (JOIN) A DTO ----------------
     public ClienteResponseDTO toFullDto(Object[] row) {
-        if(row == null) return null;
-        
+        if (row == null) return null;
+
         return ClienteResponseDTO.builder()
                 .id(toLong(row[0]))                           // c.id
                 .codigoCliente(row[1] != null ? row[1].toString() : null)
@@ -92,32 +92,32 @@ public class ClienteMapper {
                 .mensaje("Operación exitosa")
                 .build();
     }
-    
+
     // Variante extendida para SP + mensaje
     public ClienteResponseDTO toFullDto(Object[] entRow, Object[] cliRow, String mensaje) {
         return toDto(entRow, cliRow, mensaje);
     }
-    
+
     // ---------------- MÉTODOS DE CONVERSIÓN SEGURA ----------------
     private Long toLong(Object value) {
-        if(value == null) return null;
-        if(value instanceof Number) return ((Number) value).longValue();
-        if(value instanceof String s && s.matches("\\d+")) return Long.parseLong(s);
+        if (value == null) return null;
+        if (value instanceof Number) return ((Number) value).longValue();
+        if (value instanceof String s && s.matches("\\d+")) return Long.parseLong(s);
         return null;
     }
-    
+
     private Integer toInt(Object value) {
-        if(value == null) return null;
-        if(value instanceof Number) return ((Number) value).intValue();
-        if(value instanceof String s && s.matches("\\d+")) return Integer.parseInt(s);
+        if (value == null) return null;
+        if (value instanceof Number) return ((Number) value).intValue();
+        if (value instanceof String s && s.matches("\\d+")) return Integer.parseInt(s);
         return null;
     }
-    
+
     private Boolean toBoolean(Object value) {
-        if(value == null) return true; // activo por defecto
-        if(value instanceof Boolean) return (Boolean) value;
-        if(value instanceof Number) return ((Number) value).intValue() == 1;
-        if(value instanceof String s) return s.equals("1") || s.equalsIgnoreCase("true");
+        if (value == null) return true; // activo por defecto
+        if (value instanceof Boolean) return (Boolean) value;
+        if (value instanceof Number) return ((Number) value).intValue() == 1;
+        if (value instanceof String s) return s.equals("1") || s.equalsIgnoreCase("true");
         return true;
     }
 }

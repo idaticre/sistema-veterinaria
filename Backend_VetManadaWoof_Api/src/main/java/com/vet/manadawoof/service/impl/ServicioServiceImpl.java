@@ -16,9 +16,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ServicioServiceImpl implements ServicioService {
-    
+
     private final ServicioRepository repository;
-    
+
     // Crea un nuevo servicio.
     @Override
     @Transactional
@@ -31,44 +31,44 @@ public class ServicioServiceImpl implements ServicioService {
                 });
         return repository.save(entity);
     }
-    
+
     // Actualiza los datos de un servicio existente.
     @Override
     @Transactional
     public ServicioEntity actualizar(ServicioEntity entity) {
         ServicioEntity existente = repository.findById(entity.getId())
                 .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
-        
+
         repository.findAll().stream()
-                .filter(e -> e.getNombre().equalsIgnoreCase(entity.getNombre()) && ! e.getId().equals(entity.getId()))
+                .filter(e -> e.getNombre().equalsIgnoreCase(entity.getNombre()) && !e.getId().equals(entity.getId()))
                 .findFirst()
                 .ifPresent(e -> {
                     throw new RuntimeException("Otro servicio con ese nombre ya existe");
                 });
-        
+
         existente.setNombre(entity.getNombre());
         existente.setDescripcion(entity.getDescripcion());
         return repository.save(existente);
     }
-    
+
     // Elimina un servicio de la base de datos por su ID.
     @Override
     @Transactional
     public String eliminar(Integer id) {
-        if(! repository.existsById(id)) {
+        if (!repository.existsById(id)) {
             throw new RuntimeException("Servicio no encontrado");
         }
         repository.deleteById(id);
         return "Servicio eliminado correctamente";
     }
-    
+
     // Lista todos los servicios registrados.
     @Override
     @Transactional
     public List<ServicioEntity> listar() {
         return repository.findAll();
     }
-    
+
     // Obtiene un servicio específico por su ID.
     @Override
     @Transactional

@@ -14,38 +14,42 @@ import java.util.List;
 @RequestMapping("/api/estado-mascota")
 @RequiredArgsConstructor
 public class EstadoMascotaRestController {
-    
+
     // Servicio con la lógica de negocio
     private final EstadoMascotaService service;
-    
+
     // Crear estado de mascota
     @PostMapping
     public ResponseEntity<EstadoMascotaEntity> crear(@RequestBody EstadoMascotaEntity entity) {
         EstadoMascotaEntity creado = service.crear(entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
-    
+
     // Actualizar estado de mascota
     @PutMapping
     public ResponseEntity<EstadoMascotaEntity> actuaizar(@RequestBody EstadoMascotaEntity entity) {
-        EstadoMascotaEntity actualizado = service.actualizar(entity); return ResponseEntity.ok(actualizado);
+        EstadoMascotaEntity actualizado = service.actualizar(entity);
+        return ResponseEntity.ok(actualizado);
     }
-    
+
     // Eliminar estado de mascota por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        String mensaje = service.eliminar(id); return ResponseEntity.ok(mensaje);
+        String mensaje = service.eliminar(id);
+        return ResponseEntity.ok(mensaje);
     }
-    
+
     // Listar estados de mascota
     @GetMapping
     public ResponseEntity<List<EstadoMascotaEntity>> listar() {
-        List<EstadoMascotaEntity> list = service.listar(); return ResponseEntity.ok(list);
+        List<EstadoMascotaEntity> list = service.listar();
+        return ResponseEntity.ok(list);
     }
-    
+
     // Obtener estado de mascota por ID
     @GetMapping("/{id}")
     public ResponseEntity<EstadoMascotaEntity> obtener(@PathVariable Integer id) {
-        EstadoMascotaEntity entity = service.obtenerPorId(id); return ResponseEntity.ok(entity);
+        EstadoMascotaEntity entity = service.obtenerPorId(id);
+        return ResponseEntity.ok(entity);
     }
 }

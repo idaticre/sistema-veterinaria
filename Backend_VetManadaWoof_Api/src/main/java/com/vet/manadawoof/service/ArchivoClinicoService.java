@@ -8,14 +8,14 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface ArchivoClinicoService {
-    
+
     ArchivoClinicoResponseDTO subir(ArchivoClinicoRequestDTO dto);
-    
+
     ArchivoClinicoResponseDTO eliminar(Long idArchivo);
-    
+
     ArchivoClinicoResponseDTO obtenerPorId(Long id);
-    
+
     List<ArchivoClinicoResponseDTO> listarPorRegistro(Long idRegistroAtencion);
-    
+
     Page<ArchivoClinicoResponseDTO> listarPorRegistroPaginado(Long idRegistroAtencion, Pageable pageable);
 }

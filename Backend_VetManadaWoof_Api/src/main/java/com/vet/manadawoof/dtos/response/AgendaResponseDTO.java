@@ -15,7 +15,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AgendaResponseDTO {
-    
+
     private Long id;
     private String codigo;
     private Long idCliente;
@@ -29,7 +29,7 @@ public class AgendaResponseDTO {
     private Integer idEstado;
     private String observaciones;
     private LocalDateTime fechaRegistro;
-    
+
     // Mensaje de respuesta del SP
     private String mensaje;
 }

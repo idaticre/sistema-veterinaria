@@ -12,6 +12,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HorarioBaseRolResponseDTO {
+
     private Long id;
     private Integer idRol;
     private String nombreRol;

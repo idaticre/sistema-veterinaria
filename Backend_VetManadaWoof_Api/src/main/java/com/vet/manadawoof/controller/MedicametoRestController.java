@@ -14,37 +14,42 @@ import java.util.List;
 @RequestMapping("/api/medicamentos")
 @RequiredArgsConstructor
 public class MedicametoRestController {
-    
+
     // Servicio con la lógica de negocio
     private final MedicamentoService service;
-    
+
     // Crear medicamento
     @PostMapping
     public ResponseEntity<MedicamentoEntity> crear(@RequestBody MedicamentoEntity entity) {
-        MedicamentoEntity creado = service.crear(entity); return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+        MedicamentoEntity creado = service.crear(entity);
+        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
-    
+
     // Actualizar medicamento
     @PutMapping
     public ResponseEntity<MedicamentoEntity> actuaizar(@RequestBody MedicamentoEntity entity) {
-        MedicamentoEntity actualizado = service.actualizar(entity); return ResponseEntity.ok(actualizado);
+        MedicamentoEntity actualizado = service.actualizar(entity);
+        return ResponseEntity.ok(actualizado);
     }
-    
+
     // Eliminar medicamento por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
-        String mensaje = service.eliminar(id); return ResponseEntity.ok(mensaje);
+        String mensaje = service.eliminar(id);
+        return ResponseEntity.ok(mensaje);
     }
-    
+
     // Listar medicamentos
     @GetMapping
     public ResponseEntity<List<MedicamentoEntity>> listar() {
-        List<MedicamentoEntity> list = service.listar(); return ResponseEntity.ok(list);
+        List<MedicamentoEntity> list = service.listar();
+        return ResponseEntity.ok(list);
     }
-    
+
     // Obtener medicamento por ID
     @GetMapping("/{id}")
     public ResponseEntity<MedicamentoEntity> obtener(@PathVariable Integer id) {
-        MedicamentoEntity entity = service.obtenerPorId(id); return ResponseEntity.ok(entity);
+        MedicamentoEntity entity = service.obtenerPorId(id);
+        return ResponseEntity.ok(entity);
     }
 }

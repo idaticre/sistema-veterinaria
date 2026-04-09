@@ -15,20 +15,21 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GestionDiaEspecialRequestDTO {
+
     @NotNull(message = "El ID del colaborador es obligatorio")
     private Long idColaborador;
-    
+
     @NotNull(message = "La fecha es obligatoria")
     private LocalDate fecha;
-    
+
     @NotNull(message = "El tipo de acción es obligatorio")
     @Pattern(regexp = "HORARIO|DESCANSO|DESASIGNAR",
             message = "Tipo de acción debe ser: HORARIO, DESCANSO o DESASIGNAR")
     private String tipoAccion;
-    
+
     private LocalTime horaInicio;
-    
+
     private LocalTime horaFin;
-    
+
     private Long idUsuario;
 }

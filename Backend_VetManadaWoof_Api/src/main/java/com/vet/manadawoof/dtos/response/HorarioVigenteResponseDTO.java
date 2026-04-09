@@ -12,6 +12,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HorarioVigenteResponseDTO {
+
     private Long idColaborador;
     private String colaborador;
     private String dia;
@@ -20,7 +21,7 @@ public class HorarioVigenteResponseDTO {
     private String vigenteDesde;
     private Integer diasConEsteHorario;
     private String vigenteHasta;
-    
+
     // Campos adicionales
     private Boolean esIndefinido;
     private Boolean proximoACambiar; // true si vence en menos de 7 días

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AsignacionHorarioResponseDTO {
+
     private Long id;
     private Long idColaborador;
     private String nombreColaborador;

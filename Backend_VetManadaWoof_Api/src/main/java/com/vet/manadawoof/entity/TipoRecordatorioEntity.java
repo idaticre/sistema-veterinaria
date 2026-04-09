@@ -17,19 +17,19 @@ import java.util.List;
 @Entity
 @Table(name = "tipo_recordatorio")
 public class TipoRecordatorioEntity implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     @Column(length = 64, nullable = false, unique = true)
     private String nombre;
-    
+
     @Column(length = 128)
     private String descripcion;
-    
+
     @OneToMany(mappedBy = "tipoRecordatorio", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<RecordatorioAgendaEntity> recordatorios;

@@ -19,20 +19,20 @@ import java.util.List;
 @Entity
 @Table(name = "especies")
 public class EspecieEntity implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     @Column(length = 32, nullable = false, unique = true)
     private String nombre;
-    
+
     @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     @JdbcTypeCode(SqlTypes.BIT)
     private Boolean activo = true;
-    
+
     @OneToMany(mappedBy = "especie", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<RazaEntity> razas;

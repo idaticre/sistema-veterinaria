@@ -17,26 +17,26 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    
+
     private final UsuarioRepository usuarioRepository;
-    
+
     public UserDetailsServiceImpl(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
     }
-    
+
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UsuarioEntity usuario = usuarioRepository.findByUsernameAndActivoTrue(username)
                 .orElseThrow(() -> new UsernameNotFoundException("UsuarioEntity no encontrado: " + username));
-        
+
         List<GrantedAuthority> authorities = usuario.getUsuarioRoles().stream()
                 .map(usuarioRol -> {
                     String roleName = usuarioRol.getRol().getNombre();
                     return new SimpleGrantedAuthority(roleName);
                 })
                 .collect(Collectors.toList());
-        
+
         return User.builder()
                 .username(usuario.getUsername())
                 .password(usuario.getPasswordHash())

@@ -13,13 +13,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class FiltroAsistenciaRequestDTO {
+
     @NotNull(message = "Fecha inicio es obligatoria")
     private LocalDate fechaInicio;
-    
+
     @NotNull(message = "Fecha fin es obligatoria")
     private LocalDate fechaFin;
-    
+
     private Long idColaborador;
-    
+
     private Integer idEstado;
 }

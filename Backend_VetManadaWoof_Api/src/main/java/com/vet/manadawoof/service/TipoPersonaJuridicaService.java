@@ -1,6 +1,7 @@
 package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.TipoPersonaJuridicaEntity;
+
 import java.util.List;
 
 public interface TipoPersonaJuridicaService {

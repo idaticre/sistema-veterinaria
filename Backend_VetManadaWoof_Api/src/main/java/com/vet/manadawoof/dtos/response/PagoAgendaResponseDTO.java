@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PagoAgendaResponseDTO {
-    
+
     private Long id;
     private String codigo;
     private Long idAgenda;
@@ -22,11 +22,11 @@ public class PagoAgendaResponseDTO {
     private BigDecimal monto;
     private LocalDateTime fechaPago;
     private String observaciones;
-    
+
     // Datos adicionales del SP
     private BigDecimal totalAbonado;
     private BigDecimal saldoPendiente;
-    
+
     // Mensaje de respuesta del SP
     private String mensaje;
 }

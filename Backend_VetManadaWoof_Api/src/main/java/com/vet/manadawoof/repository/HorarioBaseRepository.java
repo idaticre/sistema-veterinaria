@@ -14,6 +14,6 @@ import java.util.Optional;
 @Repository
 public interface HorarioBaseRepository extends JpaRepository<HorarioBaseEntity, Integer> {
     Optional<HorarioBaseEntity> findByNombreIgnoreCase(String nombre);
-    
+
     boolean existsByNombreIgnoreCaseAndIdNot(String nombre, Integer id);
 }

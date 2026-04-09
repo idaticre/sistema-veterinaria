@@ -37,8 +37,10 @@ export default function AsistenciaColaboradores() {
   const [busqueda, setBusqueda] = useState("");
   // 'colaboradores' sigue cargando la lista completa al inicio
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
-  const [colaboradorSeleccionado, setColaboradorSeleccionado] = useState<Colaborador | null>(null);
-  const [registroHoy, setRegistroHoy] = useState<RegistroAsistenciaBackend | null>(null);
+  const [colaboradorSeleccionado, setColaboradorSeleccionado] =
+    useState<Colaborador | null>(null);
+  const [registroHoy, setRegistroHoy] =
+    useState<RegistroAsistenciaBackend | null>(null);
   const [loadingRegistroHoy, setLoadingRegistroHoy] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
 
@@ -54,17 +56,21 @@ export default function AsistenciaColaboradores() {
           id: Number(c.id),
           activo: Boolean(c.activo),
           // 🔥 Mapeamos el campo 'documento' que viene del DTO
-          documento: c.documento, 
+          documento: c.documento,
         }));
         setColaboradores(normalized);
 
         const savedRegistroKey = Object.keys(localStorage).find((key) =>
-          key.startsWith("registroHoy_")
+          key.startsWith("registroHoy_"),
         );
 
         if (savedRegistroKey) {
-          const registro = JSON.parse(localStorage.getItem(savedRegistroKey) || "{}");
-          const colaboradorId = Number(savedRegistroKey.replace("registroHoy_", ""));
+          const registro = JSON.parse(
+            localStorage.getItem(savedRegistroKey) || "{}",
+          );
+          const colaboradorId = Number(
+            savedRegistroKey.replace("registroHoy_", ""),
+          );
           const col = normalized.find((x) => x.id === colaboradorId);
           if (col) {
             setColaboradorSeleccionado(col);
@@ -106,7 +112,10 @@ export default function AsistenciaColaboradores() {
       setRegistroHoy(registro);
 
       if (registro) {
-        localStorage.setItem("registroHoy_" + idColaborador, JSON.stringify(registro));
+        localStorage.setItem(
+          "registroHoy_" + idColaborador,
+          JSON.stringify(registro),
+        );
       }
     } catch (err) {
       console.error("Error cargando registro del día:", err);
@@ -155,11 +164,12 @@ export default function AsistenciaColaboradores() {
 
     // 🔥 Mostrar mensaje si es día de descanso
     if (registroHoy?.descansoProgramado) {
-      alert("Hoy es un día de descanso programado. No se puede registrar asistencia.");
+      alert(
+        "Hoy es un día de descanso programado. No se puede registrar asistencia.",
+      );
       return;
     }
 
-    
     setLoadingAction(true);
 
     const body = {
@@ -168,7 +178,7 @@ export default function AsistenciaColaboradores() {
     };
 
     try {
-      const res = await IST.post("/asistencias/registrar", body);
+      const res = await IST.post("/asistencias", body);
       const data = res.data?.data as RegistroAsistenciaBackend | undefined;
 
       if (!data) {
@@ -198,7 +208,10 @@ export default function AsistenciaColaboradores() {
         base.estadoAsistencia = data.estadoAsistencia ?? data.estadoFinal;
 
         if (colaboradorSeleccionado) {
-          localStorage.setItem("registroHoy_" + colaboradorSeleccionado.id, JSON.stringify(base));
+          localStorage.setItem(
+            "registroHoy_" + colaboradorSeleccionado.id,
+            JSON.stringify(base),
+          );
         }
 
         return base;
@@ -226,7 +239,7 @@ export default function AsistenciaColaboradores() {
             <input
               type="text"
               // 🔥 Texto actualizado para indicar la nueva capacidad de búsqueda
-              placeholder="Buscar por nombre o documento..." 
+              placeholder="Buscar por nombre o documento..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
@@ -242,7 +255,8 @@ export default function AsistenciaColaboradores() {
                   onClick={() => seleccionarColaborador(c)}
                 >
                   {/* 🔥 CAMBIO CLAVE: Mostramos el documento en lugar de codigoColaborador */}
-                  {c.nombre} **({c.documento})** </div>
+                  {c.nombre} **({c.documento})**{" "}
+                </div>
               ))}
             </div>
           )}
@@ -252,7 +266,9 @@ export default function AsistenciaColaboradores() {
             <div className="panel-registro">
               <h3>👤 {colaboradorSeleccionado.nombre}</h3>
               {/* 🔥 CAMBIO CLAVE: Mostramos el documento en el panel */}
-              <p><strong>Documento:</strong> {colaboradorSeleccionado.documento}</p>
+              <p>
+                <strong>Documento:</strong> {colaboradorSeleccionado.documento}
+              </p>
 
               <div className="acciones-asistencia">
                 <button
@@ -284,19 +300,38 @@ export default function AsistenciaColaboradores() {
                 </button>
               </div>
 
-
               <h4>📅 Registro del día</h4>
               <div className="tabla-asistencia">
                 {loadingRegistroHoy && <p>Cargando registro...</p>}
-                {!loadingRegistroHoy && !registroHoy && <p>No hay marcas hoy.</p>}
+                {!loadingRegistroHoy && !registroHoy && (
+                  <p>No hay marcas hoy.</p>
+                )}
                 {!loadingRegistroHoy && registroHoy && (
                   <div className="fila-asistencia">
-                    <div><strong>Entrada:</strong> {registroHoy.horaEntrada ?? "—"}</div>
-                    <div><strong>Inicio Almuerzo:</strong> {registroHoy.horaLunchInicio ?? "—"}</div>
-                    <div><strong>Fin Almuerzo:</strong> {registroHoy.horaLunchFin ?? "—"}</div>
-                    <div><strong>Salida:</strong> {registroHoy.horaSalida ?? "—"}</div>
-                    <div><strong>Última marcación:</strong> {registroHoy.horaMarcacion ?? "—"}</div>
-                    <div><strong>Estado:</strong> {registroHoy.estadoAsistencia ?? registroHoy.estadoFinal ?? "—"}</div>
+                    <div>
+                      <strong>Entrada:</strong> {registroHoy.horaEntrada ?? "—"}
+                    </div>
+                    <div>
+                      <strong>Inicio Almuerzo:</strong>{" "}
+                      {registroHoy.horaLunchInicio ?? "—"}
+                    </div>
+                    <div>
+                      <strong>Fin Almuerzo:</strong>{" "}
+                      {registroHoy.horaLunchFin ?? "—"}
+                    </div>
+                    <div>
+                      <strong>Salida:</strong> {registroHoy.horaSalida ?? "—"}
+                    </div>
+                    <div>
+                      <strong>Última marcación:</strong>{" "}
+                      {registroHoy.horaMarcacion ?? "—"}
+                    </div>
+                    <div>
+                      <strong>Estado:</strong>{" "}
+                      {registroHoy.estadoAsistencia ??
+                        registroHoy.estadoFinal ??
+                        "—"}
+                    </div>
                   </div>
                 )}
               </div>

@@ -15,13 +15,13 @@ import java.io.Serializable;
 @Entity
 @Table(name = "estado_asistencia")
 public class EstadoAsistenciaEntity implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     private String nombre;
-    
+
     private String descripcion;
 }

@@ -13,20 +13,20 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AsignacionHorarioRequestDTO {
-    
+
     @NotNull(message = "El ID del colaborador es obligatorio")
     private Long idColaborador;
-    
+
     @NotNull(message = "El ID del horario base es obligatorio")
     private Integer idHorarioBase;
-    
+
     @NotNull(message = "El ID del día es obligatorio")
     private Integer idDiaSemana;
-    
+
     @NotNull(message = "La fecha de inicio de vigencia es obligatoria")
     private LocalDate fechaInicioVigencia;
-    
+
     private LocalDate fechaFinVigencia;
-    
+
     private String motivoCambio;
 }

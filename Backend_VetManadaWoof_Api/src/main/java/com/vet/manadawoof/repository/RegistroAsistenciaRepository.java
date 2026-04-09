@@ -17,6 +17,6 @@ public interface RegistroAsistenciaRepository extends JpaRepository<RegistroAsis
             Long idColaborador,
             LocalDate fecha
     );
-    
+
     boolean existsByColaboradorIdAndFecha(Long idColaborador, LocalDate fecha);
 }

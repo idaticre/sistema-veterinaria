@@ -10,10 +10,10 @@ import java.util.Optional;
 
 @Repository
 public interface HistoriaClinicaRepository extends JpaRepository<HistoriaClinicaEntity, Long> {
-    
+
     Optional<HistoriaClinicaEntity> findByMascotaId(Long idMascota);
-    
+
     Optional<HistoriaClinicaEntity> findByCodigo(String codigo);
-    
+
     Page<HistoriaClinicaEntity> findByActivoTrue(Pageable pageable);
 }

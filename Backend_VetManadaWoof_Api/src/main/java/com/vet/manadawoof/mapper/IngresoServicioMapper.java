@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class IngresoServicioMapper {
-    
+
     public IngresoServicioResponseDTO toDto(IngresoServicioEntity entity) {
-        if(entity == null) return null;
-        
+        if (entity == null) return null;
+
         return IngresoServicioResponseDTO.builder()
                 .id(entity.getId())
                 .codigo(entity.getCodigo())

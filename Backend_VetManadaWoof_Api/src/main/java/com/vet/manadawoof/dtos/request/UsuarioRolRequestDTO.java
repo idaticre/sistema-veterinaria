@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UsuarioRolRequestDTO {
-    
+
     private String accion;       // 'ASIGNAR', 'ELIMINAR' o 'ACTUALIZAR'
     private Integer idUsuario;
     private Integer idRol;

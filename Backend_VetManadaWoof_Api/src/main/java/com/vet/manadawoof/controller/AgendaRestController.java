@@ -19,7 +19,7 @@ public class AgendaRestController {
     
     private final AgendaService service;
     
-    @PostMapping("/crear")
+    @PostMapping
     public ResponseEntity<ApiResponse<AgendaResponseDTO>> crear(@RequestBody AgendaRequestDTO dto) {
         AgendaResponseDTO response = service.crear(dto);
         
@@ -30,7 +30,7 @@ public class AgendaRestController {
                 .body(new ApiResponse<>(true, response.getMensaje(), response));
     }
     
-    @PutMapping("/actualizar")
+    @PutMapping
     public ResponseEntity<ApiResponse<AgendaResponseDTO>> actualizar(@RequestBody AgendaRequestDTO dto) {
         AgendaResponseDTO response = service.actualizar(dto);
         

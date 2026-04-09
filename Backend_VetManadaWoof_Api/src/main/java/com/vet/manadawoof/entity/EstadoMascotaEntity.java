@@ -22,15 +22,15 @@ public class EstadoMascotaEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     // Nombre único
     @Column(length = 32, nullable = false, unique = true)
     private String nombre;
-    
+
     // Descripción
     @Column(length = 128, nullable = false, unique = true)
     private String descripcion;
-    
+
     // Estado activo/inactivo
     @Column(name = "activo", nullable = false, columnDefinition = "TINYINT(1)")
     @JdbcTypeCode(SqlTypes.BIT)

@@ -14,7 +14,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AsignacionHorarioDetalleResponseDTO {
-    
+
     private Long idDetalle;
     private Long idAsignacion;
     private LocalDate fecha;

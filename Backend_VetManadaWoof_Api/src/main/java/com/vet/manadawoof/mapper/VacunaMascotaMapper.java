@@ -15,8 +15,8 @@ public class VacunaMascotaMapper {
      * Convierte una Entity a ResponseDTO
      */
     public static VacunaMascotaResponseDTO toResponse(VacunaMascotaEntity entity) {
-        if(entity == null) return null;
-        
+        if (entity == null) return null;
+
         return VacunaMascotaResponseDTO.builder()
                 .id(entity.getId())
                 .codigo(entity.getCodigo())
@@ -35,7 +35,7 @@ public class VacunaMascotaMapper {
                 .activo(entity.getActivo())
                 .build();
     }
-    
+
     // Actualiza la Entity desde el RequestDTO
     // Solo actualiza los campos que no sean null
     public static void updateEntityFromRequest(
@@ -43,18 +43,18 @@ public class VacunaMascotaMapper {
             MascotaEntity mascota, VacunaEntity vacuna, AplicacionViaEntity via,
             ColaboradorEntity colaborador, VeterinarioEntity veterinario
     ) {
-        if(request.getDosis() != null) entity.setDosis(request.getDosis());
-        if(request.getFechaAplicacion() != null) entity.setFechaAplicacion(request.getFechaAplicacion());
-        if(request.getDurabilidad() != null) entity.setDurabilidad(request.getDurabilidad());
-        if(request.getProxDosis() != null) entity.setProximaDosis(request.getProxDosis());
-        if(request.getObservaciones() != null) entity.setObservaciones(request.getObservaciones());
-        if(request.getActivo() != null) entity.setActivo(request.getActivo());
-        
+        if (request.getDosis() != null) entity.setDosis(request.getDosis());
+        if (request.getFechaAplicacion() != null) entity.setFechaAplicacion(request.getFechaAplicacion());
+        if (request.getDurabilidad() != null) entity.setDurabilidad(request.getDurabilidad());
+        if (request.getProxDosis() != null) entity.setProximaDosis(request.getProxDosis());
+        if (request.getObservaciones() != null) entity.setObservaciones(request.getObservaciones());
+        if (request.getActivo() != null) entity.setActivo(request.getActivo());
+
         // Relaciones
-        if(vacuna != null) entity.setVacuna(vacuna);
-        if(mascota != null) entity.setMascota(mascota);
-        if(via != null) entity.setVia(via);
-        if(colaborador != null) entity.setColaborador(colaborador);
-        if(veterinario != null) entity.setVeterinario(veterinario);
+        if (vacuna != null) entity.setVacuna(vacuna);
+        if (mascota != null) entity.setMascota(mascota);
+        if (via != null) entity.setVia(via);
+        if (colaborador != null) entity.setColaborador(colaborador);
+        if (veterinario != null) entity.setVeterinario(veterinario);
     }
 }

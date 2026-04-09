@@ -11,10 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface ArchivoClinicoRepository extends JpaRepository<HistoriaClinicaArchivoEntity, Long> {
-    
+
     List<HistoriaClinicaArchivoEntity> findByRegistroAtencionId(Long idRegistroAtencion);
-    
+
     Page<HistoriaClinicaArchivoEntity> findByRegistroAtencionId(Long idRegistroAtencion, Pageable pageable);
-    
+
     Optional<HistoriaClinicaArchivoEntity> findByCodigo(String codigo);
 }

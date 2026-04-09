@@ -15,10 +15,10 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AplicacionViaServiceImpl implements AplicacionViaService {
-    
+
     // Repositorio de vías de aplicación
     private final AplicacionViaRepository repository;
-    
+
     // Crea una nueva vía de aplicación con validación de nombre único
     @Override
     @Transactional
@@ -31,44 +31,44 @@ public class AplicacionViaServiceImpl implements AplicacionViaService {
                 });
         return repository.save(entity);
     }
-    
+
     // Actualiza una vía de aplicación existente con validaciones
     @Override
     @Transactional
     public AplicacionViaEntity actualizar(AplicacionViaEntity entity) {
         AplicacionViaEntity existente = repository.findById(entity.getId())
                 .orElseThrow(() -> new RuntimeException("Vía de aplicación no encontrada"));
-        
+
         repository.findAll().stream()
-                .filter(e -> e.getNombre().equalsIgnoreCase(entity.getNombre()) && ! e.getId().equals(entity.getId()))
+                .filter(e -> e.getNombre().equalsIgnoreCase(entity.getNombre()) && !e.getId().equals(entity.getId()))
                 .findFirst()
                 .ifPresent(e -> {
                     throw new RuntimeException("Otra vía de aplicación con ese nombre ya existe");
                 });
-        
+
         existente.setNombre(entity.getNombre());
         existente.setActivo(entity.getActivo());
         return repository.save(existente);
     }
-    
+
     // Elimina una vía de aplicación por su ID
     @Override
     @Transactional
     public String eliminar(Integer id) {
-        if(! repository.existsById(id)) {
+        if (!repository.existsById(id)) {
             throw new RuntimeException("Vía de aplicación no encontrada");
         }
         repository.deleteById(id);
         return "Vía de aplicación eliminada correctamente";
     }
-    
+
     // Lista todas las vías de aplicación
     @Override
     @Transactional
     public List<AplicacionViaEntity> listar() {
         return repository.findAll();
     }
-    
+
     // Obtiene una vía de aplicación por su ID
     @Override
     @Transactional

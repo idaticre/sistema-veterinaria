@@ -13,29 +13,29 @@ import java.util.List;
 @RequestMapping("/api/estados-historia-clinica")
 @RequiredArgsConstructor
 public class EstadoHistoriaClinicaRestController {
-    
+
     private final EstadoHistoriaClinicaService service;
-    
+
     @PostMapping
     public ResponseEntity<EstadoHistoriaClinicaEntity> crear(@RequestBody EstadoHistoriaClinicaEntity entity) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(entity));
     }
-    
+
     @PutMapping
     public ResponseEntity<EstadoHistoriaClinicaEntity> actualizar(@RequestBody EstadoHistoriaClinicaEntity entity) {
         return ResponseEntity.ok(service.actualizar(entity));
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Integer id) {
         return ResponseEntity.ok(service.eliminar(id));
     }
-    
+
     @GetMapping
     public ResponseEntity<List<EstadoHistoriaClinicaEntity>> listar() {
         return ResponseEntity.ok(service.listar());
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<EstadoHistoriaClinicaEntity> obtener(@PathVariable Integer id) {
         return ResponseEntity.ok(service.obtenerPorId(id));

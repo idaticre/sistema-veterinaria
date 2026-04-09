@@ -17,10 +17,10 @@ import java.util.List;
 @RequestMapping("/api/medicamentos-mascota")
 @RequiredArgsConstructor
 public class MedicamentoMascotaRestController {
-    
+
     // Servicio inyectado
     private final MedicamentoMascotaService service;
-    
+
     // Listar todos los medicamentos aplicados
     @GetMapping
     public ResponseEntity<ApiResponse<List<MedicamentoMascotaResponseDTO>>> listar() {
@@ -28,7 +28,7 @@ public class MedicamentoMascotaRestController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Lista de medicamentos obtenida correctamente", lista));
     }
-    
+
     // Obtener un medicamento específico por su ID
     // GET /api/medicamentos-mascota/{id}
     @GetMapping("/{id}")
@@ -44,13 +44,13 @@ public class MedicamentoMascotaRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(false, e.getMessage()));
         }
-        
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Registro obtenido correctamente", registro));
     }
-    
+
     // Crear un nuevo registro de medicamento
-    @PostMapping("/crear")
+    @PostMapping
     public ResponseEntity<ApiResponse<MedicamentoMascotaResponseDTO>> crear(
             @Valid @RequestBody MedicamentoMascotaRequestDTO dto
     ) {
@@ -59,9 +59,9 @@ public class MedicamentoMascotaRestController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(true, "Medicamento registrado correctamente", creado));
     }
-    
+
     // Actualizar un registro existente
-    @PutMapping("/actualizar")
+    @PutMapping
     public ResponseEntity<ApiResponse<MedicamentoMascotaResponseDTO>> actualizar(
             @Valid @RequestBody MedicamentoMascotaRequestDTO dto
     ) {
@@ -69,13 +69,13 @@ public class MedicamentoMascotaRestController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Registro actualizado correctamente", actualizado));
     }
-    
+
     // Eliminar (lógica) un registro por ID
     // Se realiza mediante cambio de estado activo = 0
-    @DeleteMapping("/eliminar/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<MedicamentoMascotaResponseDTO>> eliminar(@PathVariable Integer id) {
         MedicamentoMascotaResponseDTO eliminado = service.eliminarMedicamento(id);
         return ResponseEntity.ok(new ApiResponse<>(true, "Registro eliminado correctamente", eliminado));
     }
-    
+
 }

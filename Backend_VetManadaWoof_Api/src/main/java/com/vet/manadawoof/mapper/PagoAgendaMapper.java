@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PagoAgendaMapper {
-    
+
     public PagoAgendaResponseDTO toDto(AgendaPagoEntity entity) {
-        if(entity == null) return null;
-        
+        if (entity == null) return null;
+
         return PagoAgendaResponseDTO.builder()
                 .id(entity.getId())
                 .codigo(entity.getCodigo())

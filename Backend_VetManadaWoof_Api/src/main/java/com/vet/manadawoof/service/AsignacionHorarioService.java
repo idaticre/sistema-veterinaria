@@ -11,19 +11,19 @@ import java.util.Map;
 public interface AsignacionHorarioService {
     // CRUD básico
     AsignacionHorarioResponseDTO crearAsignacion(AsignacionHorarioRequestDTO request);
-    
+
     AsignacionHorarioResponseDTO actualizarAsignacion(Long id, AsignacionHorarioRequestDTO request);
-    
+
     void eliminarAsignacion(Long id);
-    
+
     GestionDiaEspecialResponseDTO gestionarDiaEspecial(GestionDiaEspecialRequestDTO request);
-    
+
     GestionRangoResponseDTO gestionarRangoFechas(GestionRangoRequestDTO request);
-    
+
     List<HistorialHorarioResponseDTO> consultarHistorialHorarios(Long idColaborador, Integer idDiaSemana);
-    
+
     List<HorarioVigenteResponseDTO> verHorariosVigentes(Long idColaborador);
-    
+
     Map<String, Object> resumenHorariosColaborador(Long idColaborador);
-    
+
 }

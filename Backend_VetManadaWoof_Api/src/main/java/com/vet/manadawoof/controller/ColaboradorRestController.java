@@ -15,34 +15,35 @@ import java.util.List;
 @RequestMapping("/api/colaboradores")
 @RequiredArgsConstructor
 public class ColaboradorRestController {
-    
+
     private final ColaboradorService service;
-    
+
     /**
      * Registrar colaborador
      **/
-    @PostMapping("/registrar")
+    @PostMapping
     public ResponseEntity<ApiResponse<ColaboradorResponseDTO>> registrar(@RequestBody ColaboradorRequestDTO dto) {
         ColaboradorResponseDTO response = service.registrar(dto);
-        
-        if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
+
+        if (response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
             return ResponseEntity.ok(new ApiResponse<>(false, response.getMensaje(), null));
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response.getMensaje(), response));
     }
-    
-    
+
+
     // Actualizar colaborador
-    
-    @PutMapping("/actualizar")
+
+    @PutMapping
     public ResponseEntity<ApiResponse<ColaboradorResponseDTO>> actualizar(@RequestBody ColaboradorRequestDTO dto) {
         ColaboradorResponseDTO response = service.actualizar(dto);
-        
-        if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
+
+        if (response.getMensaje() != null && response.getMensaje().startsWith("ERROR:")) {
             return ResponseEntity.ok(new ApiResponse<>(false, response.getMensaje(), null));
-        } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
     }
-    
+
     /**
      * Listar colaboradores
      **/
@@ -51,30 +52,32 @@ public class ColaboradorRestController {
         List<ColaboradorResponseDTO> colaboradores = service.listar();
         return ResponseEntity.ok(new ApiResponse<>(true, "Lista de colaboradores obtenida correctamente", colaboradores));
     }
-    
+
     /**
      * Obtener colaborador por ID
      **/
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ColaboradorResponseDTO>> obtenerPorId(@PathVariable Long id) {
         ColaboradorResponseDTO colaborador = service.obtenerPorId(id);
-        
-        if(colaborador == null) {
+
+        if (colaborador == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, "Colaborador no encontrado", null));
-        } return ResponseEntity.ok(new ApiResponse<>(true, "Colaborador encontrado", colaborador));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Colaborador encontrado", colaborador));
     }
-    
+
     /**
      * Eliminar colaborador
      **/
-    @DeleteMapping("/eliminar/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<ColaboradorResponseDTO>> eliminar(@PathVariable Long id) {
         try {
             ColaboradorResponseDTO response = service.eliminar(id);
-            
-            if(response.getMensaje() != null && response.getMensaje().startsWith("ERROR")) {
+
+            if (response.getMensaje() != null && response.getMensaje().startsWith("ERROR")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, response.getMensaje(), null));
-            } return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
+            }
+            return ResponseEntity.ok(new ApiResponse<>(true, response.getMensaje(), response));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, "Error en la operación: " + e.getMessage(), null));
         }

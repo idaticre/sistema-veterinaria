@@ -8,15 +8,15 @@ import org.springframework.data.domain.Pageable;
 import java.util.Map;
 
 public interface HistoriaClinicaService {
-    
+
     HistoriaClinicaResponseDTO crear(HistoriaClinicaRequestDTO dto);
-    
+
     HistoriaClinicaResponseDTO obtenerPorId(Long id);
-    
+
     HistoriaClinicaResponseDTO obtenerPorMascota(Long idMascota);
-    
+
     Map<String, Object> consultarHistorialMascota(Long idMascota);
-    
+
     Page<HistoriaClinicaResponseDTO> listar(Pageable pageable);
-    
+
 }

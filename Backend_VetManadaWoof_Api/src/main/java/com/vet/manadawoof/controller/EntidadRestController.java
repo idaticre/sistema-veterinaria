@@ -16,9 +16,9 @@ import java.util.List;
 @RequestMapping("/api/entidades")
 @RequiredArgsConstructor
 public class EntidadRestController {
-    
+
     private final EntidadService service;
-    
+
     @GetMapping
     public ResponseEntity<ApiResponse<List<EntidadResponseDTO>>> listar() {
         List<EntidadResponseDTO> lista = service.listarEntidades();
@@ -26,7 +26,7 @@ public class EntidadRestController {
                 .body(new ApiResponse<>(
                         true, "Lista obtenida correctamente", lista));
     }
-    
+
     @PostMapping("/crear")
     public ResponseEntity<ApiResponse<EntidadResponseDTO>> crear(
             @Valid @RequestBody EntidadRequestDTO dto
@@ -36,7 +36,7 @@ public class EntidadRestController {
                 .body(new ApiResponse<>(
                         true, "Entidad creada correctamente", creada));
     }
-    
+
     @PutMapping("/actualizar")
     public ResponseEntity<ApiResponse<EntidadResponseDTO>> actualizar(
             @Valid @RequestBody EntidadRequestDTO dto
@@ -46,7 +46,7 @@ public class EntidadRestController {
                 .body(new ApiResponse<>(
                         true, "Entidad actualizada correctamente", actualizada));
     }
-    
+
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<ApiResponse<EntidadResponseDTO>> eliminar(
             @PathVariable("id") Long id

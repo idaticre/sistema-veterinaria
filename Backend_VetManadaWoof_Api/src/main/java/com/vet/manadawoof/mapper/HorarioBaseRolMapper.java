@@ -10,10 +10,10 @@ public class HorarioBaseRolMapper {
      * Convierte una Entity a Response DTO con información completa
      */
     public HorarioBaseRolResponseDTO toResponse(HorarioBaseRolEntity entity) {
-        if(entity == null) {
+        if (entity == null) {
             return null;
         }
-        
+
         return HorarioBaseRolResponseDTO.builder()
                 .id(entity.getId())
                 .idRol(entity.getRol().getId())

@@ -12,44 +12,48 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TipoArchivoClinicoServiceImpl implements TipoArchivoClinicoService {
-    
+
     private final TipoArchivoClinicoRepository repository;
-    
+
     @Override
     @Transactional
     public TipoArchivoClinicoEntity crear(TipoArchivoClinicoEntity entity) {
         repository.findAll().stream().filter(e -> e.getNombre().equalsIgnoreCase(entity.getNombre())).findFirst().ifPresent(e -> {
             throw new RuntimeException("Tipo de archivo clínico ya existe");
-        }); return repository.save(entity);
+        });
+        return repository.save(entity);
     }
-    
+
     @Override
     @Transactional
     public TipoArchivoClinicoEntity actualizar(TipoArchivoClinicoEntity entity) {
         TipoArchivoClinicoEntity existente = repository.findById(entity.getId()).orElseThrow(() -> new RuntimeException("Tipo de archivo clínico no encontrado"));
-        
-        repository.findAll().stream().filter(e -> e.getNombre().equalsIgnoreCase(entity.getNombre()) && ! e.getId().equals(entity.getId())).findFirst().ifPresent(e -> {
+
+        repository.findAll().stream().filter(e -> e.getNombre().equalsIgnoreCase(entity.getNombre()) && !e.getId().equals(entity.getId())).findFirst().ifPresent(e -> {
             throw new RuntimeException("Otro tipo de archivo clínico con ese nombre ya existe");
         });
-        
-        existente.setNombre(entity.getNombre()); existente.setDescripcion(entity.getDescripcion());
+
+        existente.setNombre(entity.getNombre());
+        existente.setDescripcion(entity.getDescripcion());
         return repository.save(existente);
     }
-    
+
     @Override
     @Transactional
     public String eliminar(Integer id) {
-        if(! repository.existsById(id)) {
+        if (!repository.existsById(id)) {
             throw new RuntimeException("Tipo de archivo clínico no encontrado");
-        } repository.deleteById(id); return "Tipo de archivo clínico eliminado correctamente";
+        }
+        repository.deleteById(id);
+        return "Tipo de archivo clínico eliminado correctamente";
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<TipoArchivoClinicoEntity> listar() {
         return repository.findAll();
     }
-    
+
     @Override
     @Transactional
     public TipoArchivoClinicoEntity obtenerPorId(Integer id) {

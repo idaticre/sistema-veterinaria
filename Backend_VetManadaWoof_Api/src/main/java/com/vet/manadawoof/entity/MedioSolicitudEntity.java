@@ -17,19 +17,19 @@ import java.util.List;
 @Entity
 @Table(name = "medio_solicitud")
 public class MedioSolicitudEntity implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     @Column(length = 32, nullable = false, unique = true)
     private String nombre;
-    
+
     @Column(length = 128)
     private String descripcion;
-    
+
     @OneToMany(mappedBy = "medioSolicitud", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<AgendaEntity> agendas;
