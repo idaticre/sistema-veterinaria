@@ -14,11 +14,12 @@ import java.util.List;
 @RequestMapping("/api/archivos")
 public class SubidArchRestController {
 
-    private static final String BASE = "C:/Users/edgar/Desktop/archivos/"; //cambiar segun conveniencia
+    private static final String BASE = "C:/Users/edgar/Desktop/archivos/"; // cambiar según conveniencia
     private static final String MULTIMEDIA = BASE + "multimedia/";
     private static final String DOCUMENTOS = BASE + "documentos/";
 
-    @PostMapping
+    // Ruta final: POST /api/archivos/subir
+    @PostMapping("/subir")
     public ResponseEntity<String> subirArchivo(
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false) String nombreExistente,
@@ -73,6 +74,7 @@ public class SubidArchRestController {
             File destino = new File(folder + nombreFinal);
             file.transferTo(destino); // sobrescribe si existe
 
+            // URL pública (asegúrate de que el puerto 8088 coincida con tu configuración de recursos estáticos)
             String publicUrl = "http://localhost:8088/archivos/" + (esMultimedia ? "multimedia/" : "documentos/") + nombreFinal;
 
             return ResponseEntity.ok(publicUrl);
@@ -82,7 +84,8 @@ public class SubidArchRestController {
         }
     }
 
-    @PostMapping
+    // Ruta final: POST /api/archivos/eliminar
+    @PostMapping("/eliminar")
     public ResponseEntity<String> eliminarArchivo(@RequestParam String nombreArchivo) {
         try {
             if (nombreArchivo == null || nombreArchivo.isEmpty()) {
@@ -113,5 +116,4 @@ public class SubidArchRestController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
-
 }
