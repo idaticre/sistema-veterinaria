@@ -1,4 +1,3 @@
-/*
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
 import "./turnosYhorarios.css"
@@ -163,8 +162,8 @@ function turnosYhorarios() {
                                         </div>
                                         {menuActivoId === registro.ID && (
                                             <div ref={menuRef} className="menu-opciones">
-                                            <button onClick={() => editarHorario(registro.ID)}>✏️ Editar</button>
-                                            <button onClick={() => eliminarHorario(registro.ID)}>🗑️ Eliminar</button>
+                                                <button onClick={() => editarHorario(registro.ID)}>✏️ Editar</button>
+                                                <button onClick={() => eliminarHorario(registro.ID)}>🗑️ Eliminar</button>
                                             </div>
                                         )}
                                         </div>
@@ -236,4 +235,3 @@ function turnosYhorarios() {
 };
 
 export default turnosYhorarios
-*/
