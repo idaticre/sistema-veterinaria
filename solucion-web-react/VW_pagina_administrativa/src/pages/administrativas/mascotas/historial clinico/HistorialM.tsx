@@ -154,6 +154,7 @@ function HistorialM() {
                                         <div className='citas_mascota_datos'>
                                             <p>Codigo: <span>{CMT.codigo}</span></p>
                                             <p>Hora: <span>{CMT.fechaRegistro.split("T")[1].slice(0,5)}</span></p>
+                                            <p>Tiempo: <span>{CMT.duracionEstimadaMin} min</span></p>
                                             <p>Monto total: {CMT.totalCita}</p>
                                             <p>Veterinario: Nombre colaborador</p>
                                         </div>

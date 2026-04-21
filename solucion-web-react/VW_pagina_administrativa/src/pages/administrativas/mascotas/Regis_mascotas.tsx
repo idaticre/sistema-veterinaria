@@ -144,7 +144,7 @@ function Regis_mascotas() {
           formData.append("nombreMascota", nombre || "mascota");
         }
 
-        const res = await IST.post("/archivos", formData);
+        const res = await IST.post("/archivos/subir", formData);
         fotoURL = res.data;
       }
 
@@ -237,7 +237,7 @@ function Regis_mascotas() {
         const formData = new FormData();
         formData.append("nombreArchivo", nombreArchivo);
 
-        await IST.post("/archivos", formData, {
+        await IST.post("/archivos/eliminar", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
