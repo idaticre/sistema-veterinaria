@@ -3,7 +3,7 @@ import Br_administrativa from "../../../../components/barra_administrativa/Br_ad
 import "./EditarCita.css";
 import IST from "../../../../components/proteccion/IST";
 import axios from "axios";
-
+import { useLocation } from "react-router-dom";
 // 🚨 Nuevas Constantes y Declaraciones de Google Calendar
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
@@ -266,6 +266,10 @@ const parsearServiciosGC = (
 };
 
 function EditarCita() {
+
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const fechaURL = params.get("fecha");
   const [minimizado, setMinimizado] = useState(false);
   const [status, setStatus] = useState("🟡 Inicializando...");
 
@@ -283,7 +287,7 @@ function EditarCita() {
   const [editandoCita, setEditandoCita] = useState<CitaBD | null>(null);
 
   const [busqueda, setBusqueda] = useState("");
-  const [filtroFecha, setFiltroFecha] = useState("");
+  const [filtroFecha, setFiltroFecha] = useState(fechaURL || "");
 
   const [filtroEstadoId, setFiltroEstadoId] = useState<number>(0);
 
@@ -660,6 +664,11 @@ function EditarCita() {
   useEffect(() => {
     fetchCitas();
   }, []);
+  useEffect(() => {
+  if (fechaURL) {
+    setFiltroFecha(fechaURL);
+  }
+}, [fechaURL]);
 
   // ================== FUNCIONES DE FILTRADO UNIFICADO ==================
   useEffect(() => {
@@ -682,9 +691,9 @@ function EditarCita() {
       });
     }
 
-    if (filtroFecha) {
-      filtrados = filtrados.filter((e) => e.fecha === filtroFecha);
-    }
+ if (filtroFecha) {
+  filtrados = filtrados.filter((e) => e.fecha === filtroFecha);
+}
 
     if (filtroEstadoId === 0) {
       if (idsEstadosTerminales.length > 0) {
@@ -1102,41 +1111,44 @@ function EditarCita() {
       <Br_administrativa onMinimizeChange={setMinimizado} />
 
       <main className={minimizado ? "minimize" : ""}>
-        <section className="editarita-container">
-          <h2 className="titulo-editarita">📝 Editor de Citas Agendadas</h2>
-          <div className="auth-section">
-            <p className="status-info" style={{ textAlign: "left" }}>
-              {status}
-            </p>
+        <div className="editor-wrapper">
+            <section className="editarita-container">
+          <div className="editor-header">
 
-            <div
-              className="google-auth-controls"
-              style={{ marginBottom: "20px", textAlign: "left" }}
-            >
-              {!isSignedIn ? (
-                <button className="btn-primary" onClick={iniciarSesion}>
-                  🔐 Iniciar sesión Google Calendar
-                </button>
-              ) : (
-                <button
-                  className="btn-cerrar-sesion"
-                  onClick={cerrarSesion}
-                  style={{
-                    background: "#dc3545",
-                    color: "white",
-                    padding: "10px 20px",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                  }}
-                >
-                  🚪 Cerrar sesión de Google Calendar
-                </button>
-              )}
-            </div>
-          </div>
+  <div className="editor-header">
 
+  <div className="editor-header">
+
+  {/* IZQUIERDA */}
+  <h2 className="titulo-editarita">
+    📝 Editor de Citas Agendadas
+  </h2>
+
+  {/* CENTRO */}
+  <div className="header-center">
+    <span className="contador">
+      ✔ {eventos.length} citas cargadas
+    </span>
+  </div>
+
+  {/* DERECHA */}
+  <div className="header-right">
+    {!isSignedIn ? (
+      <button className="btn-primary" onClick={iniciarSesion}>
+        🔐 Iniciar sesión
+      </button>
+    ) : (
+      <button
+        className="btn-cerrar-sesion"
+        onClick={cerrarSesion}
+      >
+        🚪 Cerrar sesión
+      </button>
+    )}
+  </div>
+</div>
+</div>
+</div>
           {!isSignedIn ? (
             <div className="no-eventos">
               {/* 🚨 AQUÍ PROTEGEMOS LA VISTA: Si no hay login, solo sale este mensaje */}
@@ -1287,6 +1299,7 @@ function EditarCita() {
             </>
           )}
         </section>
+        </div>
       </main>
 
       {/* MODAL DE EDICIÓN */}

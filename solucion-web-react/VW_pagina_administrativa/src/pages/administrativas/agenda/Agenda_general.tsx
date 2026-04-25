@@ -62,14 +62,13 @@ const extraerDetallesGC = (summary: string, description?: string) => {
   let mascota = "N/A";
   let costoTotal = "N/A";
 
-  // Regex modificado para aceptar '$' o 'S/'
-  const summaryMatch = summary.match(/(.*?) - Total: [\$S\/](\d+\.?\d*)/);
-  if (summaryMatch) {
-    mascota = summaryMatch[1].trim();
-    // Formato de salida con S/
-    costoTotal = `S/${parseFloat(summaryMatch[2]).toFixed(2)}`;
-  } else {
-    mascota = summary.split(" - ")[0].trim();
+  // 🔥 SACAR MASCOTA (igual que antes)
+  mascota = summary.split(" - ")[0].trim();
+
+  // 🔥 NUEVO: detectar cualquier S/xx.xx (más robusto)
+  const totalMatch = summary.match(/S\/\s*(\d+\.?\d*)/i);
+  if (totalMatch) {
+    costoTotal = `S/${parseFloat(totalMatch[1]).toFixed(2)}`;
   }
 
   if (description) {
@@ -80,25 +79,41 @@ const extraerDetallesGC = (summary: string, description?: string) => {
       cliente = clienteMatch[1].trim();
     }
 
+    // 🔥 respaldo desde description (por si falla summary)
     if (costoTotal === "N/A") {
-      // Regex modificado para aceptar '$' o 'S/'
-      const costoMatch = description.match(
-        /Costo Total:\s*[\$S\/](\d+\.?\d*)/i,
-      );
+      const costoMatch = description.match(/S\/\s*(\d+\.?\d*)/i);
       if (costoMatch) {
-        // Formato de salida con S/
         costoTotal = `S/${parseFloat(costoMatch[1]).toFixed(2)}`;
       }
     }
   }
 
-  return { Cliente: cliente, Mascota: mascota, "Costo Total": costoTotal };
+  return {
+    Cliente: cliente,
+    Mascota: mascota,
+    "Costo Total": costoTotal,
+  };
 };
 
 function Agenda_general() {
   const navigate = useNavigate();
   const [minimizado, setMinimizado] = useState(false);
   const [fechaSeleccionada, setFechaSeleccionada] = useState<Date>(new Date()); // Estados de Google Calendar
+  // 🔒 FERIADOS PERÚ 2026
+const [fechasBloqueadas, setFechasBloqueadas] = useState<string[]>([
+  "2026-01-01",
+  "2026-04-17",
+  "2026-04-18",
+  "2026-05-01",
+  "2026-06-29",
+  "2026-07-28",
+  "2026-07-29",
+  "2026-08-30",
+  "2026-12-25",
+]);
+
+// 🔓 PERMITIR TRABAJAR EN FERIADOS
+const [permitirFeriados, setPermitirFeriados] = useState(false);
 
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [status, setStatus] = useState("🔌 Inicializando Google Calendar...");
@@ -442,6 +457,10 @@ function Agenda_general() {
   }; // --- FUNCIÓN PRINCIPAL DE GUARDADO (ACTUALIZADA con S/ y Recordatorios) ---
 
   const guardarEvento = async () => {
+    // 🚫 BLOQUEO DE FERIADOS
+if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
+  return alert("🚫 No se puede agendar en feriados.");
+}
     if (!nuevoEvento.cliente || !nuevoEvento.mascota || !nuevoEvento.dni)
       return alert("Completa los campos de Cliente, DNI y Mascota.");
 
@@ -600,155 +619,187 @@ function Agenda_general() {
   }; // ---------------------------------------------
   // --- JSX DEL COMPONENTE ---
   return (
-    <div id="agenda">
-            <Br_administrativa onMinimizeChange={setMinimizado} />     {" "}
-      <main className={minimizado ? "minimize" : ""}>
-               {" "}
-        <section className="agenda-container">
-                    <h2 className="titulo-agenda">Agenda de Citas</h2>         {" "}
-          <div className="agenda-layout">
-                        {/* Calendar y Auth Buttons */}           {" "}
-            <div className="calendar-container">
-                           {" "}
-              <Calendar
-                onChange={(date) => setFechaSeleccionada(date as Date)}
-                value={fechaSeleccionada}
-                locale="es-ES"
-              />
-                           {" "}
-              <div className="auth-buttons">
-                               {" "}
-                {!isSignedIn ? (
-                  <button className="btn-agregar" onClick={iniciarSesion}>
-                    🔐 Iniciar sesión
-                  </button>
-                ) : (
-                  <button className="btn-cerrar" onClick={cerrarSesion}>
-                    🚪Cerrar sesión
-                  </button>
-                )}
-                           {" "}
-              </div>
-                           {" "}
-              <p style={{ marginTop: "10px", color: "#555" }}>{status}</p>     
-                   {" "}
-            </div>
-                        {/* Citas Container (UNIFICADO) */}           {" "}
-            <div className="citas-container">
-                           {" "}
-              <div className="citas-header">
-                               {" "}
-                <h3>
-                  📋 Citas Registradas del{" "}
-                  {fechaSeleccionada.toLocaleDateString()}
-                </h3>
-                               {" "}
-                <button
-                  className="btn-agregar-linda"
-                  onClick={() => {
-                    setNuevoEvento((prev) => ({
-                      ...prev,
-                      id: "",
-                      date: fechaSeleccionada.toISOString().split("T")[0],
-                      startTime: "10:00",
-                      estado:
-                        estadosAgenda.find((e) => e.nombre === "PENDIENTE")
-                          ?.nombre || "PENDIENTE",
-                    }));
-                    setServiciosRegistrados([]);
-                    setBonoTemporal(0);
-                    setMostrarModal(true);
-                  }}
-                >
-                                    ✨➕ Nueva cita                {" "}
-                </button>
-                             {" "}
-              </div>
-                            <div className="linea-divisoria"></div>             {" "}
-              <div className="citas-lista">
-                                               {" "}
-                {/* 2. EVENTOS DE GOOGLE CALENDAR (GC) - SIN CAMBIOS */}       
-                       {" "}
-                {eventos.map((e) => {
-                  const inicio = new Date(e.start.dateTime).toLocaleTimeString(
-                    [],
-                    { hour: "2-digit", minute: "2-digit" },
-                  );
-                  const fin = new Date(e.end.dateTime).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
-                  const dia = new Date(e.start.dateTime).toLocaleDateString(); // Extraer los detalles del summary/description
+  <div id="agenda">
+    <Br_administrativa onMinimizeChange={setMinimizado} />
 
-                  const detalles = extraerDetallesGC(e.summary, e.description);
+    <main className={minimizado ? "minimize" : ""}>
+      <section className="agenda-container">
 
-                  return (
-                    <div key={`gc-${e.id}`} className="cita-card gc-cita">
-                                           {" "}
-                      <p>
-                        <strong>Cliente:</strong> {detalles.Cliente || "N/A"}
-                      </p>
-                                           {" "}
-                      <p>
-                        <strong>Mascota:</strong> {detalles.Mascota || "N/A"}
-                      </p>
-                                           {" "}
-                      <p>
-                        <strong>Hora:</strong> {inicio} - {fin}
-                      </p>
-                                           {" "}
-                      <p>
-                        <strong>Día:</strong> {dia}
-                      </p>
-                                           {" "}
-                      <button
-                        className="btn-mas-info"
-                        onClick={() =>
-                          navigate(`/administracion/agenda/EditarCita`)
-                        }
-                      >
-                        📄 Más información
-                      </button>
-                                         {" "}
-                    </div>
-                  );
-                })}
-                               {" "}
-                {/* Mensaje si no hay ninguna cita registrada */}               {" "}
-                {/* Se cambia la condición para que solo dependa de eventos (GC) */}
-                               {" "}
-                {eventos.length === 0 && (
-                  <p
-                    style={{
-                      marginTop: "15px",
-                      padding: "10px",
-                      border: "1px solid #ccc",
-                    }}
-                  >
-                                        No hay citas de Google Calendar
-                    registradas para este día.                  {" "}
-                  </p>
-                )}
-                             {" "}
-              </div>
-                         {" "}
-            </div>
-                     {" "}
+        {/* HEADER */}
+        <div className="header-agenda">
+
+  <h2 className="titulo-agenda">Agenda de Citas</h2>
+
+  <button
+    className="btn-agregar-linda"
+    onClick={() => {
+      setNuevoEvento((prev) => ({
+        ...prev,
+        id: "",
+        date: fechaSeleccionada.toISOString().split("T")[0],
+        startTime: "10:00",
+        estado:
+          estadosAgenda.find((e) => e.nombre === "PENDIENTE")
+            ?.nombre || "PENDIENTE",
+      }));
+      setServiciosRegistrados([]);
+      setBonoTemporal(0);
+      setMostrarModal(true);
+    }}
+  >
+    ✨➕ Nueva cita
+  </button>
+
+</div>
+
+        {/* GRID */}
+        <div className="agenda-layout">
+
+          {/* IZQUIERDA */}
+          <div className="calendar-container">
+
+            <Calendar
+  onChange={(date) => setFechaSeleccionada(date as Date)}
+  value={fechaSeleccionada}
+  locale="es-ES"
+  tileDisabled={({ date }) => {
+    if (permitirFeriados) return false;
+
+    const fecha = date.toISOString().split("T")[0];
+    return fechasBloqueadas.includes(fecha);
+  }}
+  tileClassName={({ date }) => {
+    const fecha = date.toISOString().split("T")[0];
+    return fechasBloqueadas.includes(fecha) ? "feriado" : null;
+  }}
+/>
+
+            <div className="auth-buttons">
+  {!isSignedIn ? (
+    <button className="btn-agregar" onClick={iniciarSesion}>
+      🔐 Iniciar sesión
+    </button>
+  ) : (
+    <div className="auth-buttons-row">
+      
+      {/* IZQUIERDA */}
+      <button
+        onClick={() => setPermitirFeriados(!permitirFeriados)}
+        className="btn-feriado"
+      >
+        {permitirFeriados ? "🔓 Feriados ACTIVOS" : "🔒 Feriados BLOQUEADOS"}
+      </button>
+
+      {/* DERECHA */}
+      <button className="btn-cerrar" onClick={cerrarSesion}>
+        🚪Cerrar sesión
+      </button>
+
+    </div>
+  )}
+</div>
+
+            <p style={{ marginTop: "10px", color: "#555" }}>{status}</p>
+
           </div>
-                 {" "}
-        </section>
-             {" "}
-      </main>
+
+          {/* DERECHA */}
+          <div className="citas-container">
+
+            <div className="citas-header">
+
+  <h3 className="titulo-izquierda">
+    📋 Citas Registradas del {fechaSeleccionada.toLocaleDateString()}
+  </h3>
+
+{isSignedIn && (
+  <div className="cita-acciones">
+    <button
+      className="btn-mas-info"
+      onClick={() => {
+        const fechaISO = fechaSeleccionada
+          ?.toISOString()
+          .split("T")[0];
+
+        navigate(`/administracion/agenda/EditarCita?fecha=${fechaISO}`);
+      }}
+    >
+      📄 Más información
+    </button>
+  </div>
+)}
+
+</div>
+
+            <div className="linea-divisoria"></div>
+
+            <div className="citas-lista">
+
+              {eventos.map((e) => {
+                const inicio = new Date(e.start.dateTime).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+
+                const fin = new Date(e.end.dateTime).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+
+                const dia = new Date(e.start.dateTime).toLocaleDateString();
+
+                const detalles = extraerDetallesGC(e.summary, e.description);
+
+                return (
+                  <div key={`gc-${e.id}`} className="cita-card">
+
+ <div className="cita-info-horizontal">
+
+  <span><strong>Cliente:</strong> {detalles.Cliente || "N/A"}</span>
+
+  <span><strong>Mascota:</strong> {detalles.Mascota || "N/A"}</span>
+
+  <span><strong>Hora:</strong> {inicio} - {fin}</span>
+
+  <span><strong>Día:</strong> {dia}</span>
+
+  <span>
+    <strong>Total:</strong>
+    {detalles["Costo Total"] || "S/0.00"}
+  </span>
+
+</div>
+
+  
+
+</div>
+                );
+              })}
+
+              {eventos.length === 0 && (
+                <p style={{ marginTop: "15px", padding: "10px" }}>
+                  No hay citas registradas para este día.
+                </p>
+              )}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+    </main>
             {/* ======================= MODAL NUEVA ======================= */} 
-         {" "}
+        
       {mostrarModal && (
         <div className="modal-overlay">
-                   {" "}
+                 
           <div className="modal-content">
-                        <h3>Agendar nueva cita 🗓️</h3>           {" "}
+                        <h3>Agendar nueva cita 🗓️</h3>          
             <div className="col-izq">
                             <label>DNI *</label>
-                           {" "}
+                           
               <input
                 type="text"
                 value={nuevoEvento.dni}
@@ -774,9 +825,9 @@ function Agenda_general() {
                 }}
               />
                             <label>Cliente *</label>
-                           {" "}
+                          
               <input type="text" value={nuevoEvento.cliente} disabled />       
-                    <label>Mascota *</label>             {" "}
+                    <label>Mascota *</label>            
               <select
                 value={nuevoEvento.mascota}
                 onChange={(e) =>
@@ -785,7 +836,7 @@ function Agenda_general() {
                 disabled={!nuevoEvento.clienteId}
               >
                                 <option value="">Seleccione mascota...</option> 
-                             {" "}
+                             
                 {mascotas
                   .filter((m) => m.idCliente === nuevoEvento.clienteId)
                   .map((m) => (
@@ -793,14 +844,14 @@ function Agenda_general() {
                       {m.nombre}
                     </option>
                   ))}
-                             {" "}
+                             
               </select>
-                         {" "}
+                        
             </div>
-                       {" "}
+                       
             <div className="col-der">
                             <label>Fecha *</label>
-                           {" "}
+                           
               <input
                 type="date"
                 value={nuevoEvento.date}
@@ -809,7 +860,7 @@ function Agenda_general() {
                 }
               />
                             <label>Hora *</label>
-                           {" "}
+                          
               <input
                 type="time"
                 value={nuevoEvento.startTime}
@@ -817,19 +868,19 @@ function Agenda_general() {
                   setNuevoEvento({ ...nuevoEvento, startTime: e.target.value })
                 }
               />
-                         {" "}
+                        
             </div>
-                       {" "}
+                      
             <div className="full-width-section">
-                            <h3>🛠 Servicios</h3>             {" "}
+                            <h3>🛠 Servicios</h3>            
               <div className="service-input-grid" id="serviceFormInputs">
-                               {" "}
+                             
                 <div>
-                                   {" "}
+                                  
                   <label htmlFor="id_servicio">
                     Servicio<span className="required">*</span>
                   </label>
-                                   {" "}
+                                 
                   <select
                     id="id_servicio"
                     name="id_servicio"
@@ -841,25 +892,25 @@ function Agenda_general() {
                       })
                     }
                   >
-                                       {" "}
+                                      
                     <option value="">Seleccione un servicio</option>           
-                           {" "}
+                          
                     {serviciosDisponibles.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.nombre} ({s.duracion} min)
                       </option>
                     ))}
-                                     {" "}
+                                   
                   </select>
-                                 {" "}
+                                 
                 </div>
-                               {" "}
+                              
                 <div>
-                                   {" "}
+                                  
                   <label htmlFor="valor_servicio">
                     Valor servicio<span className="required">*</span>
                   </label>
-                                   {" "}
+                                 
                   <input
                     type="number"
                     id="valor_servicio"
@@ -874,12 +925,12 @@ function Agenda_general() {
                       })
                     }
                   />
-                                 {" "}
+                                 
                 </div>
-                               {" "}
+                               
                 <div>
                                     <label htmlFor="cantidad">Cantidad</label>
-                                   {" "}
+                                  
                   <input
                     type="number"
                     id="cantidad"
@@ -893,13 +944,13 @@ function Agenda_general() {
                       })
                     }
                   />
-                                 {" "}
+                                
                 </div>
-                               {" "}
+                             
                 <div>
-                                   {" "}
+                                  
                   <label htmlFor="duracion_min">Duración Servicio</label>
-                                   {" "}
+                                  
                   <input
                     type="number"
                     id="duracion_min"
@@ -913,15 +964,15 @@ function Agenda_general() {
                       })
                     }
                   />
-                                 {" "}
+                                
                 </div>
-                               {" "}
+                             
                 <div>
-                                   {" "}
+                                  
                   <label htmlFor="id_veterinario">
                     Veterinario <span className="required">*</span>
                   </label>
-                                   {" "}
+                                  
                   <select
                     name="id_veterinario"
                     value={servicioTemporal.id_veterinario}
@@ -933,21 +984,21 @@ function Agenda_general() {
                     }
                   >
                                         <option value="">Seleccione...</option> 
-                                     {" "}
+                                     
                     {colaboradores.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.nombre} (ID {c.id})
                       </option>
                     ))}
-                                     {" "}
+                                  
                   </select>
-                                 {" "}
+                               
                 </div>
-                               {" "}
+                            
                 <div>
-                                   {" "}
+                                 
                   <label htmlFor="adicionales">Adicionales</label>
-                                   {" "}
+                                 
                   <input
                     type="text"
                     id="adicionales"
@@ -960,11 +1011,11 @@ function Agenda_general() {
                       })
                     }
                   />
-                                 {" "}
+                                
                 </div>
-                               {" "}
+                             
                 <div>
-                                   {" "}
+                                  
                   <button
                     type="button"
                     id="btnAddService"
@@ -974,14 +1025,14 @@ function Agenda_general() {
                   >
                     Agregar
                   </button>
-                                 {" "}
+                                 
                 </div>
-                             {" "}
+                            
               </div>
-                           {" "}
+                          
               <div>
                                 <label htmlFor="bono_inicial">Adelanto</label>
-                               {" "}
+                               
                 <input
                   type="number"
                   id="bono_inicial"
@@ -992,29 +1043,29 @@ function Agenda_general() {
                     setBonoTemporal(parseFloat(e.target.value) || 0)
                   }
                 />
-                             {" "}
+                          
               </div>
-                            <h4>Detalle de Servicios:</h4>             {" "}
+                            <h4>Detalle de Servicios:</h4>           
               <table className="service-table">
-                               {" "}
+                              
                 <thead>
-                                   {" "}
+                                 
                   <tr>
-                                        <th>Servicio</th>                   {" "}
-                    <th>Responsable</th>                    <th>Cantidad</th>   
-                                    <th>Duración Total</th>                   {" "}
-                    <th>Valor Servicio (S/)</th>                   {" "}
-                    <th>Subtotal (S/)</th>                    <th>Acción</th>   
-                                 {" "}
+                    <th>Servicio</th>              
+                    <th>Responsable</th><th>Cantidad</th>   
+                    <th>Duración Total</th>                  
+                    <th>Valor Servicio (S/)</th>                  
+                    <th>Subtotal (S/)</th><th>Acción</th>   
+                                
                   </tr>
-                                 {" "}
+                                
                 </thead>
-                               {" "}
+                              
                 <tbody id="serviceTableBody">
-                                   {" "}
+                                 
                   {serviciosRegistrados.map((s, index) => (
                     <tr key={index}>
-                                           {" "}
+                                         
                       <td style={{ textAlign: "left" }}>
                         <strong>{s.nombre_servicio}</strong>
                         {s.adicionales && (
@@ -1024,13 +1075,13 @@ function Agenda_general() {
                           </>
                         )}
                       </td>
-                                            <td>{s.nombre_veterinario}</td>     
-                                      <td>{s.cantidad}</td>                     {" "}
-                      <td>{s.duracion_total} min</td>                     {" "}
-                      <td>S/{s.valor_servicio.toFixed(2)}</td>{" "}
-                      {/* AÑADIDO S/ */}                     {" "}
+                      <td>{s.nombre_veterinario}</td>     
+                      <td>{s.cantidad}</td>                    
+                      <td>{s.duracion_total} min</td>                   
+                      <td>S/{s.valor_servicio.toFixed(2)}</td>
+                      {/* AÑADIDO S/ */}                    
                       <td>S/{s.subtotal.toFixed(2)}</td> {/* AÑADIDO S/ */}     
-                                     {" "}
+                                    
                       <td>
                         <button
                           type="button"
@@ -1039,98 +1090,85 @@ function Agenda_general() {
                         >
                           🗑️
                         </button>
-                      </td>
-                                       {" "}
+                      </td>               
                     </tr>
-                  ))}
-                                 {" "}
-                </tbody>
-                               {" "}
-                <tfoot>
-                                   {" "}
-                  <tr>
-                                       {" "}
+                  ))}                  
+                </tbody>                    
+                <tfoot>                           
+                  <tr>                                  
                     <td colSpan={3} style={{ textAlign: "right" }}>
                       Total Duración:
-                    </td>
-                                       {" "}
+                    </td>                    
                     <td id="totalDuracion">
                       <strong>{totalDuracion} min</strong>
                     </td>
-                                        <td colSpan={3}></td>               
-                     {" "}
+                  <td colSpan={3}></td>               
                   </tr>
-                                   {" "}
                   <tr>
-                                       {" "}
                     <td
                       colSpan={5}
                       style={{ textAlign: "right", fontWeight: "bold" }}
                     >
                       Total Servicios:
                     </td>
-                                       {" "}
                     <td style={{ fontWeight: "bold" }}>
                       S/{totalCosto.toFixed(2)}
-                    </td>{" "}
-                    {/* AÑADIDO S/ */}                    <td></td>             
-                       {" "}
-                  </tr>
-                                   {" "}
-                  <tr className="bono-row">
-                                       {" "}
+                    </td>
+                    {/* AÑADIDO S/ */}<td></td>  
+                  </tr>                         
+                  <tr className="bono-row">                
                     <td
                       colSpan={5}
                       style={{ textAlign: "right", fontWeight: "bold" }}
                     >
                       Adelanto:
                     </td>
-                                       {" "}
+                                      
                     <td style={{ fontWeight: "bold", color: "red" }}>
                       S/{bonoTemporal.toFixed(2)}
-                    </td>{" "}
+                    </td>
                     {/* AÑADIDO S/ */}                    <td></td>             
-                       {" "}
+                      
                   </tr>
-                                   {" "}
+                                  
                   <tr className="total-row">
-                                       {" "}
+                                      
                     <td colSpan={5} style={{ textAlign: "right" }}>
                       Pendiente de Pago:
                     </td>
-                                       {" "}
+                                       
                     <td id="totalCitaDisplay">
                       <strong>
                         S/{Math.max(0, totalCosto - bonoTemporal).toFixed(2)}
                       </strong>
-                    </td>{" "}
+                    </td>
                     {/* AÑADIDO S/ */}                    <td></td>             
-                       {" "}
+                      
                   </tr>
-                                 {" "}
+                               
                 </tfoot>
-                             {" "}
+                            
               </table>
-                         {" "}
+                        
             </div>
-                        {/* Estado y Observaciones */}           {" "}
-            <label>Estado *</label>           {" "}
+                        {/* Estado y Observaciones */}          
+            <label>Estado *</label>           
             <select
               value={nuevoEvento.estado}
               onChange={(e) =>
                 setNuevoEvento({ ...nuevoEvento, estado: e.target.value })
               }
             >
-                            <option value="">Seleccione...</option>             {" "}
+                            <option value="">Seleccione...</option>           
               {estadosAgenda.map((estado) => (
                 <option key={estado.id} value={estado.nombre}>
                   {estado.nombre}
                 </option>
               ))}
-                         {" "}
+                         
             </select>
                         <label className="label-obs">Observaciones</label>
-                       {" "}
+                      
             <textarea
               className="textarea-obs"
               value={nuevoEvento.description}
@@ -1138,13 +1176,13 @@ function Agenda_general() {
                 setNuevoEvento({ ...nuevoEvento, description: e.target.value })
               }
             />
-                        {/* Botones Finales */}           {" "}
+                        {/* Botones Finales */}         
             <div className="acciones-modal">
-                           {" "}
+                         
               <button className="btn-agregar" onClick={guardarEvento}>
-                                💾 Guardar Cita              {" "}
+                                💾 Guardar Cita             
               </button>
-                           {" "}
+                          
               <button
                 className="btn-cerrar"
                 onClick={() => {
@@ -1155,14 +1193,14 @@ function Agenda_general() {
               >
                 ❌ Cancelar
               </button>
-                         {" "}
+                        
             </div>
-                     {" "}
+                     
           </div>
-                 {" "}
+                 
         </div>
       )}
-         {" "}
+         
     </div>
   );
 }

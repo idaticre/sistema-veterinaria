@@ -6,13 +6,52 @@
 }
 
 #editarita main {
-  margin-left: 250px;
-  padding: 30px;
-  transition: margin-left 0.3s ease;
+  margin-left: 15px;
+  width: calc(100% - 15px);
 }
 
 #editarita main.minimize {
-  margin-left: 80px;
+  margin-left: 15px;
+  width: calc(100% - 15px);
+}
+.editor-wrapper {
+  background: #eef2f7;
+  padding: 20px;
+  border-radius: 12px;
+}
+.editor-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+/* IZQUIERDA */
+.titulo-editarita {
+  margin: 0;
+}
+
+/* CENTRO */
+.header-center {
+  margin-left: 160px; /* 🔥 separa del título */
+}
+
+/* DERECHA */
+.header-right {
+  margin-left: 380px; /* 🔥 se va al extremo */
+}
+
+.contador {
+  background: #e6f4ea;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+.filtros-section {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 /* ================== CONTENEDOR DE CONTENIDO ================== */
@@ -146,11 +185,6 @@
   font-size: 1rem;
   font-weight: 600;
   transition: background 0.3s ease;
-  margin-left: auto;
-}
-
-.btn-cerrar-sesion:hover {
-  background: #c0181e;
 }
 
 /* ================== STATUS ================== */
@@ -176,9 +210,9 @@
 /* ================== GRID DE CITAS ================== */
 .citas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 25px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  width: 100%;
 }
 
 /* ================== TARJETA DE CITA ================== */
@@ -189,6 +223,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   border: 1px solid #e0e0e0;
+  border-left: 5px solid #667eea;
 }
 
 .cita-card-edit:hover {
@@ -457,9 +492,9 @@
     width: 100%;
   }
 
-  .citas-grid {
-    grid-template-columns: 1fr;
-  }
+  .cita-card {
+  width: 100%;
+}
 
   .form-grid {
     grid-template-columns: 1fr;

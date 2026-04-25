@@ -1,11 +1,11 @@
 :root {
-  --color-principal: #ff9900;
-  --color-principal-hover: #e07b00;
-  --color-borde: #ddd;
-  --color-verde-claro: #6fdc6f;
-  --color-celeste: #a7e0ff;
-  --color-rojo: #e74c3c;
-  --color-rojo-hover: #c0392b;
+  --color-titulo: #001C3D;
+  --color-subtitulo: #33475B;
+  --color-editar: #A5C9FF; /* Azul Glaciar Cálido */
+  --color-exito: #77E07D;
+  --color-peligro: #E63946;
+  --color-fondo: #F9E4C8;
+  --color-subfondo: #ffffff;
 }
 
 /* ================== CONTENEDOR PRINCIPAL ================== */
@@ -24,13 +24,19 @@
   overflow-y: auto;
 }
 
-.titulo-agenda {
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
+.header-agenda {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
   margin-bottom: 1.5rem;
 }
 
+.titulo-agenda {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #333;
+}
 /* ================== LAYOUT ================== */
 .agenda-layout {
   display: grid;
@@ -180,6 +186,7 @@
 }
 
 /* ================== TARJETAS ================== */
+/* 🔥 TARJETA */
 .cita-card {
   display: flex;
   justify-content: space-between;
@@ -190,26 +197,49 @@
   background: #fff;
   transition: 0.25s ease;
   width: 100%;
+  gap: 25px; /* 🔥 separación entre contenido y botón */
 }
 
+/* 🔥 INFORMACIÓN */
+.cita-info-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  flex: 1; /* 🔥 ocupa todo el espacio */
+  font-size: 1.05rem; /* 🔥 texto más grande */
+}
+
+/* 🔥 BLOQUES (Cliente, Mascota, etc.) */
+.cita-info-horizontal span {
+  background: #f5f6fa;
+  padding: 10px 14px; /* 🔥 más grandes */
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+/* 🔥 HOVER */
 .cita-card:hover {
   background: var(--color-celeste);
   color: #000;
   transform: translateY(-3px);
 }
 
-.cita-info {
-  flex: 1;
+/* 🔥 CONTENEDOR BOTÓN DERECHA */
+.cita-acciones {
+  display: flex;
+  justify-content: flex-end;
 }
 
+/* 🔥 BOTÓN MÁS GRANDE */
 .btn-mas-info {
   background: #42b5ff;
   color: white;
   border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 14px 22px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 0.95rem;
   transition: 0.2s;
 }
 
@@ -217,7 +247,6 @@
   background: #77caff;
   transform: scale(1.05);
 }
-
 /* ==========================================================
    ==========  MODAL ELEGANTE COMPLETAMENTE NUEVO  ==========
    ========================================================== */
@@ -462,4 +491,28 @@
     flex-direction: column;
     gap: 12px;
   }
+}
+.feriado {
+  background: #ff4d4f !important;
+  color: white !important;
+  border-radius: 8px;
+}
+
+.btn-feriado {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: none;
+  background: #333;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.auth-buttons-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.btn-feriado {
+  background: linear-gradient(135deg, #444, #222);
 }
