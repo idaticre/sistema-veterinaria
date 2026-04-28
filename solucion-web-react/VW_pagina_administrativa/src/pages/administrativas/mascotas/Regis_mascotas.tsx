@@ -12,7 +12,7 @@ import type {
   MascotaResponse,
 } from "../../../components/interfaces/interfaces";
 import IST from "../../../components/proteccion/IST";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 type Mascotaextendido = MascotaResponse & { nombre_dueño?: string };
 
@@ -26,35 +26,69 @@ function Regis_mascotas() {
   const [tamañosMascota, setTamañosMascota] = useState<Tamaño_Mascota[]>([]);
   const [etapaMascota, setEtapaMascota] = useState<Etapa_Mascota[]>([]);
 
-  const [nombre, setNombre] = useState("");
-  const [sexo, setSexo] = useState<"M" | "H" | undefined>(undefined);
-  const [idCliente, setIdCliente] = useState<number>(0);
-  const [idRaza, setIdRaza] = useState<number>(0);
-  const [idEspecie, setIdEspecie] = useState<number>(0);
-  const [idEstado, setIdEstado] = useState<number>(1);
-  const [fechaNacimiento, setFechaNacimiento] = useState("");
-  const [pelaje, setPelaje] = useState("");
-  const [idTamano, setIdTamaño] = useState<number>(0);
-  const [idEtapa, setIdEtapa] = useState<number>(0);
-  const [esterilizado, setEsterilizado] = useState<boolean>(false);
-  const [alergias, setAlergias] = useState("");
-  const [peso, setPeso] = useState<number | undefined>(undefined);
-  const [chip, setChip] = useState(false);
-  const [pedigree, setPedigree] = useState(false);
-  const [factorDea, setFactorDea] = useState(false);
-  const [agresividad, setAgresividad] = useState(false);
-  const [foto, setFoto] = useState("");
+  const [formMascota, setFormMascota] = useState<MascotaRequest>({
+    nombre: "",
+    sexo: "M",
+    idCliente: 0,
+    idRaza: 0,
+    idEspecie: 0,
+    idEstado: 1,
+    fechaNacimiento: "",
+    pelaje: "",
+    idTamano: 0,
+    idEtapa: 0,
+    esterilizado: false,
+    alergias: "",
+    peso: undefined,
+    chip: false,
+    pedigree: false,
+    factorDea: false,
+    agresividad: false,
+    foto: ""
+  });
+  const [mascotaSelecc, setMascotaSelecc] = useState<MascotaResponse | null>(null);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
 
   const [busqueda, setBusqueda] = useState("");
   const [resultados, setResultados] = useState<ClienteResponse[]>([]);
-
-  const location = useLocation();
-  const mascotaSelecc = location.state?.mascotaSeleccionado as
-    | Mascotaextendido
-    | undefined;
-
+  const { id } = useParams();
   const navigate = useNavigate();
+
+
+  useEffect(() => {
+    if (!id) return;
+
+    IST.get(`/mascotas/${id}`)
+      .then(res => {
+        const data: MascotaResponse = res.data.data;
+
+        setMascotaSelecc(data); 
+
+        setFormMascota({
+          id: data.id,
+          nombre: data.nombre,
+          sexo: data.sexo,
+          idCliente: data.idCliente,
+          idRaza: data.idRaza,
+          idEspecie: data.idEspecie,
+          idEstado: data.idEstado,
+          fechaNacimiento: data.fechaNacimiento,
+          pelaje: data.pelaje,
+          idTamano: data.idTamano,
+          idEtapa: data.idEtapa,
+          esterilizado: data.esterilizado,
+          alergias: data.alergias,
+          peso: data.peso,
+          chip: data.chip,
+          pedigree: data.pedigree,
+          factorDea: data.factorDea,
+          agresividad: data.agresividad,
+          foto: data.foto
+        });
+
+        setImagenMascota(data.foto);
+      });
+  }, [id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,7 +106,7 @@ function Regis_mascotas() {
           IST.get("/tamanos"),
           IST.get("/etapasVida"),
           IST.get("/estado-mascota"),
-          IST.get("/clientes"), // esto se cambiara a futuro
+          IST.get("/clientes"), 
         ]);
 
         setRazas(resRazas.data);
@@ -90,28 +124,13 @@ function Regis_mascotas() {
   }, []);
 
   useEffect(() => {
-    if (mascotaSelecc) {
-      setNombre(mascotaSelecc.nombre || "");
-      setSexo(mascotaSelecc.sexo as "M" | "H" | undefined);
-      setIdCliente(mascotaSelecc.idCliente || 0);
-      setIdRaza(mascotaSelecc.idRaza || 0);
-      setIdEspecie(mascotaSelecc.idEspecie || 0);
-      setIdEstado(mascotaSelecc.idEstado || 0);
-      setFechaNacimiento(mascotaSelecc.fechaNacimiento || "");
-      setPelaje(mascotaSelecc.pelaje || "");
-      setIdTamaño(mascotaSelecc.idTamano || 0);
-      setIdEtapa(mascotaSelecc.idEtapa || 0);
-      setEsterilizado(mascotaSelecc.esterilizado || false);
-      setAlergias(mascotaSelecc.alergias || "");
-      setPeso(mascotaSelecc.peso || undefined);
-      setChip(mascotaSelecc.chip || false);
-      setPedigree(mascotaSelecc.pedigree || false);
-      setFactorDea(mascotaSelecc.factorDea || false);
-      setAgresividad(mascotaSelecc.agresividad || false);
-      setFoto(mascotaSelecc.foto || "");
-      setImagenMascota(mascotaSelecc.foto || null);
+    if (!formMascota.idCliente || dueños.length === 0) return;
+
+    const dueño = dueños.find(d => d.id === formMascota.idCliente);
+    if (dueño) {
+      setBusqueda(dueño.nombre);
     }
-  }, [mascotaSelecc]);
+  }, [formMascota.idCliente, dueños]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -127,10 +146,16 @@ function Regis_mascotas() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    
+    if (!formMascota.idCliente) {
+      alert("Debe seleccionar un dueño ❌");
+      return;
+    }
+    
     e.preventDefault();
 
     try {
-      let fotoURL = foto;
+      let fotoURL = formMascota.foto;
 
       // Si se seleccionó una imagen, la subimos
       if (fotoFile) {
@@ -141,7 +166,7 @@ function Regis_mascotas() {
         if (nombreArchivoExistente) {
           formData.append("nombreExistente", nombreArchivoExistente);
         } else {
-          formData.append("nombreMascota", nombre || "mascota");
+          formData.append("nombreMascota", formMascota.nombre || "mascota");
         }
 
         const res = await IST.post("/archivos/subir", formData);
@@ -149,28 +174,12 @@ function Regis_mascotas() {
       }
 
       const nuevaMascota: MascotaRequest = {
-        nombre,
-        sexo,
-        idCliente,
-        idRaza,
-        idEspecie,
-        idEstado,
-        fechaNacimiento,
-        pelaje,
-        idTamano,
-        idEtapa,
-        esterilizado,
-        alergias,
-        peso,
-        chip,
-        pedigree,
-        factorDea,
-        agresividad,
+        ...formMascota,
         foto: fotoURL,
       };
 
-      if (mascotaSelecc) {
-        IST.put(`/mascotas/${mascotaSelecc.id}`, nuevaMascota)
+      if (id) {
+        IST.put(`/mascotas/${id}`, nuevaMascota)
           .then((res) => {
             console.log("Mascota actualizada:", res.data);
             alert("Mascota actualizada correctamente ✅");
@@ -193,7 +202,7 @@ function Regis_mascotas() {
             };
 
             try {
-              await IST.post("/historia-clinica/crear", historia_clinica);
+              await IST.post("/historia-clinica", historia_clinica);
             } catch (error) {
               console.error("Error al crear historia clínica", error);
             }
@@ -245,7 +254,7 @@ function Regis_mascotas() {
 
         setImagenMascota(null);
         setFotoFile(null);
-        setFoto("");
+        setFormMascota(prev => ({ ...prev, foto: "" }));
 
         alert("Imagen eliminada ✔");
 
@@ -259,7 +268,7 @@ function Regis_mascotas() {
 
     setImagenMascota(null);
     setFotoFile(null);
-    setFoto("");
+    setFormMascota(prev => ({ ...prev, foto: "" }));
   };
 
   return (
@@ -314,8 +323,8 @@ function Regis_mascotas() {
                             <input
                               type="text"
                               id="pet-name"
-                              value={nombre}
-                              onChange={(e) => setNombre(e.target.value)}
+                              value={formMascota.nombre}
+                              onChange={(e) => setFormMascota(prev => ({ ...prev, nombre: e.target.value }))}
                               required
                             />
                           </div>
@@ -328,9 +337,9 @@ function Regis_mascotas() {
                               type="date"
                               id="birth-date"
                               name="birth-date"
-                              value={fechaNacimiento}
+                              value={formMascota.fechaNacimiento}
                               onChange={(e) =>
-                                setFechaNacimiento(e.target.value)
+                                setFormMascota(prev => ({ ...prev, fechaNacimiento: e.target.value}))
                               }
                             />
                           </div>
@@ -338,11 +347,14 @@ function Regis_mascotas() {
                           <div className="form-group">
                             <label>Especie *</label>
                             <select
-                              value={idEspecie}
-                              onChange={(e) => {
-                                setIdEspecie(Number(e.target.value));
-                                setIdRaza(0);
-                              }}
+                              value={formMascota.idEspecie}
+                              onChange={(e) =>
+                                setFormMascota(prev => ({
+                                  ...prev,
+                                  idEspecie: Number(e.target.value),
+                                  idRaza: 0
+                                }))
+                              }
                               required
                             >
                               <option value="">Seleccionar especie</option>
@@ -353,20 +365,22 @@ function Regis_mascotas() {
                               ))}
                             </select>
                           </div>
-
                           <div className="form-group">
                             <label>Raza *</label>
                             <select
-                              value={idRaza}
+                              value={formMascota.idRaza}
                               onChange={(e) =>
-                                setIdRaza(Number(e.target.value))
+                                setFormMascota(prev => ({
+                                  ...prev,
+                                  idRaza: Number(e.target.value),
+                                }))
                               }
                               required
-                              disabled={!idEspecie}
+                              disabled={!formMascota.idEspecie}
                             >
                               <option value="">Seleccionar raza</option>
                               {razas
-                                .filter((r) => r.idEspecie == idEspecie)
+                                .filter((r) => r.idEspecie == formMascota.idEspecie)
                                 .map((r) => (
                                   <option key={r.id} value={r.id}>
                                     {r.nombre}
@@ -374,18 +388,21 @@ function Regis_mascotas() {
                                 ))}
                             </select>
                           </div>
-
                           <div className="form-group">
                             <label htmlFor="weight">Peso (kg)</label>
                             <input
                               type="number"
                               id="weight"
-                              name="weight"
                               step="0.1"
                               min="0"
                               placeholder="Ej: 5.5"
-                              value={peso}
-                              onChange={(e) => setPeso(Number(e.target.value))}
+                              value={formMascota.peso ?? ""}
+                              onChange={(e) =>
+                                setFormMascota(prev => ({
+                                  ...prev,
+                                  peso: e.target.value ? Number(e.target.value) : undefined,
+                                }))
+                              }
                               className="pet-weight"
                             />
                           </div>
@@ -399,8 +416,13 @@ function Regis_mascotas() {
                                   id="male"
                                   name="sex"
                                   value="M"
-                                  checked={sexo === "M"}
-                                  onChange={() => setSexo("M")}
+                                  checked={formMascota.sexo === "M"}
+                                  onChange={() =>
+                                    setFormMascota(prev => ({
+                                      ...prev,
+                                      sexo: "M",
+                                    }))
+                                  }
                                 />
                                 <label htmlFor="male">Macho</label>
                               </div>
@@ -410,15 +432,19 @@ function Regis_mascotas() {
                                   id="female"
                                   name="sex"
                                   value="H"
-                                  checked={sexo === "H"}
-                                  onChange={() => setSexo("H")}
+                                  checked={formMascota.sexo === "H"}
+                                  onChange={() =>
+                                    setFormMascota(prev => ({
+                                      ...prev,
+                                      sexo: "H",
+                                    }))
+                                  }
                                 />
                                 <label htmlFor="female">Hembra</label>
                               </div>
                             </div>
                           </div>
                         </div>
-
                         <div className="photo-section-form">
                           <h4
                             style={{
@@ -482,9 +508,10 @@ function Regis_mascotas() {
                               type="radio"
                               id="neutered-yes"
                               name="neutered"
-                              value="true"
-                              checked={esterilizado === true}
-                              onChange={() => setEsterilizado(true)}
+                              checked={formMascota.esterilizado === true}
+                              onChange={() =>
+                                setFormMascota(prev => ({ ...prev, esterilizado: true }))
+                              }
                             />
                             <label htmlFor="neutered-yes">Sí</label>
                           </div>
@@ -493,25 +520,30 @@ function Regis_mascotas() {
                               type="radio"
                               id="neutered-no"
                               name="neutered"
-                              value="false"
-                              checked={esterilizado === false}
-                              onChange={() => setEsterilizado(false)}
+                              checked={formMascota.esterilizado === false}
+                              onChange={() =>
+                                setFormMascota(prev => ({ ...prev, esterilizado: false }))
+                              }
                             />
                             <label htmlFor="neutered-no">No</label>
                           </div>
                         </div>
-                      </div>
+                      </div>  
 
                       <div className="form-group">
                         <label htmlFor="estado">Estado *</label>
                         <select
                           id="estado"
-                          name="estado"
-                          value={idEstado}
-                          onChange={(e) => setIdEstado(Number(e.target.value))}
+                          value={formMascota.idEstado}
+                          onChange={(e) =>
+                            setFormMascota(prev => ({
+                              ...prev,
+                              idEstado: Number(e.target.value)
+                            }))
+                          }
                           required
                         >
-                          <option selected>-- Seleccione estado --</option>
+                          <option value="">-- Seleccione estado --</option>
                           {estadoMascota.map((estad) => (
                             <option key={estad.id} value={estad.id}>
                               {estad.nombre}
@@ -520,36 +552,36 @@ function Regis_mascotas() {
                         </select>
                       </div>
 
-                      {/*<div className="form-group">
-                                                    <label htmlFor="veterinario">Veterinario a cargo *</label>
-                                                    <select id="veterinario" name="veterinario" required>
-                                                        <option selected>-- FALTA DESARROLLAR --</option>
-                                                    </select>
-                                                </div> */}
-
                       <div className="form-group">
                         <label htmlFor="pelaje">Pelaje *</label>
                         <input
                           type="text"
                           id="pelaje"
-                          name="pelaje"
-                          value={pelaje}
-                          onChange={(e) => setPelaje(e.target.value)}
+                          value={formMascota.pelaje}
+                          onChange={(e) =>
+                            setFormMascota(prev => ({
+                              ...prev,
+                              pelaje: e.target.value
+                            }))
+                          }
                           placeholder="Ej: Corto, largo"
                           required
                         />
                       </div>
-
                       <div className="form-group">
                         <label htmlFor="tamano">Tamaño *</label>
                         <select
                           id="tamano"
-                          name="tamano"
-                          value={idTamano}
-                          onChange={(e) => setIdTamaño(Number(e.target.value))}
+                          value={formMascota.idTamano}
+                          onChange={(e) =>
+                            setFormMascota(prev => ({
+                              ...prev,
+                              idTamano: Number(e.target.value)
+                            }))
+                          }
                           required
                         >
-                          <option selected>-- Seleccione tamaño --</option>
+                          <option value="">-- Seleccione tamaño --</option>
                           {tamañosMascota.map((tam) => (
                             <option key={tam.id} value={tam.id}>
                               {tam.descripcion}
@@ -562,12 +594,16 @@ function Regis_mascotas() {
                         <label htmlFor="etapa-de-vida">Etapa de vida *</label>
                         <select
                           id="etapa-de-vida"
-                          name="etapa-de-vida"
-                          value={idEtapa}
-                          onChange={(e) => setIdEtapa(Number(e.target.value))}
+                          value={formMascota.idEtapa}
+                          onChange={(e) =>
+                            setFormMascota(prev => ({
+                              ...prev,
+                              idEtapa: Number(e.target.value)
+                            }))
+                          }
                           required
                         >
-                          <option selected>-- Seleccione etapa --</option>
+                          <option value="">-- Seleccione etapa --</option>
                           {etapaMascota.map((etm) => (
                             <option key={etm.id} value={etm.id}>
                               {etm.descripcion}
@@ -577,34 +613,45 @@ function Regis_mascotas() {
                       </div>
 
                       <div className="form-group">
-                        <label htmlFor="alergias">Alergias </label>
+                        <label htmlFor="alergias">Alergias</label>
                         <input
                           type="text"
                           id="alergias"
-                          name="alergias"
-                          value={alergias}
-                          onChange={(e) => setAlergias(e.target.value)}
+                          value={formMascota.alergias}
+                          onChange={(e) =>
+                            setFormMascota(prev => ({
+                              ...prev,
+                              alergias: e.target.value
+                            }))
+                          }
                           placeholder="Ej: Alimentarias o ambientales"
                         />
                       </div>
-
                       <div className="form-group">
                         <label htmlFor="chip">Chip</label>
                         <input
                           type="checkbox"
                           id="chip"
-                          checked={chip}
-                          onChange={(e) => setChip(e.target.checked)}
-                          name="chip"
+                          checked={formMascota.chip}
+                          onChange={(e) =>
+                            setFormMascota(prev => ({
+                              ...prev,
+                              chip: e.target.checked
+                            }))
+                          }
                         />
 
                         <label htmlFor="pedigree">Pedigree</label>
                         <input
                           type="checkbox"
                           id="pedigree"
-                          name="pedigree"
-                          checked={pedigree}
-                          onChange={(e) => setPedigree(e.target.checked)}
+                          checked={formMascota.pedigree}
+                          onChange={(e) =>
+                            setFormMascota(prev => ({
+                              ...prev,
+                              pedigree: e.target.checked
+                            }))
+                          }
                         />
                       </div>
 
@@ -613,18 +660,25 @@ function Regis_mascotas() {
                         <input
                           type="checkbox"
                           id="factor-dea"
-                          name="factor-dea"
-                          checked={factorDea}
-                          onChange={(e) => setFactorDea(e.target.checked)}
+                          checked={formMascota.factorDea}
+                          onChange={(e) =>
+                            setFormMascota(prev => ({
+                              ...prev,
+                              factorDea: e.target.checked
+                            }))
+                          }
                         />
-
                         <label htmlFor="agresividad">Agresivo</label>
                         <input
                           type="checkbox"
                           id="agresividad"
-                          name="agresividad"
-                          checked={agresividad}
-                          onChange={(e) => setAgresividad(e.target.checked)}
+                          checked={formMascota.agresividad}
+                          onChange={(e) =>
+                            setFormMascota(prev => ({
+                              ...prev,
+                              agresividad: e.target.checked
+                            }))
+                          }
                         />
                       </div>
                     </div>
@@ -633,22 +687,13 @@ function Regis_mascotas() {
                       <div className="owner-search">
                         <input
                           type="text"
-                          placeholder={
-                            mascotaSelecc
-                              ? mascotaSelecc.nombre_dueño
-                              : "Buscar cliente por nombre"
-                          }
+                          placeholder="Buscar cliente por nombre"
                           value={busqueda}
                           onChange={(e) => handleBusqueda(e.target.value)}
                         />
-                        <input
-                          type="hidden"
-                          name="idCliente"
-                          value={idCliente}
-                        />
+                        <input type="hidden" value={formMascota.idCliente} />
                       </div>
 
-                      {/* Lista de coincidencias */}
                       {resultados.length > 0 && (
                         <ul className="suggestions-list">
                           {resultados.map((cliente) => (
@@ -656,7 +701,12 @@ function Regis_mascotas() {
                               key={cliente.id}
                               onClick={() => {
                                 setBusqueda(cliente.nombre);
-                                setIdCliente(cliente.id);
+
+                                setFormMascota(prev => ({
+                                  ...prev,
+                                  idCliente: cliente.id
+                                }));
+
                                 setResultados([]);
                               }}
                             >

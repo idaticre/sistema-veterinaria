@@ -394,3 +394,103 @@ export interface MascotaPorEspecie{
     nombre: string;
     cantidad: number;
 }
+
+
+//Para el el Historail
+
+export type InfoGeneral = [
+  idMascota: number,        // 0
+  codigo_Masc: string,      // 1
+  nombre: string,           // 2
+  sexo: "M" | "H",          // 3
+  f_nacimiento: string,     // 4
+  pelaje: string,           // 5
+  peso: number,             // 6
+  castrado: number,         // 7 (0/1)
+  alergias: string,         // 8
+  chip: number,             // 9 (0/1)
+  pedigree: number,         // 10 (0/1)
+  dea: number,              // 11 (0/1)
+  agresivo: number,         // 12 (0/1)
+  foto: string,             // 13
+  especie: string,          // 14
+  raza: string,             // 15
+  tamaño: string,           // 16
+  etapa_vida: string,       // 17
+  estado: string,           // 18
+  idCliente: number,        // 19
+  codigo_cliente: string,   // 20
+  nombre_cliente: string,   // 21
+  telefono: string,         // 22
+  correo: string,           // 23
+  id_historial: number,     // 24
+  codigo_histo: string,     // 25
+  fecha_historial: string,  // 26
+  extra: string | null,     // 27 (desconocido)
+  activo: number,           // 28 (0/1)
+  fecha_modificacion: string // 29
+];
+
+export interface historialCPorMascota {
+  id: number;
+  codigo: string;
+  nombre: string;
+  sexo: "M" | "H";
+  fechaNacimiento: string;
+  pelaje: string;
+  peso: number;
+  castrado: boolean;
+  alergias: string;
+  chip: boolean;
+  pedigree: boolean;
+  dea: boolean;
+  agresivo: boolean;
+  foto: string;
+  especie: string;
+  raza: string;
+  tamaño: string;
+  etapaVida: string;
+  estado: string;
+  idCliente: number;
+  codigoCliente: string;
+  nombreCliente: string;
+  telefono: string;
+  correo: string;
+  idHistorial: number;
+  codigoHistorial: string;
+  fechaHistorial: string;
+  activo: boolean;
+  fechaModificacion: string;
+}
+
+export const mapInfoGeneral = (info: InfoGeneral): historialCPorMascota => ({
+  id: info[0],
+  codigo: info[1],
+  nombre: info[2],
+  sexo: info[3],
+  fechaNacimiento: info[4],
+  pelaje: info[5],
+  peso: info[6],
+  castrado: Boolean(info[7]),
+  alergias: info[8],
+  chip: Boolean(info[9]),
+  pedigree: Boolean(info[10]),
+  dea: Boolean(info[11]),
+  agresivo: Boolean(info[12]),
+  foto: info[13],
+  especie: info[14],
+  raza: info[15],
+  tamaño: info[16],
+  etapaVida: info[17],
+  estado: info[18],
+  idCliente: info[19],
+  codigoCliente: info[20],
+  nombreCliente: info[21],
+  telefono: info[22],
+  correo: info[23],
+  idHistorial: info[24],
+  codigoHistorial: info[25],
+  fechaHistorial: info[26],
+  activo: Boolean(info[28]),
+  fechaModificacion: info[29],
+});

@@ -14,7 +14,7 @@ import Admin_index from './pages/administrativas/home/Admin_index';
 import Lst_clientes from './pages/administrativas/clientes/Clientes';
 import Regis_dueños from './pages/administrativas/clientes/Regis_dueños';
 
-import Mascotas from './pages/administrativas/mascotas/Regis_mascotas';
+import Regis_mascotas from './pages/administrativas/mascotas/Regis_mascotas';
 import Especies_razas from './pages/administrativas/mascotas/Especies_razas';
 import Lst_mascotas from './pages/administrativas/mascotas/Lst_mascotas';
 import Vacunas from './pages/administrativas/mascotas/Vacunas';
@@ -66,7 +66,8 @@ function App() {
 
         {/* Mascotas */}
         <Route element={<IPRR roles={['ADMINISTRADOR GENERAL', 'AUXILIAR CAJA']} />} >
-          <Route path='/administracion/mascotas/registro' element={<Mascotas/>}/>
+          <Route path='/administracion/mascotas/registro' element={<Regis_mascotas/>}/>
+          <Route path='/administracion/mascotas/registro/:id' element={<Regis_mascotas/>}/>
           <Route path='/administracion/mascotas/especies_razas' element={<Especies_razas/>}/>
           <Route path='/administracion/mascotas/vacunas' element={<Vacunas/>}/>
         </Route>
@@ -76,7 +77,7 @@ function App() {
 
         {/* Historial médico */}
         <Route element={<IPRR roles={['ADMINISTRADOR GENERAL']}/>}>
-          <Route path='/administracion/historia-clinica' element={<HistorialM/>}/>
+          <Route path="/administracion/historia-clinica/:id" element={<HistorialM/>}/>
         </Route>
         
         {/* Servicios*/}

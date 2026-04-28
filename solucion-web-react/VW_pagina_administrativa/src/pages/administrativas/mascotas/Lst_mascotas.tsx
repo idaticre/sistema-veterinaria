@@ -148,8 +148,12 @@ function Lst_mascotas() {
             </div>
             <section className="tabla_registosM">
               <div id="lista_mascotas">
-                {filtrados.length > 0 ? (
-                  filtrados.map((mascota) => (
+                {filtrados
+                .filter((mascota) => mascota.idEstado !== 9)
+                .length > 0 ? (
+                  filtrados
+                  .filter((mascota) => mascota.idEstado !== 9)
+                  .map((mascota) => (
                     <div
                       className={`registro_mascota ${mascotaSeleccionado?.id === mascota.id ? "seleccionado" : ""}`}
                       onClick={() => setMascotaSeleccionado(mascota)}
@@ -290,14 +294,12 @@ function Lst_mascotas() {
                             </span>
                           </div>
                           <Link
-                            to="/administracion/mascotas/registro"
-                            state={{ mascotaSeleccionado }}
+                            to={`/administracion/mascotas/registro/${mascotaSeleccionado.id}`}
                           >
                             <button>Editar</button>
                           </Link>
                           <Link
-                            to="/administracion/historia-clinica"
-                            state={{ mascotaSeleccionado }}
+                            to= {`/administracion/historia-clinica/${mascotaSeleccionado.id}`}
                           >
                             <button>Historia Clinica</button>
                           </Link>
