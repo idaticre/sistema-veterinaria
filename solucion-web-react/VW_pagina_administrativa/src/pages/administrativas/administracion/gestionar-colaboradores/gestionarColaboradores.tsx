@@ -17,17 +17,14 @@ const GestionarColaboradores: React.FC = () => {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [edicion, setEdicion] = useState<ColaboradorRequest | null>(null);
   const [tiposDocumento, setTiposDocumento] = useState<tipo_doc[]>([]);
-  const [tiposPersonasJuridicas, setTiposPersonasJuridicas] = useState<
-    TipoPersonaJuridica[]
-  >([]);
+  const [tiposPersonasJuridicas, setTiposPersonasJuridicas] = useState<TipoPersonaJuridica[]>([]);
   const [menuActivoId, setMenuActivoId] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   /* 
         De forma similar a mostrarModal && edicion, usaremos consts para mostrar de forma extensiva la información de un colaborador mediante un
         tercer botón "Más..." uwu
     */
-  const [masInformacion, setMasInformacion] =
-    useState<ColaboradorResponse | null>(null);
+  const [masInformacion, setMasInformacion] =useState<ColaboradorResponse | null>(null);
   const [mostrarModalInformativo, setMostrarModalInformativo] = useState(false);
 
   // Obtener tipos de documentos
