@@ -457,6 +457,10 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
   }; // --- FUNCIÓN PRINCIPAL DE GUARDADO (ACTUALIZADA con S/ y Recordatorios) ---
 
   const guardarEvento = async () => {
+    // 🔒 BLOQUEO TOTAL SI NO HAY SESIÓN
+  if (!isSignedIn) {
+    return alert("🔐 Debes iniciar sesión con Google antes de registrar una cita.");
+  }
     // 🚫 BLOQUEO DE FERIADOS
 if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
   return alert("🚫 No se puede agendar en feriados.");
