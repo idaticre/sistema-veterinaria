@@ -1205,4 +1205,4 @@ if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
   );
 }
 
-export default Agenda_general;
+ export default Agenda_general;
