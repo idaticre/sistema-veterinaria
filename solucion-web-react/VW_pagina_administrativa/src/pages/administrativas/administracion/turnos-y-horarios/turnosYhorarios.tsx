@@ -22,8 +22,6 @@
     POST: /asignar-horario permite añadir los registros en la tabla HORARIOS
     PUT: /asignar-horario permite editar los registros
     DELETE: /eliminar-horario elimina todos los registros de HORARIOS que contengan el ID de un colaborador, si se quiere indicar que un colaborador no trabaja un día específico, cambia el boolean del campo trabaja
-
-
 */
 
 import { useEffect, useRef, useState } from 'react'

@@ -1518,3 +1518,346 @@ ALTER TABLE historia_clinica_archivos
 CREATE INDEX idx_archivo_registro ON historia_clinica_archivos(id_registro_atencion);
 CREATE INDEX idx_archivo_tipo ON historia_clinica_archivos(id_tipo_archivo);
 
+USE vet_manada_woof;
+
+-- Usado para facturas, boletas y demás en vez de tener 2 tablas
+-- Hace uso de diferentes tablas, incluidas clientes, tipos_comprobantes, entidades, agenda_pagos, etc
+-- Los SP deben ser solo GET y POST
+CREATE TABLE comprobantes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY, -- orden_compra_servicio
+    agenda_id BIGINT NOT NULL,
+    tipo_comprobante_id INT NOT NULL,
+    serie VARCHAR(4) NOT NULL,
+    numero INT(8) NOT NULL,
+    fecha_emision DATE NOT NULL,
+    fecha_vencimiento DATE NOT NULL,
+    tipo_moneda_id INT NOT NULL,
+    total_gravada DECIMAL(14,2) NOT NULL DEFAULT 0,
+    total_inafecta DECIMAL(14,2) NOT NULL DEFAULT 0,
+    total_exonerada DECIMAL(14,2) NOT NULL DEFAULT 0,
+    total_igv DECIMAL(14,2) NOT NULL DEFAULT 0,
+    total_gratuita DECIMAL(14,2) NOT NULL DEFAULT 0,
+    total_otros_cargos DECIMAL(14,2) NOT NULL DEFAULT 0,
+    total DECIMAL(14,2) NOT NULL,
+    tipo_percepcion_id INT NULL DEFAULT NULL,
+    percepcion_base_imponible DECIMAL(14,2) NOT NULL DEFAULT 0,
+    total_percepcion DECIMAL(14,2) NOT NULL DEFAULT 0,
+    total_incluido_percepcion DECIMAL(14,2) NOT NULL DEFAULT 0,
+    observaciones VARCHAR(1000) NULL DEFAULT NULL,
+    codigo_unico VARCHAR(20) NULL DEFAULT NULL,
+    condiciones_pago VARCHAR(250) NULL DEFAULT NULL,
+    nubecont_tipo_venta_codigo VARCHAR(5) NULL DEFAULT NULL,
+    cliente_id BIGINT NOT NULL,
+    total_anticipio DECIMAL(14,2) NOT NULL DEFAULT 0,
+    medio_pago_id INT NULL DEFAULT NULL,
+
+    CONSTRAINT fk_comprobantes_agenda FOREIGN KEY (agenda_id) REFERENCES agenda(id),
+    CONSTRAINT fk_comprobantes_tipo FOREIGN KEY (tipo_comprobante_id) REFERENCES tipos_comprobantes(id),
+    CONSTRAINT fk_comprobantes_moneda FOREIGN KEY (tipo_moneda_id) REFERENCES tipo_monedas(id),
+    CONSTRAINT fk_comprobantes_percepcion FOREIGN KEY (tipo_percepcion_id) REFERENCES tipos_percepciones(id),
+    CONSTRAINT fk_comprobantes_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    CONSTRAINT fk_comprobantes_medio_pago FOREIGN KEY (medio_pago_id) REFERENCES medios_pago(id),
+	CONSTRAINT uq_tipo_serie_numero UNIQUE (tipo_comprobante_id, serie, numero),
+
+    INDEX idx_tipo_comprobante (tipo_comprobante_id),
+    INDEX idx_cliente (cliente_id),
+    INDEX idx_fecha_emision (fecha_emision),
+    INDEX idx_serie_numero (serie, numero)
+);
+
+CREATE TABLE correlativos(
+    tipo_comprobante_id INT,
+    serie VARCHAR(4),
+    ultimo_numero INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (tipo_comprobante_id, serie)
+);
+
+DELIMITER //
+CREATE PROCEDURE sp_get_comprobantes_por_tipo(IN p_tipo INT)
+BEGIN
+    SELECT *
+    FROM comprobantes
+    WHERE tipo_comprobante_id = p_tipo;
+END //
+DELIMITER;
+
+CREATE TABLE monedas(
+	id int primary key not null auto_increment,
+    moneda varchar(15)
+);
+
+DELIMITER $$
+CREATE PROCEDURE sp_listar_monedas()
+BEGIN
+    SELECT *
+    FROM monedas;
+END $$
+DELIMITER ;
+
+INSERT INTO monedas(moneda) VALUES ('SOLES');
+INSERT INTO monedas(moneda) VALUES ('DÓLARES');
+INSERT INTO monedas(moneda) VALUES ('EUROS');
+
+-- Por si en un futuro trabajamos con más tipos_comprobantes (por ahora solo boleta y factura)
+CREATE TABLE tipos_comprobantes(
+	id int primary key not null auto_increment,
+    comprobante varchar(16) not null
+);
+
+DELIMITER $$
+CREATE PROCEDURE sp_listar_tipos_comprobantes()
+BEGIN
+    SELECT *
+    FROM tipos_comprobantes;
+END $$
+DELIMITER ;
+
+INSERT INTO tipos_comprobantes(comprobante) VALUES ('factura');
+INSERT INTO tipos_comprobantes(comprobante) VALUES ('boleta');
+
+CREATE TABLE tipos_percepciones(
+	id int primary key not null auto_increment,
+    percepcion varchar(128),
+    tasa_porcentaje decimal(2, 1)
+);
+
+DELIMITER $$
+CREATE PROCEDURE sp_listar_tipos_percepciones()
+BEGIN
+    SELECT *
+    FROM tipos_percepciones;
+END $$
+DELIMITER ;
+
+INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN VENTA INTERNA', 2);
+INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN ADQUISICIÓN DE COMBUSTIBLE', 1);
+INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN REALIZADA AL AGENTE DE PERCEPCIÓN CON TASA ESPECIAL', 0.5);
+
+CREATE TABLE tipos_unidad_medida(
+	id int primary key not null auto_increment,
+    unidad_medida varchar(5)
+);
+
+INSERT INTO tipos_unidad_medida(unidad_medida) VALUES ('NIU'); 
+INSERT INTO tipos_unidad_medida(unidad_medida) VALUES ('ZZ');
+
+CREATE TABLE tipos_igv(
+	id int primary key not null,
+    descripcion varchar(128)
+);
+
+INSERT INTO tipos_igv (id, descripcion) VALUES
+(1, 'Gravado - Operación Onerosa'),
+(2, 'Gravado – Retiro por premio'),
+(3, 'Gravado – Retiro por donación'),
+(4, 'Gravado – Retiro'),
+(5, 'Gravado – Retiro por publicidad'),
+(6, 'Gravado – Bonificaciones'),
+(7, 'Gravado – Retiro por entrega a trabajadores'),
+(8, 'Exonerado - Operación Onerosa'),
+(9, 'Inafecto - Operación Onerosa'),
+(10, 'Inafecto – Retiro por Bonificación'),
+(11, 'Inafecto – Retiro'),
+(12, 'Inafecto – Retiro por Muestras Médicas'),
+(13, 'Inafecto - Retiro por Convenio Colectivo'),
+(14, 'Inafecto – Retiro por premio'),
+(15, 'Inafecto - Retiro por publicidad'),
+(16, 'Exportación'),
+(17, 'Exonerado - Transferencia Gratuita'),
+(20, 'Inafecto - Transferencia Gratuita');
+
+DELIMITER $$
+CREATE PROCEDURE sp_listar_tipos_igv()
+BEGIN
+    SELECT *
+    FROM tipos_igv;
+END $$
+DELIMITER ;
+
+CREATE TABLE comprobante_detalles(
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    comprobante_id bigint not null,
+    foreign key (comprobante_id) references comprobantes(id),
+	tipo_unidad_medida_id int not null,
+    foreign key (tipo_unidad_medida_id) references tipos_unidad_medida(id),
+    item_id int not null, -- en el json se conoce como "codigo", pero los servicios y los inexistentes productos no tienen esta columna en sus respectivas tablas
+    descripcion varchar(250),
+    cantidad decimal(22, 10) not null,
+    valor_unitario decimal(22, 10) not null,
+	precio_unitario decimal(22, 10) not null,
+    descuento decimal(14, 2) default 0,
+    subtotal decimal(14, 2) not null,
+    tipo_igv_id int not null,
+    foreign key (tipo_igv_id) references tipos_igv(id),
+    igv decimal(14, 2) not null,
+    impuestos_bolsas decimal(14, 2) default 0,
+    total decimal(14, 2) not null,
+    anticipio_regularizacion bool,
+    anticipio_documento_serie varchar(4),
+    anticipio_documento_numero int(8),
+    codigo_producto_sunat varchar(8)
+);
+
+CREATE INDEX idx_comprobante_detalle_comprobante ON comprobante_detalles(comprobante_id)
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_insertar_comprobante_full(
+    IN p_agenda_id BIGINT,
+    IN p_tipo_comprobante_id INT,
+    IN p_serie VARCHAR(4),
+    IN p_fecha_emision DATE,
+    IN p_fecha_vencimiento DATE,
+    IN p_tipo_moneda_id INT,
+
+    IN p_total_gravada DECIMAL(14,2),
+    IN p_total_inafecta DECIMAL(14,2),
+    IN p_total_exonerada DECIMAL(14,2),
+    IN p_total_igv DECIMAL(14,2),
+    IN p_total DECIMAL(14,2),
+
+    IN p_cliente_id BIGINT,
+
+    IN p_detalles JSON
+)
+BEGIN
+    DECLARE v_numero INT DEFAULT 0;
+    DECLARE v_id_comprobante BIGINT;
+
+    DECLARE i INT DEFAULT 0;
+    DECLARE v_items INT;
+
+    -- handlers
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'ERROR: fallo en transacción' AS mensaje;
+    END;
+
+    START TRANSACTION;
+
+
+    IF (p_tipo_comprobante_id = 1 AND p_serie NOT LIKE 'F%') THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Serie inválida para FACTURA';
+    END IF;
+
+    IF (p_tipo_comprobante_id = 2 AND p_serie NOT LIKE 'B%') THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Serie inválida para BOLETA';
+    END IF;
+
+
+    SELECT ultimo_numero
+    INTO v_numero
+    FROM correlativos
+    WHERE tipo_comprobante_id = p_tipo_comprobante_id
+      AND serie = p_serie
+    FOR UPDATE;
+
+    IF v_numero IS NULL THEN
+        SET v_numero = 1;
+
+        INSERT INTO correlativos(tipo_comprobante_id, serie, ultimo_numero)
+        VALUES (p_tipo_comprobante_id, p_serie, v_numero);
+    ELSE
+        SET v_numero = v_numero + 1;
+
+        UPDATE correlativos
+        SET ultimo_numero = v_numero
+        WHERE tipo_comprobante_id = p_tipo_comprobante_id
+          AND serie = p_serie;
+    END IF;
+
+
+    INSERT INTO comprobantes (
+        agenda_id,
+        tipo_comprobante_id,
+        serie,
+        numero,
+        fecha_emision,
+        fecha_vencimiento,
+        tipo_moneda_id,
+        total_gravada,
+        total_inafecta,
+        total_exonerada,
+        total_igv,
+        total,
+        cliente_id
+    )
+    VALUES (
+        p_agenda_id,
+        p_tipo_comprobante_id,
+        p_serie,
+        v_numero,
+        p_fecha_emision,
+        p_fecha_vencimiento,
+        p_tipo_moneda_id,
+        IFNULL(p_total_gravada,0),
+        IFNULL(p_total_inafecta,0),
+        IFNULL(p_total_exonerada,0),
+        IFNULL(p_total_igv,0),
+        p_total,
+        p_cliente_id
+    );
+
+    SET v_id_comprobante = LAST_INSERT_ID();
+
+
+    SET v_items = JSON_LENGTH(p_detalles);
+
+    WHILE i < v_items DO
+
+        INSERT INTO comprobante_detalles (
+            comprobante_id,
+            tipo_unidad_medida_id,
+            item_id,
+            descripcion,
+            cantidad,
+            valor_unitario,
+            precio_unitario,
+            descuento,
+            subtotal,
+            tipo_igv_id,
+            igv,
+            impuestos_bolsas,
+            total
+        )
+        VALUES (
+            v_id_comprobante,
+
+            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].tipo_unidad_medida_id')),
+            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].item_id')),
+            JSON_UNQUOTE(JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].descripcion'))),
+
+            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].cantidad')),
+            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].valor_unitario')),
+            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].precio_unitario')),
+
+            IFNULL(JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].descuento')), 0),
+
+            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].subtotal')),
+
+            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].tipo_igv_id')),
+
+            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].igv')),
+
+            IFNULL(JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].impuestos_bolsas')), 0),
+
+            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].total'))
+        );
+
+        SET i = i + 1;
+
+    END WHILE;
+
+    COMMIT;
+
+    SELECT 
+        v_id_comprobante AS id,
+        v_numero AS numero,
+        p_serie AS serie;
+
+END $$
+
+DELIMITER ;
