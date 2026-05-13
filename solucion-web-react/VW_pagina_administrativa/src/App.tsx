@@ -41,93 +41,140 @@ import RutaProtegidaPorRol from './components/proteccion/IPRR';
 import IPRR from './components/proteccion/IPRR';
 import Inventario from './pages/distribucion/Inventario';
 import HistorialM from './pages/administrativas/mascotas/historial clinico/HistorialM';
+import { useEffect, useState } from 'react';
+import "./App.css";
 
 function App() {
 
+  const [errorGlobal, setErrorGlobal] = useState("");
+
+  useEffect(() => {
+    let timeout: any;
+
+    const handler = (e: any) => {
+      setErrorGlobal(e.detail);
+
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setErrorGlobal("");
+      }, 40000);
+    };
+
+    window.addEventListener("error-global", handler);
+
+    return () => {
+      window.removeEventListener("error-global", handler);
+      clearTimeout(timeout);
+    };
+  }, []);
+
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/administracion/login" replace />} />
-      
-      {/* Login */}
-      <Route path='/administracion/login' element={<Login/>} />
-      
-      <Route element={<RutaProtegida />}>
-      
-        {/* Inicio de administración */}
-        <Route path='/administracion/home'  element={<Admin_index/>}/>
+    <>
+      {errorGlobal && (
+      <div className="error-global-overlay">
+        <div className="error-global-modal">
+          <div className="error-global-header">
+            <h3>⚠️ Ocurrió un problema</h3>
+          </div>
 
-        {/* Clientes */}
-        <Route element={<IPRR roles={['ADMINISTRADOR GENERAL','AUXILIAR CAJA']} />} >
-          <Route path='/administracion/cliente/registro' element ={<Regis_dueños/>} />
-        </Route>
-        <Route element={<IPRR roles={['ADMINISTRADOR GENERAL','AUXILIAR CAJA', 'AUXILIAR GROMERS']} />} >
-          <Route path='/administracion/cliente/lista' element={<Lst_clientes/>}/>
-        </Route>
+          <div className="error-global-body">
+            <p>{errorGlobal}</p>
+          </div>
 
-        {/* Mascotas */}
-        <Route element={<IPRR roles={['ADMINISTRADOR GENERAL', 'AUXILIAR CAJA']} />} >
-          <Route path='/administracion/mascotas/registro' element={<Regis_mascotas/>}/>
-          <Route path='/administracion/mascotas/registro/:id' element={<Regis_mascotas/>}/>
-          <Route path='/administracion/mascotas/especies_razas' element={<Especies_razas/>}/>
-          <Route path='/administracion/mascotas/vacunas' element={<Vacunas/>}/>
-        </Route>
-        <Route element={<IPRR roles={['ADMINISTRADOR GENERAL','AUXILIAR CAJA', 'AUXILIAR GROMERS']} />} >
-          <Route path='/administracion/mascotas/lista' element={<Lst_mascotas/>}/>
-        </Route>
+          <div className="error-global-footer">
+            <button onClick={() => setErrorGlobal("")}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
 
-        {/* Historial médico */}
-        <Route element={<IPRR roles={['ADMINISTRADOR GENERAL']}/>}>
-          <Route path="/administracion/historia-clinica/:id" element={<HistorialM/>}/>
-        </Route>
+      {/*Rutas*/}
+      <Routes>
+        <Route path="/" element={<Navigate to="/administracion/login" replace />} />
         
-        {/* Servicios*/}
-        <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA"]} />}>
-          <Route path='/administracion/servicios' element={<Servicios/>}/>      
-        </Route>
-
+        {/* Login */}
+        <Route path='/administracion/login' element={<Login/>} />
         
-        {/* Agenda */}
-        <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA"]} />}>
-          <Route path='/administracion/agenda/EditarCita' element={<EditarCita />} />
+        <Route element={<RutaProtegida />}>
+        
+          {/* Inicio de administración */}
+          <Route path='/administracion/home'  element={<Admin_index/>}/>
+
+          {/* Clientes */}
+          <Route element={<IPRR roles={['ADMINISTRADOR GENERAL','AUXILIAR CAJA']} />} >
+            <Route path='/administracion/cliente/registro' element ={<Regis_dueños/>} />
+          </Route>
+          <Route element={<IPRR roles={['ADMINISTRADOR GENERAL','AUXILIAR CAJA', 'AUXILIAR GROMERS']} />} >
+            <Route path='/administracion/cliente/lista' element={<Lst_clientes/>}/>
+          </Route>
+
+          {/* Mascotas */}
+          <Route element={<IPRR roles={['ADMINISTRADOR GENERAL', 'AUXILIAR CAJA']} />} >
+            <Route path='/administracion/mascotas/registro' element={<Regis_mascotas/>}/>
+            <Route path='/administracion/mascotas/registro/:id' element={<Regis_mascotas/>}/>
+            <Route path='/administracion/mascotas/especies_razas' element={<Especies_razas/>}/>
+            <Route path='/administracion/mascotas/vacunas' element={<Vacunas/>}/>
+          </Route>
+          <Route element={<IPRR roles={['ADMINISTRADOR GENERAL','AUXILIAR CAJA', 'AUXILIAR GROMERS']} />} >
+            <Route path='/administracion/mascotas/lista' element={<Lst_mascotas/>}/>
+          </Route>
+
+          {/* Historial médico */}
+          <Route element={<IPRR roles={['ADMINISTRADOR GENERAL']}/>}>
+            <Route path="/administracion/historia-clinica/:id" element={<HistorialM/>}/>
+          </Route>
+          
+          {/* Servicios*/}
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA"]} />}>
+            <Route path='/administracion/servicios' element={<Servicios/>}/>      
+          </Route>
+
+          
+          {/* Agenda */}
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA"]} />}>
+            <Route path='/administracion/agenda/EditarCita' element={<EditarCita />} />
+          </Route>
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS"]} />}>
+            <Route path='/administracion/agenda/Agenda_general' element={<Agenda_general />} />
+          </Route>
+
+          {/* Distribución */}
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
+            <Route path='/administracion/distribucion/inventario' element={<Inventario/>}/>
+          </Route>
+
+          {/* Ventas */}
+
+          {/* Reportes e informes */}
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]}/>}>
+            <Route path='/administracion/reportes_e_informes/clientes' element={<Reportes_e_informes/>}/>
+          </Route>
+
+          {/* Administración */}
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
+            <Route path='/administracion/administracion/gestionar_colaboradores' element={<Gestionar_colaboradores/>}/>
+            <Route path='/administracion/administracion/gestionar_usuarios' element={<Gestionar_usuarios/>}/>
+            <Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}/>
+            <Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>
+            <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>
+            <Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>
+          </Route>
+
+          {/* Aquí van las nuevas páginas administrativas */}
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
+            <Route path='/administracion/administracion/dashboard_administrativo' element={<DashboardAdministrativo/>}/>
+          </Route>  
+
+          {/* Seguridad y mantenimiento */}
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
+            <Route path='/administracion/administracion/Asignar_roles_y_permisos' element={<AsignarRolesPermisos/>}/>
+          </Route>
+
         </Route>
-        <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS"]} />}>
-          <Route path='/administracion/agenda/Agenda_general' element={<Agenda_general />} />
-        </Route>
-
-        {/* Distribución */}
-        <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
-          <Route path='/administracion/distribucion/inventario' element={<Inventario/>}/>
-        </Route>
-
-        {/* Ventas */}
-
-        {/* Reportes e informes */}
-        <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]}/>}>
-          <Route path='/administracion/reportes_e_informes/clientes' element={<Reportes_e_informes/>}/>
-        </Route>
-
-        {/* Administración */}
-        <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
-          <Route path='/administracion/administracion/gestionar_colaboradores' element={<Gestionar_colaboradores/>}/>
-          <Route path='/administracion/administracion/gestionar_usuarios' element={<Gestionar_usuarios/>}/>
-          <Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}/>
-          <Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>
-          <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>
-          <Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>
-        </Route>
-
-        {/* Aquí van las nuevas páginas administrativas */}
-        <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
-          <Route path='/administracion/administracion/dashboard_administrativo' element={<DashboardAdministrativo/>}/>
-        </Route>  
-
-        {/* Seguridad y mantenimiento */}
-        <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
-          <Route path='/administracion/administracion/Asignar_roles_y_permisos' element={<AsignarRolesPermisos/>}/>
-        </Route>
-
-      </Route>
-    </Routes>
+      </Routes>
+    </>
   )
 }
 

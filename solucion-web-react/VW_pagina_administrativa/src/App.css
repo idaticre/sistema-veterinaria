@@ -17,3 +17,85 @@
   }
 }
 
+/* CONTENEDOR GENERAL DE ERROR */
+.error-global-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 999999 !important;
+}
+
+/* MODAL */
+.error-global-modal {
+  width: 380px;
+  background: white;
+
+  border-radius: 12px;
+  overflow: hidden;
+
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+
+  animation: modalPop 0.25s ease;
+}
+
+/* HEADER */
+.error-global-header {
+  background: #ff4d4d;
+  color: white;
+  padding: 15px;
+  text-align: center;
+}
+
+/* BODY */
+.error-global-body {
+  padding: 20px;
+  text-align: center;
+  font-size: 15px;
+  color: #333;
+}
+
+/* FOOTER */
+.error-global-footer {
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.error-global-footer button {
+  background: #ff4d4d;
+  border: none;
+  color: white;
+
+  padding: 8px 20px;
+  border-radius: 6px;
+
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.error-global-footer button:hover {
+  background: #d93636;
+}
+
+/* ANIMACIÓN */
+@keyframes modalPop {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
