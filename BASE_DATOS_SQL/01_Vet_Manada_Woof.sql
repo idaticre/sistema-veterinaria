@@ -1861,3 +1861,17 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_obtener_comprobantes_por_cliente(
+    IN p_cliente_id BIGINT
+)
+BEGIN
+    SELECT *
+    FROM comprobantes
+    WHERE cliente_id = p_cliente_id
+    ORDER BY fecha_emision DESC, id DESC;
+END $$
+
+DELIMITER ;
