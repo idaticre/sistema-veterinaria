@@ -44,7 +44,7 @@ public class ComprobanteDetalleEntity implements Serializable {
     private TipoUnidadMedidaEntity tipoUnidadMedida;
     
     @Column (name = "item_id")
-    private int idItem;
+    private Integer idItem;
     
     @Column (name = "descripcion")
     private String descripcion;
@@ -86,13 +86,13 @@ public class ComprobanteDetalleEntity implements Serializable {
     private BigDecimal total = BigDecimal.ZERO;
     
     @Column (name = "anticipio_regularizacion")
-    private boolean anticipio;
+    private Boolean anticipio;
     
     @Column (name = "anticipio_documento_serie")
     private String anticipioDocSerie;
     
     @Column (name = "anticipio_documento_numero")
-    private int anticipioDocNumero;
+    private Integer anticipioDocNumero;
     
     @Column (name = "codigo_producto_sunat")
     private String codigoProducSunat;

@@ -17,33 +17,24 @@ public class ComprobanteRequestDTO {
     
     private Long clienteId;
     
-    @JsonProperty("agenda_id")
-    private Long agendaID;
+    private Long agendaId;
     
-    @JsonProperty("tipo_comprobante_id")
-    private int tipoComprobanteID;
+    private int tipoComprobanteId;
     
-    @JsonProperty("fecha_emision")
     private LocalDate fechaEmision;
 
-    @JsonProperty("fecha_vencimiento")
     private LocalDate fechaVencimiento;
     
     //private int medioPagoID;
     
-    @JsonProperty("tipo_moneda_id")
     private Integer tipoMonedaId;
 
-    @JsonProperty("total_gravada")
     private BigDecimal totalGravada;
 
-    @JsonProperty("total_inafecta")
     private BigDecimal totalInafecta;
 
-    @JsonProperty("total_exonerada")
     private BigDecimal totalExonerada;
 
-    @JsonProperty("total_igv")
     private BigDecimal totalIGV;
 
     private BigDecimal total;
