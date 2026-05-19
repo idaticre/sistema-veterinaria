@@ -23,7 +23,7 @@ import lombok.ToString;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "monedas")
+@Table(name = "tipo_monedas")
 public class TipoMonedaEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
