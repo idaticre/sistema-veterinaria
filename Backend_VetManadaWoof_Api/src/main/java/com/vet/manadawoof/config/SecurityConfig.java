@@ -54,7 +54,7 @@ public class SecurityConfig {
                 // --- 2. AGENDA Y SERVICIOS (Acceso para Admin y Auxiliares) ---
                 .requestMatchers("/api/agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
                 .requestMatchers("/api/ingresos-servicios/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
-                .requestMatchers("/api/pagos-agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
+                .requestMatchers("/api/comprobantes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
 
                 // --- 3. PERMISOS EXCLUSIVOS DE ADMINISTRADOR GENERAL ---
                 .requestMatchers("/api/archivos/**").hasAuthority("ADMINISTRADOR GENERAL")

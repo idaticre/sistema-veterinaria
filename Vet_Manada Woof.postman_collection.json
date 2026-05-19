@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "1185d711-47b3-48bb-9a86-476860a84222",
+    "_postman_id": "e49f8a43-763d-4456-a48b-86af07a57fc6",
     "name": "Vet_Manada Woof",
     "description": "Primer bloque...",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "49378470"
+    "_exporter_id": "49416981"
   },
   "item": [
     {
@@ -19,6 +19,9 @@
                 "disableBodyPruning": true
               },
               "request": {
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -95,6 +98,9 @@
                 "disableBodyPruning": true
               },
               "request": {
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -133,6 +139,9 @@
                 "disableBodyPruning": true
               },
               "request": {
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -285,6 +294,9 @@
                 "disableBodyPruning": true
               },
               "request": {
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -442,6 +454,16 @@
                 "disableBodyPruning": true
               },
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc3NjczNTI2NSwiZXhwIjoxNzc2ODIxNjY1fQ.lQHhLveTMYBcYrDxmBW9ID4-0odjutn30ueVVBKtUjQ",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [],
                 "body": {
@@ -454,12 +476,12 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/horarios-base",
+                  "raw": "http://localhost:8080/api/horarios-base",
                   "protocol": "http",
                   "host": [
                     "localhost"
                   ],
-                  "port": "8088",
+                  "port": "8080",
                   "path": [
                     "api",
                     "horarios-base"
@@ -518,7 +540,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/asignaciones-horarios/historial/2",
+                  "raw": "http://localhost:8088/api/asignaciones-horarios/historial/1?idDiaSemana=2",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -528,13 +550,12 @@
                     "api",
                     "asignaciones-horarios",
                     "historial",
-                    "2"
+                    "1"
                   ],
                   "query": [
                     {
                       "key": "idDiaSemana",
-                      "value": "2",
-                      "disabled": true
+                      "value": "2"
                     }
                   ]
                 }
@@ -559,7 +580,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/asignaciones-horarios/vigentes",
+                  "raw": "http://localhost:8088/api/asignaciones-horarios/vigentes?idColaborador=1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -573,8 +594,7 @@
                   "query": [
                     {
                       "key": "idColaborador",
-                      "value": "1",
-                      "disabled": true
+                      "value": "1"
                     }
                   ]
                 }
@@ -587,6 +607,16 @@
                 "disableBodyPruning": true
               },
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc3NjczNTI2NSwiZXhwIjoxNzc2ODIxNjY1fQ.lQHhLveTMYBcYrDxmBW9ID4-0odjutn30ueVVBKtUjQ",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [],
                 "body": {
@@ -599,12 +629,12 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/asignaciones-horarios/vigentes",
+                  "raw": "http://localhost:8080/api/asignaciones-horarios/vigentes",
                   "protocol": "http",
                   "host": [
                     "localhost"
                   ],
-                  "port": "8088",
+                  "port": "8080",
                   "path": [
                     "api",
                     "asignaciones-horarios",
@@ -748,6 +778,16 @@
                 "disableBodyPruning": true
               },
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc3NjczNTI2NSwiZXhwIjoxNzc2ODIxNjY1fQ.lQHhLveTMYBcYrDxmBW9ID4-0odjutn30ueVVBKtUjQ",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -766,12 +806,12 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/dias",
+                  "raw": "http://localhost:8080/api/dias",
                   "protocol": "http",
                   "host": [
                     "localhost"
                   ],
-                  "port": "8088",
+                  "port": "8080",
                   "path": [
                     "api",
                     "dias"
@@ -788,6 +828,9 @@
             {
               "name": "Clientes",
               "request": {
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -797,9 +840,8 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "",
-                    "type": "text",
-                    "disabled": true
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+                    "type": "text"
                   }
                 ],
                 "body": {
@@ -812,7 +854,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/clientes",
+                  "raw": "http://localhost:8088/api/clientes/registrar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -820,7 +862,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "clientes"
+                    "clientes",
+                    "registrar"
                   ]
                 }
               },
@@ -847,7 +890,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/proveedores",
+                  "raw": "http://localhost:8088/api/proveedores/registrar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -855,7 +898,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "proveedores"
+                    "proveedores",
+                    "registrar"
                   ]
                 }
               },
@@ -870,11 +914,16 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MjYxOCwiZXhwIjoxNzY0NjQ5MDE4fQ.VBDJlKU6eCwQ9g47vDkh-Wji6UMbWIJbwVnby1-EzRk",
+                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Juan Pérez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"21121122\",\r\n  \"correo\": \"juan.perez@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 1,\r\n  \"fechaIngreso\": \"2025-10-17\",\r\n  \"foto\": \"foto_juan.png\",\r\n  \"activo\": true\r\n}",
+                  "raw": "{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Juan Pérez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"21121122\",\r\n  \"correo\": \"juan.perez@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 1,\r\n  \"fechaIngreso\": \"2025-10-17\",\r\n  \"foto\": \"foto_juan.png\",\r\n  \"activo\": true\r\n}\r\n/*\r\n{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Alberto Sanchez\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"23434354\",\r\n  \"correo\": \"alberto@vet.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Laureles 456\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"idUsuario\": 2,\r\n  \"fechaIngreso\": \"2025-11-22\",\r\n  \"foto\": \"foto_alberto.png\"\r\n}\r\n*/\r\n\r\n\r\n",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -882,7 +931,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/colaboradores",
+                  "raw": "http://localhost:8088/api/colaboradores/registrar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -890,7 +939,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "colaboradores"
+                    "colaboradores",
+                    "registrar"
                   ]
                 }
               },
@@ -917,7 +967,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/usuarios-roles",
+                  "raw": "http://localhost:8088/api/usuarios-roles/asignar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -925,7 +975,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "usuarios-roles"
+                    "usuarios-roles",
+                    "asignar"
                   ]
                 }
               },
@@ -973,7 +1024,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "// Esta asignacion es dia por dia\r\n{\r\n  \"idColaborador\": 1,\r\n  \"idHorarioBase\": 5,\r\n  \"idDiaSemana\": 1,\r\n  \"fechaInicioVigencia\": \"2026-04-14\",\r\n  \"fechaFinVigencia\": null,\r\n  \"motivoCambio\": \"Asignación inicial de horario de caja\"\r\n}",
+                  "raw": "// Esta asignacion es dia por dia\r\n{\r\n  \"idColaborador\": 1,\r\n  \"idHorarioBase\": 5,\r\n  \"idDiaSemana\": 1,\r\n  \"fechaInicioVigencia\": \"2025-11-25\",\r\n  \"fechaFinVigencia\": null,\r\n  \"motivoCambio\": \"Asignación inicial de horario de caja\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1160,7 +1211,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/asistencias",
+                  "raw": "http://localhost:8088/api/asistencias/registrar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -1168,7 +1219,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "asistencias"
+                    "asistencias",
+                    "registrar"
                   ]
                 }
               },
@@ -1308,7 +1360,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/clientes/1",
+                  "raw": "http://localhost:8088/api/clientes/actualizar/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -1317,6 +1369,7 @@
                   "path": [
                     "api",
                     "clientes",
+                    "actualizar",
                     "1"
                   ]
                 }
@@ -1344,7 +1397,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/colaboradores",
+                  "raw": "http://localhost:8088/api/colaboradores/actualizar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -1352,7 +1405,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "colaboradores"
+                    "colaboradores",
+                    "actualizar"
                   ]
                 }
               },
@@ -1379,7 +1433,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/proveedores",
+                  "raw": "http://localhost:8088/api/proveedores/actualizar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -1387,7 +1441,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "proveedores"
+                    "proveedores",
+                    "actualizar"
                   ]
                 }
               },
@@ -1455,7 +1510,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/clientes/1",
+                  "raw": "http://localhost:8088/api/clientes/eliminar/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -1464,6 +1519,7 @@
                   "path": [
                     "api",
                     "clientes",
+                    "eliminar",
                     "1"
                   ]
                 }
@@ -1528,7 +1584,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/proveedores/1",
+                  "raw": "http://localhost:8088/api/proveedores/eliminar/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -1537,6 +1593,7 @@
                   "path": [
                     "api",
                     "proveedores",
+                    "eliminar",
                     "1"
                   ]
                 }
@@ -1564,7 +1621,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/usuarios-roles",
+                  "raw": "http://localhost:8088/api/usuarios-roles/eliminar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -1572,7 +1629,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "usuarios-roles"
+                    "usuarios-roles",
+                    "eliminar"
                   ]
                 }
               },
@@ -2190,7 +2248,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/mascotas",
+                  "raw": "http://localhost:8088/api/mascotas/crear",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2198,7 +2256,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "mascotas"
+                    "mascotas",
+                    "crear"
                   ]
                 }
               },
@@ -2219,7 +2278,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/medicamentos-mascota",
+                  "raw": "http://localhost:8088/api/medicamentos-mascota/crear",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2227,7 +2286,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "medicamentos-mascota"
+                    "medicamentos-mascota",
+                    "crear"
                   ]
                 }
               },
@@ -2248,7 +2308,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/vacunas-mascota",
+                  "raw": "http://localhost:8088/api/vacunas-mascota/crear",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2256,7 +2316,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "vacunas-mascota"
+                    "vacunas-mascota",
+                    "crear"
                   ]
                 }
               },
@@ -2288,7 +2349,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/mascotas/1",
+                  "raw": "http://localhost:8088/api/mascotas/actualizar/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2297,6 +2358,7 @@
                   "path": [
                     "api",
                     "mascotas",
+                    "actualizar",
                     "1"
                   ]
                 }
@@ -2324,7 +2386,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/medicamentos-mascota",
+                  "raw": "http://localhost:8088/api/medicamentos-mascota/actualizar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2332,7 +2394,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "medicamentos-mascota"
+                    "medicamentos-mascota",
+                    "actualizar"
                   ]
                 }
               },
@@ -2359,7 +2422,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/vacunas-mascota",
+                  "raw": "http://localhost:8088/api/vacunas-mascota/actualizar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2367,7 +2430,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "vacunas-mascota"
+                    "vacunas-mascota",
+                    "actualizar"
                   ]
                 }
               },
@@ -2399,7 +2463,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/mascotas/1",
+                  "raw": "http://localhost:8088/api/mascotas/eliminar/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2408,6 +2472,7 @@
                   "path": [
                     "api",
                     "mascotas",
+                    "eliminar",
                     "1"
                   ]
                 }
@@ -2435,7 +2500,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/medicamentos-mascota/1",
+                  "raw": "http://localhost:8088/api/medicamentos-mascota/eliminar/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2444,6 +2509,7 @@
                   "path": [
                     "api",
                     "medicamentos-mascota",
+                    "eliminar",
                     "1"
                   ]
                 }
@@ -2471,7 +2537,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/vacunas-mascota/1",
+                  "raw": "http://localhost:8088/api/vacunas-mascota/eliminar/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2480,6 +2546,7 @@
                   "path": [
                     "api",
                     "vacunas-mascota",
+                    "eliminar",
                     "1"
                   ]
                 }
@@ -2622,85 +2689,6 @@
                   "path": [
                     "api",
                     "estados-agenda"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Abonos de una cita",
-              "protocolProfileBehavior": {
-                "disableBodyPruning": true
-              },
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/pagos-agenda/agenda/1",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "pagos-agenda",
-                    "agenda",
-                    "1"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Consulta abonos por ID",
-              "protocolProfileBehavior": {
-                "disableBodyPruning": true
-              },
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/pagos-agenda/1",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "pagos-agenda",
-                    "1"
                   ]
                 }
               },
@@ -2965,7 +2953,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/agenda",
+                  "raw": "http://localhost:8088/api/agenda/crear",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -2973,7 +2961,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "agenda"
+                    "agenda",
+                    "crear"
                   ]
                 }
               },
@@ -3005,7 +2994,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/ingresos-servicios",
+                  "raw": "http://localhost:8088/api/ingresos-servicios/crear",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3013,47 +3002,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "ingresos-servicios"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Abono pago de Cita",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc2NDU2MDA5OSwiZXhwIjoxNzY0NjQ2NDk5fQ.fVDvdDfxjymnXw6YMUpOgDEgvBha4WMDYuKdJ2kvx8k",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idMedioPago\": 1,\r\n  \"idUsuario\": 1,\r\n  \"monto\": 50.00,\r\n  \"observaciones\": \"Pago parcial de consulta\"\r\n}\r\n\r\n\r\n/*\r\n\r\n// pagos con tarjeta ejemplo \r\n{\r\n  \"idAgenda\": 1,\r\n  \"idMedioPago\": 2,\r\n  \"idUsuario\": 1,\r\n  \"monto\": 150.00,\r\n  \"observaciones\": \"Tarjeta Visa\"\r\n}\r\n\r\n*/",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/pagos-agenda",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "pagos-agenda"
+                    "ingresos-servicios",
+                    "crear"
                   ]
                 }
               },
@@ -3090,7 +3040,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/agenda",
+                  "raw": "http://localhost:8088/api/agenda/actualizar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3098,7 +3048,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "agenda"
+                    "agenda",
+                    "actualizar"
                   ]
                 }
               },
@@ -3125,7 +3076,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/ingresos-servicios",
+                  "raw": "http://localhost:8088/api/ingresos-servicios/actualizar",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3133,7 +3084,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "ingresos-servicios"
+                    "ingresos-servicios",
+                    "actualizar"
                   ]
                 }
               },
@@ -3165,7 +3117,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/ingresos-servicios/1/1",
+                  "raw": "http://localhost:8088/api/ingresos-servicios/eliminar/1/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3174,43 +3126,7 @@
                   "path": [
                     "api",
                     "ingresos-servicios",
-                    "1",
-                    "1"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Eliminar Abono de una Cita",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idMedioPago\": 1,\r\n  \"idUsuario\": 2,\r\n  \"monto\": 180,\r\n  \"observaciones\": \"Pago con transferencia\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/pagos-agenda/1/1",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "pagos-agenda",
+                    "eliminar",
                     "1",
                     "1"
                   ]
@@ -3384,7 +3300,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/historia-clinica/mascota/1/historial",
+                  "raw": "http://localhost:8088/api/historia-clinica/historial-mascota/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3393,9 +3309,8 @@
                   "path": [
                     "api",
                     "historia-clinica",
-                    "mascota",
-                    "1",
-                    "historial"
+                    "historial-mascota",
+                    "1"
                   ]
                 }
               },
@@ -3531,7 +3446,7 @@
               "response": []
             },
             {
-              "name": "Atencion Medica x H Clinica",
+              "name": "Atenciones Medicas x H Clinica",
               "protocolProfileBehavior": {
                 "disableBodyPruning": true
               },
@@ -3565,57 +3480,6 @@
                     "atenciones-medicas",
                     "historia",
                     "1"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Atenciones Medicas x HC Paginado",
-              "protocolProfileBehavior": {
-                "disableBodyPruning": true
-              },
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "// Aplica para vacunaciones\r\n",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/atenciones-medicas/historia/1/paginado?page=0&size=5",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "atenciones-medicas",
-                    "historia",
-                    "1",
-                    "paginado"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "0"
-                    },
-                    {
-                      "key": "size",
-                      "value": "5"
-                    }
                   ]
                 }
               },
@@ -3897,7 +3761,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/historia-clinica",
+                  "raw": "http://localhost:8088/api/historia-clinica/crear",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3905,7 +3769,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "historia-clinica"
+                    "historia-clinica",
+                    "crear"
                   ]
                 }
               },
@@ -3965,7 +3830,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n    \"idVeterinario\": 1,\r\n    \"idColaborador\": null,\r\n    \"tipoVisita\": \"MEDICA\",\r\n    \"motivoConsulta\": \"El perro no quiere comer desde hace 2 días\",\r\n    \"anamnesis\": \"Paciente con historial de alergia al polen, previamente vacunado\",\r\n    \"examenFisico\": \"Abdomen blando, mucosas rosadas, sin dolor a la palpación\",\r\n    \"signosVitales\": \"FC: 90bpm, FR: 22rpm\",\r\n    \"pesoKg\": 28.50,\r\n    \"temperaturaC\": 38.7,\r\n    \"diagnostico\": \"Gastritis leve por cambio de alimento\",\r\n    \"tratamiento\": \"Dieta blanda 3 días, omeprazol 10mg cada 12 horas\",\r\n    \"proximoControl\": \"2026-05-10\",\r\n    \"estadoPelaje\": null,\r\n    \"condicionPiel\": null,\r\n    \"observacionesGrooming\": null,\r\n    \"comportamientoHospedaje\": null,\r\n    \"alimentacionHospedaje\": null,\r\n    \"actividadHospedaje\": null,\r\n    \"observaciones\": \"Propietaria muy pendiente del paciente\"\r\n}\r\n\r\n\r\n/*\r\n{\r\n    \"idVeterinario\": null,\r\n    \"idColaborador\": 4,\r\n    \"tipoVisita\": \"ESTETICA\",\r\n    \"motivoConsulta\": null,\r\n    \"anamnesis\": null,\r\n    \"examenFisico\": null,\r\n    \"signosVitales\": null,\r\n    \"pesoKg\": null,\r\n    \"temperaturaC\": null,\r\n    \"diagnostico\": null,\r\n    \"tratamiento\": null,\r\n    \"proximoControl\": null,\r\n    \"estadoPelaje\": \"Brillante, bien hidratado\",\r\n    \"condicionPiel\": \"Normal, sin irritaciones\",\r\n    \"observacionesGrooming\": \"Corte raza labrador completado, cliente satisfecha\",\r\n    \"comportamientoHospedaje\": null,\r\n    \"alimentacionHospedaje\": null,\r\n    \"actividadHospedaje\": null,\r\n    \"observaciones\": \"Mascota tranquila durante el servicio\"\r\n}\r\n*/\r\n\r\n\r\n/*\r\n{\r\n    \"idVeterinario\": 1,\r\n    \"idColaborador\": null,\r\n    \"tipoVisita\": \"GENERAL\",\r\n    \"motivoConsulta\": \"Desparasitacion de rutina\",\r\n    \"anamnesis\": null,\r\n    \"examenFisico\": \"Felino en buen estado general\",\r\n    \"signosVitales\": null,\r\n    \"pesoKg\": 4.20,\r\n    \"temperaturaC\": 38.5,\r\n    \"diagnostico\": \"Sano, desparasitacion preventiva aplicada\",\r\n    \"tratamiento\": \"Fenbendazol oral dosis única\",\r\n    \"proximoControl\": \"2026-07-09\",\r\n    \"estadoPelaje\": null,\r\n    \"condicionPiel\": null,\r\n    \"observacionesGrooming\": null,\r\n    \"comportamientoHospedaje\": null,\r\n    \"alimentacionHospedaje\": null,\r\n    \"actividadHospedaje\": null,\r\n    \"observaciones\": null\r\n}\r\n*/",
+                  "raw": "{\r\n  \"idAgenda\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"tipoVisita\": \"MEDICA\",\r\n  \"motivoConsulta\": \"Vacunación\",\r\n  \"diagnostico\": \"Apto\",\r\n  \"tratamiento\": \"Vacuna IM\",\r\n  \"pesoKg\": 12.5,\r\n  \"temperaturaC\": 38.5,\r\n  \"proximoControl\": \"2026-02-25\"\r\n}\r\n",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3973,7 +3838,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/atenciones-medicas/cita/4",
+                  "raw": "http://localhost:8088/api/atenciones-medicas/registrar-cita-atendida",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3982,8 +3847,7 @@
                   "path": [
                     "api",
                     "atenciones-medicas",
-                    "cita",
-                    "4"
+                    "registrar-cita-atendida"
                   ]
                 }
               },
@@ -4002,7 +3866,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n    \"idHistoriaClinica\": 1,\r\n    \"idAgenda\": null,\r\n    \"idVeterinario\": 1,\r\n    \"idColaborador\": null,\r\n    \"fechaAtencion\": \"2026-04-09\",\r\n    \"horaInicio\": \"10:00:00\",\r\n    \"horaFin\": \"10:30:00\",\r\n    \"motivoConsulta\": \"Emergencia por ingestion de objeto extraño\",\r\n    \"anamnesis\": \"Propietaria reporta que el perro ingirió un trozo de juguete\",\r\n    \"examenFisico\": \"Abdomen tenso, signos de malestar\",\r\n    \"signosVitales\": \"FC: 110bpm, FR: 28rpm\",\r\n    \"pesoKg\": 28.00,\r\n    \"temperaturaC\": 39.1,\r\n    \"diagnostico\": \"Sospecha de obstrucción intestinal parcial\",\r\n    \"tratamiento\": \"Radiografía urgente, ayuno 12 horas, control en 6 horas\",\r\n    \"observaciones\": \"Caso de emergencia sin cita previa\",\r\n    \"proximoControl\": \"2026-04-10\",\r\n    \"estadoPelaje\": null,\r\n    \"condicionPiel\": null,\r\n    \"observacionesGrooming\": null,\r\n    \"comportamientoHospedaje\": null,\r\n    \"alimentacionHospedaje\": null,\r\n    \"actividadHospedaje\": null,\r\n    \"idEstado\": null\r\n}",
+                  "raw": "{\r\n  \"idHistoriaClinica\": 1,\r\n  \"idAgenda\": 1,\r\n  \"idVeterinario\": 1,\r\n  \"idColaborador\": null,\r\n  \"fechaAtencion\": \"2025-12-14\",\r\n  \"horaInicio\": \"10:00:00\",\r\n  \"horaFin\": \"10:30:00\",\r\n  \"motivoConsulta\": \"Consulta de rutina\",\r\n  \"anamnesis\": \"Mascota presenta buen apetito y energía normal\",\r\n  \"examenFisico\": \"Sin hallazgos relevantes\",\r\n  \"signosVitales\": \"FC: 80, FR: 20, PA: 120/80\",\r\n  \"pesoKg\": 25.50,\r\n  \"temperaturaC\": 38.50,\r\n  \"diagnostico\": \"Animal sano\",\r\n  \"tratamiento\": \"Vacunación anual\",\r\n  \"observaciones\": \"Continuar con plan preventivo\",\r\n  \"proximoControl\": \"2026-03-14\"\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -4010,7 +3874,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/atenciones-medicas",
+                  "raw": "http://localhost:8088/api/atenciones-medicas/crear",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -4018,7 +3882,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "atenciones-medicas"
+                    "atenciones-medicas",
+                    "crear"
                   ]
                 }
               },
@@ -4045,7 +3910,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/archivos-clinicos",
+                  "raw": "http://localhost:8088/api/archivos-clinicos/subir",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -4053,7 +3918,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "archivos-clinicos"
+                    "archivos-clinicos",
+                    "subir"
                   ]
                 }
               },
@@ -4085,7 +3951,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/historia-clinica",
+                  "raw": "http://localhost:8088/api/historia-clinica/actualizar-atencion",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -4093,43 +3959,8 @@
                   "port": "8088",
                   "path": [
                     "api",
-                    "historia-clinica"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Actualizar atención",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \"idVeterinario\": 1,\r\n    \"idColaborador\": null,\r\n    \"horaFin\": \"10:45:00\",\r\n    \"motivoConsulta\": \"El perro no quiere comer desde hace 2 días\",\r\n    \"anamnesis\": \"Paciente con historial de alergia al polen, previamente vacunado\",\r\n    \"examenFisico\": \"Abdomen blando, mucosas rosadas, sin dolor a la palpación\",\r\n    \"signosVitales\": \"FC: 90bpm, FR: 22rpm\",\r\n    \"pesoKg\": 28.50,\r\n    \"temperaturaC\": 38.7,\r\n    \"diagnostico\": \"Gastritis leve confirmada\",\r\n    \"tratamiento\": \"Dieta blanda 3 días, omeprazol 10mg cada 12 horas, probiótico\",\r\n    \"proximoControl\": \"2026-05-10\",\r\n    \"estadoPelaje\": null,\r\n    \"condicionPiel\": null,\r\n    \"observacionesGrooming\": null,\r\n    \"comportamientoHospedaje\": null,\r\n    \"alimentacionHospedaje\": null,\r\n    \"actividadHospedaje\": null,\r\n    \"observaciones\": \"Se agrega probiótico al tratamiento\",\r\n    \"idEstado\": 1\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/atenciones-medicas/1",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "atenciones-medicas",
-                    "1"
+                    "historia-clinica",
+                    "actualizar-atencion"
                   ]
                 }
               },
@@ -4198,7 +4029,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8088/api/archivos-clinicos/1",
+                  "raw": "http://localhost:8088/api/archivos-clinicos/eliminar/1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -4207,36 +4038,7 @@
                   "path": [
                     "api",
                     "archivos-clinicos",
-                    "1"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Eliminar atención",
-              "request": {
-                "method": "DELETE",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "// Solo funciona si el registro está en estado TEMPORAL o ABIERTA.",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/atenciones-medicas/1",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "atenciones-medicas",
+                    "eliminar",
                     "1"
                   ]
                 }
@@ -4249,41 +4051,6 @@
     },
     {
       "name": "LOGIN",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "// 1. Convertir la respuesta a un objeto JSON\r",
-              "const respuesta = pm.response.json();\r",
-              "// Cambia 'token' por el nombre exacto que viene en tu JSON\r",
-              "pm.environment.set(\"mi_token\", respuesta.token);\r",
-              "\r",
-              "// 2. Extraer el token (ajusta 'token' según el nombre que use tu API)\r",
-              "// const tokenGenerado = respuesta.token; \r",
-              "\r",
-              "// 3. Guardarlo en la variable de entorno\r",
-              "// pm.environment.set(\"mi_token\", tokenGenerado);\r",
-              "\r",
-              "// console.log(\"El token se ha guardado correctamente.\");"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
       "request": {
         "auth": {
           "type": "bearer",
@@ -4307,12 +4074,12 @@
           }
         },
         "url": {
-          "raw": "http://localhost:8088/api/auth/login",
+          "raw": "http://localhost:8080/api/auth/login",
           "protocol": "http",
           "host": [
             "localhost"
           ],
-          "port": "8088",
+          "port": "8080",
           "path": [
             "api",
             "auth",
@@ -4321,40 +4088,6 @@
         }
       },
       "response": []
-    }
-  ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{mi_token}}",
-        "type": "string"
-      }
-    ]
-  },
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "packages": {},
-        "requests": {},
-        "exec": [
-          ""
-        ]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "packages": {},
-        "requests": {},
-        "exec": [
-          ""
-        ]
-      }
     }
   ]
 }

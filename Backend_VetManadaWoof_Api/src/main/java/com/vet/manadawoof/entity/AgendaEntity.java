@@ -76,7 +76,7 @@ public class AgendaEntity implements Serializable {
 
     @OneToMany(mappedBy = "agenda", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<AgendaPagoEntity> agendaPagos;
+    private List<ComprobanteEntity> comprobante; // antes esta linea era | private List<AgendaPagoEntity> agendaPagos;
 
     @OneToMany(mappedBy = "agenda", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore

@@ -32,5 +32,5 @@ public class MedioPagoEntity implements Serializable {
 
     @OneToMany(mappedBy = "medioPago", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<AgendaPagoEntity> agendaPagos;
+    private List<ComprobanteEntity> comprobante; // Esta linea antes era | private List<AgendaPagoEntity> agendaPagos;
 }
