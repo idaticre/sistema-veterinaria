@@ -1702,7 +1702,7 @@ CREATE INDEX idx_comprobante_detalle_comprobante ON comprobante_detalles(comprob
 
 DELIMITER $$
 
-CREATE PROCEDURE sp_insertar_comprobante_full(
+CREATE PROCEDURE sp_insertar_comprobante(
     IN p_agenda_id BIGINT,
     IN p_tipo_comprobante_id INT,
     IN p_serie VARCHAR(4),
@@ -1718,59 +1718,52 @@ CREATE PROCEDURE sp_insertar_comprobante_full(
 
     IN p_cliente_id BIGINT,
 
-    IN p_detalles JSON
+    OUT p_id_comprobante BIGINT,
+    OUT p_numero INT,
+    OUT p_mensaje VARCHAR(255)
 )
 BEGIN
-    DECLARE v_numero INT DEFAULT 0;
-    DECLARE v_id_comprobante BIGINT;
 
-    DECLARE i INT DEFAULT 0;
-    DECLARE v_items INT;
+    DECLARE v_numero INT;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_numero = NULL;
 
-    -- handlers
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        SELECT 'ERROR: fallo en transacción' AS mensaje;
-    END;
-
-    START TRANSACTION;
-
-
-    IF (p_tipo_comprobante_id = 1 AND p_serie NOT LIKE 'F%') THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Serie inválida para FACTURA';
-    END IF;
-
-    IF (p_tipo_comprobante_id = 2 AND p_serie NOT LIKE 'B%') THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Serie inválida para BOLETA';
-    END IF;
-
+    SET v_numero = NULL;
 
     SELECT ultimo_numero
     INTO v_numero
     FROM correlativos
     WHERE tipo_comprobante_id = p_tipo_comprobante_id
       AND serie = p_serie
+    LIMIT 1
     FOR UPDATE;
 
     IF v_numero IS NULL THEN
+
         SET v_numero = 1;
 
-        INSERT INTO correlativos(tipo_comprobante_id, serie, ultimo_numero)
-        VALUES (p_tipo_comprobante_id, p_serie, v_numero);
+        INSERT INTO correlativos(
+            tipo_comprobante_id,
+            serie,
+            ultimo_numero
+        )
+        VALUES(
+            p_tipo_comprobante_id,
+            p_serie,
+            v_numero
+        );
+
     ELSE
+
         SET v_numero = v_numero + 1;
 
         UPDATE correlativos
         SET ultimo_numero = v_numero
         WHERE tipo_comprobante_id = p_tipo_comprobante_id
           AND serie = p_serie;
+
     END IF;
 
-
-    INSERT INTO comprobantes (
+    INSERT INTO comprobantes(
         agenda_id,
         tipo_comprobante_id,
         serie,
@@ -1785,7 +1778,7 @@ BEGIN
         total,
         cliente_id
     )
-    VALUES (
+    VALUES(
         p_agenda_id,
         p_tipo_comprobante_id,
         p_serie,
@@ -1793,85 +1786,77 @@ BEGIN
         p_fecha_emision,
         p_fecha_vencimiento,
         p_tipo_moneda_id,
-        IFNULL(p_total_gravada,0),
-        IFNULL(p_total_inafecta,0),
-        IFNULL(p_total_exonerada,0),
-        IFNULL(p_total_igv,0),
+        IFNULL(p_total_gravada, 0),
+        IFNULL(p_total_inafecta, 0),
+        IFNULL(p_total_exonerada, 0),
+        IFNULL(p_total_igv, 0),
         p_total,
         p_cliente_id
     );
 
-    SET v_id_comprobante = LAST_INSERT_ID();
+    SET p_id_comprobante = LAST_INSERT_ID();
+    SET p_numero = v_numero;
+    SET p_mensaje = 'Comprobante registrado correctamente';
 
-
-    SET v_items = JSON_LENGTH(p_detalles);
-
-    WHILE i < v_items DO
-
-        INSERT INTO comprobante_detalles (
-            comprobante_id,
-            tipo_unidad_medida_id,
-            item_id,
-            descripcion,
-            cantidad,
-            valor_unitario,
-            precio_unitario,
-            descuento,
-            subtotal,
-            tipo_igv_id,
-            igv,
-            impuestos_bolsas,
-            total
-        )
-        VALUES (
-            v_id_comprobante,
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].tipo_unidad_medida_id')),
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].item_id')),
-            JSON_UNQUOTE(JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].descripcion'))),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].cantidad')),
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].valor_unitario')),
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].precio_unitario')),
-
-            IFNULL(JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].descuento')), 0),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].subtotal')),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].tipo_igv_id')),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].igv')),
-
-            IFNULL(JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].impuestos_bolsas')), 0),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].total'))
-        );
-
-        SET i = i + 1;
-
-    END WHILE;
-
-    COMMIT;
-
-    SELECT 
-        v_id_comprobante AS id,
-        v_numero AS numero,
-        p_serie AS serie;
-
-END $$
+END$$
 
 DELIMITER ;
 
 DELIMITER $$
 
-CREATE PROCEDURE sp_obtener_comprobantes_por_cliente(
-    IN p_cliente_id BIGINT
+CREATE PROCEDURE sp_insertar_comprobante_detalle(
+    IN p_comprobante_id BIGINT,
+
+    IN p_tipo_unidad_medida_id INT,
+    IN p_item_id INT,
+    IN p_descripcion VARCHAR(250),
+
+    IN p_cantidad DECIMAL(22,10),
+    IN p_valor_unitario DECIMAL(22,10),
+    IN p_precio_unitario DECIMAL(22,10),
+
+    IN p_descuento DECIMAL(14,2),
+    IN p_subtotal DECIMAL(14,2),
+
+    IN p_tipo_igv_id INT,
+    IN p_igv DECIMAL(14,2),
+
+    IN p_impuestos_bolsas DECIMAL(14,2),
+    IN p_total DECIMAL(14,2)
 )
 BEGIN
-    SELECT *
-    FROM comprobantes
-    WHERE cliente_id = p_cliente_id
-    ORDER BY fecha_emision DESC, id DESC;
+
+    INSERT INTO comprobante_detalles(
+        comprobante_id,
+        tipo_unidad_medida_id,
+        item_id,
+        descripcion,
+        cantidad,
+        valor_unitario,
+        precio_unitario,
+        descuento,
+        subtotal,
+        tipo_igv_id,
+        igv,
+        impuestos_bolsas,
+        total
+    )
+    VALUES(
+        p_comprobante_id,
+        p_tipo_unidad_medida_id,
+        p_item_id,
+        p_descripcion,
+        p_cantidad,
+        p_valor_unitario,
+        p_precio_unitario,
+        IFNULL(p_descuento, 0),
+        p_subtotal,
+        p_tipo_igv_id,
+        p_igv,
+        IFNULL(p_impuestos_bolsas, 0),
+        p_total
+    );
+
 END $$
 
 DELIMITER ;
