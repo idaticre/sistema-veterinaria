@@ -3835,9 +3835,26 @@ CREATE PROCEDURE sp_insertar_comprobante(
     IN p_total_inafecta DECIMAL(14,2),
     IN p_total_exonerada DECIMAL(14,2),
     IN p_total_igv DECIMAL(14,2),
+
+    IN p_total_gratuita DECIMAL(14,2),
+    IN p_total_otros_cargos DECIMAL(14,2),
+
     IN p_total DECIMAL(14,2),
 
+    IN p_tipo_percepcion_id INT,
+    IN p_percepcion_base_imponible DECIMAL(14,2),
+    IN p_total_percepcion DECIMAL(14,2),
+    IN p_total_incluido_percepcion DECIMAL(14,2),
+
+    IN p_observaciones VARCHAR(1000),
+    IN p_codigo_unico VARCHAR(20),
+    IN p_condiciones_pago VARCHAR(250),
+    IN p_nubecont_tipo_venta_codigo VARCHAR(5),
+
     IN p_cliente_id BIGINT,
+
+    IN p_total_anticipio DECIMAL(14,2),
+    IN p_medio_pago_id INT,
 
     OUT p_id_comprobante BIGINT,
     OUT p_numero INT,
@@ -3892,12 +3909,29 @@ BEGIN
         fecha_emision,
         fecha_vencimiento,
         tipo_moneda_id,
+
         total_gravada,
         total_inafecta,
         total_exonerada,
         total_igv,
+        total_gratuita,
+        total_otros_cargos,
         total,
-        cliente_id
+
+        tipo_percepcion_id,
+        percepcion_base_imponible,
+        total_percepcion,
+        total_incluido_percepcion,
+
+        observaciones,
+        codigo_unico,
+        condiciones_pago,
+        nubecont_tipo_venta_codigo,
+
+        cliente_id,
+
+        total_anticipio,
+        medio_pago_id
     )
     VALUES(
         p_agenda_id,
@@ -3907,19 +3941,36 @@ BEGIN
         p_fecha_emision,
         p_fecha_vencimiento,
         p_tipo_moneda_id,
+
         IFNULL(p_total_gravada, 0),
         IFNULL(p_total_inafecta, 0),
         IFNULL(p_total_exonerada, 0),
         IFNULL(p_total_igv, 0),
+        IFNULL(p_total_gratuita, 0),
+        IFNULL(p_total_otros_cargos, 0),
         p_total,
-        p_cliente_id
+
+        p_tipo_percepcion_id,
+        IFNULL(p_percepcion_base_imponible, 0),
+        IFNULL(p_total_percepcion, 0),
+        IFNULL(p_total_incluido_percepcion, 0),
+
+        p_observaciones,
+        p_codigo_unico,
+        p_condiciones_pago,
+        p_nubecont_tipo_venta_codigo,
+
+        p_cliente_id,
+
+        IFNULL(p_total_anticipio, 0),
+        p_medio_pago_id
     );
 
     SET p_id_comprobante = LAST_INSERT_ID();
     SET p_numero = v_numero;
     SET p_mensaje = 'Comprobante registrado correctamente';
 
-END$$
+END $$
 
 DELIMITER ;
 
@@ -3943,7 +3994,12 @@ CREATE PROCEDURE sp_insertar_comprobante_detalle(
     IN p_igv DECIMAL(14,2),
 
     IN p_impuestos_bolsas DECIMAL(14,2),
-    IN p_total DECIMAL(14,2)
+    IN p_total DECIMAL(14,2),
+
+    IN p_anticipio_regularizacion BOOL,
+    IN p_anticipio_documento_serie VARCHAR(4),
+    IN p_anticipio_documento_numero INT,
+    IN p_codigo_producto_sunat VARCHAR(8)
 )
 BEGIN
 
@@ -3960,7 +4016,11 @@ BEGIN
         tipo_igv_id,
         igv,
         impuestos_bolsas,
-        total
+        total,
+        anticipio_regularizacion,
+        anticipio_documento_serie,
+        anticipio_documento_numero,
+        codigo_producto_sunat
     )
     VALUES(
         p_comprobante_id,
@@ -3975,7 +4035,11 @@ BEGIN
         p_tipo_igv_id,
         p_igv,
         IFNULL(p_impuestos_bolsas, 0),
-        p_total
+        p_total,
+        p_anticipio_regularizacion,
+        p_anticipio_documento_serie,
+        p_anticipio_documento_numero,
+        p_codigo_producto_sunat
     );
 
 END $$
