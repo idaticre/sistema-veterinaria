@@ -35,6 +35,7 @@ import Parametros_y_promociones from './pages/administrativas/administracion/par
 
 import AsignarRolesPermisos from './pages/administrativas/administracion/Asignar-Gestionar-Roles/AsignarRolesPermisos';
 
+
 import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
 import RutaProtegida from './components/proteccion/IPRT';
 import RutaProtegidaPorRol from './components/proteccion/IPRR';
@@ -43,6 +44,7 @@ import Inventario from './pages/distribucion/Inventario';
 import HistorialM from './pages/administrativas/mascotas/historial clinico/HistorialM';
 import { useEffect, useState } from 'react';
 import "./App.css";
+import FacturacionElectronica from './pages/administrativas/ventas/FacturacionElectronica';
 
 function App() {
 
@@ -146,6 +148,9 @@ function App() {
           </Route>
 
           {/* Ventas */}
+          <Route>
+  <Route path='/administracion/ventas/facturacion' element={<FacturacionElectronica />}/>
+</Route>
 
           {/* Reportes e informes */}
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]}/>}>
@@ -156,7 +161,7 @@ function App() {
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
             <Route path='/administracion/administracion/gestionar_colaboradores' element={<Gestionar_colaboradores/>}/>
             <Route path='/administracion/administracion/gestionar_usuarios' element={<Gestionar_usuarios/>}/>
-            <Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}/>
+           {/*<Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}*/}
             <Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>
             <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>
             <Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>

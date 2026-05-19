@@ -173,7 +173,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <ul ref={ventaRef} className="submenu">
                                     
                                     <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestion de ventas</Link></li>
-                                    <li><Link to="/administracion/mascotas/registro" className="sub_opcion">Facturación electronica</Link></li>
+                                    <li><Link to="/administracion/ventas/facturacion" className="sub_opcion">Facturación electronica</Link></li>
                                     <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Notas de credito</Link></li>
                                     
                                 </ul>

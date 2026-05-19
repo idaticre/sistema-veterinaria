@@ -1,0 +1,177 @@
+:root {
+  --color-titulo: #001C3D;
+  --color-subtitulo: #33475B;
+  --color-editar: #A5C9FF;
+  --color-exito: #77E07D;
+  --color-peligro: #E63946;
+  --color-fondo: #F9E4C8;
+  --color-subfondo: #ffffff;
+}
+
+#facturacion {
+  background: var(--color-fondo);
+  min-height: 100vh;
+}
+
+.facturacion-container {
+  padding: 30px;
+}
+
+.header-factura {
+  margin-bottom: 20px;
+}
+
+.header-factura h2 {
+  color: var(--color-titulo);
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.factura-card {
+  background: var(--color-subfondo);
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap: 20px;
+}
+
+.form-grid label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-subtitulo);
+  font-weight: bold;
+}
+
+.form-grid input,
+.form-grid select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+  outline: none;
+  transition: 0.3s;
+}
+
+.form-grid input:focus,
+.form-grid select:focus {
+  border-color: var(--color-editar);
+}
+
+.servicio-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.servicio-grid input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+}
+
+.servicio-grid button {
+  background: var(--color-editar);
+  color: var(--color-titulo);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.servicio-grid button:hover {
+  transform: scale(1.03);
+}
+
+.tabla-servicios {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.tabla-servicios th {
+  background: var(--color-titulo);
+  color: white;
+  padding: 14px;
+}
+
+.tabla-servicios td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  color: var(--color-subtitulo);
+}
+
+.btn-eliminar {
+  background: var(--color-peligro);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.totales {
+  margin-top: 30px;
+  text-align: right;
+}
+
+.totales h3 {
+  color: var(--color-subtitulo);
+  margin: 10px 0;
+}
+
+.totales h2 {
+  color: var(--color-titulo);
+  font-size: 30px;
+}
+
+.acciones {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.btn-guardar,
+.btn-pdf {
+  border: none;
+  padding: 14px 22px;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-guardar {
+  background: var(--color-exito);
+  color: #000;
+}
+
+.btn-pdf {
+  background: var(--color-titulo);
+}
+
+.btn-guardar:hover,
+.btn-pdf:hover {
+  transform: scale(1.03);
+}
+
+hr {
+  margin: 30px 0;
+  border: none;
+  border-top: 2px solid #eee;
+}
+
+h3 {
+  color: var(--color-titulo);
+}

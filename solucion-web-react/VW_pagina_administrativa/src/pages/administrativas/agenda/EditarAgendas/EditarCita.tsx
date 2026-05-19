@@ -110,161 +110,6 @@ const getDetallesMascotaCliente = (
   };
 };
 
-// 🚨 FUNCIÓN CORREGIDA: Ahora pide MASCOTA para evitar confusión de citas dobles
-const buscarIdGoogleCalendar = async (
-  cita: CitaBD,
-  cliente: EntityBase,
-  mascota: MascotaBase,
-): Promise<string | undefined> => {
-  if (!window.gapi || !window.gapi.client || !window.gapi.client.calendar) {
-    return undefined;
-  }
-
-  const startOfDay = new Date(`${cita.fecha}T00:00:00`).toISOString();
-  const endOfDay = new Date(`${cita.fecha}T23:59:59`).toISOString();
-
-  let queryTerm = cliente.documento || cliente.nombre || "";
-  if (!queryTerm) return undefined;
-
-  try {
-    const res = await window.gapi.client.calendar.events.list({
-      calendarId: "primary",
-      timeMin: startOfDay,
-      timeMax: endOfDay,
-      q: queryTerm,
-      singleEvents: true,
-      maxResults: 50,
-    });
-
-    const eventosEncontrados = res.result.items;
-    if (!eventosEncontrados || eventosEncontrados.length === 0)
-      return undefined;
-
-    const eventoCorrecto = eventosEncontrados.find((event: any) => {
-      if (
-        event.description &&
-        event.description.includes(`[REF_ID:${cita.id}]`)
-      ) {
-        return true;
-      }
-
-      if (event.start && event.start.dateTime) {
-        const eventDate = new Date(event.start.dateTime);
-        const [citaHora, citaMin] = cita.hora.split(":").map(Number);
-        const coincideHora = eventDate.getHours() === citaHora;
-        const coincideMin = Math.abs(eventDate.getMinutes() - citaMin) <= 2;
-
-        if (coincideHora && coincideMin) {
-          const nombreMascota = mascota.nombre.toLowerCase();
-          const tituloEvento = (event.summary || "").toLowerCase();
-          const descEvento = (event.description || "").toLowerCase();
-          const coincideMascota =
-            tituloEvento.includes(nombreMascota) ||
-            descEvento.includes(nombreMascota);
-          return coincideMascota;
-        }
-      }
-      return false;
-    });
-
-    return eventoCorrecto ? eventoCorrecto.id : undefined;
-  } catch (e) {
-    console.warn("Error en búsqueda GC con query:", queryTerm, e);
-    return undefined;
-  }
-};
-
-// 🚨 FUNCIÓN CORREGIDA (TypeScript Safe)
-const parsearServiciosGC = (
-  description: string,
-  colaboradores: EntityBase[],
-  serviciosDisponibles: ServicioBase[],
-): ServicioDetalle[] => {
-  if (!description) return [];
-
-  const regexPrincipal = /\*\*SERVICIOS REGISTRADOS\*\*((.|\n)*?)\*\*ADELANTO/i;
-  const regexAlternativo = /\*\*SERVICIOS REGISTRADOS\*\*((.|\n)*)/i;
-
-  let textoServicios = "";
-  const matchPrincipal = description.match(regexPrincipal);
-
-  if (matchPrincipal && matchPrincipal[1]) {
-    textoServicios = matchPrincipal[1];
-  } else {
-    const matchAlternativo = description.match(regexAlternativo);
-    if (matchAlternativo && matchAlternativo[1]) {
-      textoServicios = matchAlternativo[1];
-    } else {
-      return [];
-    }
-  }
-
-  const lineas = textoServicios
-    .trim()
-    .split("\n")
-    .filter((l) => l.trim().startsWith("•"));
-  const resultados: ServicioDetalle[] = [];
-
-  lineas.forEach((linea) => {
-    const match = linea.match(
-      /•\s*(.*?)\s*\((\d+)x\s*(?:S\/|\$)\s*(\d+(\.\d+)?)\)\s*Subtotal:\s*(?:S\/|\$)\s*(\d+(\.\d+)?)\s*con\s*(.*?)\.\s*Adicionales:\s*(.*)/i,
-    );
-
-    if (match) {
-      const nombreServicioRaw = match[1].trim();
-      const cantidad = parseInt(match[2]);
-      const precio = parseFloat(match[3]);
-      const subtotal = parseFloat(match[5]);
-      const nombreVetRaw = match[7].trim();
-      const adicionalesRaw = match[8].trim();
-
-      const servicioBase = serviciosDisponibles.find(
-        (s) =>
-          s.nombre.trim().toLowerCase() === nombreServicioRaw.toLowerCase(),
-      );
-
-      const veterinario = colaboradores.find(
-        (c) => c.nombre.trim().toLowerCase() === nombreVetRaw.toLowerCase(),
-      );
-
-      const idServicio = servicioBase ? servicioBase.id : 0;
-      const idVeterinario = veterinario
-        ? veterinario.id
-        : colaboradores[0]?.id || 0;
-
-      // 🔥 AQUÍ ESTÁ LA CLAVE
-      // usamos la duración BASE SOLO como referencia
-      const duracionBase = servicioBase?.duracion || 0;
-
-      // 🧠 si el usuario modificó duración, mantenemos la proporción
-      let duracionCalculada = duracionBase;
-
-      if (cantidad > 0 && duracionBase > 0) {
-        duracionCalculada = duracionBase; // base por defecto
-      }
-
-      resultados.push({
-        id_servicio: idServicio,
-        nombre_servicio: nombreServicioRaw,
-        id_veterinario: idVeterinario,
-        nombre_veterinario: nombreVetRaw,
-        cantidad: cantidad,
-        valor_servicio: precio,
-        bono_inicial: 0,
-
-        // ✅ IMPORTANTE: NO forzar 30 ni 0
-        duracion_min: duracionCalculada,
-        duracion_total: duracionCalculada * cantidad,
-
-        subtotal: subtotal,
-        adicionales: adicionalesRaw === "N/A" ? "" : adicionalesRaw,
-      });
-    }
-  });
-
-  return resultados;
-};
-
 function EditarCita() {
 
   const location = useLocation();
@@ -441,7 +286,7 @@ function EditarCita() {
       id_servicio: sId,
       nombre_servicio: servicioInfo.nombre,
       id_veterinario: vId,
-      nombre_veterinario: veterinarioInfo.nombre,
+      nombre_veterinario: "Veterinario",
       cantidad: servicioTemporal.cantidad,
       valor_servicio: servicioTemporal.valor_servicio,
       bono_inicial: 0,
@@ -684,10 +529,12 @@ function EditarCita() {
         const enCliente = cliente?.nombre?.toLowerCase().includes(busquedaStr);
         const enMascota = mascota?.nombre?.toLowerCase().includes(busquedaStr);
         const enObservaciones = e.observaciones
-          ?.toLowerCase()
+        ?.toLowerCase()
           .includes(busquedaStr);
+        const enCodigo = e.codigo?.toLowerCase().includes(busquedaStr);
+          
 
-        return enDNI || enCliente || enMascota || enObservaciones;
+        return enDNI || enCliente || enMascota || enObservaciones || enCodigo;
       });
     }
 
@@ -753,105 +600,205 @@ function EditarCita() {
   };
 
   // 🚨 FIX 2: INTEGRACIÓN DEL PARSEADOR EN LA EDICIÓN
-  const editarEvento = async (cita: CitaBD) => {
-    // 🔒 BLOQUEO DE SEGURIDAD: Si no está logueado en GC, no permite abrir
-    if (!isSignedIn) {
-      alert(
-        "🔒 Por seguridad, debe iniciar sesión en Google Calendar para editar citas.",
+// ================== EDITAR EVENTO ==================
+const editarEvento = async (cita: CitaBD) => {
+
+  // 🔒 VALIDACIÓN LOGIN
+  if (!isSignedIn) {
+    alert(
+      "🔒 Por seguridad, debe iniciar sesión en Google Calendar para editar citas."
+    );
+    return;
+  }
+
+  // 🟢 VALIDAR TOKEN
+  if (!checkTokenValidity()) return;
+
+  const estado = estadosAgenda.find(
+    (e) => e.id === cita.idEstado
+  );
+
+  const estadoNombre =
+    estado?.nombre.toUpperCase() || "N/A";
+
+  // 🚫 ESTADOS TERMINALES
+  if (
+    ESTADOS_NO_EDITABLES.includes(
+      estadoNombre
+    )
+  ) {
+
+    alert(
+      `🚫 No se puede editar la cita ${cita.codigo} porque su estado es ${estadoNombre}.`
+    );
+
+    return;
+  }
+
+  // 🔥 OBTENER DATOS
+  const cliente = clientes.find(
+    (c) => c.id === cita.idCliente
+  );
+
+  const mascota = mascotas.find(
+    (m) => m.id === cita.idMascota
+  );
+
+  const colaboradorAsignado =
+    colaboradores.find(
+      (c) => c.id === cita.idColaborador
+    ) || colaboradores[0];
+
+  // 🔥 SETS INICIALES
+  setEditandoCita(cita);
+
+  setAbonoEditable(
+    cita.abonoInicial || 0
+  );
+
+  setServiciosRegistrados([]);
+
+  let fetchedObservaciones =
+    cita.observaciones || "";
+
+  // ==================================================
+  // 🔥 CARGAR SERVICIOS REALES DESDE MYSQL
+  // ==================================================
+
+  try {
+
+    setStatus(
+      "🟡 Cargando servicios desde MYSQL..."
+    );
+
+    const responseServicios =
+      await IST.get(
+        `/agenda/${cita.id}/servicios`
       );
-      return;
-    }
 
-    // 🟢 VALIDACIÓN DE CADUCIDAD DEL TOKEN
-    if (!checkTokenValidity()) return;
+    const listaServicios =
+      responseServicios.data.data || [];
 
-    const estado = estadosAgenda.find((e) => e.id === cita.idEstado);
-    const estadoNombre = estado?.nombre.toUpperCase() || "N/A";
+    console.log(
+      "🔥 SERVICIOS MYSQL:",
+      listaServicios
+    );
 
-    if (ESTADOS_NO_EDITABLES.includes(estadoNombre)) {
-      alert(
-        `🚫 No se puede editar la cita ${cita.codigo} porque su estado es ${estadoNombre}.`,
-      );
-      return;
-    }
+    const serviciosConvertidos =
+      listaServicios.map((srv: any) => ({
 
-    const cliente = clientes.find((c) => c.id === cita.idCliente);
-    const mascota = mascotas.find((m) => m.id === cita.idMascota); // Necesitamos la mascota ahora
-    const colaboradorAsignado =
-      colaboradores.find((c) => c.id === cita.idColaborador) ||
-      colaboradores[0];
+        id_servicio:
+          srv.idServicio,
 
-    setEditandoCita(cita);
-    setAbonoEditable(cita.abonoInicial || 0);
+        nombre_servicio:
+          srv.descripcion,
 
-    // Inicializamos observaciones y limpiamos servicios previos
-    let fetchedObservaciones = cita.observaciones;
+        id_veterinario:
+          srv.idVeterinario,
+
+        nombre_veterinario:
+          srv.nombreVeterinario ||
+          "No asignado",
+
+        cantidad:
+          Number(srv.cantidad),
+
+        valor_servicio:
+          Number(srv.valorServicio),
+
+        bono_inicial: 0,
+
+        duracion_min:
+          Number(srv.duracionMin),
+
+        duracion_total:
+          Number(srv.duracionMin) *
+          Number(srv.cantidad),
+
+        subtotal:
+          Number(srv.subtotal),
+
+        adicionales:
+          srv.observaciones || ""
+      }));
+
+    setServiciosRegistrados(
+      serviciosConvertidos
+    );
+
+    setStatus(
+      "✅ Servicios cargados desde MYSQL."
+    );
+
+  } catch (error) {
+
+    console.error(
+      "❌ ERROR SERVICIOS:",
+      error
+    );
+
     setServiciosRegistrados([]);
 
-    if (isSignedIn && cliente && mascota) {
-      setStatus("🟡 Buscando datos en Google Calendar...");
+    setStatus(
+      "⚠️ No se pudieron cargar servicios."
+    );
+  }
 
-      // 🚨 AHORA PASAMOS LA MASCOTA PARA DIFERENCIAR LAS CITAS
-      let gcEventId =
-        cita.idGoogleCalendar ||
-        (await buscarIdGoogleCalendar(cita, cliente, mascota));
+  // ==================================================
+  // 🔥 GOOGLE CALENDAR
+  // SOLO PARA SINCRONIZACIÓN
+  // ==================================================
 
-      if (gcEventId) {
-        try {
-          const res = await window.gapi.client.calendar.events.get({
-            calendarId: "primary",
-            eventId: gcEventId,
-          });
+  setEditingGCId(
+    cita.idGoogleCalendar || undefined
+  );
 
-          const descriptionGC = res.result.description || "";
+  // ==================================================
+  // 🔥 DATOS DEL MODAL
+  // ==================================================
 
-          const serviciosRecuperados = parsearServiciosGC(
-            descriptionGC,
-            colaboradores,
-            serviciosDisponibles,
-          );
+  setNuevoEvento({
 
-          if (serviciosRecuperados.length > 0) {
-            console.log(serviciosRecuperados);
-            setServiciosRegistrados(serviciosRecuperados);
-            setStatus("✅ Servicios recuperados de Google Calendar.");
-          } else {
-            setStatus(
-              "⚠️ Evento encontrado en GC, pero no se pudieron leer los servicios.",
-            );
-          }
+    dni:
+      cliente?.documento || "",
 
-          setEditingGCId(gcEventId);
-        } catch (gcError) {
-          console.error("Error al obtener detalles del evento GC:", gcError);
-          setStatus("⚠️ Cita cargada. La sincronización de GC falló.");
-          setEditingGCId(gcEventId);
-        }
-      } else {
-        setEditingGCId(undefined);
-        setStatus("⚠️ Cita cargada. No se encontró ID de GC para esta cita.");
-      }
-    } else {
-      setEditingGCId(undefined);
-    }
+    cliente:
+      cliente?.nombre || "",
 
-    setNuevoEvento({
-      dni: cliente?.documento || "",
-      cliente: cliente?.nombre || "",
-      clienteId: cita.idCliente,
-      mascotaId: cita.idMascota,
-      date: cita.fecha,
-      startTime: cita.hora.substring(0, 5), // HH:mm
-      estado: estadoNombre,
-      duracionEstimadaMin: cita.duracionEstimadaMin,
-      abonoInicial: cita.abonoInicial,
-      observaciones: fetchedObservaciones || "",
-      colaboradorId: colaboradorAsignado?.id || 0,
-      colaboradorNombre: colaboradorAsignado?.nombre || "",
-    });
+    clienteId:
+      cita.idCliente,
 
-    setMostrarModal(true);
-  };
+    mascotaId:
+      cita.idMascota,
+
+    date:
+      cita.fecha,
+
+    startTime:
+      cita.hora.substring(0, 5),
+
+    estado:
+      estadoNombre,
+
+    duracionEstimadaMin:
+      cita.duracionEstimadaMin,
+
+    abonoInicial:
+      cita.abonoInicial,
+
+    observaciones:
+      fetchedObservaciones,
+
+    colaboradorId:
+      colaboradorAsignado?.id || 0,
+
+    colaboradorNombre:
+      colaboradorAsignado?.nombre || ""
+  });
+
+  // 🔥 ABRIR MODAL
+  setMostrarModal(true);
+};
 
   const handleMascotaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedMascotaId = parseInt(e.target.value);
@@ -1010,101 +957,260 @@ function EditarCita() {
         idGoogleCalendar: editingGCId || citaEditada.idGoogleCalendar || null,
       };
 
-      const responseDB = await IST.put("/agenda", AgendaRequestDTO);
+     const responseDB = await IST.put(
+  "/agenda",
+  AgendaRequestDTO
+);
 
-      if (!responseDB.data.success) {
-        throw new Error(`Error BD: ${responseDB.data.message}`);
-      }
+if (!responseDB.data.success) {
 
-      setStatus(`✏️ Cita ${citaEditada.codigo} actualizada exitosamente.`);
+  throw new Error(
+    `Error BD: ${responseDB.data.message}`
+  );
+}
 
-      if (isSignedIn && editingGCId) {
-        try {
-          const cliente = clientes.find((c) => c.id === nuevoEvento.clienteId);
-          const mascota = mascotas.find((m) => m.id === nuevoEvento.mascotaId);
+// ======================================================
+// 🔥 ELIMINAR SERVICIOS ANTERIORES
+// ======================================================
 
-          const newStart = new Date(
-            `${nuevoEvento.date}T${nuevoEvento.startTime}`,
-          );
-          const newEnd = new Date(newStart.getTime() + duracionFinal * 60000);
+try {
 
-          // 🚨 Reconstrucción del texto de servicios
-          const serviciosListaGC = serviciosRegistrados
-            .map(
-              (s) =>
-                `• ${s.nombre_servicio} (${s.cantidad}x S/ ${s.valor_servicio.toFixed(2)})  Subtotal: S/ ${s.subtotal.toFixed(2)} con ${s.nombre_veterinario}. Adicionales: ${s.adicionales || "N/A"}`,
-            )
-            .join("\n");
+  const serviciosViejos =
+    await IST.get(
+      `/agenda/${citaEditada.id}/servicios`
+    );
 
-          const updatedEventResource = {
-            summary: `${mascota?.nombre || "Mascota"} - Total: S/${totalMinimoNecesario.toFixed(2)}`,
-            description:
-              `**CLIENTE Y MASCOTA**\n` +
-              `Cliente: ${cliente?.nombre} (DNI: ${cliente?.documento})\n` +
-              `Mascota: ${mascota?.nombre}\n` +
-              `Estado: ${nuevoEvento.estado}\n` +
-              `Costo Total: S/${totalCosto.toFixed(2)}\n` +
-              `Duración Total: ${duracionFinal} min\n\n` +
-              `**SERVICIOS REGISTRADOS**\n${serviciosListaGC}\n\n` +
-              `**ADELANTO/ABONO:** S/${citaEditada.abonoInicial.toFixed(2)}\n\n` +
-              `**OBSERVACIONES**\n${nuevoEvento.observaciones || "No hay observaciones adicionales."}\n\n` +
-              `--------------------------------\n` +
-              `[REF_ID:${citaEditada.id}]`.trim(),
+  for (const srv of serviciosViejos.data.data) {
 
-            start: {
-              dateTime: newStart.toISOString(),
-              timeZone: "America/Lima",
-            },
-            end: { dateTime: newEnd.toISOString(), timeZone: "America/Lima" },
-          };
+    console.log(
+      "🗑️ Eliminando servicio:",
+      srv.id
+    );
 
-          await window.gapi.client.calendar.events.update({
-            calendarId: "primary",
-            eventId: editingGCId,
-            resource: updatedEventResource,
-          });
+    await IST.delete(
+  `/ingresos-servicios/${srv.id}/${citaEditada.id}`
+);
+  }
 
-          setStatus(
-            `✏️ Cita ${citaEditada.codigo} actualizada en BD y Google Calendar.`,
-          );
-        } catch (gcError: any) {
-          let gcErrorMessage = "Error desconocido.";
-          if (gcError.result && gcError.result.error) {
-            const errorObj = gcError.result.error;
-            gcErrorMessage = `Error GC ${errorObj.code}: ${errorObj.message}`;
-          }
-          console.error("Error al actualizar Google Calendar:", gcError);
-          alert(
-            `⚠️ Cita actualizada en BD. Falló la sincronización con Google Calendar. ${gcErrorMessage}.`,
-          );
-          setStatus(
-            `✏️ Cita ${citaEditada.codigo} actualizada en BD. ⚠️ Sincronización GC fallida.`,
-          );
-        }
-      } else {
-        setStatus(
-          `✏️ Cita ${citaEditada.codigo} actualizada exitosamente en BD. (GC ID no encontrado/Sesión inactiva)`,
-        );
-      }
-    } catch (error: any) {
-      let errorMessage =
-        "⚠️ Error al guardar la cita. Verifique el formato de datos.";
+} catch (error) {
 
-      if (axios.isAxiosError(error) && error.response) {
-        errorMessage += ` Detalle API: ${error.response.data.message || "Error de conexión"}`;
-      } else if (error instanceof Error) {
-        errorMessage += ` Detalle: ${error.message}`;
-      }
+  console.error(
+    "❌ ERROR ELIMINANDO SERVICIOS:",
+    error
+  );
+}
 
-      console.error("Error al guardar cita:", error);
-      alert(errorMessage);
-      return;
+// ======================================================
+// 🔥 GUARDAR NUEVOS SERVICIOS
+// ======================================================
+
+for (const srv of serviciosRegistrados) {
+
+  try {
+
+    const ingresoServicioDTO = {
+
+      idAgenda:
+        citaEditada.id,
+
+      idServicio:
+        srv.id_servicio,
+
+      idColaborador:
+        null,
+
+      idVeterinario:
+        srv.id_veterinario,
+
+      cantidad:
+        Number(srv.cantidad),
+
+      duracionMin:
+        Number(srv.duracion_min),
+
+      valorServicio:
+        Number(srv.valor_servicio),
+
+      observaciones:
+        srv.adicionales || ""
+    };
+
+    console.log(
+      "🔥 GUARDANDO SERVICIO:",
+      ingresoServicioDTO
+    );
+
+    await IST.post(
+      "/ingresos-servicios",
+      ingresoServicioDTO
+    );
+
+  } catch (error) {
+
+    console.error(
+      "❌ ERROR GUARDANDO SERVICIO:",
+      error
+    );
+  }
+}
+
+setStatus(
+  `✏️ Cita ${citaEditada.codigo} actualizada exitosamente.`
+);
+
+// ======================================================
+// 🔥 GOOGLE CALENDAR
+// ======================================================
+
+if (isSignedIn && editingGCId) {
+
+  try {
+
+    const cliente =
+      clientes.find(
+        (c) =>
+          c.id === nuevoEvento.clienteId
+      );
+
+    const mascota =
+      mascotas.find(
+        (m) =>
+          m.id === nuevoEvento.mascotaId
+      );
+
+    const newStart = new Date(
+      `${nuevoEvento.date}T${nuevoEvento.startTime}`
+    );
+
+    const newEnd = new Date(
+      newStart.getTime() +
+      duracionFinal * 60000
+    );
+
+    // 🔥 TEXTO SERVICIOS GC
+    const serviciosListaGC =
+      serviciosRegistrados
+        .map(
+          (s) =>
+            `• ${s.nombre_servicio} (${s.cantidad}x S/ ${s.valor_servicio.toFixed(2)}) Subtotal: S/ ${s.subtotal.toFixed(2)} con ${s.nombre_veterinario}. Adicionales: ${s.adicionales || "N/A"}`
+        )
+        .join("\n");
+
+    const updatedEventResource = {
+
+      summary:
+        `${mascota?.nombre || "Mascota"} - Total: S/${totalMinimoNecesario.toFixed(2)}`,
+
+      description:
+
+        `**CLIENTE Y MASCOTA**\n` +
+
+        `Cliente: ${cliente?.nombre} (DNI: ${cliente?.documento})\n` +
+
+        `Mascota: ${mascota?.nombre}\n` +
+
+        `Estado: ${nuevoEvento.estado}\n` +
+
+        `Costo Total: S/${totalCosto.toFixed(2)}\n` +
+
+        `Duración Total: ${duracionFinal} min\n\n` +
+
+        `**SERVICIOS REGISTRADOS**\n${serviciosListaGC}\n\n` +
+
+        `**ADELANTO/ABONO:** S/${citaEditada.abonoInicial.toFixed(2)}\n\n` +
+
+        `**OBSERVACIONES**\n${nuevoEvento.observaciones || "No hay observaciones adicionales."}\n\n` +
+
+        `--------------------------------\n` +
+
+        `[REF_ID:${citaEditada.id}]`,
+
+      start: {
+
+        dateTime:
+          newStart.toISOString(),
+
+        timeZone:
+          "America/Lima",
+      },
+
+      end: {
+
+        dateTime:
+          newEnd.toISOString(),
+
+        timeZone:
+          "America/Lima",
+      },
+    };
+
+    await window.gapi.client.calendar.events.update({
+
+      calendarId:
+        "primary",
+
+      eventId:
+        editingGCId,
+
+      resource:
+        updatedEventResource,
+    });
+
+    setStatus(
+      `✏️ Cita ${citaEditada.codigo} actualizada en BD y Google Calendar.`
+    );
+
+  } catch (gcError: any) {
+
+    let gcErrorMessage =
+      "Error desconocido.";
+
+    if (
+      gcError.result &&
+      gcError.result.error
+    ) {
+
+      const errorObj =
+        gcError.result.error;
+
+      gcErrorMessage =
+        `Error GC ${errorObj.code}: ${errorObj.message}`;
     }
 
-    resetModalState();
-    fetchCitas();
-  };
+    console.error(
+      "Error Google Calendar:",
+      gcError
+    );
 
+    alert(
+      `⚠️ Cita actualizada en BD. Falló Google Calendar. ${gcErrorMessage}`
+    );
+
+    setStatus(
+      `✏️ Cita ${citaEditada.codigo} actualizada en BD. ⚠️ GC falló.`
+    );
+  }
+
+} else {
+
+  setStatus(
+    `✏️ Cita ${citaEditada.codigo} actualizada exitosamente en BD.`
+  );
+}
+ } catch (error: any) {
+
+  console.error(
+    "❌ ERROR GUARDANDO CITA:",
+    error
+  );
+
+  alert(
+    error?.response?.data?.message ||
+    error.message ||
+    "Error desconocido"
+  );
+}
+  }
   // ================== RENDER ==================
   return (
     <div id="editarita">
@@ -1166,7 +1272,7 @@ function EditarCita() {
                     id="input-busqueda"
                     name="busqueda"
                     type="text"
-                    placeholder="🔍 Buscar por DNI, cliente o mascota..."
+                    placeholder="🔍 Buscar por documento, cliente, mascota o código..."
                     value={busqueda}
                     onChange={(e) => setBusqueda(e.target.value)}
                   />
@@ -1234,17 +1340,26 @@ function EditarCita() {
                     return (
                       <div key={e.id} className="cita-card-edit">
                         <div className="cita-header">
-                          <h3>{detalles.mascotaNombre}</h3>
+
+  <div className="info-titulo">
+
+    <small className="codigo-cita">
+      #{e.codigo || e.id}
+    </small>
+
+    <h3>{detalles.mascotaNombre}</h3>
+
+  </div>
                           <span
-                            className={`estado estado-${detalles.estadoNombre.toLowerCase()}`}
-                          >
-                            {detalles.estadoNombre || "N/A"}
-                          </span>
+  className={`estado estado-${detalles.estadoNombre.toLowerCase()}`}
+>
+  {detalles.estadoNombre || "N/A"}
+</span>
                         </div>
 
                         <div className="cita-info">
                           <p>
-                            <strong>📄 DNI:</strong> {detalles.dni}
+                            <strong>📄 Documento:</strong> {detalles.dni}
                           </p>
                           <p>
                             <strong>👤 Cliente:</strong>{" "}

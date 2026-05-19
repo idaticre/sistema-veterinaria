@@ -1,4 +1,3 @@
-
 package com.vet.manadawoof.config;
 
 import org.springframework.context.annotation.Bean;
@@ -27,8 +26,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
-                          JwtAuthenticationFilter jwtAuthenticationFilter
-    ) {
+                          JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
@@ -36,113 +34,67 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/archivos/**").permitAll()
-                        // Endpoints públicos
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(authz -> authz
+                // --- 1. ENDPOINTS PÚBLICOS ---
+                .requestMatchers("/archivos/**").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/clientes/documento/**").permitAll()
+                .requestMatchers("/api/agenda/cliente/**").permitAll()
 
-                        // Endpoints que requieren roles específicos
+                // --- 2. AGENDA Y SERVICIOS (Acceso para Admin y Auxiliares) ---
+                .requestMatchers("/api/agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
+                .requestMatchers("/api/ingresos-servicios/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
+                .requestMatchers("/api/pagos-agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
 
-                        //Permisos de solo Admin
-                        .requestMatchers("/api/agenda/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/archivos/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/archivos-clinicos/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/asistencias/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/atenciones-medicas/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/asignaciones-horarios/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/atenciones-medicas/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/clientes/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/colaboradores/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/entidades/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/historia-clinica/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/horarios-base-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/ingresos-servicios/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/mascotas/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/medicamentos-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/pagos-agenda/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/proveedores/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/recordatorios-agenda/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/usuarios-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/vacunas-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/veterinarios/**").hasAuthority("ADMINISTRADOR GENERAL")
+                // --- 3. PERMISOS EXCLUSIVOS DE ADMINISTRADOR GENERAL ---
+                .requestMatchers("/api/archivos/**").hasAuthority("ADMINISTRADOR GENERAL")
+                .requestMatchers("/api/archivos-clinicos/**").hasAuthority("ADMINISTRADOR GENERAL")
+                .requestMatchers("/api/asistencias/**").hasAuthority("ADMINISTRADOR GENERAL")
+                .requestMatchers("/api/asignaciones-horarios/**").hasAuthority("ADMINISTRADOR GENERAL")
+                .requestMatchers("/api/entidades/**").hasAuthority("ADMINISTRADOR GENERAL")
+                .requestMatchers("/api/horarios-base-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
+                .requestMatchers("/api/proveedores/**").hasAuthority("ADMINISTRADOR GENERAL")
+                .requestMatchers("/api/usuarios/**").hasAuthority("ADMINISTRADOR GENERAL")
+                .requestMatchers("/api/usuarios-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
+                .requestMatchers("/api/roles/**").hasAuthority("ADMINISTRADOR GENERAL")
+                
+                // --- 4. CLIENTES Y MASCOTAS (Acceso compartido) ---
+                .requestMatchers("/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
+                .requestMatchers("/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
+                .requestMatchers("/api/clientes/listar_solo_con_nombreymascota").hasAnyAuthority("AUXILIAR CAJA", "ADMINISTRADOR GENERAL")
 
-                        //Permisos del Auxiliar Caja
+                // --- 5. ATENCIÓN MÉDICA Y VETERINARIOS ---
+                .requestMatchers("/api/atenciones-medicas/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO")
+                .requestMatchers("/api/historia-clinica/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO")
+                .requestMatchers("/api/veterinarios/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO", "AUXILIAR CAJA")
+                .requestMatchers("/api/colaboradores/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
 
-                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority(
-                                "AUXILIAR CAJA", "ADMINISTRADOR GENERAL")
-                        .requestMatchers(HttpMethod.POST, "/api/mascotas/**").hasAnyAuthority(
-                                "ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
-                        // (pendiente por hacer)
-                        .requestMatchers("/api/clientes/listar_solo_con_nombreymascota").hasAnyAuthority(
-                                "AUXILIAR CAJA", "ADMINISTRADOR GENERAL")
-                        // Permisos del Auxiliar Gromers
+                // --- 6. TABLAS MAESTRAS (Necesarias para cargar Selects y formularios) ---
+                .requestMatchers("/api/estados-agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
+                .requestMatchers("/api/estados-mascota/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
+                .requestMatchers("/api/especialidades/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO")
+                .requestMatchers("/api/especies/**", "/api/razas/**", "/api/tamanos/**", "/api/etapasVida/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
+                .requestMatchers("/api/servicios/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
+                .requestMatchers("/api/medios-pago/**", "/api/medios-solicitud/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
 
-                        .requestMatchers("/api/public/**").permitAll()
-
-                        // Endpoints que requieren roles específicos
-                        .requestMatchers("/api/por_definir/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/por_definir/**").hasAnyAuthority(
-                                "ADMINISTRADOR GENERAL", "VETERINARIO")
-                        .requestMatchers("/api/por_definir/**").hasAnyAuthority(
-                                "ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
-
-                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority(
-                                "AUXILIAR CAJA", "AUXILIAR GROMERS")
-                        .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyAuthority(
-                                "ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
-                        .requestMatchers("/api/estados-agenda/**").hasAnyAuthority(
-                                "ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
-                        .requestMatchers("/api/estados-mascota/**").hasAnyAuthority(
-                                "ADMINISTRADOR GENERAL", "AUXILIAR GROMERS", "AUXILIAR CAJA")
-                        //.requestMatchers(HttpMethod.GET,"/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL","AUXILIAR GROMERS")
-
-                        // Permisos que todavia no han sido definido quienes seran los responsables
-                        .requestMatchers("/api/canales-comunicacion/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/especialidades/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/especies/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/etapasVida/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/medicamentos-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/medicamentos/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/medios-pago/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/medios-solicitud/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/proveedores/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/razas/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/asistencias/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/roles/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/servicios/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/tamanos/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/tipo-documento/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/tipoMedicamento/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/tipo-persona-juridica/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/tipos-recordatorio/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/usuarios/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/usuarios-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/vacunas-mascota/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/vacunas/**").hasAuthority("ADMINISTRADOR GENERAL")
-                        .requestMatchers("/api/veterinarios/**").hasAuthority("ADMINISTRADOR GENERAL")
-
-
-                        .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasAnyAuthority(
-                                "AUXILIAR CAJA")
-                        .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyAuthority(
-                                "ADMINISTRADOR GENERAL", "AUXILIAR GROMERS")
-                        .requestMatchers("/api/colaboradores/**").hasAnyAuthority(
-                                "ADMINISTRADOR GENERAL")
-
-
-                        // Todos los demás endpoints requieren autenticación
-
-                        .anyRequest().authenticated()
-                );
+                // --- 7. OTROS ENDPOINTS ---
+                .requestMatchers("/api/medicamentos/**", "/api/tipoMedicamento/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO")
+                .requestMatchers("/api/vacunas/**", "/api/vacunas-mascota/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "VETERINARIO")
+                .requestMatchers("/api/recordatorios-agenda/**", "/api/tipos-recordatorio/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
+                
+                // Todos los demás endpoints requieren autenticación
+                .anyRequest().authenticated()
+            );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -152,9 +104,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://vet-woof-admin.netlify.app"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
 

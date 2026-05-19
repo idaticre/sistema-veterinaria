@@ -4,6 +4,7 @@ import com.vet.manadawoof.dtos.request.AgendaRequestDTO;
 import com.vet.manadawoof.dtos.response.AgendaResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 public interface AgendaService {
 
@@ -15,6 +16,8 @@ public interface AgendaService {
 
     // Lista todas las citas
     Page<AgendaResponseDTO> listar(Pageable pageable);
+    
+    List<AgendaResponseDTO> listarPorCliente(Long idCliente);
 
     // Obtiene una cita por ID
     AgendaResponseDTO obtenerPorId(Long idAgenda);

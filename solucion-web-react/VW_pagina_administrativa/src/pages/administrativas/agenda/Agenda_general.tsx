@@ -73,8 +73,8 @@ const extraerDetallesGC = (summary: string, description?: string) => {
 
   if (description) {
     const clienteMatch = description.match(
-      /Cliente:\s*(.*?)(\s*\(DNI:.*?\))?\s*\n/i,
-    );
+  /Cliente:\s*(.*?)(\s*\(Documento:.*?\))?\s*\n/i,
+);
     if (clienteMatch) {
       cliente = clienteMatch[1].trim();
     }
@@ -168,9 +168,9 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
     0,
   );
   const totalCosto = serviciosRegistrados.reduce(
-    (sum, s) => sum + s.subtotal,
-    0,
-  ); // --- CARGA DE DATOS INICIALES ---
+  (sum, s) => sum + Number(s.subtotal || 0),
+  0
+); // --- CARGA DE DATOS INICIALES ---
 
   useEffect(() => {
     const listarServicios = async () => {
@@ -404,6 +404,9 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
   }; // --- FUNCIONES DE GESTIÓN DE SERVICIOS ---
 
   const agregarServicio = () => {
+    if (servicioTemporal.valor_servicio <= 0) {
+  return alert("Ingrese un precio válido");
+}
     const sId = parseInt(servicioTemporal.id_servicio as string);
     const vId = parseInt(servicioTemporal.id_veterinario as string);
     const servicioInfo = serviciosDisponibles.find((s) => s.id === sId);
@@ -424,13 +427,24 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
     const cantidad = servicioTemporal.cantidad;
     const valorUnitario = servicioTemporal.valor_servicio;
     const duracionUnitaria = servicioTemporal.duracion_min;
-    const subtotalCalculado = valorUnitario * cantidad;
+    const subtotalCalculado =
+  Number(valorUnitario) * Number(cantidad);
+
+  console.log(
+  "🔥 SERVICIO TEMPORAL:",
+  servicioTemporal
+);
+
+console.log(
+  "🔥 SERVICIOS REGISTRADOS ACTUALES:",
+  serviciosRegistrados
+);
 
     const nuevoServicio: ServicioDetalle = {
       id_servicio: sId,
       nombre_servicio: servicioInfo.nombre,
       id_veterinario: vId,
-      nombre_veterinario: veterinarioInfo.nombre,
+      nombre_veterinario: `Veterinario ${vId}`,
       cantidad: cantidad,
       valor_servicio: valorUnitario,
       bono_inicial: 0,
@@ -441,6 +455,11 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
     };
 
     setServiciosRegistrados((prev) => [...prev, nuevoServicio]);
+
+    console.log(
+  "🔥 SERVICIOS REGISTRADOS:",
+  nuevoServicio
+);
 
     setServicioTemporal({
       id_servicio: "",
@@ -456,25 +475,35 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
     setServiciosRegistrados((prev) => prev.filter((_, i) => i !== index));
   }; // --- FUNCIÓN PRINCIPAL DE GUARDADO (ACTUALIZADA con S/ y Recordatorios) ---
 
-  const guardarEvento = async () => {
-    // 🔒 BLOQUEO TOTAL SI NO HAY SESIÓN
-  if (!isSignedIn) {
-    return alert("🔐 Debes iniciar sesión con Google antes de registrar una cita.");
-  }
-    // 🚫 BLOQUEO DE FERIADOS
-if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
-  return alert("🚫 No se puede agendar en feriados.");
-}
-    if (!nuevoEvento.cliente || !nuevoEvento.mascota || !nuevoEvento.dni)
+const guardarEvento = async () => {
+    // 1. VALIDACIONES INICIALES Y TOKEN
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      alert("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
+      navigate("/administracion/login");
+      return;
+    }
+
+    if (!isSignedIn) {
+      return alert("🔐 Debes iniciar sesión con Google antes de registrar una cita.");
+    }
+
+    if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
+      return alert("🚫 No se puede agendar en feriados.");
+    }
+
+    if (!nuevoEvento.cliente || !nuevoEvento.mascota || !nuevoEvento.dni) {
       return alert("Completa los campos de Cliente, DNI y Mascota.");
+    }
 
     if (serviciosRegistrados.length === 0) {
       return alert("Debe registrar al menos un servicio para la cita.");
     }
 
+    // 2. FORMATEO DE HORA Y FECHAS
     let horaDBFormateada = nuevoEvento.startTime;
     if (horaDBFormateada && horaDBFormateada.length === 5) {
-      horaDBFormateada = horaDBFormateada + ":00";
+      horaDBFormateada = horaDBFormateada + ":00"; // Formato HH:mm:ss requerido por Java
     }
 
     const duracionCitaTotal = totalDuracion;
@@ -482,145 +511,163 @@ if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
     const end = new Date(start.getTime() + duracionCitaTotal * 60000);
 
     if (horaOcupada(start, end, nuevoEvento.id)) {
-      return alert(
-        "⚠️ Ya existe una cita en este horario en Google Calendar. Elige otro horario.",
-      );
-    } // 1. PREPARAR DATOS PARA EL BACKEND (BD)
+      return alert("⚠️ Ya existe una cita en este horario en Google Calendar. Elige otro horario.");
+    }
 
+    // 3. IDENTIFICACIÓN DE IDS (MASCOTA Y ESTADO)
     const mascotaEncontrada = mascotas.find(
-      (m) =>
-        m.nombre === nuevoEvento.mascota &&
-        m.idCliente === nuevoEvento.clienteId,
+      (m) => m.nombre === nuevoEvento.mascota && m.idCliente === nuevoEvento.clienteId
     );
     const idMascota = mascotaEncontrada ? mascotaEncontrada.id : null;
 
-    const estadoEncontrado = estadosAgenda.find(
-      (e) => e.nombre === nuevoEvento.estado,
-    );
-    const idEstado = estadoEncontrado ? estadoEncontrado.id : 1;
-
     if (!idMascota) {
-      return alert(
-        "Error: No se pudo encontrar el ID de la mascota. Revisa la carga inicial de datos.",
-      );
+      return alert("Error: No se pudo encontrar el ID de la mascota.");
     }
 
+    const estadoEncontrado = estadosAgenda.find((e) => e.nombre === nuevoEvento.estado);
+    const idEstado = estadoEncontrado ? estadoEncontrado.id : 1;
+
+    // 4. PREPARAR DTO PARA BACKEND (Limpio para AgendaRequestDTO de Java)
     const AgendaRequestDTO = {
-      idCliente: nuevoEvento.clienteId,
-      idMascota: idMascota,
-      idMedioSolicitud: 4,
+      idCliente: Number(nuevoEvento.clienteId),
+      idMascota: Number(idMascota),
+      idMedioSolicitud: 4, 
       fecha: nuevoEvento.date,
       hora: horaDBFormateada,
-      duracionEstimadaMin: duracionCitaTotal,
-      abonoInicial: bonoTemporal,
-      totalCita: totalCosto,
-      idEstado: idEstado,
-      observaciones: nuevoEvento.description,
+      duracionEstimadaMin: Number(duracionCitaTotal),
+      abonoInicial: Number(bonoTemporal) || 0,
+      totalCita: Number(totalCosto) || 0,
+      idEstado: Number(idEstado),
+      observaciones: nuevoEvento.description || ""
+    };
 
-      servicios: serviciosRegistrados.map((s) => ({
-        idServicio: s.id_servicio,
-        idColaborador: s.id_veterinario,
-        idVeterinario: s.id_veterinario,
-        cantidad: s.cantidad,
-        valorServicio: s.valor_servicio,
-        duracionMin: s.duracion_min,
-        observaciones: s.adicionales,
-      })),
-    }; // 2. PREPARAR DATOS PARA GOOGLE CALENDAR (GC)
-
-    // Se usa S/ en lugar de $
+    // 5. PREPARAR RECURSO PARA GOOGLE CALENDAR
     const serviciosListaGC = serviciosRegistrados
-      .map(
-        (s) =>
-          `• ${s.nombre_servicio} (${s.cantidad}x S/${s.valor_servicio.toFixed(2)})  Subtotal: S/${s.subtotal.toFixed(2)} con ${s.nombre_veterinario}. Adicionales: ${s.adicionales || "N/A"}`,
-      )
+      .map((s) => `• ${s.nombre_servicio} (${s.cantidad}x S/${s.valor_servicio.toFixed(2)}) con ${s.nombre_veterinario}`)
       .join("\n");
 
     const eventoResource = {
-      // Se usa S/ en lugar de $
       summary: `${nuevoEvento.mascota} - Total: S/${totalCosto.toFixed(2)}`,
-      // Se usa S/ en lugar de $
-      description:
-        `**CLIENTE Y MASCOTA**\nCliente: ${nuevoEvento.cliente} (DNI: ${nuevoEvento.dni})\nMascota: ${nuevoEvento.mascota}\nEstado: ${nuevoEvento.estado}\nCosto Total: S/${totalCosto.toFixed(2)}\nDuración Total: ${duracionCitaTotal} min\n\n**SERVICIOS REGISTRADOS**\n${serviciosListaGC}\n\n**ADELANTO** S/${bonoTemporal.toFixed(2)}\n\n**OBSERVACIONES**\n${nuevoEvento.description || "No hay observaciones adicionales."} [DATA_JSON]
-        ${JSON.stringify(serviciosRegistrados)}`.trim(),
+      description: `Cliente: ${nuevoEvento.cliente}\nMascota: ${nuevoEvento.mascota}\n\n**SERVICIOS**\n${serviciosListaGC}\n\nObs: ${nuevoEvento.description || ""}`,
       start: { dateTime: start.toISOString(), timeZone: "America/Lima" },
       end: { dateTime: end.toISOString(), timeZone: "America/Lima" },
-      // Implementación de Recordatorios
-      reminders: {
-        useDefault: false,
-        overrides: [
-          { method: "email", minutes: 43200 }, // 1 mes antes
-          { method: "popup", minutes: 30 }, // 30 minutos antes
-        ],
-      },
     };
 
     try {
-      // *** PASO 1: INTENTAR INSERTAR EN LA BASE DE DATOS (Requiere JWT) ***
-      const responseDB = await IST.post("/agenda", AgendaRequestDTO);
+      // 🔥 PASO 1: INSERTAR CITA EN BD
+      const responseDB = await axios.post(
+        "http://localhost:8080/api/agenda",
+        AgendaRequestDTO,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!responseDB.data || !responseDB.data.success) {
+        throw new Error(responseDB.data.message || "Error al crear la cita en BD");
+      }
+
       const citaCreada = responseDB.data.data;
 
-      if (!responseDB.data.success) {
-        // Falló la lógica de negocio del backend
-        return alert(`Error BD: ${responseDB.data.message}`);
-      } // *** PASO 2: INSERTAR EN GOOGLE CALENDAR (Solo si la BD fue exitosa) ***
+      console.log(
+  "🔥 ANTES DE GUARDAR:",
+  serviciosRegistrados
+);
 
+
+      // 🔥 PASO 2: INSERTAR SERVICIOS UNO POR UNO
+      for (const servicio of serviciosRegistrados) {
+        const ingresoDTO = {
+          idAgenda: Number(citaCreada.id),
+          idServicio: Number(servicio.id_servicio),
+          idColaborador:
+  Number(servicio.id_veterinario),
+          idVeterinario: null,
+          cantidad:
+  parseInt(
+    servicio.cantidad.toString()
+  ),
+          duracionMin:
+  parseInt(
+    servicio.duracion_min.toString()
+  ),
+          valorServicio:
+  parseFloat(
+    servicio.valor_servicio.toString()
+  ),
+          observaciones: servicio.adicionales || ""
+        };
+
+     try {
+
+  const responseIngreso =
+    await IST.post(
+      "/ingresos-servicios",
+      ingresoDTO
+    );
+
+  console.log(
+    "🔥 RESPUESTA BACKEND:",
+    responseIngreso.data
+  );
+
+} catch (error: any) {
+
+  console.error(
+    "🔥 ERROR BACKEND:",
+    error.response?.data || error
+  );
+}
+      }
+
+      // 🔥 PASO 3: INSERTAR EN GOOGLE CALENDAR
       if (isSignedIn) {
         await window.gapi.client.calendar.events.insert({
           calendarId: "primary",
           resource: eventoResource,
         });
-      } // *** PASO 3: REGISTRAR ABONO/PAGO si aplica ***
+      }
 
+      // 🔥 PASO 4: REGISTRAR PAGO SI HAY ABONO
       if (bonoTemporal > 0) {
         const pagoRequestDTO = {
           idAgenda: citaCreada.id,
-          idMedioPago: ID_MEDIO_PAGO_DEFAULT,
-          idUsuario: ID_USUARIO_DEFAULT,
+          idMedioPago: 1, // Ajustar ID según tu tabla medios_pago
+          idUsuario: 1,   // Ajustar según sesión
           monto: bonoTemporal,
-          observaciones: "Adelanto registrado durante la creación de la cita.",
+          observaciones: "Adelanto registrado desde agenda.",
         };
         await IST.post("/pagos-agenda", pagoRequestDTO);
       }
 
-      alert(`Cita Registrada Existosamenete`);
+      alert(`Cita Registrada Exitosamente`);
+
+      // LIMPIEZA DE FORMULARIO
+      setMostrarModal(false);
+      setServiciosRegistrados([]);
+      setBonoTemporal(0);
+      setNuevoEvento((prev) => ({
+        ...prev,
+        id: "",
+        summary: "",
+        description: "",
+        dni: "",
+        cliente: "",
+        clienteId: 0,
+        mascota: "",
+        servicio: "",
+        estado: "PENDIENTE",
+        date: fechaSeleccionada.toISOString().split("T")[0],
+        startTime: "10:00",
+      }));
+      cargarEventos();
+
     } catch (error: any) {
-      let errorMessage = "Ocurrió un error al guardar la cita. "; // MANEJO CRÍTICO DEL 401: Detiene y notifica la expiración de la sesión
-
-      if (
-        axios.isAxiosError(error) &&
-        error.response &&
-        error.response.status === 401
-      ) {
-        errorMessage =
-          "🚫 Error: 401 Unauthorized. Su sesión ha expirado o no tiene permisos. **NO se guardó la cita en la BD ni en Calendar.** Por favor, inicie sesión de nuevo.";
-      } else if (error.message) {
-        errorMessage += `Detalle: ${error.message}`;
-      }
-      alert(errorMessage);
-      return;
-    } // --- CÓDIGO DE ÉXITO (Solo si el try completó todo) ---
-
-    setMostrarModal(false);
-    setServiciosRegistrados([]);
-    setBonoTemporal(0);
-    setNuevoEvento((prev) => ({
-      ...prev,
-      id: "",
-      summary: "",
-      description: "",
-      dni: "",
-      cliente: "",
-      clienteId: 0,
-      mascota: "",
-      servicio: "",
-      estado: estadosAgenda.find((e) => e.id === 1)?.nombre || "PENDIENTE",
-      date: fechaSeleccionada.toISOString().split("T")[0],
-      startTime: "10:00",
-    })); // Recarga la lista de eventos de Google Calendar para mostrar el nuevo registro
-
-    cargarEventos(); // Se mantiene, aunque ya no se usa para renderizar: cargarCitasBD(fechaSeleccionada);
-  }; // ---------------------------------------------
+      console.error("Error al guardar:", error);
+      const msg = error.response?.status === 401 
+        ? "🚫 Sesión expirada o no autorizada." 
+        : `Detalle: ${error.message}`;
+      alert("Ocurrió un error al guardar la cita. " + msg);
+    }
+  };// ---------------------------------------------
   // --- JSX DEL COMPONENTE ---
   return (
   <div id="agenda">
@@ -802,7 +849,7 @@ if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
           <div className="modal-content">
                         <h3>Agendar nueva cita 🗓️</h3>          
             <div className="col-izq">
-                            <label>DNI *</label>
+                            <label>Número de documento *</label>
                            
               <input
                 type="text"
@@ -916,19 +963,23 @@ if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
                   </label>
                                  
                   <input
-                    type="number"
-                    id="valor_servicio"
-                    min="0"
-                    step="1.00"
-                    placeholder="0.00"
-                    value={servicioTemporal.valor_servicio.toFixed()}
-                    onChange={(e) =>
-                      setServicioTemporal({
-                        ...servicioTemporal,
-                        valor_servicio: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                  />
+  type="number"
+  id="valor_servicio"
+  min="1"
+  step="0.01"
+  placeholder="Ingrese precio"
+  value={
+    servicioTemporal.valor_servicio === 0
+      ? ""
+      : servicioTemporal.valor_servicio
+  }
+  onChange={(e) =>
+    setServicioTemporal({
+      ...servicioTemporal,
+      valor_servicio: parseFloat(e.target.value) || 0,
+    })
+  }
+/>
                                  
                 </div>
                                
@@ -990,10 +1041,10 @@ if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
                                         <option value="">Seleccione...</option> 
                                      
                     {colaboradores.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nombre} (ID {c.id})
-                      </option>
-                    ))}
+  <option key={c.id} value={c.id}>
+    ID {c.id}
+  </option>
+))}
                                   
                   </select>
                                

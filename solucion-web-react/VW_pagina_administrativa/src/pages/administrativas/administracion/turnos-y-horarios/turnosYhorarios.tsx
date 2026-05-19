@@ -28,7 +28,7 @@ import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
 // import type { ColaboradorRequest } from '../../../../components/interfaces/interfaces';
 import "./turnosYhorarios.css"
-import IST from "../../../../components/proteccion/IST";
+//import IST from "../../../../components/proteccion/IST";
 
 function turnosYhorarios() {
     /*

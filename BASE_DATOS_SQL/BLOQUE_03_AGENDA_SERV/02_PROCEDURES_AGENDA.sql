@@ -4,9 +4,11 @@ USE vet_manada_woof;
 -- SP 1: GESTIONAR AGENDA (Crear/Actualizar)
 -- ========================================
 DROP PROCEDURE IF EXISTS sp_gestionar_agenda;
+
 DELIMITER $$
 
 CREATE PROCEDURE sp_gestionar_agenda(
+
     IN p_accion VARCHAR(10),
     IN p_id_agenda BIGINT,
     IN p_id_cliente BIGINT,
@@ -17,88 +19,170 @@ CREATE PROCEDURE sp_gestionar_agenda(
     IN p_duracion_estimada_min INT,
     IN p_id_estado INT,
     IN p_abono_inicial DECIMAL(10,2),
+    IN p_total_cita DECIMAL(10,2),
     IN p_observaciones VARCHAR(256),
+
     OUT p_id_resultado BIGINT,
     OUT p_codigo VARCHAR(16),
     OUT p_mensaje VARCHAR(255)
+
 )
+
 main_block: BEGIN
+
     DECLARE v_existe_cita INT DEFAULT 0;
     DECLARE v_nuevo_codigo VARCHAR(16);
     DECLARE v_estado_actual INT;
-    
+
     SET p_accion = UPPER(TRIM(p_accion));
-    
-    -- ========================================
+
+    -- =========================================
     -- VALIDACIONES GENERALES
-    -- ========================================
+    -- =========================================
+
     IF p_accion NOT IN ('CREAR', 'ACTUALIZAR') THEN
-        SET p_mensaje = 'ERROR: Acción no válida. Use "CREAR" o "ACTUALIZAR".';
+
+        SET p_mensaje =
+        'ERROR: Acción inválida';
+
         LEAVE main_block;
+
     END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM clientes WHERE id = p_id_cliente) THEN
-        SET p_mensaje = 'ERROR: Cliente no existe.';
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM clientes
+        WHERE id = p_id_cliente
+    ) THEN
+
+        SET p_mensaje =
+        'ERROR: Cliente no existe';
+
         LEAVE main_block;
+
     END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
-        SET p_mensaje = 'ERROR: Mascota no existe.';
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM mascotas
+        WHERE id = p_id_mascota
+    ) THEN
+
+        SET p_mensaje =
+        'ERROR: Mascota no existe';
+
         LEAVE main_block;
+
     END IF;
-    
-    IF p_id_medio_solicitud IS NOT NULL AND NOT EXISTS (SELECT 1 FROM medio_solicitud WHERE id = p_id_medio_solicitud) THEN
-        SET p_mensaje = 'ERROR: Medio de solicitud no existe.';
+
+    IF p_id_medio_solicitud IS NOT NULL
+    AND NOT EXISTS (
+        SELECT 1
+        FROM medio_solicitud
+        WHERE id = p_id_medio_solicitud
+    ) THEN
+
+        SET p_mensaje =
+        'ERROR: Medio solicitud inválido';
+
         LEAVE main_block;
+
     END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM estado_agenda WHERE id = p_id_estado) THEN
-        SET p_mensaje = 'ERROR: Estado de agenda no existe.';
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM estado_agenda
+        WHERE id = p_id_estado
+    ) THEN
+
+        SET p_mensaje =
+        'ERROR: Estado agenda inválido';
+
         LEAVE main_block;
+
     END IF;
-    
+
     IF p_fecha < CURDATE() THEN
-        SET p_mensaje = 'ERROR: La fecha no puede ser anterior a hoy.';
+
+        SET p_mensaje =
+        'ERROR: Fecha inválida';
+
         LEAVE main_block;
+
     END IF;
-    
+
     IF p_duracion_estimada_min < 0 THEN
-        SET p_mensaje = 'ERROR: La duración no puede ser negativa.';
+
+        SET p_mensaje =
+        'ERROR: Duración inválida';
+
         LEAVE main_block;
+
     END IF;
-    
+
     IF p_abono_inicial < 0 THEN
-        SET p_mensaje = 'ERROR: El abono no puede ser negativo.';
+
+        SET p_mensaje =
+        'ERROR: Abono inválido';
+
         LEAVE main_block;
+
     END IF;
-    
-    -- ========================================
-    -- CREAR NUEVA CITA
-    -- ========================================
+
+    -- =========================================
+    -- CREAR
+    -- =========================================
+
     IF p_accion = 'CREAR' THEN
-        
-        -- Validar duplicados: misma mascota, misma fecha y hora
-        SELECT COUNT(*) INTO v_existe_cita
+
+        SELECT COUNT(*)
+        INTO v_existe_cita
         FROM agenda
         WHERE id_mascota = p_id_mascota
-          AND fecha = p_fecha
-          AND hora = p_hora
-          AND id_estado NOT IN (4, 6); -- Excluir CANCELADA y NO ASISTIÓ
-        
+        AND fecha = p_fecha
+        AND hora = p_hora
+        AND id_estado NOT IN (4,6);
+
         IF v_existe_cita > 0 THEN
-            SET p_mensaje = 'ERROR: Ya existe una cita para esta mascota en la misma fecha y hora.';
+
+            SET p_mensaje =
+            'ERROR: Ya existe una cita';
+
             LEAVE main_block;
+
         END IF;
-        
-        -- Generar código único usando UUID (más seguro que MAX(id))
-        SET v_nuevo_codigo = CONCAT('AG-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
-        
-        -- Verificar que el código no exista (por si acaso)
-        WHILE EXISTS (SELECT 1 FROM agenda WHERE codigo = v_nuevo_codigo) DO
-            SET v_nuevo_codigo = CONCAT('AG-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
+
+        -- GENERAR CÓDIGO
+        SET v_nuevo_codigo =
+            CONCAT(
+                'AG-',
+                LPAD(
+                    FLOOR(1 + RAND() * 999999),
+                    6,
+                    '0'
+                )
+            );
+
+        WHILE EXISTS (
+            SELECT 1
+            FROM agenda
+            WHERE codigo = v_nuevo_codigo
+        ) DO
+
+            SET v_nuevo_codigo =
+                CONCAT(
+                    'AG-',
+                    LPAD(
+                        FLOOR(1 + RAND() * 999999),
+                        6,
+                        '0'
+                    )
+                );
+
         END WHILE;
-        
-        INSERT INTO agenda (
+
+        INSERT INTO agenda(
+
             codigo,
             id_cliente,
             id_mascota,
@@ -110,7 +194,10 @@ main_block: BEGIN
             total_cita,
             id_estado,
             observaciones
-        ) VALUES (
+
+        )
+        VALUES(
+
             v_nuevo_codigo,
             p_id_cliente,
             p_id_mascota,
@@ -119,71 +206,97 @@ main_block: BEGIN
             p_hora,
             p_duracion_estimada_min,
             p_abono_inicial,
-            0, -- Se actualizará al agregar servicios
+            p_total_cita,
             p_id_estado,
             p_observaciones
+
         );
-        
+
         SET p_id_resultado = LAST_INSERT_ID();
+
         SET p_codigo = v_nuevo_codigo;
-        SET p_mensaje = CONCAT('Cita ', v_nuevo_codigo, ' creada exitosamente.');
-    
-    -- ========================================
-    -- ACTUALIZAR CITA EXISTENTE
-    -- ========================================
+
+        SET p_mensaje =
+            CONCAT(
+                'Cita ',
+                v_nuevo_codigo,
+                ' creada correctamente'
+            );
+
+    -- =========================================
+    -- ACTUALIZAR
+    -- =========================================
+
     ELSEIF p_accion = 'ACTUALIZAR' THEN
-        
+
         IF p_id_agenda IS NULL THEN
-            SET p_mensaje = 'ERROR: Debe proporcionar el ID de la cita a actualizar.';
+
+            SET p_mensaje =
+            'ERROR: Debe enviar ID';
+
             LEAVE main_block;
+
         END IF;
-        
-        IF NOT EXISTS (SELECT 1 FROM agenda WHERE id = p_id_agenda) THEN
-            SET p_mensaje = 'ERROR: Cita no existe.';
+
+        IF NOT EXISTS (
+            SELECT 1
+            FROM agenda
+            WHERE id = p_id_agenda
+        ) THEN
+
+            SET p_mensaje =
+            'ERROR: Cita no existe';
+
             LEAVE main_block;
+
         END IF;
-        
-        -- Obtener estado actual
-        SELECT id_estado INTO v_estado_actual FROM agenda WHERE id = p_id_agenda;
-        
-        -- No permitir actualizar citas canceladas o ya atendidas
-        IF v_estado_actual IN (4, 5) THEN -- CANCELADA, ATENDIDA
-            SET p_mensaje = 'ERROR: No se puede actualizar una cita cancelada o atendida.';
-            LEAVE main_block;
-        END IF;
-        
-        -- Validar duplicados: misma mascota, misma fecha y hora (excluyendo la cita actual)
-        SELECT COUNT(*) INTO v_existe_cita
+
+        SELECT id_estado
+        INTO v_estado_actual
         FROM agenda
-        WHERE id_mascota = p_id_mascota
-          AND fecha = p_fecha
-          AND hora = p_hora
-          AND id != p_id_agenda
-          AND id_estado NOT IN (4, 6);
-        
-        IF v_existe_cita > 0 THEN
-            SET p_mensaje = 'ERROR: Ya existe otra cita para esta mascota en la misma fecha y hora.';
+        WHERE id = p_id_agenda;
+
+        IF v_estado_actual IN (4,5) THEN
+
+            SET p_mensaje =
+            'ERROR: No se puede actualizar';
+
             LEAVE main_block;
+
         END IF;
-        
-        UPDATE agenda SET
+
+        UPDATE agenda
+        SET
             id_cliente = p_id_cliente,
             id_mascota = p_id_mascota,
             id_medio_solicitud = p_id_medio_solicitud,
             fecha = p_fecha,
             hora = p_hora,
             duracion_estimada_min = p_duracion_estimada_min,
+            abono_inicial = p_abono_inicial,
+            total_cita = p_total_cita,
             id_estado = p_id_estado,
             observaciones = p_observaciones
         WHERE id = p_id_agenda;
-        
-        SELECT codigo INTO p_codigo FROM agenda WHERE id = p_id_agenda;
+
+        SELECT codigo
+        INTO p_codigo
+        FROM agenda
+        WHERE id = p_id_agenda;
+
         SET p_id_resultado = p_id_agenda;
-        SET p_mensaje = CONCAT('Cita ', p_codigo, ' actualizada exitosamente.');
-    
+
+        SET p_mensaje =
+            CONCAT(
+                'Cita ',
+                p_codigo,
+                ' actualizada correctamente'
+            );
+
     END IF;
-    
+
 END$$
+
 DELIMITER ;
 
 -- ========================================

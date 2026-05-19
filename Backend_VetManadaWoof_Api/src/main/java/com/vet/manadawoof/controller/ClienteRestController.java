@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/clientes")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class ClienteRestController {
 
     private final ClienteService service;
@@ -56,6 +57,31 @@ public class ClienteRestController {
         }
         return ResponseEntity.ok(new ApiResponse<>(true, "Cliente encontrado", cliente));
     }
+    
+    @GetMapping("/documento/{documento}")
+public ResponseEntity<ApiResponse<ClienteResponseDTO>>
+buscarPorDocumento(@PathVariable String documento) {
+
+    ClienteResponseDTO cliente =
+            service.buscarPorDocumento(documento);
+
+    if(cliente == null){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(
+                        false,
+                        "Cliente no encontrado",
+                        null
+                ));
+    }
+
+    return ResponseEntity.ok(
+            new ApiResponse<>(
+                    true,
+                    "Cliente encontrado",
+                    cliente
+            )
+    );
+}
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<ClienteResponseDTO>> eliminar(@PathVariable("id") Long idCliente) {

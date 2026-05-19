@@ -17,17 +17,21 @@ public class AgendaScheduler {
 
     private final AgendaRepository agendaRepository;
 
-     @Scheduled(cron = "0 0 0 * * *") // todos los días a medianoche
+    // 🔥 Ejecuta cada minuto
+    @Scheduled(cron = "0 * * * * *")
     public void actualizarNoAsistidos() {
 
         LocalDate hoy = LocalDate.now();
-        LocalTime horaActual = LocalTime.now();
+
+        // 🔥 tolerancia de 30 minutos
+        LocalTime horaActual =
+                LocalTime.now().minusMinutes(30);
 
         // 🔥 estados válidos
         List<Integer> estadosValidos = List.of(
-            1, // PENDIENTE
-            2, // CONFIRMADA
-            3  // REPROGRAMADA
+                1, // PENDIENTE
+                2, // CONFIRMADA
+                3  // REPROGRAMADA
         );
 
         List<AgendaEntity> citas =
@@ -38,19 +42,29 @@ public class AgendaScheduler {
                 );
 
         if (citas.isEmpty()) {
-            System.out.println("✔ No hay citas para actualizar");
+
+            System.out.println(
+                    "✔ No hay citas para actualizar"
+            );
+
             return;
         }
 
         for (AgendaEntity cita : citas) {
-            EstadoAgendaEntity estado = new EstadoAgendaEntity();
-            estado.setId(6); // 👈 NO ASISTIO (verifica ID real)
+
+            EstadoAgendaEntity estado =
+                    new EstadoAgendaEntity();
+
+            // 🔥 ID del estado NO ASISTIÓ
+            estado.setId(6);
 
             cita.setEstado(estado);
         }
 
         agendaRepository.saveAll(citas);
 
-        System.out.println("✔ Citas actualizadas a NO ASISTIO");
+        System.out.println(
+                "✔ Citas actualizadas a NO ASISTIÓ"
+        );
     }
 }

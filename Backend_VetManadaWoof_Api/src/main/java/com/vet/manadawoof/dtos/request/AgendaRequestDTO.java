@@ -50,6 +50,9 @@ public class AgendaRequestDTO {
 
     @DecimalMin(value = "0.0", message = "El abono no puede ser negativo")
     private BigDecimal abonoInicial;
+    
+    @DecimalMin(value = "0.0", message = "El total no puede ser negativo")
+private BigDecimal totalCita;
 
     @Size(max = 256, message = "Las observaciones no deben superar 256 caracteres")
     private String observaciones;

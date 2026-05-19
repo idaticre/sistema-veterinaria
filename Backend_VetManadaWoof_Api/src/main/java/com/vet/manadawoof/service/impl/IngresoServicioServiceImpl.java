@@ -30,7 +30,7 @@ public class IngresoServicioServiceImpl implements IngresoServicioService {
     @Override
     @Transactional
     public IngresoServicioResponseDTO crear(IngresoServicioRequestDTO dto) {
-        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("gestionar_ingreso_servicio");
+        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("sp_gestionar_ingreso_servicio");
         
         registrarParametros(sp);
         
@@ -47,24 +47,36 @@ public class IngresoServicioServiceImpl implements IngresoServicioService {
         
         sp.execute();
         
-        Long idResultado = ((Number) sp.getOutputParameterValue("p_id_resultado")).longValue();
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
         BigDecimal nuevoTotal = (BigDecimal) sp.getOutputParameterValue("p_nuevo_total_cita");
-        
-        if(mensaje != null && mensaje.startsWith("ERROR")) {
-            return IngresoServicioResponseDTO.builder().mensaje(mensaje).build();
+
+        if (mensaje != null && mensaje.startsWith("ERROR")) {
+            return IngresoServicioResponseDTO.builder()
+                    .mensaje(mensaje)
+                    .build();
         }
+
+        Object resultado = sp.getOutputParameterValue("p_id_resultado");
+
+        Long idResultado = resultado != null
+                ? ((Number) resultado).longValue()
+                : null;
         
         IngresoServicioResponseDTO response = obtenerPorId(idResultado);
-        response.setNuevoTotalCita(nuevoTotal);
-        response.setMensaje(mensaje);
+        
+        // Corrección aplicada aquí
+        if (response != null) {
+            response.setNuevoTotalCita(nuevoTotal);
+            response.setMensaje(mensaje);
+        }
+        
         return response;
     }
     
     @Override
     @Transactional
     public IngresoServicioResponseDTO actualizar(IngresoServicioRequestDTO dto) {
-        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("gestionar_ingreso_servicio");
+        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("sp_gestionar_ingreso_servicio");
         
         registrarParametros(sp);
         
@@ -81,24 +93,36 @@ public class IngresoServicioServiceImpl implements IngresoServicioService {
         
         sp.execute();
         
-        Long idResultado = ((Number) sp.getOutputParameterValue("p_id_resultado")).longValue();
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
         BigDecimal nuevoTotal = (BigDecimal) sp.getOutputParameterValue("p_nuevo_total_cita");
-        
-        if(mensaje != null && mensaje.startsWith("ERROR")) {
-            return IngresoServicioResponseDTO.builder().mensaje(mensaje).build();
+
+        if (mensaje != null && mensaje.startsWith("ERROR")) {
+            return IngresoServicioResponseDTO.builder()
+                    .mensaje(mensaje)
+                    .build();
         }
+
+        Object resultado = sp.getOutputParameterValue("p_id_resultado");
+
+        Long idResultado = resultado != null
+                ? ((Number) resultado).longValue()
+                : null;
         
         IngresoServicioResponseDTO response = obtenerPorId(idResultado);
-        response.setNuevoTotalCita(nuevoTotal);
-        response.setMensaje(mensaje);
+        
+        // Corrección aplicada aquí
+        if (response != null) {
+            response.setNuevoTotalCita(nuevoTotal);
+            response.setMensaje(mensaje);
+        }
+        
         return response;
     }
     
     @Override
     @Transactional
     public IngresoServicioResponseDTO eliminar(Long idIngreso, Long idAgenda) {
-        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("gestionar_ingreso_servicio");
+        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("sp_gestionar_ingreso_servicio");
         
         registrarParametros(sp);
         

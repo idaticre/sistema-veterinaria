@@ -179,6 +179,28 @@ public class ClienteServiceImpl implements ClienteService {
         return mapper.toFullDto(results.get(0));
     }
     
+    @Override
+@Transactional
+public ClienteResponseDTO buscarPorDocumento(String documento) {
+
+    List<Object[]> results = entityManager.createNativeQuery("""
+            SELECT
+                c.id, c.codigo, c.activo, c.fecha_registro,
+                e.id, e.codigo, e.nombre, e.sexo, e.documento,
+                e.id_tipo_persona_juridica, e.id_tipo_documento, e.correo,
+                e.telefono, e.direccion, e.ciudad, e.distrito, e.representante,
+                e.activo, e.fecha_registro
+            FROM clientes c
+            JOIN entidades e ON e.id = c.id_entidad
+            WHERE e.documento = :documento
+            """)
+            .setParameter("documento", documento)
+            .getResultList();
+
+    if(results.isEmpty()) return null;
+
+    return mapper.toFullDto(results.get(0));
+}
     // ELIMINAR (Desactivar)
     @Override
     @Transactional

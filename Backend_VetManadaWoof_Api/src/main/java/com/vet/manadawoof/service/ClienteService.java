@@ -16,5 +16,7 @@ public interface ClienteService {
 
     // borrado lógico
     ClienteResponseDTO eliminar(Long idCliente);
+    
+    ClienteResponseDTO buscarPorDocumento(String documento);
 
 }

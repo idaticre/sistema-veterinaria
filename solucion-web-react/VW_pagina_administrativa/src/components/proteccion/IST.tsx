@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const IST = axios.create({
-  baseURL: "https://sistema-veterinaria.onrender.com/api",
+  baseURL: "http://localhost:8080/api",
 });
 
 IST.interceptors.request.use((config) => {
@@ -41,4 +41,4 @@ IST.interceptors.response.use(
   }
 );
 
-export default IST
+export default IST;
