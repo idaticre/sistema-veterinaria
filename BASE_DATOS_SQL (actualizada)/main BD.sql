@@ -1,22 +1,7 @@
--- =========================================================
--- BASE DE DATOS: vet_manada_woof
--- Este script contiene la definición inicial de la base de datos
--- =========================================================
-
--- ========================================x
--- 0. Creación de la Base de Datos
--- ========================================
 DROP DATABASE IF EXISTS vet_manada_woof;
 CREATE DATABASE vet_manada_woof;
 USE vet_manada_woof;
--- ========================================
--- BLOQUE 01: Administracion
--- ========================================
 
--- ========================================
--- TABLA: empresa
--- Almacena la información de la veterinaria que opera el sistema.
--- ========================================
 CREATE TABLE IF NOT EXISTS empresa (
     id INT PRIMARY KEY AUTO_INCREMENT,
     razon_social VARCHAR(128) NOT NULL,
@@ -31,10 +16,6 @@ CREATE TABLE IF NOT EXISTS empresa (
     logo_empresa VARCHAR(255)  		-- Guardar solo la ruta al archivo
 );
 
--- ========================================
--- EMPRESA 
--- Al ser información real se hace el insert y posterior hay un sp para visualizar y actualizar
--- ========================================
 INSERT INTO empresa(razon_social, ruc, direccion, ciudad, distrito, telefono, correo, representante) VALUES 
 ('Manada Woof.S.A.C.S ', 
 '20613366998', 
@@ -46,11 +27,6 @@ INSERT INTO empresa(razon_social, ruc, direccion, ciudad, distrito, telefono, co
 'Sandra Alexis Laguna De La Rosa'
 );
 
--- ========================================
--- TABLA: tipo_documento
--- Contiene los diferentes tipos de documentos permitidos para identificar entidades.
--- Ejemplo: “DNI”, “RUC”, “PASAPORTE”
-	-- ========================================
 CREATE TABLE IF NOT EXISTS tipo_documento (
 		id INT PRIMARY KEY AUTO_INCREMENT,
 		descripcion VARCHAR(32) NOT NULL,
@@ -66,10 +42,6 @@ INSERT INTO tipo_documento (descripcion) VALUES
 ('PASAPORTE'), 
 ('OTROS');
 
--- ========================================
--- TABLA: tipo_persona_juridica
--- Clasifica la naturaleza legal de la entidad: NATURAL o JURÍDICA.
--- ========================================
 CREATE TABLE tipo_persona_juridica (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) NOT NULL UNIQUE,
@@ -84,10 +56,6 @@ INSERT INTO tipo_persona_juridica (nombre, descripcion) VALUES
 ('NATURAL', 'Persona natural que representa una entidad individual'),
 ('JURIDICA', 'Entidad jurídica con existencia legal y RUC propio');
 
--- ========================================
--- TABLA: usuarios
--- Guarda las credenciales de acceso al sistema para cada persona autorizada.
--- ========================================
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(32) UNIQUE NOT NULL,
@@ -103,11 +71,6 @@ INSERT INTO usuarios (username, password_hash) VALUES
 ('caja_milo',   '$2a$10$dD4rOJmMmy/2yILJbiMet.TAefxSWM5U/Y7RsRASsy.aX/bF0gftC'),   -- Auxiliar Caja         (pwd: caja123)
 ('gromer_luna', '$2a$10$yBktNscCkRfzx9rsDOab.OyaS4f21aynN6Huy4hqrGbiEEobdhqCq');   -- Auxiliar Gromers      (pwd: luna123)
 
--- ========================================
--- TABLA: roles
--- Define los roles asignables a usuarios del sistema.
--- Ejemplo: “ADMIN”, “VETERINARIO”
--- ========================================
 CREATE TABLE IF NOT EXISTS roles (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) NOT NULL UNIQUE,
@@ -121,11 +84,6 @@ INSERT INTO roles (nombre, descripcion) VALUES
 ('AUXILIAR GROMERS', 'Atiende grooming y soporte de servicios'),
 ('AUXILIAR BAÑADOR', 'Atiende BAÑOS y soporte de servicios');
 
--- ========================================
--- TABLA: usuarios_roles
--- Relaciona usuarios con uno o varios roles.
--- Ejemplo: usuario_id = 1, rol_id = 2 (Usuario 1 tiene el rol 2 - VETERINARIO)
--- ========================================
 CREATE TABLE IF NOT EXISTS usuarios_roles (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_usuario INT,
@@ -1039,7 +997,6 @@ CREATE INDEX idx_vacuna_mascota_vacuna ON vacunas_mascota(id_vacuna);
 -- gestiona los tipos de servicios, su registro,
 -- citas programadas, visitas y recordatorios.
 -- ========================================
--- USE vet_manada_woof;
 -- ========================================
 -- TABLA: canales_comunicacion
 -- Define los canales de contacto utilizados.
@@ -1518,7 +1475,6 @@ ALTER TABLE historia_clinica_archivos
 CREATE INDEX idx_archivo_registro ON historia_clinica_archivos(id_registro_atencion);
 CREATE INDEX idx_archivo_tipo ON historia_clinica_archivos(id_tipo_archivo);
 
-USE vet_manada_woof;
 
 -- Usado para facturas, boletas y demás en vez de tener 2 tablas
 -- Hace uso de diferentes tablas, incluidas clientes, tipos_comprobantes, entidades, agenda_pagos, etc
@@ -1551,17 +1507,18 @@ CREATE TABLE comprobantes (
     total_anticipio DECIMAL(14,2) NOT NULL DEFAULT 0,
     medio_pago_id INT NULL DEFAULT NULL,
 
-    CONSTRAINT fk_comprobantes_agenda FOREIGN KEY (agenda_id) REFERENCES agenda(id),
-    CONSTRAINT fk_comprobantes_tipo FOREIGN KEY (tipo_comprobante_id) REFERENCES tipos_comprobantes(id),
-    CONSTRAINT fk_comprobantes_moneda FOREIGN KEY (tipo_moneda_id) REFERENCES tipo_monedas(id),
-    CONSTRAINT fk_comprobantes_percepcion FOREIGN KEY (tipo_percepcion_id) REFERENCES tipos_percepciones(id),
-    CONSTRAINT fk_comprobantes_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id),
-    CONSTRAINT fk_comprobantes_medio_pago FOREIGN KEY (medio_pago_id) REFERENCES medios_pago(id),
+    CONSTRAINT fk_comprobantes_agenda FOREIGN KEY (agenda_id) REFERENCES agenda(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_comprobantes_tipo FOREIGN KEY (tipo_comprobante_id) REFERENCES tipos_comprobantes(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_comprobantes_moneda FOREIGN KEY (tipo_moneda_id) REFERENCES tipo_monedas(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_comprobantes_percepcion FOREIGN KEY (tipo_percepcion_id) REFERENCES tipos_percepciones(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_comprobantes_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_comprobantes_medio_pago FOREIGN KEY (medio_pago_id) REFERENCES medios_pago(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT uq_tipo_serie_numero UNIQUE (tipo_comprobante_id, serie, numero),
 
     INDEX idx_tipo_comprobante (tipo_comprobante_id),
     INDEX idx_cliente (cliente_id),
     INDEX idx_fecha_emision (fecha_emision),
+    INDEX idx_fecha_pago (fecha_pago),
     INDEX idx_serie_numero (serie, numero)
 );
 
@@ -1572,27 +1529,10 @@ CREATE TABLE correlativos(
     PRIMARY KEY (tipo_comprobante_id, serie)
 );
 
-DELIMITER //
-CREATE PROCEDURE sp_get_comprobantes_por_tipo(IN p_tipo INT)
-BEGIN
-    SELECT *
-    FROM comprobantes
-    WHERE tipo_comprobante_id = p_tipo;
-END //
-DELIMITER;
-
 CREATE TABLE monedas(
 	id int primary key not null auto_increment,
     moneda varchar(15)
 );
-
-DELIMITER $$
-CREATE PROCEDURE sp_listar_monedas()
-BEGIN
-    SELECT *
-    FROM monedas;
-END $$
-DELIMITER ;
 
 INSERT INTO monedas(moneda) VALUES ('SOLES');
 INSERT INTO monedas(moneda) VALUES ('DÓLARES');
@@ -1604,14 +1544,6 @@ CREATE TABLE tipos_comprobantes(
     comprobante varchar(16) not null
 );
 
-DELIMITER $$
-CREATE PROCEDURE sp_listar_tipos_comprobantes()
-BEGIN
-    SELECT *
-    FROM tipos_comprobantes;
-END $$
-DELIMITER ;
-
 INSERT INTO tipos_comprobantes(comprobante) VALUES ('factura');
 INSERT INTO tipos_comprobantes(comprobante) VALUES ('boleta');
 
@@ -1620,14 +1552,6 @@ CREATE TABLE tipos_percepciones(
     percepcion varchar(128),
     tasa_porcentaje decimal(2, 1)
 );
-
-DELIMITER $$
-CREATE PROCEDURE sp_listar_tipos_percepciones()
-BEGIN
-    SELECT *
-    FROM tipos_percepciones;
-END $$
-DELIMITER ;
 
 INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN VENTA INTERNA', 2);
 INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN ADQUISICIÓN DE COMBUSTIBLE', 1);
@@ -1666,14 +1590,6 @@ INSERT INTO tipos_igv (id, descripcion) VALUES
 (17, 'Exonerado - Transferencia Gratuita'),
 (20, 'Inafecto - Transferencia Gratuita');
 
-DELIMITER $$
-CREATE PROCEDURE sp_listar_tipos_igv()
-BEGIN
-    SELECT *
-    FROM tipos_igv;
-END $$
-DELIMITER ;
-
 CREATE TABLE comprobante_detalles(
 	id BIGINT AUTO_INCREMENT PRIMARY KEY,
     comprobante_id bigint not null,
@@ -1699,179 +1615,3 @@ CREATE TABLE comprobante_detalles(
 );
 
 CREATE INDEX idx_comprobante_detalle_comprobante ON comprobante_detalles(comprobante_id)
-
-DELIMITER $$
-
-CREATE PROCEDURE sp_insertar_comprobante_full(
-    IN p_agenda_id BIGINT,
-    IN p_tipo_comprobante_id INT,
-    IN p_serie VARCHAR(4),
-    IN p_fecha_emision DATE,
-    IN p_fecha_vencimiento DATE,
-    IN p_tipo_moneda_id INT,
-
-    IN p_total_gravada DECIMAL(14,2),
-    IN p_total_inafecta DECIMAL(14,2),
-    IN p_total_exonerada DECIMAL(14,2),
-    IN p_total_igv DECIMAL(14,2),
-    IN p_total DECIMAL(14,2),
-
-    IN p_cliente_id BIGINT,
-
-    IN p_detalles JSON
-)
-BEGIN
-    DECLARE v_numero INT DEFAULT 0;
-    DECLARE v_id_comprobante BIGINT;
-
-    DECLARE i INT DEFAULT 0;
-    DECLARE v_items INT;
-
-    -- handlers
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        SELECT 'ERROR: fallo en transacción' AS mensaje;
-    END;
-
-    START TRANSACTION;
-
-
-    IF (p_tipo_comprobante_id = 1 AND p_serie NOT LIKE 'F%') THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Serie inválida para FACTURA';
-    END IF;
-
-    IF (p_tipo_comprobante_id = 2 AND p_serie NOT LIKE 'B%') THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Serie inválida para BOLETA';
-    END IF;
-
-
-    SELECT ultimo_numero
-    INTO v_numero
-    FROM correlativos
-    WHERE tipo_comprobante_id = p_tipo_comprobante_id
-      AND serie = p_serie
-    FOR UPDATE;
-
-    IF v_numero IS NULL THEN
-        SET v_numero = 1;
-
-        INSERT INTO correlativos(tipo_comprobante_id, serie, ultimo_numero)
-        VALUES (p_tipo_comprobante_id, p_serie, v_numero);
-    ELSE
-        SET v_numero = v_numero + 1;
-
-        UPDATE correlativos
-        SET ultimo_numero = v_numero
-        WHERE tipo_comprobante_id = p_tipo_comprobante_id
-          AND serie = p_serie;
-    END IF;
-
-
-    INSERT INTO comprobantes (
-        agenda_id,
-        tipo_comprobante_id,
-        serie,
-        numero,
-        fecha_emision,
-        fecha_vencimiento,
-        tipo_moneda_id,
-        total_gravada,
-        total_inafecta,
-        total_exonerada,
-        total_igv,
-        total,
-        cliente_id
-    )
-    VALUES (
-        p_agenda_id,
-        p_tipo_comprobante_id,
-        p_serie,
-        v_numero,
-        p_fecha_emision,
-        p_fecha_vencimiento,
-        p_tipo_moneda_id,
-        IFNULL(p_total_gravada,0),
-        IFNULL(p_total_inafecta,0),
-        IFNULL(p_total_exonerada,0),
-        IFNULL(p_total_igv,0),
-        p_total,
-        p_cliente_id
-    );
-
-    SET v_id_comprobante = LAST_INSERT_ID();
-
-
-    SET v_items = JSON_LENGTH(p_detalles);
-
-    WHILE i < v_items DO
-
-        INSERT INTO comprobante_detalles (
-            comprobante_id,
-            tipo_unidad_medida_id,
-            item_id,
-            descripcion,
-            cantidad,
-            valor_unitario,
-            precio_unitario,
-            descuento,
-            subtotal,
-            tipo_igv_id,
-            igv,
-            impuestos_bolsas,
-            total
-        )
-        VALUES (
-            v_id_comprobante,
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].tipo_unidad_medida_id')),
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].item_id')),
-            JSON_UNQUOTE(JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].descripcion'))),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].cantidad')),
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].valor_unitario')),
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].precio_unitario')),
-
-            IFNULL(JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].descuento')), 0),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].subtotal')),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].tipo_igv_id')),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].igv')),
-
-            IFNULL(JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].impuestos_bolsas')), 0),
-
-            JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].total'))
-        );
-
-        SET i = i + 1;
-
-    END WHILE;
-
-    COMMIT;
-
-    SELECT 
-        v_id_comprobante AS id,
-        v_numero AS numero,
-        p_serie AS serie;
-
-END $$
-
-DELIMITER ;
-
-DELIMITER $$
-
-CREATE PROCEDURE sp_obtener_comprobantes_por_cliente(
-    IN p_cliente_id BIGINT
-)
-BEGIN
-    SELECT *
-    FROM comprobantes
-    WHERE cliente_id = p_cliente_id
-    ORDER BY fecha_emision DESC, id DESC;
-END $$
-
-DELIMITER ;
