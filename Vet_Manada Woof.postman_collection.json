@@ -3135,6 +3135,140 @@
               "response": []
             }
           ]
+        },
+        {
+          "name": "Pagos y comprobantes",
+          "item": [
+            {
+              "name": "Tipos-igv",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:808x/api/catalogos/tipos-igv",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "808x",
+                  "path": [
+                    "api",
+                    "catalogos",
+                    "tipos-igv"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Comprobantes por tipo de comprobante",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:808x//api/comprobantes/tipo/{id}",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "808x",
+                  "path": [
+                    "",
+                    "api",
+                    "comprobantes",
+                    "tipo",
+                    "{id}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Comprobantes por id de cliente",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:808x/api/comprobantes/cliente/{id}",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "808x",
+                  "path": [
+                    "api",
+                    "comprobantes",
+                    "cliente",
+                    "{id}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Monedas",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:808x/api/catalogos/monedas",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "808x",
+                  "path": [
+                    "api",
+                    "catalogos",
+                    "monedas"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Tipos-comprobantes",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:808x/api/catalogos/tipos-comprobantes",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "808x",
+                  "path": [
+                    "api",
+                    "catalogos",
+                    "tipos-comprobantes"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Tipos-percepciones",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:808x/api/catalogos/tipos-percepciones",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "808x",
+                  "path": [
+                    "api",
+                    "catalogos",
+                    "tipos-percepciones"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
         }
       ]
     },
