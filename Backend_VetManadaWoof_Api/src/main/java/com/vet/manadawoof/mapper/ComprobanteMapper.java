@@ -1,9 +1,18 @@
 package com.vet.manadawoof.mapper;
 
+
 import com.vet.manadawoof.dtos.response.ComprobanteDetalleResponseDTO;
 import com.vet.manadawoof.dtos.response.ComprobanteResponseDTO;
+import com.vet.manadawoof.dtos.response.TipoIGVResponseDTO;
+import com.vet.manadawoof.dtos.response.TipoMonedaResponseDTO;
+import com.vet.manadawoof.dtos.response.TiposComprobantesResponseDTO;
+import com.vet.manadawoof.dtos.response.TiposPercepcionesResponseDTO;
 import com.vet.manadawoof.entity.ComprobanteDetalleEntity;
 import com.vet.manadawoof.entity.ComprobanteEntity;
+import com.vet.manadawoof.entity.TipoIGVEntity;
+import com.vet.manadawoof.entity.MonedasEntity;
+import com.vet.manadawoof.entity.TiposComprobantesEntity;
+import com.vet.manadawoof.entity.TiposPercepcionesEntity;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -220,4 +229,89 @@ public class ComprobanteMapper {
 
                 .build();
     }
+    
+    public static TipoMonedaResponseDTO
+    toTipoMonedaResponseDTO(
+            MonedasEntity moneda
+    ) {
+        if (moneda == null) return null;
+
+        return TipoMonedaResponseDTO
+                .builder()
+
+                .id(
+                        moneda.getId()
+                )
+
+                .moneda(
+                        moneda.getMoneda()
+                )
+
+                .build();
+    }
+
+    public static TiposComprobantesResponseDTO
+    toTiposComprobantesResponseDTO(
+            TiposComprobantesEntity tipoComprobante
+    ) {
+        if (tipoComprobante == null) return null;
+
+        return TiposComprobantesResponseDTO
+                .builder()
+
+                .id(
+                        tipoComprobante.getId()
+                )
+
+                .comprobante(
+                        tipoComprobante.getComprobante()
+                )
+
+                .build();
+    }
+
+    public static TiposPercepcionesResponseDTO
+    toTiposPercepcionesResponseDTO(
+            TiposPercepcionesEntity tipoPercepcion
+    ) {
+        if (tipoPercepcion == null) return null;
+
+        return TiposPercepcionesResponseDTO
+                .builder()
+
+                .id(
+                        tipoPercepcion.getId()
+                )
+
+                .percepcion(
+                        tipoPercepcion.getPercepcion()
+                )
+
+                .tasaPorcentaje(
+                        tipoPercepcion.getTasaPorcentaje()
+                )
+
+                .build();
+    }
+
+    public static TipoIGVResponseDTO
+    toTipoIGVResponseDTO(
+            TipoIGVEntity tipoIGV
+    ) {
+        if (tipoIGV == null) return null;
+
+        return TipoIGVResponseDTO
+                .builder()
+
+                .id(
+                        tipoIGV.getId()
+                )
+
+                .descripcion(
+                        tipoIGV.getDescripcion()
+                )
+
+                .build();
+    }
+
 }

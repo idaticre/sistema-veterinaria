@@ -59,7 +59,7 @@ public class ComprobanteEntity implements Serializable{
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_moneda_id", nullable = false)
-    private TipoMonedaEntity tipoMoneda;
+    private MonedasEntity tipoMoneda;
     
     @Builder.Default
     @Column(name = "total_gravada", precision = 14, scale = 2)

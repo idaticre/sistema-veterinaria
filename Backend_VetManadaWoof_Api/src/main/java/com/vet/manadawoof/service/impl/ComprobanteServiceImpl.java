@@ -17,6 +17,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -237,5 +238,23 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                 .orElseThrow(() -> new RuntimeException("Comprobante no encontrado"));
 
         return ComprobanteMapper.toResponseDTO(comprobante);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<ComprobanteResponseDTO> obtenerPorTipo(Integer tipoComprobanteId) {
+        return comprobanteRepository.findByTipoComprobante(tipoComprobanteId)
+                .stream()
+                .map(ComprobanteMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ComprobanteResponseDTO> obtenerPorCliente(Long clienteId) {
+        return comprobanteRepository.findByCliente(clienteId)
+                .stream()
+                .map(ComprobanteMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 }

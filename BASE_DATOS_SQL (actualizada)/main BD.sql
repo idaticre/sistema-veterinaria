@@ -1475,7 +1475,49 @@ ALTER TABLE historia_clinica_archivos
 CREATE INDEX idx_archivo_registro ON historia_clinica_archivos(id_registro_atencion);
 CREATE INDEX idx_archivo_tipo ON historia_clinica_archivos(id_tipo_archivo);
 
+-- Por si en un futuro trabajamos con más tipos_comprobantes (por ahora solo boleta y factura)
+CREATE TABLE tipos_comprobantes(
+	id int primary key not null auto_increment,
+    comprobante varchar(16) not null
+);
 
+INSERT INTO tipos_comprobantes(comprobante) VALUES ('factura');
+INSERT INTO tipos_comprobantes(comprobante) VALUES ('boleta');
+
+CREATE TABLE tipos_percepciones(
+	id int primary key not null auto_increment,
+    percepcion varchar(128),
+    tasa_porcentaje decimal(2, 1)
+);
+
+INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN VENTA INTERNA', 2);
+INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN ADQUISICIÓN DE COMBUSTIBLE', 1);
+INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN REALIZADA AL AGENTE DE PERCEPCIÓN CON TASA ESPECIAL', 0.5);
+
+CREATE TABLE tipos_unidad_medida(
+	id int primary key not null auto_increment,
+    unidad_medida varchar(5)
+);
+
+INSERT INTO tipos_unidad_medida(unidad_medida) VALUES ('NIU'); 
+INSERT INTO tipos_unidad_medida(unidad_medida) VALUES ('ZZ');
+
+CREATE TABLE tipos_igv(
+	id int primary key not null,
+    descripcion varchar(128)
+);
+
+CREATE TABLE correlativos(
+    tipo_comprobante_id INT,
+    serie VARCHAR(4),
+    ultimo_numero INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (tipo_comprobante_id, serie)
+);
+
+CREATE TABLE monedas(
+	id int primary key not null auto_increment,
+    moneda varchar(15)
+);
 -- Usado para facturas, boletas y demás en vez de tener 2 tablas
 -- Hace uso de diferentes tablas, incluidas clientes, tipos_comprobantes, entidades, agenda_pagos, etc
 -- Los SP deben ser solo GET y POST
@@ -1509,7 +1551,7 @@ CREATE TABLE comprobantes (
 
     CONSTRAINT fk_comprobantes_agenda FOREIGN KEY (agenda_id) REFERENCES agenda(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_comprobantes_tipo FOREIGN KEY (tipo_comprobante_id) REFERENCES tipos_comprobantes(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_comprobantes_moneda FOREIGN KEY (tipo_moneda_id) REFERENCES tipo_monedas(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_comprobantes_moneda FOREIGN KEY (tipo_moneda_id) REFERENCES monedas(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_comprobantes_percepcion FOREIGN KEY (tipo_percepcion_id) REFERENCES tipos_percepciones(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_comprobantes_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_comprobantes_medio_pago FOREIGN KEY (medio_pago_id) REFERENCES medios_pago(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1518,57 +1560,12 @@ CREATE TABLE comprobantes (
     INDEX idx_tipo_comprobante (tipo_comprobante_id),
     INDEX idx_cliente (cliente_id),
     INDEX idx_fecha_emision (fecha_emision),
-    INDEX idx_fecha_pago (fecha_pago),
     INDEX idx_serie_numero (serie, numero)
-);
-
-CREATE TABLE correlativos(
-    tipo_comprobante_id INT,
-    serie VARCHAR(4),
-    ultimo_numero INT NOT NULL DEFAULT 0,
-    PRIMARY KEY (tipo_comprobante_id, serie)
-);
-
-CREATE TABLE monedas(
-	id int primary key not null auto_increment,
-    moneda varchar(15)
 );
 
 INSERT INTO monedas(moneda) VALUES ('SOLES');
 INSERT INTO monedas(moneda) VALUES ('DÓLARES');
 INSERT INTO monedas(moneda) VALUES ('EUROS');
-
--- Por si en un futuro trabajamos con más tipos_comprobantes (por ahora solo boleta y factura)
-CREATE TABLE tipos_comprobantes(
-	id int primary key not null auto_increment,
-    comprobante varchar(16) not null
-);
-
-INSERT INTO tipos_comprobantes(comprobante) VALUES ('factura');
-INSERT INTO tipos_comprobantes(comprobante) VALUES ('boleta');
-
-CREATE TABLE tipos_percepciones(
-	id int primary key not null auto_increment,
-    percepcion varchar(128),
-    tasa_porcentaje decimal(2, 1)
-);
-
-INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN VENTA INTERNA', 2);
-INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN ADQUISICIÓN DE COMBUSTIBLE', 1);
-INSERT INTO tipos_percepciones(percepcion, tasa_porcentaje) VALUES ('PERCEPCIÓN REALIZADA AL AGENTE DE PERCEPCIÓN CON TASA ESPECIAL', 0.5);
-
-CREATE TABLE tipos_unidad_medida(
-	id int primary key not null auto_increment,
-    unidad_medida varchar(5)
-);
-
-INSERT INTO tipos_unidad_medida(unidad_medida) VALUES ('NIU'); 
-INSERT INTO tipos_unidad_medida(unidad_medida) VALUES ('ZZ');
-
-CREATE TABLE tipos_igv(
-	id int primary key not null,
-    descripcion varchar(128)
-);
 
 INSERT INTO tipos_igv (id, descripcion) VALUES
 (1, 'Gravado - Operación Onerosa'),

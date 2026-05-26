@@ -1,5 +1,7 @@
 package com.vet.manadawoof.controller;
 
+import com.vet.manadawoof.dtos.response.ComprobanteResponseDTO;
+import com.vet.manadawoof.service.ComprobanteService;
 import com.vet.manadawoof.dtos.request.ComprobanteRequestDTO;
 import com.vet.manadawoof.dtos.response.ComprobanteResponseDTO;
 import com.vet.manadawoof.service.ComprobanteService;
@@ -40,5 +42,17 @@ public class ComprobanteController {
             @PathVariable Long id
     ) {
         return comprobanteService.obtenerComprobante(id);
+    }
+    
+    @GetMapping("/tipo/{tipoComprobanteId}")
+    public ResponseEntity<List<ComprobanteResponseDTO>> obtenerPorTipo(
+            @PathVariable Integer tipoComprobanteId) {
+        return ResponseEntity.ok(comprobanteService.obtenerPorTipo(tipoComprobanteId));
+    }
+
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<List<ComprobanteResponseDTO>> obtenerPorCliente(
+            @PathVariable Long clienteId) {
+        return ResponseEntity.ok(comprobanteService.obtenerPorCliente(clienteId));
     }
 }

@@ -23,8 +23,8 @@ import lombok.ToString;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "tipo_monedas")
-public class TipoMonedaEntity implements Serializable {
+@Table(name = "monedas")
+public class MonedasEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

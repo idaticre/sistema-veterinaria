@@ -11,5 +11,7 @@ public interface ComprobanteService {
     Map<String, String> generarComprobante(ComprobanteRequestDTO request);//ComprobanteResponseDTO
     List<ComprobanteResponseDTO> listarComprobantes();
     ComprobanteResponseDTO obtenerComprobante(Long id);
+    List<ComprobanteResponseDTO> obtenerPorTipo(Integer tipoComprobanteId);
+    List<ComprobanteResponseDTO> obtenerPorCliente(Long clienteId);
     
 }

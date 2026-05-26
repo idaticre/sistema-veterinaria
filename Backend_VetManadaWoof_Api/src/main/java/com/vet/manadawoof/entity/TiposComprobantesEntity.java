@@ -31,6 +31,6 @@ public class TiposComprobantesEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     
-    @Column(length = 16, nullable = false)
+    @Column(name = "comprobante", nullable = false, length = 16)
     private String comprobante;
 }

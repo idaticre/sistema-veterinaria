@@ -3170,6 +3170,7 @@ DROP PROCEDURE IF EXISTS sp_crear_historia_clinica;
 DELIMITER $$
 
 CREATE PROCEDURE sp_crear_historia_clinica(
+	IN p_accion VARCHAR(10),
     IN p_id_mascota BIGINT,
     IN p_observaciones_generales TEXT,
     OUT p_id_historia BIGINT,

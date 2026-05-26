@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.math.BigDecimal;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
@@ -35,6 +36,6 @@ public class TiposPercepcionesEntity implements Serializable{
     private String percepcion;
     
     @Column(name = "tasa_porcentaje", precision = 2, scale = 1)
-    private java.math.BigDecimal tasa_porcentaje = java.math.BigDecimal.ZERO;
+    private BigDecimal tasaPorcentaje;
     
 }
