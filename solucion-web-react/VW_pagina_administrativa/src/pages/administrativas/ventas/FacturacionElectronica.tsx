@@ -35,6 +35,8 @@ function FacturacionElectronica() {
   const [buscarCodigo, setBuscarCodigo] = useState("");
   const [servicios, setServicios] = useState<Servicio[]>([]);
   const [citasCliente, setCitasCliente] = useState<Cita[]>([]);
+  const [totalAnticipio, setTotalAnticipio] = useState(0);
+  const [agendaId, setAgendaId] = useState(0);
 
   // 🔥 BUSCAR CLIENTE
   const buscarCliente = async (doc: string) => {
@@ -61,6 +63,7 @@ function FacturacionElectronica() {
 
     try {
       const token = sessionStorage.getItem("token");
+      
       
       const response = await fetch(
         `http://localhost:8080/api/clientes/documento/${doc}`,
@@ -155,6 +158,7 @@ function FacturacionElectronica() {
       }
 
       const token = sessionStorage.getItem("token");
+      
 
       const response = await fetch(
         `http://localhost:8080/api/agenda/${cita.id}/servicios`,
@@ -179,6 +183,7 @@ function FacturacionElectronica() {
         alert("La cita no tiene servicios");
         return;
       }
+     
 
       const nuevosServicios: Servicio[] = listaServicios.map((srv: any) => ({
         descripcion: `${srv.descripcion} (Cita ${cita.codigo})`,
@@ -189,17 +194,11 @@ function FacturacionElectronica() {
         veterinario: srv.nombreVeterinario || "No asignado",
       }));
 
+      setAgendaId(cita.id);
+
       // Descontar abono inicial si existe
-      if (Number(cita.abonoInicial) > 0) {
-        nuevosServicios.push({
-          descripcion: `Adelanto ${cita.codigo}`,
-          cantidad: 1,
-          precio: -Number(cita.abonoInicial),
-          subtotal: -Number(cita.abonoInicial),
-          duracion: 0,
-          veterinario: "N/A"
-        });
-      }
+     // Guardar el adelanto para enviarlo al comprobante
+setTotalAnticipio(Number(cita.abonoInicial || 0));
 
       setServicios((prev) => [...prev, ...nuevosServicios]);
     } catch (error) {
@@ -221,34 +220,92 @@ function FacturacionElectronica() {
   }, [citasCliente, buscarCodigo]);
 
   // 🔥 TOTALES
-  const subtotal = servicios.reduce((acc, s) => acc + s.subtotal, 0);
-  const igv = subtotal * 0.18;
-  const total = subtotal + igv;
+ const subtotalServicios = servicios.reduce(
+  (acc, s) => acc + s.subtotal,
+  0
+);
+
+const subtotal = subtotalServicios - totalAnticipio;
+const igv = subtotal * 0.18;
+const total = subtotal + igv;
 
   // 🔥 GUARDAR
-  const guardarComprobante = () => {
-    if (clienteId === 0) {
-      alert("Seleccione cliente");
-      return;
-    }
+  const guardarComprobante = async () => {
+  try {
 
-    if (servicios.length === 0) {
-      alert("Agregue servicios");
-      return;
-    }
+    const token = sessionStorage.getItem("token");
+    
+const request = {
+  clienteId: clienteId,
+  agendaId: agendaId, // luego cambiaremos esto por la agenda real
+  tipoComprobanteId: tipoComprobante === "FACTURA" ? 1 : 2,
 
-    alert("Comprobante generado correctamente");
+  fechaEmision: new Date().toISOString().split("T")[0],
+  fechaVencimiento: new Date().toISOString().split("T")[0],
 
-    console.log({
-      cliente,
-      documento,
-      tipoComprobante,
-      servicios,
-      subtotal,
-      igv,
-      total,
-    });
-  };
+  tipoMonedaId: 1,
+
+  totalGravada: subtotal,
+  totalInafecta: 0,
+  totalExonerada: 0,
+  totalIGV: igv,
+  totalGratuita: 0,
+  totalOtrosCargos: 0,
+  total: total,
+
+  tipoPercepcionId: null,
+  percepcionBaseImponible: 0,
+  totalPercepcion: 0,
+  totalIncluidoPercepcion: 0,
+
+  observaciones: "",
+  codigoUnico: "",
+  condicionesPago: "",
+  nubecontTipoVentaCodigo: "",
+
+  totalAnticipio: totalAnticipio,
+  medioPagoId: null,
+
+  detalles: servicios.map((s, index) => ({
+    tipoUnidadMedidaId: 1,
+    itemId: index + 1,
+    descripcion: s.descripcion,
+    cantidad: s.cantidad,
+    valorUnitario: s.precio,
+    precioUnitario: s.precio,
+    descuento: 0,
+    subtotal: s.subtotal,
+    tipoIgvId: 1,
+    igv: s.subtotal * 0.18,
+    impuestosBolsas: 0,
+    total: s.subtotal * 1.18
+  }))
+};
+
+    console.log("ENVIANDO", request);
+
+    const response = await fetch(
+      "http://localhost:8080/api/comprobantes/generar",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(request)
+      }
+    );
+
+    const data = await response.json();
+
+    console.log(data);
+
+    alert("Comprobante guardado correctamente");
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   // 🔥 PDF CORREGIDO
   const generarPDF = () => {
@@ -467,9 +524,7 @@ function FacturacionElectronica() {
                 💾 Guardar comprobante
               </button>
 
-              <button className="btn-pdf" onClick={generarPDF}>
-                🖨 Generar PDF
-              </button>
+              
             </div>
           </div>
         </section>

@@ -45,6 +45,7 @@ import HistorialM from './pages/administrativas/mascotas/historial clinico/Histo
 import { useEffect, useState } from 'react';
 import "./App.css";
 import FacturacionElectronica from './pages/administrativas/ventas/FacturacionElectronica';
+import RecuperacionComprobantes from './pages/administrativas/ventas/RecuperacionComprobantes';
 
 function App() {
 
@@ -150,6 +151,7 @@ function App() {
           {/* Ventas */}
           <Route>
   <Route path='/administracion/ventas/facturacion' element={<FacturacionElectronica />}/>
+  <Route path='/administracion/ventas/recuperacion_comprobantes' element={<RecuperacionComprobantes />}/>
 </Route>
 
           {/* Reportes e informes */}
