@@ -24,9 +24,7 @@ public class ComprobanteRequestDTO {
     private LocalDate fechaEmision;
 
     private LocalDate fechaVencimiento;
-    
-    //private int medioPagoID;
-    
+
     private Integer tipoMonedaId;
 
     private BigDecimal totalGravada;
@@ -37,10 +35,32 @@ public class ComprobanteRequestDTO {
 
     private BigDecimal totalIGV;
 
+    private BigDecimal totalGratuita;
+
+    private BigDecimal totalOtrosCargos;
+
     private BigDecimal total;
 
+    private Integer tipoPercepcionId;
+
+    private BigDecimal percepcionBaseImponible;
+
+    private BigDecimal totalPercepcion;
+
+    private BigDecimal totalIncluidoPercepcion;
+
+    private String observaciones;
+
+    private String codigoUnico;
+
+    private String condicionesPago;
+
+    private String nubecontTipoVentaCodigo;
+
+    private BigDecimal totalAnticipio;
+
+    private Integer medioPagoId;
+
     private List<ComprobanteDetalleRequestDTO> detalles;
-    
-    //private String observaciones;
     
 }

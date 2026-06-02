@@ -63,9 +63,20 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         sp.registerStoredProcedureParameter("p_total_inafecta", java.math.BigDecimal.class, ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_total_exonerada", java.math.BigDecimal.class, ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_total_igv", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_gratuita", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_otros_cargos", java.math.BigDecimal.class, ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_total", java.math.BigDecimal.class, ParameterMode.IN);
-
+        sp.registerStoredProcedureParameter("p_tipo_percepcion_id", Integer.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_percepcion_base_imponible", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_percepcion", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_incluido_percepcion", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_observaciones", String.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_codigo_unico", String.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_condiciones_pago", String.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_nubecont_tipo_venta_codigo", String.class, ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_cliente_id", Long.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_anticipio", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_medio_pago_id", Integer.class, ParameterMode.IN);
 
         sp.registerStoredProcedureParameter("p_id_comprobante", Long.class, ParameterMode.OUT);
         sp.registerStoredProcedureParameter("p_numero", Integer.class, ParameterMode.OUT);
@@ -93,9 +104,20 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         sp.setParameter("p_total_inafecta", request.getTotalInafecta());
         sp.setParameter("p_total_exonerada", request.getTotalExonerada());
         sp.setParameter("p_total_igv", request.getTotalIGV());
+        sp.setParameter("p_total_gratuita", request.getTotalGratuita());
+        sp.setParameter("p_total_otros_cargos", request.getTotalOtrosCargos());
         sp.setParameter("p_total", request.getTotal());
-
+        sp.setParameter("p_tipo_percepcion_id", request.getTipoPercepcionId());
+        sp.setParameter("p_percepcion_base_imponible", request.getPercepcionBaseImponible());
+        sp.setParameter("p_total_percepcion", request.getTotalPercepcion());
+        sp.setParameter("p_total_incluido_percepcion", request.getTotalIncluidoPercepcion());
+        sp.setParameter("p_observaciones", request.getObservaciones());
+        sp.setParameter("p_codigo_unico", request.getCodigoUnico());
+        sp.setParameter("p_condiciones_pago", request.getCondicionesPago());
+        sp.setParameter("p_nubecont_tipo_venta_codigo", request.getNubecontTipoVentaCodigo());
         sp.setParameter("p_cliente_id", agenda.getCliente().getId());
+        sp.setParameter("p_total_anticipio", request.getTotalAnticipio());
+        sp.setParameter("p_medio_pago_id", request.getMedioPagoId());
 
         // EJECUTAR
 
@@ -190,6 +212,30 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                     ParameterMode.IN
             );
 
+            spDetalle.registerStoredProcedureParameter(
+                    "p_anticipio_regularizacion",
+                    Boolean.class,
+                    ParameterMode.IN
+            );
+
+            spDetalle.registerStoredProcedureParameter(
+                    "p_anticipio_documento_serie",
+                    String.class,
+                    ParameterMode.IN
+            );
+
+            spDetalle.registerStoredProcedureParameter(
+                    "p_anticipio_documento_numero",
+                    Integer.class,
+                    ParameterMode.IN
+            );
+
+            spDetalle.registerStoredProcedureParameter(
+                    "p_codigo_producto_sunat",
+                    String.class,
+                    ParameterMode.IN
+            );
+
             spDetalle.setParameter("p_comprobante_id", idComprobante);
             spDetalle.setParameter("p_tipo_unidad_medida_id", detalle.getTipoUnidadMedidaId());
             spDetalle.setParameter("p_item_id", detalle.getItemId());
@@ -203,6 +249,10 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             spDetalle.setParameter("p_igv", detalle.getIgv());
             spDetalle.setParameter("p_impuestos_bolsas", detalle.getImpuestosBolsas());
             spDetalle.setParameter("p_total", detalle.getTotal());
+            spDetalle.setParameter("p_anticipio_regularizacion", detalle.getAnticipoRegularizacion());
+            spDetalle.setParameter("p_anticipio_documento_serie", detalle.getAnticipoDocumentoSerie());
+            spDetalle.setParameter("p_anticipio_documento_numero", detalle.getAnticipoDocumentoNumero());
+            spDetalle.setParameter("p_codigo_producto_sunat", detalle.getCodigoProductoSunat());
 
             spDetalle.execute();
         }

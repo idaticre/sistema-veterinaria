@@ -175,7 +175,7 @@ public class ComprobanteMapper {
                 )
 
                 .itemId(
-                        detalle.getIdItem()
+                        detalle.getItemId()
                 )
 
                 .descripcion(

@@ -37,16 +37,12 @@ public class ComprobanteDetalleRequestDTO {
 
     private BigDecimal total;
 
-    //@JsonProperty("anticipio_regularizacion")
-    //private Boolean anticipoRegularizacion;
+    private Boolean anticipoRegularizacion;
 
-    //@JsonProperty("anticipio_documento_serie")
-    //private String anticipoDocumentoSerie;
+    private String anticipoDocumentoSerie;
 
-    //@JsonProperty("anticipio_documento_numero")
-    //private Integer anticipoDocumentoNumero;
+    private Integer anticipoDocumentoNumero;
 
-    //@JsonProperty("codigo_producto_sunat")
-    //private String codigoProductoSunat;
+    private String codigoProductoSunat;
     
 }
