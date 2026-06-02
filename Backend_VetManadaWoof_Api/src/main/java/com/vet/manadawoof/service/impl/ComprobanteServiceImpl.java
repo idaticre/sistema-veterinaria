@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vet.manadawoof.dtos.request.ComprobanteDetalleRequestDTO;
 import com.vet.manadawoof.dtos.request.ComprobanteRequestDTO;
 import com.vet.manadawoof.dtos.response.ComprobanteResponseDTO;
+import com.vet.manadawoof.dtos.response.ComprobanteSunatDTO;
 import com.vet.manadawoof.entity.AgendaEntity;
 import com.vet.manadawoof.entity.ComprobanteEntity;
 import com.vet.manadawoof.mapper.ComprobanteMapper;
+import com.vet.manadawoof.mapper.ComprobanteSunatMapper;
 import com.vet.manadawoof.repository.AgendaRepository;
 import com.vet.manadawoof.repository.ComprobanteRepository;
 import com.vet.manadawoof.service.ComprobanteService;
@@ -19,8 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -31,21 +38,24 @@ public class ComprobanteServiceImpl implements ComprobanteService {
 
     private final AgendaRepository agendaRepository;
     private final ComprobanteRepository comprobanteRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${sunat.api.url}")
+    private String sunatApiUrl;
+
+    @Value("${sunat.api.token}")
+    private String sunatApiToken;
     
     @Override
     @Transactional
-    public Map<String, String> generarComprobante(ComprobanteRequestDTO request) { //ComprobanteResponseDTO
+    public Map<String, Object> generarComprobante(ComprobanteRequestDTO request) {
 
         // VALIDAR AGENDA
-
         AgendaEntity agenda = agendaRepository.findById(request.getAgendaId())
                 .orElseThrow(() -> new RuntimeException("Agenda no encontrada"));
 
         // DEFINIR SERIE
-
-        String serie = request.getTipoComprobanteId() == 1
-                ? "F001"
-                : "B001";
+        String serie = request.getTipoComprobanteId() == 1 ? "F001" : "B001";
 
         // PROCEDURE CABECERA
 
@@ -257,16 +267,45 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             spDetalle.execute();
         }
 
-        // OBTENER COMPROBANTE
-
-        /*ComprobanteEntity comprobante = comprobanteRepository
+        // OBTENER ENTIDAD Y ENVIAR A SUNAT
+        ComprobanteEntity comprobante = comprobanteRepository
                 .findById(idComprobante)
                 .orElseThrow(() -> new RuntimeException("Comprobante no encontrado"));
 
-        return ComprobanteMapper.toResponseDTO(comprobante);*/
-        
-        return Map.of("mensaje", "Comprobante guardado exitosamente");
-        
+        Map<String, Object> respuestaSunat = enviarASunat(comprobante);
+        respuestaSunat.put("id_comprobante", idComprobante);
+        return respuestaSunat;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> enviarComprobanteSunat(Long id) {
+        ComprobanteEntity comprobante = comprobanteRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Comprobante no encontrado"));
+        return enviarASunat(comprobante);
+    }
+
+    private Map<String, Object> enviarASunat(ComprobanteEntity comprobante) {
+        ComprobanteSunatDTO sunatDTO = ComprobanteSunatMapper.toSunatDTO(comprobante);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(sunatApiToken);
+
+        HttpEntity<ComprobanteSunatDTO> entity = new HttpEntity<>(sunatDTO, headers);
+
+        try {
+            Map respuesta = restTemplate.postForObject(sunatApiUrl, entity, Map.class);
+            if (respuesta == null) return Map.of("error", "Sin respuesta de la API");
+
+            return Map.of(
+                "mensaje", "Comprobante enviado y registrado correctamente",
+                "enlace_del_pdf", respuesta.getOrDefault("enlace_del_pdf", "")
+            );
+        } catch (Exception e) {
+            return Map.of("error", e.getMessage());
+        }
     }
     
     @Override

@@ -8,7 +8,8 @@ import java.util.Map;
 
 public interface ComprobanteService {
     
-    Map<String, String> generarComprobante(ComprobanteRequestDTO request);//ComprobanteResponseDTO
+    Map<String, Object> generarComprobante(ComprobanteRequestDTO request);
+    Map<String, Object> enviarComprobanteSunat(Long id);
     List<ComprobanteResponseDTO> listarComprobantes();
     ComprobanteResponseDTO obtenerComprobante(Long id);
     List<ComprobanteResponseDTO> obtenerPorTipo(Integer tipoComprobanteId);
