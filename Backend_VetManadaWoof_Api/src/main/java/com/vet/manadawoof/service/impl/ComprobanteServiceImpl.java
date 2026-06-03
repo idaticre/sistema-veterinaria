@@ -272,7 +272,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                 .findById(idComprobante)
                 .orElseThrow(() -> new RuntimeException("Comprobante no encontrado"));
 
-        Map<String, Object> respuestaSunat = enviarASunat(comprobante);
+        Map<String, Object> respuestaSunat = new java.util.HashMap<>(enviarASunat(comprobante));
         respuestaSunat.put("id_comprobante", idComprobante);
         return respuestaSunat;
     }
@@ -299,15 +299,28 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             Map respuesta = restTemplate.postForObject(sunatApiUrl, entity, Map.class);
             if (respuesta == null) return Map.of("error", "Sin respuesta de la API");
 
+            if (respuesta.containsKey("data") && respuesta.get("data") instanceof Map) {
+                Map<String, Object> data = (Map<String, Object>) respuesta.get("data");
+                if ("true".equals(String.valueOf(data.get("error")))) {
+                    return Map.of(
+                        "error", "Error de SUNAT",
+                        "codigo", data.getOrDefault("respuesta_sunat_codigo", ""),
+                        "descripcion", data.getOrDefault("respuesta_sunat_descripcion", "")
+                    );
+                }
+            }
+
             return Map.of(
                 "mensaje", "Comprobante enviado y registrado correctamente",
                 "enlace_del_pdf", respuesta.getOrDefault("enlace_del_pdf", "")
             );
         } catch (Exception e) {
-            return Map.of("error", e.getMessage());
+            return Map.of(
+                "error", "Error al conectar con la API de SUNAT",
+                "detalle", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
+            );
         }
     }
-    
     @Override
     @Transactional(readOnly = true)
     public List<ComprobanteResponseDTO> listarComprobantes() {
