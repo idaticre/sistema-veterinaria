@@ -55,7 +55,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                 .orElseThrow(() -> new RuntimeException("Agenda no encontrada"));
 
         // DEFINIR SERIE
-        String serie = request.getTipoComprobanteId() == 1 ? "F001" : "B001";
+        String serie = request.getTipoComprobanteId() == 1 ? "FFF1" : "BBB1";
 
         // PROCEDURE CABECERA
 
