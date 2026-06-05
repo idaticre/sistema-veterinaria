@@ -6,6 +6,7 @@ import Br_administrativa from "../../../components/barra_administrativa/Br_admin
 import "./Agenda_general.css";
 import IST from "../../../components/proteccion/IST";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
@@ -188,7 +189,7 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
           setServiciosDisponibles(serviciosParseados);
         }
       } catch (error) {
-        /* console.error("Error al obtener los servicios", error); */
+       
       }
     };
 
@@ -211,7 +212,7 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
           }));
         }
       } catch (error) {
-        /* console.error("Error al obtener los estados de la agenda:", error); */
+       
       }
     };
 
@@ -355,7 +356,7 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
       });
       setEventos(res.result.items || []);
     } catch (error) {
-      /* console.error("Error al cargar eventos:", error); */
+      
       setStatus("❌ Error al cargar eventos. Intente reconectar.");
     }
   }; // La función cargarCitasBD se mantiene para el caso de uso futuro o si el flujo de edición lo necesita,
@@ -368,7 +369,7 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
       const listaCitas = res.data.data.content || [];
       setCitasDB(listaCitas);
     } catch (error) {
-      /* console.error("Error al cargar citas desde BD:", error); */
+      
       setCitasDB([]);
     }
   };
@@ -403,11 +404,28 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
     });
   }; // --- FUNCIONES DE GESTIÓN DE SERVICIOS ---
 
-  const agregarServicio = () => {
-    if (servicioTemporal.valor_servicio <= 0) {
-  return alert("Ingrese un precio válido");
-}
-    const sId = parseInt(servicioTemporal.id_servicio as string);
+ const agregarServicio = () => {
+
+  const sId = parseInt(servicioTemporal.id_servicio as string);
+
+  // 🔥 VALIDAR DUPLICADO ANTES DE AGREGAR
+  const existe = serviciosRegistrados.some(
+    (s) => s.id_servicio === sId
+  );
+
+  if (existe) {
+    Swal.fire({
+      icon: "warning",
+      title: "Servicio duplicado",
+      text: "Este servicio ya fue agregado a la cita.",
+      confirmButtonText: "Aceptar",
+    });
+
+    return;
+  }
+
+  // resto de tu código...
+
     const vId = parseInt(servicioTemporal.id_veterinario as string);
     const servicioInfo = serviciosDisponibles.find((s) => s.id === sId);
     const veterinarioInfo = colaboradores.find((v) => v.id === vId);
@@ -430,21 +448,15 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
     const subtotalCalculado =
   Number(valorUnitario) * Number(cantidad);
 
-  console.log(
-  "🔥 SERVICIO TEMPORAL:",
-  servicioTemporal
-);
+ 
 
-console.log(
-  "🔥 SERVICIOS REGISTRADOS ACTUALES:",
-  serviciosRegistrados
-);
+
 
     const nuevoServicio: ServicioDetalle = {
       id_servicio: sId,
       nombre_servicio: servicioInfo.nombre,
       id_veterinario: vId,
-      nombre_veterinario: `Veterinario ${vId}`,
+     nombre_veterinario: veterinarioInfo.nombre,
       cantidad: cantidad,
       valor_servicio: valorUnitario,
       bono_inicial: 0,
@@ -456,10 +468,7 @@ console.log(
 
     setServiciosRegistrados((prev) => [...prev, nuevoServicio]);
 
-    console.log(
-  "🔥 SERVICIOS REGISTRADOS:",
-  nuevoServicio
-);
+  
 
     setServicioTemporal({
       id_servicio: "",
@@ -567,10 +576,7 @@ const guardarEvento = async () => {
 
       const citaCreada = responseDB.data.data;
 
-      console.log(
-  "🔥 ANTES DE GUARDAR:",
-  serviciosRegistrados
-);
+   
 
 
       // 🔥 PASO 2: INSERTAR SERVICIOS UNO POR UNO
@@ -604,17 +610,11 @@ const guardarEvento = async () => {
       ingresoDTO
     );
 
-  console.log(
-    "🔥 RESPUESTA BACKEND:",
-    responseIngreso.data
-  );
+ 
 
 } catch (error: any) {
 
-  console.error(
-    "🔥 ERROR BACKEND:",
-    error.response?.data || error
-  );
+  
 }
       }
 
@@ -626,19 +626,14 @@ const guardarEvento = async () => {
         });
       }
 
-      // 🔥 PASO 4: REGISTRAR PAGO SI HAY ABONO
-      if (bonoTemporal > 0) {
-        const pagoRequestDTO = {
-          idAgenda: citaCreada.id,
-          idMedioPago: 1, // Ajustar ID según tu tabla medios_pago
-          idUsuario: 1,   // Ajustar según sesión
-          monto: bonoTemporal,
-          observaciones: "Adelanto registrado desde agenda.",
-        };
-        await IST.post("/pagos-agenda", pagoRequestDTO);
-      }
+     
 
-      alert(`Cita Registrada Exitosamente`);
+      Swal.fire({
+  icon: "success",
+  title: "Cita registrada",
+  text: "La cita fue registrada correctamente.",
+  confirmButtonText: "Aceptar",
+});
 
       // LIMPIEZA DE FORMULARIO
       setMostrarModal(false);
@@ -661,12 +656,17 @@ const guardarEvento = async () => {
       cargarEventos();
 
     } catch (error: any) {
-      console.error("Error al guardar:", error);
-      const msg = error.response?.status === 401 
-        ? "🚫 Sesión expirada o no autorizada." 
-        : `Detalle: ${error.message}`;
-      alert("Ocurrió un error al guardar la cita. " + msg);
-    }
+
+  console.error("ERROR COMPLETO:", error);
+  console.error("STATUS:", error.response?.status);
+  console.error("DATA:", error.response?.data);
+
+  alert(
+    `Error ${error.response?.status}: ${
+      error.response?.data?.message || error.message
+    }`
+  );
+}
   };// ---------------------------------------------
   // --- JSX DEL COMPONENTE ---
   return (
@@ -1042,7 +1042,7 @@ const guardarEvento = async () => {
                                      
                     {colaboradores.map((c) => (
   <option key={c.id} value={c.id}>
-    ID {c.id}
+    {c.nombre}
   </option>
 ))}
                                   

@@ -4,6 +4,7 @@ import "./EditarCita.css";
 import IST from "../../../../components/proteccion/IST";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import Swal from "sweetalert2";
 // 🚨 Nuevas Constantes y Declaraciones de Google Calendar
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
@@ -56,6 +57,7 @@ interface MascotaBase {
 
 // 🚨 Interfaces de Servicios
 interface ServicioDetalle {
+  id: any;
   id_servicio: number;
   nombre_servicio: string;
   id_veterinario: number;
@@ -268,78 +270,135 @@ function EditarCita() {
     }));
   };
   const agregarServicio = () => {
-    const sId = parseInt(servicioTemporal.id_servicio as string);
-    const vId = parseInt(servicioTemporal.id_veterinario as string);
 
-    // 1. Validaciones de seguridad
-    if (!sId || isNaN(sId)) return alert("Seleccione un servicio válido");
-    if (!vId || isNaN(vId)) return alert("Seleccione un veterinario");
 
-    const servicioInfo = serviciosDisponibles.find((s) => s.id === sId);
-    const veterinarioInfo = colaboradores.find((v) => v.id === vId);
 
-    // Verificamos que existan en las listas maestras
-    if (!servicioInfo || !veterinarioInfo)
-      return alert("Error al obtener información del servicio o veterinario");
+  const sId = parseInt(servicioTemporal.id_servicio as string);
+  const servicioDuplicado = serviciosRegistrados.some(
+  (s, index) =>
+    s.id_servicio === sId &&
+    index !== editIndexServicio
+);
 
-    const nuevoServicio: ServicioDetalle = {
-      id_servicio: sId,
-      nombre_servicio: servicioInfo.nombre,
-      id_veterinario: vId,
-      nombre_veterinario: "Veterinario",
-      cantidad: servicioTemporal.cantidad,
-      valor_servicio: servicioTemporal.valor_servicio,
-      bono_inicial: 0,
-      duracion_min: servicioTemporal.duracion_min,
-      duracion_total:
-        Number(servicioTemporal.duracion_min) *
-        Number(servicioTemporal.cantidad),
-      subtotal: servicioTemporal.valor_servicio * servicioTemporal.cantidad,
-      adicionales: servicioTemporal.adicionales,
-    };
+if (servicioDuplicado) {
+  Swal.fire({
+    icon: "warning",
+    title: "Servicio duplicado",
+    text: "Este servicio ya existe en la cita.",
+  });
 
-    // 2. Lógica de Guardado (Edición vs Nuevo)
-    if (editIndexServicio !== null) {
-      const copia = [...serviciosRegistrados];
-      copia[editIndexServicio] = nuevoServicio;
-      setServiciosRegistrados(copia);
-    } else {
-      setServiciosRegistrados((prev) => [...prev, nuevoServicio]);
-    }
+  return;
+}
+  const vId = parseInt(servicioTemporal.id_veterinario as string);
 
-    // 3. LIMPIEZA TOTAL (Fuera de los ifs para que siempre ocurra)
-    setEditIndexServicio(null); // Fundamental para que el useEffect de precios vuelva a activarse
-    setServicioTemporal({
-      id_servicio: "",
-      valor_servicio: 0,
-      cantidad: 1,
-      duracion_min: 0,
-      id_veterinario: "",
-      adicionales: "",
+
+
+  // 1. Validaciones de seguridad
+  if (!sId || isNaN(sId)) {
+    alert("Seleccione un servicio válido");
+    return;
+  }
+
+  if (!vId || isNaN(vId)) {
+    alert("Seleccione un veterinario");
+    return;
+  }
+
+  const servicioInfo = serviciosDisponibles.find(
+    (s) => s.id === sId
+  );
+
+  const veterinarioInfo = colaboradores.find(
+    (v) => v.id === vId
+  );
+
+  if (!servicioInfo || !veterinarioInfo) {
+    alert(
+      "Error al obtener información del servicio o veterinario"
+    );
+    return;
+  }
+
+const nuevoServicio: ServicioDetalle = {
+
+  id:
+    editIndexServicio !== null
+      ? serviciosRegistrados[
+          editIndexServicio
+        ].id
+      : undefined,
+
+  id_servicio: sId,
+  nombre_servicio: servicioInfo.nombre,
+
+  id_veterinario: vId,
+  nombre_veterinario:
+    veterinarioInfo.nombre,
+
+  cantidad:
+    servicioTemporal.cantidad,
+
+  valor_servicio:
+    servicioTemporal.valor_servicio,
+
+  bono_inicial: 0,
+
+  duracion_min:
+    servicioTemporal.duracion_min,
+
+  duracion_total:
+    Number(
+      servicioTemporal.duracion_min
+    ) *
+    Number(
+      servicioTemporal.cantidad
+    ),
+
+  subtotal:
+    servicioTemporal.valor_servicio *
+    servicioTemporal.cantidad,
+
+  adicionales:
+    servicioTemporal.adicionales,
+};
+
+  // 2. Guardar
+  if (editIndexServicio !== null) {
+
+    const copia = [...serviciosRegistrados];
+    copia[editIndexServicio] = nuevoServicio;
+
+  
+
+    setServiciosRegistrados(copia);
+
+  } else {
+
+    setServiciosRegistrados((prev) => {
+
+      const nuevaLista = [
+        ...prev,
+        nuevoServicio
+      ];
+
+
+      return nuevaLista;
     });
-  };
-  // 1. Función para SELECCIONAR (cargar los datos en los inputs)
-  const seleccionarServicio = (index: number) => {
-    const s = serviciosRegistrados[index];
 
-    // 🔥 PRIMERO activar modo edición
-    setEditIndexServicio(index);
+  }
 
-    // 🔥 SOLO UN setServicioTemporal (sin limpiar antes)
-    setServicioTemporal({
-      id_servicio: s.id_servicio.toString(),
-      valor_servicio: s.valor_servicio,
-      cantidad: s.cantidad,
-      duracion_min: s.duracion_min, // ✅ respeta lo que ya guardaste
-      id_veterinario: s.id_veterinario.toString(),
-      adicionales: s.adicionales,
-    });
-  };
+  // 3. Limpiar formulario
+  setEditIndexServicio(null);
 
-  // 2. Función para ELIMINAR (quitar de la lista definitivamente)
-  const eliminarServicio = (index: number) => {
-    setServiciosRegistrados((prev) => prev.filter((_, i) => i !== index));
-  };
+  setServicioTemporal({
+    id_servicio: "",
+    valor_servicio: 0,
+    cantidad: 1,
+    duracion_min: 0,
+    id_veterinario: "",
+    adicionales: "",
+  });
+};
 
   // ================== CÓDIGO DE GOOGLE CALENDAR (GAPI/GIS) ==================
 
@@ -501,7 +560,7 @@ function EditarCita() {
 
       setStatus(`✅ ${citasObtenidas.length} citas cargadas.`);
     } catch (error) {
-      console.error("Error al cargar datos de la BD:", error);
+     
       setStatus("⚠️ Error al cargar datos. Verifique endpoints.");
     }
   };
@@ -676,55 +735,50 @@ const editarEvento = async (cita: CitaBD) => {
         `/agenda/${cita.id}/servicios`
       );
 
-    const listaServicios =
-      responseServicios.data.data || [];
 
-    console.log(
-      "🔥 SERVICIOS MYSQL:",
-      listaServicios
-    );
+const listaServicios =
+  responseServicios.data.data || [];
 
-    const serviciosConvertidos =
-      listaServicios.map((srv: any) => ({
 
-        id_servicio:
-          srv.idServicio,
 
-        nombre_servicio:
-          srv.descripcion,
+const serviciosConvertidos = listaServicios.map((srv:any) => ({
+  id: srv.id, // IMPORTANTE
 
-        id_veterinario:
-          srv.idVeterinario,
+  id_servicio: srv.idServicio,
+  nombre_servicio: srv.descripcion,
 
-        nombre_veterinario:
-          srv.nombreVeterinario ||
-          "No asignado",
+ id_veterinario:
+  srv.idVeterinario ||
+  srv.idColaborador ||
+  "",
 
-        cantidad:
-          Number(srv.cantidad),
+  nombre_veterinario:
+  srv.nombreVeterinario ||
+  srv.nombreColaborador ||
+  "",
 
-        valor_servicio:
-          Number(srv.valorServicio),
+  cantidad: Number(srv.cantidad),
 
-        bono_inicial: 0,
+  valor_servicio:
+    Number(srv.valorServicio),
 
-        duracion_min:
-          Number(srv.duracionMin),
+  duracion_min:
+    Number(srv.duracionMin),
 
-        duracion_total:
-          Number(srv.duracionMin) *
-          Number(srv.cantidad),
+  duracion_total:
+    Number(srv.duracionMin) *
+    Number(srv.cantidad),
 
-        subtotal:
-          Number(srv.subtotal),
+  subtotal:
+    Number(srv.subtotal),
 
-        adicionales:
-          srv.observaciones || ""
-      }));
+  adicionales:
+    srv.observaciones || ""
+}));
 
-    setServiciosRegistrados(
-      serviciosConvertidos
-    );
+setServiciosRegistrados(serviciosConvertidos);
+
+
 
     setStatus(
       "✅ Servicios cargados desde MYSQL."
@@ -732,10 +786,7 @@ const editarEvento = async (cita: CitaBD) => {
 
   } catch (error) {
 
-    console.error(
-      "❌ ERROR SERVICIOS:",
-      error
-    );
+   
 
     setServiciosRegistrados([]);
 
@@ -858,7 +909,18 @@ const editarEvento = async (cita: CitaBD) => {
         idEstado: estadoCancelado.id,
       };
 
-      const responseDB = await IST.put("/agenda", req);
+      const token = sessionStorage.getItem("token");
+
+const responseDB = await axios.put(
+  "http://localhost:8080/api/agenda",
+  req,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+
 
       if (responseDB.data.success) {
         setStatus(`🗑️ Cita ${citaActual.codigo} CANCELADA.`);
@@ -873,7 +935,7 @@ const editarEvento = async (cita: CitaBD) => {
               `🗑️ Cita ${citaActual.codigo} CANCELADA y eliminada de Google Calendar.`,
             );
           } catch (gcError) {
-            console.error("Error al eliminar GC:", gcError);
+           
             alert(
               "Cita cancelada en BD, pero falló la eliminación en Google Calendar.",
             );
@@ -885,7 +947,7 @@ const editarEvento = async (cita: CitaBD) => {
         alert(`Error al cancelar: ${responseDB.data.message}`);
       }
     } catch (error) {
-      console.error("Error al eliminar/cancelar cita:", error);
+      
       setStatus("⚠️ Error al cancelar la cita");
     }
   };
@@ -956,107 +1018,69 @@ const editarEvento = async (cita: CitaBD) => {
 
         idGoogleCalendar: editingGCId || citaEditada.idGoogleCalendar || null,
       };
+      
 
-     const responseDB = await IST.put(
-  "/agenda",
-  AgendaRequestDTO
-);
+// 1. Actualizar agenda
+await IST.put("/agenda", AgendaRequestDTO);
 
-if (!responseDB.data.success) {
+// 2. Obtener servicios viejos
 
-  throw new Error(
-    `Error BD: ${responseDB.data.message}`
-  );
-}
 
-// ======================================================
-// 🔥 ELIMINAR SERVICIOS ANTERIORES
-// ======================================================
 
-try {
-
-  const serviciosViejos =
-    await IST.get(
-      `/agenda/${citaEditada.id}/servicios`
-    );
-
-  for (const srv of serviciosViejos.data.data) {
-
-    console.log(
-      "🗑️ Eliminando servicio:",
-      srv.id
-    );
-
-    await IST.delete(
-  `/ingresos-servicios/${srv.id}/${citaEditada.id}`
-);
-  }
-
-} catch (error) {
-
-  console.error(
-    "❌ ERROR ELIMINANDO SERVICIOS:",
-    error
-  );
-}
-
-// ======================================================
-// 🔥 GUARDAR NUEVOS SERVICIOS
-// ======================================================
-
+// 4. Crear servicios nuevos
 for (const srv of serviciosRegistrados) {
 
-  try {
+  const dto = {
 
-    const ingresoServicioDTO = {
+    idIngreso: srv.id,
 
-      idAgenda:
-        citaEditada.id,
+    idAgenda: citaEditada.id,
 
-      idServicio:
-        srv.id_servicio,
+    idServicio: srv.id_servicio,
 
-      idColaborador:
-        null,
+    idColaborador:
+      nuevoEvento.colaboradorId,
 
-      idVeterinario:
-        srv.id_veterinario,
+    idVeterinario: null,
 
-      cantidad:
-        Number(srv.cantidad),
+    cantidad: srv.cantidad,
 
-      duracionMin:
-        Number(srv.duracion_min),
+    duracionMin:
+      srv.duracion_min,
 
-      valorServicio:
-        Number(srv.valor_servicio),
+    valorServicio:
+      srv.valor_servicio,
 
-      observaciones:
-        srv.adicionales || ""
-    };
+    observaciones:
+      srv.adicionales || ""
+  };
 
-    console.log(
-      "🔥 GUARDANDO SERVICIO:",
-      ingresoServicioDTO
+  if (srv.id) {
+
+   Swal.fire({
+  icon: "info",
+  title: "Actualizando servicio",
+  text: `Servicio ${srv.nombre_servicio} actualizado`,
+  timer: 1500,
+  showConfirmButton: false
+});
+    await IST.put(
+      "/ingresos-servicios",
+      dto
     );
+
+  } else {
+
+  
 
     await IST.post(
       "/ingresos-servicios",
-      ingresoServicioDTO
+      dto
     );
 
-  } catch (error) {
-
-    console.error(
-      "❌ ERROR GUARDANDO SERVICIO:",
-      error
-    );
   }
-}
 
-setStatus(
-  `✏️ Cita ${citaEditada.codigo} actualizada exitosamente.`
-);
+}
 
 // ======================================================
 // 🔥 GOOGLE CALENDAR
@@ -1092,7 +1116,7 @@ if (isSignedIn && editingGCId) {
       serviciosRegistrados
         .map(
           (s) =>
-            `• ${s.nombre_servicio} (${s.cantidad}x S/ ${s.valor_servicio.toFixed(2)}) Subtotal: S/ ${s.subtotal.toFixed(2)} con ${s.nombre_veterinario}. Adicionales: ${s.adicionales || "N/A"}`
+            `• ${s.nombre_servicio} (${s.cantidad}x S/ ${s.valor_servicio.toFixed(2)}) Subtotal: S/${Number(s.subtotal || 0).toFixed(2)} con ${s.nombre_veterinario}. Adicionales: ${s.adicionales || "N/A"}`
         )
         .join("\n");
 
@@ -1177,10 +1201,6 @@ if (isSignedIn && editingGCId) {
         `Error GC ${errorObj.code}: ${errorObj.message}`;
     }
 
-    console.error(
-      "Error Google Calendar:",
-      gcError
-    );
 
     alert(
       `⚠️ Cita actualizada en BD. Falló Google Calendar. ${gcErrorMessage}`
@@ -1197,20 +1217,43 @@ if (isSignedIn && editingGCId) {
     `✏️ Cita ${citaEditada.codigo} actualizada exitosamente en BD.`
   );
 }
+
+await fetchCitas();
+
+resetModalState();
+
+Swal.fire({
+  icon: "success",
+  title: "Éxito",
+  text: "La cita fue actualizada correctamente"
+});
  } catch (error: any) {
 
-  console.error(
-    "❌ ERROR GUARDANDO CITA:",
-    error
-  );
-
-  alert(
-    error?.response?.data?.message ||
-    error.message ||
-    "Error desconocido"
-  );
 }
   }
+  const seleccionarServicio = (index: number) => {
+
+  const s = serviciosRegistrados[index];
+
+  setEditIndexServicio(index);
+
+  setServicioTemporal({
+    id_servicio: String(s.id_servicio),
+    valor_servicio: s.valor_servicio,
+    cantidad: s.cantidad,
+    duracion_min: s.duracion_min,
+    id_veterinario: String(s.id_veterinario),
+    adicionales: s.adicionales,
+  });
+};
+
+const eliminarServicio = (index: number) => {
+
+  setServiciosRegistrados(prev =>
+    prev.filter((_, i) => i !== index)
+  );
+};
+
   // ================== RENDER ==================
   return (
     <div id="editarita">
@@ -1590,10 +1633,12 @@ if (isSignedIn && editingGCId) {
                     ))}
                   </select>
                 </div>
+                
 
                 <div className="form-group" style={{ gridColumn: "span 6" }}>
                   <label htmlFor="id_veterinario_add">Veterinario *</label>
                   <select
+                  
                     id="id_veterinario_add"
                     name="id_veterinario_add"
                     value={servicioTemporal.id_veterinario}
@@ -1709,7 +1754,7 @@ if (isSignedIn && editingGCId) {
                   </button>
                 </div>
               </div>
-
+            
               {/* TABLA DE DETALLES DE SERVICIOS - DISEÑO COMPACTO */}
               {serviciosRegistrados.length > 0 && (
                 <div style={{ overflowX: "auto" }}>
@@ -1847,7 +1892,7 @@ if (isSignedIn && editingGCId) {
                               textAlign: "right",
                             }}
                           >
-                            ${s.subtotal.toFixed(2)}
+                            ${Number(s.subtotal || 0).toFixed(2)}
                           </td>
                           <td
                             style={{

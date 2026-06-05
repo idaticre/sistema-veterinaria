@@ -70,15 +70,13 @@ public class IngresoServicioMapper {
 
                 // 🔥 NOMBRE DEL VETERINARIO
                 .nombreVeterinario(
-                        entity.getVeterinario() != null &&
-                        entity.getVeterinario().getColaborador() != null &&
-                        entity.getVeterinario().getColaborador().getEntidad() != null
-                                ? entity.getVeterinario()
-                                        .getColaborador()
-                                        .getEntidad()
-                                        .getNombre()
-                                : "No asignado"
-                )
+    entity.getColaborador() != null &&
+    entity.getColaborador().getEntidad() != null
+        ? entity.getColaborador()
+                .getEntidad()
+                .getNombre()
+        : "No asignado"
+)
 
                 // 🔥 SUBTOTAL
                 .subtotal(subtotal)

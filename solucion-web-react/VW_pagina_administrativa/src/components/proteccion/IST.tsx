@@ -12,33 +12,6 @@ IST.interceptors.request.use((config) => {
   return config;
 }, (error) => Promise.reject(error));
 
-IST.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    let mensaje = "";
 
-    if (!error.response) {
-      mensaje = "🔌 Sin conexión a internet";
-    } else {
-      const status = error.response.status;
-
-      if (status >= 500) {
-        mensaje = "💥 Error interno del servidor";
-      } else if (status === 404) {
-        mensaje = "🔍 Recurso no encontrado";
-      } else if (status === 401) {
-        mensaje = "🔒 Sesión expirada";
-      }
-    }
-
-    if (mensaje) {
-      window.dispatchEvent(
-        new CustomEvent("error-global", { detail: mensaje })
-      );
-    }
-
-    return Promise.reject(error);
-  }
-);
 
 export default IST;
