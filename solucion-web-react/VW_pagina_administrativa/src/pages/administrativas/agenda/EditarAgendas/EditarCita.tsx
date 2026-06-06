@@ -295,12 +295,20 @@ if (servicioDuplicado) {
 
   // 1. Validaciones de seguridad
   if (!sId || isNaN(sId)) {
-    alert("Seleccione un servicio válido");
+    Swal.fire({
+        title: "Alerta",
+        text: "Seleccione un servicio válido",
+        icon: "warning"
+      });
     return;
   }
 
   if (!vId || isNaN(vId)) {
-    alert("Seleccione un veterinario");
+    Swal.fire({
+        title: "Alerta",
+        text: "Seleccione un veterinario",
+        icon: "warning"
+      });
     return;
   }
 
@@ -313,9 +321,11 @@ if (servicioDuplicado) {
   );
 
   if (!servicioInfo || !veterinarioInfo) {
-    alert(
-      "Error al obtener información del servicio o veterinario"
-    );
+    Swal.fire({
+        title: "Alerta",
+        text: "Error al obtener información del servicio o veterinario",
+        icon: "warning"
+      });
     return;
   }
 
@@ -498,9 +508,11 @@ const nuevoServicio: ServicioDetalle = {
   const checkTokenValidity = () => {
     const savedExpiry = localStorage.getItem("google_token_expires");
     if (!savedExpiry || Date.now() > parseInt(savedExpiry)) {
-      alert(
-        "⌛ Su sesión de Google ha caducado. Por favor, inicie sesión nuevamente.",
-      );
+      Swal.fire({
+        title: "Alerta",
+        text: "Su sesión de Google ha caducado. Por favor, inicie sesión nuevamente.",
+        icon: "warning"
+      });
       cerrarSesion(); // Esto limpiará el estado y mostrará el botón de login
       return false;
     }
@@ -664,9 +676,11 @@ const editarEvento = async (cita: CitaBD) => {
 
   // 🔒 VALIDACIÓN LOGIN
   if (!isSignedIn) {
-    alert(
-      "🔒 Por seguridad, debe iniciar sesión en Google Calendar para editar citas."
-    );
+    Swal.fire({
+        title: "Alerta",
+        text: "🔒 Por seguridad, debe iniciar sesión en Google Calendar para editar citas.",
+        icon: "warning"
+      });
     return;
   }
 
@@ -686,11 +700,11 @@ const editarEvento = async (cita: CitaBD) => {
       estadoNombre
     )
   ) {
-
-    alert(
-      `🚫 No se puede editar la cita ${cita.codigo} porque su estado es ${estadoNombre}.`
-    );
-
+    Swal.fire({
+      title: "Error",
+      text: `🚫 No se puede editar la cita ${cita.codigo} porque su estado es ${estadoNombre}.`,
+      icon: "error",
+    });
     return;
   }
 
@@ -880,7 +894,11 @@ setServiciosRegistrados(serviciosConvertidos);
   const eliminarEvento = async (id: number) => {
     // 🔒 BLOQUEO: También impedimos cancelar si no está logueado
     if (!isSignedIn) {
-      alert("🔒 Debe iniciar sesión en Google Calendar para cancelar citas.");
+      Swal.fire({
+        title: "Alerta",
+        text: "🔒 Debe iniciar sesión en Google Calendar para cancelar citas",
+        icon: "warning"
+      });
       return;
     }
 
@@ -892,7 +910,11 @@ setServiciosRegistrados(serviciosConvertidos);
     try {
       const citaActual = eventos.find((e) => e.id === id);
       if (!citaActual) {
-        alert("Cita no encontrada en la lista.");
+        Swal.fire({
+          title: "Alerta",
+          text: "Cita no encontrada en la lista",
+          icon: "warning"
+        });
         return;
       }
 
@@ -900,7 +922,11 @@ setServiciosRegistrados(serviciosConvertidos);
         (e) => e.nombre === "CANCELADA",
       );
       if (!estadoCancelado) {
-        alert("No se encontró el estado 'CANCELADA'.");
+        Swal.fire({
+          title: "Alerta",
+          text: "No se encontró el estado 'CANCELADA'",
+          icon: "warning"
+        });
         return;
       }
 
@@ -935,16 +961,21 @@ const responseDB = await axios.put(
               `🗑️ Cita ${citaActual.codigo} CANCELADA y eliminada de Google Calendar.`,
             );
           } catch (gcError) {
-           
-            alert(
-              "Cita cancelada en BD, pero falló la eliminación en Google Calendar.",
-            );
+            Swal.fire({
+              title: "Alerta",
+              text: "Cita cancelada en BD, pero falló la eliminación en Google Calendar",
+              icon: "warning"
+            });
           }
         }
 
         fetchCitas();
       } else {
-        alert(`Error al cancelar: ${responseDB.data.message}`);
+        Swal.fire({
+          title: "Alerta",
+          text: `Error al cancelar: ${responseDB.data.message}`,
+          icon: "warning"
+        });
       }
     } catch (error) {
       
@@ -955,23 +986,34 @@ const responseDB = await axios.put(
   // ================== GUARDAR EVENTO (FUNCIÓN CENTRAL) ==================
   const guardarEvento = async () => {
     if (!editandoCita) {
-      return alert(
-        "🚫 ERROR: No se encontró el ID de la cita para actualizar.",
-      );
+      return Swal.fire({
+        title: "Error",
+        text: "🚫 ERROR: No se encontró el ID de la cita para actualizar.",
+        icon: "error"
+      });
     }
 
     // 🟢 VALIDACIÓN DE CADUCIDAD DEL TOKEN
     if (isSignedIn && !checkTokenValidity()) return;
 
     if (nuevoEvento.mascotaId === 0)
-      return alert("Debe seleccionar una mascota.");
+      return Swal.fire({
+          title: "Alerta",
+          text: "Debe seleccionar una mascota",
+          icon: "warning"
+        });
     if (nuevoEvento.colaboradorId === 0)
-      return alert("Debe seleccionar un colaborador.");
+      return Swal.fire({
+            title: "Alerta",
+            text: "Debe seleccionar un colaborador",
+            icon: "warning"
+          });
     if (nuevoEvento.duracionEstimadaMin <= 0)
-      return alert(
-        "La duración estimada debe ser mayor a 0 (Agregue servicios).",
-      );
-
+      return Swal.fire({
+            title: "Alerta",
+            text: "La duración estimada debe ser mayor a 0 (Agregue servicios)",
+            icon: "warning"
+          });
     const totalMinimoNecesario = totalCosto || editandoCita.totalCita || 0;
     const duracionFinal = totalDuracion || nuevoEvento.duracionEstimadaMin;
 
@@ -1200,11 +1242,11 @@ if (isSignedIn && editingGCId) {
       gcErrorMessage =
         `Error GC ${errorObj.code}: ${errorObj.message}`;
     }
-
-
-    alert(
-      `⚠️ Cita actualizada en BD. Falló Google Calendar. ${gcErrorMessage}`
-    );
+    Swal.fire({
+        title: "Error",
+        text: "Falló Google Calendar",
+        icon: "error"
+      });
 
     setStatus(
       `✏️ Cita ${citaEditada.codigo} actualizada en BD. ⚠️ GC falló.`

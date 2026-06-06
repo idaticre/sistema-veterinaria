@@ -437,9 +437,11 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
       servicioTemporal.cantidad <= 0 ||
       servicioTemporal.duracion_min <= 0
     ) {
-      return alert(
-        "⚠️ Por favor, selecciona un servicio y veterinario, y verifica que Valor, Cantidad y Duración sean mayores a 0.",
-      );
+      return Swal.fire({
+        title: "Alerta",
+        text: "Asegurese de ingresar correctamente todos los datos",
+        icon: "warning"
+      });
     }
 
     const cantidad = servicioTemporal.cantidad;
@@ -488,25 +490,45 @@ const guardarEvento = async () => {
     // 1. VALIDACIONES INICIALES Y TOKEN
     const token = sessionStorage.getItem("token");
     if (!token) {
-      alert("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
+      Swal.fire({
+        title: "Alerta",
+        text: "Tu sesión ha expirado. Por favor, inicia sesión de nuevo",
+        icon: "warning"
+      });
       navigate("/administracion/login");
       return;
     }
 
     if (!isSignedIn) {
-      return alert("🔐 Debes iniciar sesión con Google antes de registrar una cita.");
+      return Swal.fire({
+        title: "Alerta",
+        text: "Debes iniciar sesión con Google antes de registrar una cita",
+        icon: "warning"
+      });
     }
 
     if (!permitirFeriados && fechasBloqueadas.includes(nuevoEvento.date)) {
-      return alert("🚫 No se puede agendar en feriados.");
+      return Swal.fire({
+        title: "Alerta",
+        text: "No se puede agendar en feriados",
+        icon: "warning"
+      });
     }
 
     if (!nuevoEvento.cliente || !nuevoEvento.mascota || !nuevoEvento.dni) {
-      return alert("Completa los campos de Cliente, DNI y Mascota.");
+      return Swal.fire({
+        title: "Alerta",
+        text: "Completa los campos de Cliente, DNI y Mascota",
+        icon: "warning"
+      });
     }
 
     if (serviciosRegistrados.length === 0) {
-      return alert("Debe registrar al menos un servicio para la cita.");
+      return Swal.fire({
+        title: "Alerta",
+        text: "Debe registrar al menos un servicio para la cita",
+        icon: "warning"
+      });
     }
 
     // 2. FORMATEO DE HORA Y FECHAS
@@ -520,7 +542,11 @@ const guardarEvento = async () => {
     const end = new Date(start.getTime() + duracionCitaTotal * 60000);
 
     if (horaOcupada(start, end, nuevoEvento.id)) {
-      return alert("⚠️ Ya existe una cita en este horario en Google Calendar. Elige otro horario.");
+      return Swal.fire({
+        title: "Alerta",
+        text: "Ya existe una cita en este horario en Google Calendar. Elige otro horario",
+        icon: "warning"
+      });
     }
 
     // 3. IDENTIFICACIÓN DE IDS (MASCOTA Y ESTADO)
@@ -530,7 +556,11 @@ const guardarEvento = async () => {
     const idMascota = mascotaEncontrada ? mascotaEncontrada.id : null;
 
     if (!idMascota) {
-      return alert("Error: No se pudo encontrar el ID de la mascota.");
+      return Swal.fire({
+        title: "Error",
+        text: "No se pudo encontrar el ID de la mascota",
+        icon: "error"
+      });
     }
 
     const estadoEncontrado = estadosAgenda.find((e) => e.nombre === nuevoEvento.estado);
@@ -609,15 +639,9 @@ const guardarEvento = async () => {
       "/ingresos-servicios",
       ingresoDTO
     );
-
- 
-
 } catch (error: any) {
-
-  
 }
       }
-
       // 🔥 PASO 3: INSERTAR EN GOOGLE CALENDAR
       if (isSignedIn) {
         await window.gapi.client.calendar.events.insert({
@@ -656,17 +680,14 @@ const guardarEvento = async () => {
       cargarEventos();
 
     } catch (error: any) {
-
-  console.error("ERROR COMPLETO:", error);
-  console.error("STATUS:", error.response?.status);
-  console.error("DATA:", error.response?.data);
-
-  alert(
-    `Error ${error.response?.status}: ${
-      error.response?.data?.message || error.message
-    }`
-  );
-}
+      Swal.fire({
+        title: "Error",
+        text: `Error ${error.response?.status}: ${
+          error.response?.data?.message || error.message
+        }`,
+        icon: "error"
+      });
+    }
   };// ---------------------------------------------
   // --- JSX DEL COMPONENTE ---
   return (
@@ -805,24 +826,15 @@ const guardarEvento = async () => {
                   <div key={`gc-${e.id}`} className="cita-card">
 
  <div className="cita-info-horizontal">
-
   <span><strong>Cliente:</strong> {detalles.Cliente || "N/A"}</span>
-
   <span><strong>Mascota:</strong> {detalles.Mascota || "N/A"}</span>
-
   <span><strong>Hora:</strong> {inicio} - {fin}</span>
-
   <span><strong>Día:</strong> {dia}</span>
-
   <span>
     <strong>Total:</strong>
     {detalles["Costo Total"] || "S/0.00"}
   </span>
-
 </div>
-
-  
-
 </div>
                 );
               })}
@@ -841,16 +853,16 @@ const guardarEvento = async () => {
 
       </section>
     </main>
-            {/* ======================= MODAL NUEVA ======================= */} 
-        
+            {/* ======================= MODAL NUEVA ======================= */} 
+        
       {mostrarModal && (
         <div className="modal-overlay">
-                 
+                 
           <div className="modal-content">
-                        <h3>Agendar nueva cita 🗓️</h3>          
+                        <h3>Agendar nueva cita 🗓️</h3>          
             <div className="col-izq">
-                            <label>Número de documento *</label>
-                           
+                            <label>Número de documento *</label>
+                           
               <input
                 type="text"
                 value={nuevoEvento.dni}
@@ -875,10 +887,10 @@ const guardarEvento = async () => {
                   }
                 }}
               />
-                            <label>Cliente *</label>
-                          
-              <input type="text" value={nuevoEvento.cliente} disabled />       
-                    <label>Mascota *</label>            
+                            <label>Cliente *</label>
+                          
+              <input type="text" value={nuevoEvento.cliente} disabled />       
+                    <label>Mascota *</label>            
               <select
                 value={nuevoEvento.mascota}
                 onChange={(e) =>
@@ -886,8 +898,8 @@ const guardarEvento = async () => {
                 }
                 disabled={!nuevoEvento.clienteId}
               >
-                                <option value="">Seleccione mascota...</option> 
-                             
+                                <option value="">Seleccione mascota...</option> 
+                             
                 {mascotas
                   .filter((m) => m.idCliente === nuevoEvento.clienteId)
                   .map((m) => (
@@ -895,14 +907,14 @@ const guardarEvento = async () => {
                       {m.nombre}
                     </option>
                   ))}
-                             
+                             
               </select>
-                        
+                        
             </div>
-                       
+                       
             <div className="col-der">
-                            <label>Fecha *</label>
-                           
+                            <label>Fecha *</label>
+                           
               <input
                 type="date"
                 value={nuevoEvento.date}
@@ -910,8 +922,8 @@ const guardarEvento = async () => {
                   setNuevoEvento({ ...nuevoEvento, date: e.target.value })
                 }
               />
-                            <label>Hora *</label>
-                          
+                            <label>Hora *</label>
+                          
               <input
                 type="time"
                 value={nuevoEvento.startTime}
@@ -919,19 +931,19 @@ const guardarEvento = async () => {
                   setNuevoEvento({ ...nuevoEvento, startTime: e.target.value })
                 }
               />
-                        
+                        
             </div>
-                      
+                      
             <div className="full-width-section">
-                            <h3>🛠 Servicios</h3>            
+                            <h3>🛠 Servicios</h3>            
               <div className="service-input-grid" id="serviceFormInputs">
-                             
+                             
                 <div>
-                                  
+                                  
                   <label htmlFor="id_servicio">
                     Servicio<span className="required">*</span>
                   </label>
-                                 
+                                 
                   <select
                     id="id_servicio"
                     name="id_servicio"
@@ -943,25 +955,25 @@ const guardarEvento = async () => {
                       })
                     }
                   >
-                                      
-                    <option value="">Seleccione un servicio</option>           
-                          
+                                      
+                    <option value="">Seleccione un servicio</option>           
+                          
                     {serviciosDisponibles.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.nombre} ({s.duracion} min)
                       </option>
                     ))}
-                                   
+                                   
                   </select>
-                                 
+                                 
                 </div>
-                              
+                              
                 <div>
-                                  
+                                  
                   <label htmlFor="valor_servicio">
                     Valor servicio<span className="required">*</span>
                   </label>
-                                 
+                                 
                   <input
   type="number"
   id="valor_servicio"
@@ -980,12 +992,12 @@ const guardarEvento = async () => {
     })
   }
 />
-                                 
+                                 
                 </div>
-                               
+                               
                 <div>
-                                    <label htmlFor="cantidad">Cantidad</label>
-                                  
+                                    <label htmlFor="cantidad">Cantidad</label>
+                                  
                   <input
                     type="number"
                     id="cantidad"
@@ -999,13 +1011,13 @@ const guardarEvento = async () => {
                       })
                     }
                   />
-                                
+                                
                 </div>
-                             
+                             
                 <div>
-                                  
+                                  
                   <label htmlFor="duracion_min">Duración Servicio</label>
-                                  
+                                  
                   <input
                     type="number"
                     id="duracion_min"
@@ -1019,15 +1031,15 @@ const guardarEvento = async () => {
                       })
                     }
                   />
-                                
+                                
                 </div>
-                             
+                             
                 <div>
-                                  
+                                  
                   <label htmlFor="id_veterinario">
                     Veterinario <span className="required">*</span>
                   </label>
-                                  
+                                  
                   <select
                     name="id_veterinario"
                     value={servicioTemporal.id_veterinario}
@@ -1038,22 +1050,22 @@ const guardarEvento = async () => {
                       })
                     }
                   >
-                                        <option value="">Seleccione...</option> 
-                                     
+                                        <option value="">Seleccione...</option> 
+                                     
                     {colaboradores.map((c) => (
   <option key={c.id} value={c.id}>
     {c.nombre}
   </option>
 ))}
-                                  
+                                  
                   </select>
-                               
+                               
                 </div>
-                            
+                            
                 <div>
-                                 
+                                 
                   <label htmlFor="adicionales">Adicionales</label>
-                                 
+                                 
                   <input
                     type="text"
                     id="adicionales"
@@ -1066,11 +1078,11 @@ const guardarEvento = async () => {
                       })
                     }
                   />
-                                
+                                
                 </div>
-                             
+                             
                 <div>
-                                  
+                                  
                   <button
                     type="button"
                     id="btnAddService"
@@ -1080,14 +1092,14 @@ const guardarEvento = async () => {
                   >
                     Agregar
                   </button>
-                                 
+                                 
                 </div>
-                            
+                            
               </div>
-                          
+                          
               <div>
-                                <label htmlFor="bono_inicial">Adelanto</label>
-                               
+                                <label htmlFor="bono_inicial">Adelanto</label>
+                               
                 <input
                   type="number"
                   id="bono_inicial"
@@ -1098,29 +1110,29 @@ const guardarEvento = async () => {
                     setBonoTemporal(parseFloat(e.target.value) || 0)
                   }
                 />
-                          
+                          
               </div>
-                            <h4>Detalle de Servicios:</h4>           
+                            <h4>Detalle de Servicios:</h4>           
               <table className="service-table">
-                              
+                              
                 <thead>
-                                 
+                                 
                   <tr>
-                    <th>Servicio</th>              
-                    <th>Responsable</th><th>Cantidad</th>   
-                    <th>Duración Total</th>                  
-                    <th>Valor Servicio (S/)</th>                  
-                    <th>Subtotal (S/)</th><th>Acción</th>   
-                                
+                    <th>Servicio</th>              
+                    <th>Responsable</th><th>Cantidad</th>   
+                    <th>Duración Total</th>                  
+                    <th>Valor Servicio (S/)</th>                  
+                    <th>Subtotal (S/)</th><th>Acción</th>   
+                                
                   </tr>
-                                
+                                
                 </thead>
-                              
+                              
                 <tbody id="serviceTableBody">
-                                 
+                                 
                   {serviciosRegistrados.map((s, index) => (
                     <tr key={index}>
-                                         
+                                         
                       <td style={{ textAlign: "left" }}>
                         <strong>{s.nombre_servicio}</strong>
                         {s.adicionales && (
@@ -1130,13 +1142,13 @@ const guardarEvento = async () => {
                           </>
                         )}
                       </td>
-                      <td>{s.nombre_veterinario}</td>     
-                      <td>{s.cantidad}</td>                    
-                      <td>{s.duracion_total} min</td>                   
+                      <td>{s.nombre_veterinario}</td>     
+                      <td>{s.cantidad}</td>                    
+                      <td>{s.duracion_total} min</td>                   
                       <td>S/{s.valor_servicio.toFixed(2)}</td>
-                      {/* AÑADIDO S/ */}                    
-                      <td>S/{s.subtotal.toFixed(2)}</td> {/* AÑADIDO S/ */}     
-                                    
+                      {/* AÑADIDO S/ */}                    
+                      <td>S/{s.subtotal.toFixed(2)}</td> {/* AÑADIDO S/ */}     
+                                    
                       <td>
                         <button
                           type="button"
@@ -1145,19 +1157,19 @@ const guardarEvento = async () => {
                         >
                           🗑️
                         </button>
-                      </td>               
+                      </td>               
                     </tr>
-                  ))}                  
-                </tbody>                    
-                <tfoot>                           
-                  <tr>                                  
+                  ))}                  
+                </tbody>                    
+                <tfoot>                           
+                  <tr>                                  
                     <td colSpan={3} style={{ textAlign: "right" }}>
                       Total Duración:
-                    </td>                    
+                    </td>                    
                     <td id="totalDuracion">
                       <strong>{totalDuracion} min</strong>
                     </td>
-                  <td colSpan={3}></td>               
+                  <td colSpan={3}></td>               
                   </tr>
                   <tr>
                     <td
@@ -1169,61 +1181,54 @@ const guardarEvento = async () => {
                     <td style={{ fontWeight: "bold" }}>
                       S/{totalCosto.toFixed(2)}
                     </td>
-                    {/* AÑADIDO S/ */}<td></td>  
-                  </tr>                         
-                  <tr className="bono-row">                
+                    {/* AÑADIDO S/ */}<td></td>  
+                  </tr>                         
+                  <tr className="bono-row">                
                     <td
                       colSpan={5}
                       style={{ textAlign: "right", fontWeight: "bold" }}
                     >
                       Adelanto:
                     </td>
-                                      
+                                      
                     <td style={{ fontWeight: "bold", color: "red" }}>
                       S/{bonoTemporal.toFixed(2)}
                     </td>
-                    {/* AÑADIDO S/ */}                    <td></td>             
-                      
+                    {/* AÑADIDO S/ */}                    <td></td>             
+                      
                   </tr>
-                                  
                   <tr className="total-row">
-                                      
                     <td colSpan={5} style={{ textAlign: "right" }}>
                       Pendiente de Pago:
                     </td>
-                                       
                     <td id="totalCitaDisplay">
                       <strong>
                         S/{Math.max(0, totalCosto - bonoTemporal).toFixed(2)}
                       </strong>
                     </td>
-                    {/* AÑADIDO S/ */}                    <td></td>             
-                      
+                    {/* AÑADIDO S/ */}                    <td></td>             
+                      
                   </tr>
-                               
                 </tfoot>
-                            
               </table>
-                        
             </div>
-                        {/* Estado y Observaciones */}          
-            <label>Estado *</label>           
+                        {/* Estado y Observaciones */}          
+            <label>Estado *</label>           
             <select
               value={nuevoEvento.estado}
               onChange={(e) =>
                 setNuevoEvento({ ...nuevoEvento, estado: e.target.value })
               }
             >
-                            <option value="">Seleccione...</option>           
+                            <option value="">Seleccione...</option>           
               {estadosAgenda.map((estado) => (
                 <option key={estado.id} value={estado.nombre}>
                   {estado.nombre}
                 </option>
               ))}
-                         
+                         
             </select>
-                        <label className="label-obs">Observaciones</label>
-                      
+                        <label className="label-obs">Observaciones</label>
             <textarea
               className="textarea-obs"
               value={nuevoEvento.description}
@@ -1231,13 +1236,12 @@ const guardarEvento = async () => {
                 setNuevoEvento({ ...nuevoEvento, description: e.target.value })
               }
             />
-                        {/* Botones Finales */}         
+                        {/* Botones Finales */}         
             <div className="acciones-modal">
-                         
+                         
               <button className="btn-agregar" onClick={guardarEvento}>
-                                💾 Guardar Cita             
+                                💾 Guardar Cita             
               </button>
-                          
               <button
                 className="btn-cerrar"
                 onClick={() => {
@@ -1248,16 +1252,12 @@ const guardarEvento = async () => {
               >
                 ❌ Cancelar
               </button>
-                        
             </div>
-                     
           </div>
-                 
         </div>
       )}
-         
     </div>
   );
 }
 
- export default Agenda_general;
+export default Agenda_general;
