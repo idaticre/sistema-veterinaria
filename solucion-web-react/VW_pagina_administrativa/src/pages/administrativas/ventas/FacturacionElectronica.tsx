@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
 import "./FacturacionElectronica.css";
+import Swal from 'sweetalert2';
 
 interface Servicio {
   descripcion: string;
@@ -109,24 +109,40 @@ function FacturacionElectronica() {
       const citasResult = await citasResponse.json();
       setCitasCliente(citasResult.data || []);
     } catch (error) {
-      console.error(error);
+      Swal.fire({
+        title: "Error desconocido",
+        text: "Refresque la página por favor",
+        icon: "error"
+      });
     }
   };
 
   // 🔥 AGREGAR SERVICIO MANUAL
   const agregarServicio = () => {
     if (!servicio) {
-      alert("Ingrese descripción");
+      Swal.fire({
+        title: "Alerta",
+        text: "Debe ingresar una descripción",
+        icon: "warning"
+      });
       return;
     }
 
     if (precio <= 0) {
-      alert("Ingrese un precio válido");
+      Swal.fire({
+        title: "Alerta",
+        text: "Debe ingresar un precio válido",
+        icon: "warning"
+      });
       return;
     }
 
     if (cantidad <= 0) {
-      alert("Ingrese cantidad válida");
+      Swal.fire({
+        title: "Alerta",
+        text: "Debe ingresar una cantidad válida",
+        icon: "warning"
+      });
       return;
     }
 
@@ -153,7 +169,11 @@ function FacturacionElectronica() {
       );
 
       if (yaExiste) {
-        alert("La cita ya fue agregada");
+        Swal.fire({
+        title: "Alerta",
+        text: "La cita ya fue agregada",
+        icon: "warning"
+      });
         return;
       }
 
@@ -172,7 +192,11 @@ function FacturacionElectronica() {
       );
 
       if (!response.ok) {
-        alert("No se pudieron obtener los servicios");
+        Swal.fire({
+        title: "Error",
+        text: "al obtener los servicios, refresque la página",
+        icon: "warning"
+      });
         return;
       }
 
@@ -180,7 +204,11 @@ function FacturacionElectronica() {
       const listaServicios = result.data || [];
 
       if (listaServicios.length === 0) {
-        alert("La cita no tiene servicios");
+        Swal.fire({
+          title: "Alerta",
+          text: "la cita no tiene servicios",
+          icon: "warning"
+        });
         return;
       }
      
@@ -202,8 +230,11 @@ setTotalAnticipio(Number(cita.abonoInicial || 0));
 
       setServicios((prev) => [...prev, ...nuevosServicios]);
     } catch (error) {
-      console.error(error);
-      alert("Error obteniendo servicios");
+      Swal.fire({
+        title: "Error",
+        text: "al obtener los servicios. Refresque la página",
+        icon: "warning"
+      });
     }
   };
 
@@ -281,9 +312,6 @@ const request = {
     total: s.subtotal * 1.18
   }))
 };
-
-    console.log("ENVIANDO", request);
-
     const response = await fetch(
       "http://localhost:8080/api/comprobantes/generar",
       {
@@ -298,19 +326,29 @@ const request = {
 
     const data = await response.json();
 
-    console.log(data);
-
-    alert("Comprobante guardado correctamente");
+    Swal.fire({
+        title: "Éxito",
+        text: "operación exitosa",
+        icon: "success"
+      });
 
   } catch (error) {
-    console.error(error);
+    Swal.fire({
+        title: "Error desconocido",
+        text: "Refresque la página por favor",
+        icon: "error"
+      });
   }
 };
 
   // 🔥 PDF CORREGIDO
   const generarPDF = () => {
     if (servicios.length === 0) {
-      alert("No hay servicios");
+      Swal.fire({
+        title: "Alerta",
+        text: "No hay servicios",
+        icon: "warning"
+      });
       return;
     }
 

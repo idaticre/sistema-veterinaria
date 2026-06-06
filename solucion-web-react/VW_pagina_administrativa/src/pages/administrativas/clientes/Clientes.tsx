@@ -7,6 +7,7 @@ import type {
   ClienteResponse,
   MascotaResponse,
 } from "../../../components/interfaces/interfaces";
+import Swal from 'sweetalert2';
 
 type Mascotaextendido = MascotaResponse & {
   nombre_raza?: string;
@@ -27,7 +28,6 @@ function Lst_clientes() {
   useEffect(() => {
     IST.get("/clientes")
       .then((res) => {
-        console.log("clientes:", res.data);
         const lista = res.data.data;
 
         const activos = lista.filter(
@@ -38,7 +38,11 @@ function Lst_clientes() {
         setFiltrados(activos);
       })
       .catch((err) => {
-        console.error("Error en la carga de datos", err);
+        Swal.fire({
+          title: "Error desconocido",
+          text: "Por favor refresque la página",
+          icon: "error"
+        });
       });
   }, []);
 
@@ -55,7 +59,6 @@ function Lst_clientes() {
                 IST.get(`/especies/${m.idEspecie}`),
                 IST.get(`/estado-mascota/${m.idEstado}`),
               ]);
-
               return {
                 ...m,
                 nombre_raza: razaRes.data.nombre,
@@ -63,7 +66,11 @@ function Lst_clientes() {
                 nombre_estado: estadoRes.data.nombre,
               };
             } catch (error) {
-              console.error("Error al obtener datos", error);
+              Swal.fire({
+                title: "Error desconocido",
+                text: "Por favor refresque la página",
+                icon: "error"
+              });
               return {
                 ...m,
                 nombre_raza: "Desconocido",
@@ -76,7 +83,12 @@ function Lst_clientes() {
 
         setMascota(mascotasConExtras);
       })
-      .catch((err) => console.error("Error en la carga de mascotas", err));
+      .catch((err) => Swal.fire({
+          title: "Error desconocido",
+          text: "Por favor refresque la página",
+          icon: "error"
+        })
+      );
   }, []);
 
   const mascotaDueño = clienteSeleccionado
@@ -95,7 +107,11 @@ function Lst_clientes() {
         setFiltrados(actualizados);
       })
       .catch((err) => {
-        console.error("Error al eliminar este cliente", err);
+        Swal.fire({
+          title: "Error...",
+          text: "al eliminar este cliente",
+          icon: "error"
+        });
       });
   };
 

@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import "./lst_mascotas.css";
 import type { MascotaResponse } from "../../../components/interfaces/interfaces";
 import IST from "../../../components/proteccion/IST";
+import Swal from 'sweetalert2';
 
 type Mascotaextendido = MascotaResponse & {
   nombre_dueño?: string;
@@ -58,7 +59,11 @@ function Lst_mascotas() {
                 nombre_etapa: etapaRes.data.descripcion,
               };
             } catch (error) {
-              console.error("Error al obtener datos", error);
+              Swal.fire({
+                title: "Error desconocido",
+                text: "Por favor refresque la página",
+                icon: "error"
+              });
               return {
                 ...m,
                 nombre_dueño: "Desconocido",
@@ -83,7 +88,12 @@ function Lst_mascotas() {
           }
         }
       })
-      .catch((err) => console.error("Error en la carga de mascotas", err));
+      .catch((err) => Swal.fire({
+          title: "Error...",
+          text: "al cargar las mascotas",
+          icon: "error"
+        })
+      );
   }, []);
 
   const handleDelete = (id?: number) => {
@@ -99,7 +109,11 @@ function Lst_mascotas() {
         setMascotaSeleccionado(null);
       })
       .catch((err) => {
-        console.error("Error al eliminar esta mascota", err);
+          Swal.fire({
+          title: "Error...",
+          text: "al eliminar esta mascota",
+          icon: "error"
+        });
       });
   };
 

@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip, BarChart, Ba
 import "./Admin_index.css"
 import type { UsuarioResponse, ClienteResponse,  MascotaResponse, CitaResponse, CitaPorEstado, MascotaPorEspecie } from "../../../components/interfaces/interfaces";
 import IST from "../../../components/proteccion/IST";
+import Swal from 'sweetalert2';
 
 function Admin_index() {
     const [minimizado, setMinimizado] = useState(false);
@@ -92,7 +93,11 @@ function Admin_index() {
 
 
             } catch (err) {
-                console.error("Error al cargar datos:", err);
+                Swal.fire({
+                    title: "Error desconocido",
+                    text: "Por favor refresque la página",
+                    icon: "error"
+                });
             }
         };
 

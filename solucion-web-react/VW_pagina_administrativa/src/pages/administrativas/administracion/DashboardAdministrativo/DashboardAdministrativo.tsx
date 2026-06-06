@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./DashboardAdministrativo.css";
 import IST from "../../../../components/proteccion/IST";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
+import Swal from 'sweetalert2';
 
 interface Colaborador {
   id: number;
@@ -46,8 +47,11 @@ const DashboardAdministrativo: React.FC = () => {
         setError("No se pudieron cargar los colaboradores");
       }
     } catch (err) {
-      console.error("Error:", err);
-      setError("Error al conectar con el servidor");
+      Swal.fire({
+        title: "Error...",
+        text: "al conectar con el servidor",
+        icon: "error"
+      });
     } finally {
       setLoading(false);
     }

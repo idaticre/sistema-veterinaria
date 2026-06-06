@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
 import "./styles.css"
 import IST from '../../../components/proteccion/IST'
-    
+import Swal from 'sweetalert2';
+
 interface ServicioResponse {
     id: number,
     nombre: string,
@@ -46,7 +47,13 @@ const GestionarServicios: React.FC = () => {
 
             setServicios(lista);
             setFiltrado(lista);
-        } catch (error) {console.error("Error al obtener los servicios", error);}
+        } catch (error) {
+            Swal.fire({
+                title: "Error desconocido",
+                text: "Por favor refresque la página",
+                icon: "error"
+            });
+        }
     }
 
     // Formulario nuevo y vacío
@@ -73,8 +80,21 @@ const GestionarServicios: React.FC = () => {
     // Guardar
     const guardarServicio = async () => {
         if (!edicion) return;
-        if (!edicion.nombre.trim()) {alert("Ingrese el nombre del servicio"); return;}
-        if (!edicion.descripcion?.trim()) {alert("Ingrese la descripción del servicio"); return;}
+        if (!edicion.nombre.trim()) {
+            Swal.fire({
+                title: "Alerta",
+                text: "Debe ingresar el nombre del servicio",
+                icon: "warning"
+            });
+            return;
+        }
+        if (!edicion.descripcion?.trim()) {
+            Swal.fire({
+                title: "Alerta",
+                text: "Debe ingresar la descripción del servicio",
+                icon: "warning"
+            });
+            return;}
 
         try {
             if (edicion.id && edicion.id > 0) {await IST.put(`/servicios`, edicion);}
@@ -83,8 +103,11 @@ const GestionarServicios: React.FC = () => {
             setEdicion(null);
             setMostrarModal(false);
         } catch (error) {
-            console.error("Error al registrar/actualizar: ", error);
-            alert("Error al registrar o actualizar")
+            Swal.fire({
+                title: "Error",
+                text: "al registrar o actualizar",
+                icon: "error"
+            });
         }
     }
 
@@ -93,10 +116,17 @@ const GestionarServicios: React.FC = () => {
         try {
             await IST.delete(`/servicios/${id}`)
             listarServicios();
-            alert("Eliminación exitosa");
+            Swal.fire({
+                title: "Éxito",
+                text: "Operación exitosa",
+                icon: "success"
+            });
         } catch (error) {
-            alert(error);
-            console.error("Error al eliminar: ", error)
+            Swal.fire({
+                title: "Error",
+                text: "Hubo un error al eliminar",
+                icon: "error"
+            });
         }
     }
 

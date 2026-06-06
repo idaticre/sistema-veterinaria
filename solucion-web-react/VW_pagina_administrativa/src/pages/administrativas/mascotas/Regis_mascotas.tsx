@@ -12,7 +12,8 @@ import type {
   MascotaResponse,
 } from "../../../components/interfaces/interfaces";
 import IST from "../../../components/proteccion/IST";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import Swal from 'sweetalert2';
 
 type Mascotaextendido = MascotaResponse & { nombre_dueño?: string };
 
@@ -116,7 +117,11 @@ function Regis_mascotas() {
         setEstadoMascota(resEstadosM.data);
         setDueños(resDueños.data.data);
       } catch (error) {
-        console.error("Error al obtener datos:", error);
+        Swal.fire({
+          title: "Error desconocido",
+          text: "Por favor refresque la página",
+          icon: "error"
+        });
       }
     };
 
@@ -148,7 +153,11 @@ function Regis_mascotas() {
   const handleSubmit = async (e: React.FormEvent) => {
     
     if (!formMascota.idCliente) {
-      alert("Debe seleccionar un dueño ❌");
+      Swal.fire({
+        title: "Alerta",
+        text: "debe seleccionar un dueño",
+        icon: "warning"
+      });
       return;
     }
     
@@ -181,18 +190,27 @@ function Regis_mascotas() {
       if (id) {
         IST.put(`/mascotas/${id}`, nuevaMascota)
           .then((res) => {
-            console.log("Mascota actualizada:", res.data);
-            alert("Mascota actualizada correctamente ✅");
+            Swal.fire({
+              title: "Éxito",
+              text: "Operación exitosa",
+              icon: "success"
+            });
             navigate("/administracion/mascotas/lista");
           })
           .catch((err) => {
-            console.error("Error al actualizar mascota", err);
-            alert("Error al actualizar mascota ❌");
+            Swal.fire({
+              title: "Error",
+              text: "al actualizar mascota",
+              icon: "error"
+            });
           });
       } else {
         IST.post("/mascotas", nuevaMascota).then(async (res) => {
-          console.log("Respuesta del servidor:", res.data);
-          alert("Mascota registrada correctamente ✅");
+          Swal.fire({
+              title: "Éxito",
+              text: "Operación exitosa",
+              icon: "success"
+            });
 
           const idHistoriaMascota = res.data.data.id;
 
@@ -204,7 +222,11 @@ function Regis_mascotas() {
             try {
               await IST.post("/historia-clinica", historia_clinica);
             } catch (error) {
-              console.error("Error al crear historia clínica", error);
+              Swal.fire({
+                title: "Error",
+                text: "al crear lista clínica",
+                icon: "error"
+              });
             }
           }
 
@@ -212,14 +234,16 @@ function Regis_mascotas() {
         });
       }
     } catch (err) {
-      console.error("Error al registrar mascota:", err);
-      alert("Error al registrar mascota ❌");
+      Swal.fire({
+        title: "Error",
+        text: "al registrar la mascota",
+        icon: "error"
+      });
     }
   };
 
   const handleBusqueda = (valor: string) => {
     setBusqueda(valor);
-    console.log("Buscando:", valor);
 
     if (valor.trim() === "") {
       setResultados([]);
@@ -232,7 +256,6 @@ function Regis_mascotas() {
       const documentoCoincide = d.documento.toString().includes(valor);
       return nombreCoincide || documentoCoincide;
     });
-    console.log("Coincidencias encontradas:", filtrados);
     setResultados(filtrados);
   };
 
@@ -250,18 +273,24 @@ function Regis_mascotas() {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        console.log("Imagen eliminada del servidor ✔");
 
         setImagenMascota(null);
         setFotoFile(null);
         setFormMascota(prev => ({ ...prev, foto: "" }));
 
-        alert("Imagen eliminada ✔");
+        Swal.fire({
+          title: "Éxito",
+          text: "Operación exitosa",
+          icon: "error"
+        });
 
         return;
       } catch (error) {
-        console.error("Error eliminando archivo:", error);
-        alert("Error eliminando la imagen ❌");
+        Swal.fire({
+          title: "Error",
+          text: "al eliminar la imagen",
+          icon: "error"
+        });
         return;
       }
     }

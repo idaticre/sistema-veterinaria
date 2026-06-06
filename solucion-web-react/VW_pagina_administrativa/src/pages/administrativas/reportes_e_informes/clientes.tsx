@@ -148,7 +148,13 @@ const GestionarColaboradores: React.FC = () => {
 
             const clientesActivos = lista.filter((cliente: ClienteResponse) => cliente.activo === true);
             setClientes(clientesActivos);
-        } catch (error) {console.error("Error al obtener los clientes", error);}
+        } catch (error) {
+            Swal.fire({
+                title: "Error desconocido",
+                text: "refresque la página por favor",
+                icon: "error"
+            });
+        }
     };
 
     // Listar mascotas
@@ -160,7 +166,13 @@ const GestionarColaboradores: React.FC = () => {
             ? respuesta.data
             : respuesta.data.data;
             setMascotas(lista);
-        } catch (error) {console.error("Error al obtener las mascotas", error);}
+        } catch (error) {
+            Swal.fire({
+                title: "Error desconocido",
+                text: "refresque la página por favor",
+                icon: "error"
+            });
+        }
     };
 
     // Listar razas de mascotas
@@ -172,7 +184,13 @@ const GestionarColaboradores: React.FC = () => {
             ? respuesta.data
             : respuesta.data.data;
             setRazas(lista);
-        } catch (error) {console.error("Error al obtener las razas", error);}
+        } catch (error) {
+            Swal.fire({
+                title: "Error desconocido",
+                text: "refresque la página por favor",
+                icon: "error"
+            });
+        }
     };
     const razasMap = razas.reduce((acc, r) => {
         acc[r.id] = r.nombre;
@@ -192,7 +210,13 @@ const GestionarColaboradores: React.FC = () => {
             ? respuesta.data
             : respuesta.data.data;
             setEspecies(lista);
-        } catch (error) {console.error("Error al obtener las especies", error);}
+        } catch (error) {
+            Swal.fire({
+                title: "Error desconocido",
+                text: "refresque la página por favor",
+                icon: "error"
+            });
+        }
     };
     const especiesMap = especies.reduce((acc, r) => {
         acc[r.id] = r.nombre;
@@ -206,7 +230,11 @@ const GestionarColaboradores: React.FC = () => {
     // Cargar datos, frfr
     const cargarDatos = async () => {
     if (!clienteSeleccionado) {
-        alert("Seleccione un cliente válido.");
+        Swal.fire({
+            title: "Alerta",
+            text: "Selecciona un cliente válido",
+            icon: "warning"
+        });
         return;
     }
     try {
@@ -218,9 +246,19 @@ const GestionarColaboradores: React.FC = () => {
             cliente,
             mascotas: mascotasCliente,
         });
-        alert("Datos cargados, ahora puede generar un PDF");
+        Swal.fire({
+            title: "Datos cargados",
+            text: "Ahora puede generar un PDF",
+            icon: "success"
+        });
 
-    } catch (error) {console.error("Error cargando datos del reporte:", error);}
+    } catch (error) {
+        Swal.fire({
+            title: "Error",
+            text: "cargando datos del reporte, intente de nuevo",
+            icon: "error"
+        });
+    }
     };
 
     const transformadoresEspeciales: Record<string, (v:any) => string> = {
@@ -235,7 +273,14 @@ const GestionarColaboradores: React.FC = () => {
 
     // Magia del PDF
     const generarPDF = (datosReporte: any) => {
-        if (!datosReporte) { alert("No hay datos cargados para generar el PDF"); return; }
+        if (!datosReporte) { 
+            Swal.fire({
+                title: "Alerta",
+                text: "no hay datos cargados para generar un PDF",
+                icon: "warning"
+            });
+            return; 
+        }
         const { cliente, mascotas } = datosReporte;
 
         // Parte de clientes

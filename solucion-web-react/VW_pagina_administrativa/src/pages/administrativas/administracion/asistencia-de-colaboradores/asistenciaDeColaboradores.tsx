@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import IST from "../../../../components/proteccion/IST";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./asistencia.css";
+import Swal from 'sweetalert2';
 
 // 🔥 AGREGAMOS EL CAMPO 'documento' a la interfaz Colaborador
 interface Colaborador {
@@ -79,8 +80,11 @@ export default function AsistenciaColaboradores() {
         }
       })
       .catch((err) => {
-        console.error("Error cargando colaboradores:", err);
-        alert("No se pudieron cargar los colaboradores.");
+        Swal.fire({
+          title: "Error...",
+          text: "al cargar colaboradores",
+          icon: "error"
+        });
       });
   }, []);
 
@@ -118,7 +122,11 @@ export default function AsistenciaColaboradores() {
         );
       }
     } catch (err) {
-      console.error("Error cargando registro del día:", err);
+      Swal.fire({
+        title: "Error...",
+        text: "al cargar el registro del día",
+        icon: "error"
+      });
       setRegistroHoy(null);
     } finally {
       setLoadingRegistroHoy(false);
@@ -158,15 +166,19 @@ export default function AsistenciaColaboradores() {
   /* ============================ MARCAR ASISTENCIA (SIN CAMBIOS) ============================ */
   const marcarAsistencia = async (tipo: TipoMarcaFrontend) => {
     if (!colaboradorSeleccionado) {
-      alert("Selecciona un colaborador.");
+      Swal.fire({
+        title: "Selecciona un colaborador",
+        icon: "question"
+      });
       return;
     }
 
     // 🔥 Mostrar mensaje si es día de descanso
     if (registroHoy?.descansoProgramado) {
-      alert(
-        "Hoy es un día de descanso programado. No se puede registrar asistencia.",
-      );
+      Swal.fire({
+        title: "Hoy es un día de descanso programado. No se puede registrar asistencia",
+        icon: "question"
+      });
       return;
     }
 
@@ -182,16 +194,27 @@ export default function AsistenciaColaboradores() {
       const data = res.data?.data as RegistroAsistenciaBackend | undefined;
 
       if (!data) {
-        alert("Respuesta inválida del servidor.");
+        Swal.fire({
+          title: "Error...",
+          text: "Respuesta inválida del servidor",
+          icon: "error"
+        });
         return;
       }
 
       if (data?.success === false) {
-        alert(data.mensaje ?? "No se pudo marcar.");
+        Swal.fire({
+          title: "Error...",
+          text: "No se pudo marcar",
+          icon: "error"
+        });
         return;
       }
 
-      alert(data.mensaje ?? "Marcación registrada.");
+      Swal.fire({
+        title: "Operación exitosa",
+        icon: "success"
+      });
 
       // 🔥 Actualizar el registro en memoria y localStorage
       setRegistroHoy((prev) => {
@@ -217,8 +240,11 @@ export default function AsistenciaColaboradores() {
         return base;
       });
     } catch (err) {
-      console.error("Error registrando asistencia:", err);
-      alert("Error registrando asistencia.");
+      Swal.fire({
+        title: "Error...",
+        text: "al registrar asistencia",
+        icon: "error"
+      });
     } finally {
       setLoadingAction(false);
     }

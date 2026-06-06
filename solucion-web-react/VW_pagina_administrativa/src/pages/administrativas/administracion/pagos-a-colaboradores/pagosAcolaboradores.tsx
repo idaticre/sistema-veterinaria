@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./pagos.css";
+import Swal from 'sweetalert2';
 
 interface Colaborador {
   id: number;
@@ -41,12 +42,20 @@ function PagosColaboradores() {
     axios
       .get("http://localhost:8088/api/colaboradores")
       .then((res) => setColaboradores(res.data.data || []))
-      .catch((err) => console.error("Error cargando colaboradores:", err));
+      .catch((err) => Swal.fire({
+        title: "Error...",
+        text: "al obtener colaboradores",
+        icon: "error"
+      }));
 
     axios
       .get("http://localhost:8088/api/pagos")
       .then((res) => setPagos(res.data.data || []))
-      .catch((err) => console.error("Error cargando pagos:", err));
+      .catch((err) => Swal.fire({
+        title: "Error...",
+        text: "al obtener pagos",
+        icon: "error"
+      }));
   }, []);
 
   
@@ -68,18 +77,27 @@ function PagosColaboradores() {
 
   const registrarPago = () => {
     if (!colaboradorSeleccionado) {
-      alert("Selecciona un colaborador primero");
+      Swal.fire({
+        title: "Selecciona un colaborador primero",
+        icon: "question"
+      });
       return;
     }
 
     if (!nuevoPago.monto || !nuevoPago.metodo) {
-      alert("Completa todos los campos del pago");
+      Swal.fire({
+        title: "Completa todos los campos del pago",
+        icon: "question"
+      });
       return;
     }
 
     const montoNum = Number(nuevoPago.monto);
     if (isNaN(montoNum) || montoNum <= 0) {
-      setErrorMonto("Ingrese un número válido para el monto");
+      Swal.fire({
+        title: "Ingrese un número válido para el monto",
+        icon: "question"
+      });
       return;
     }
 
@@ -94,7 +112,10 @@ function PagosColaboradores() {
     axios
       .post("http://localhost:8088/api/pagos", pagoNuevo)
       .then((res) => {
-        alert("✅ Pago registrado correctamente");
+        Swal.fire({
+          title: "Operación exitosa",
+          icon: "success"
+        });
         setPagos([...pagos, res.data.data || res.data]);
         setMostrarModal(false);
         setNuevoPago({
@@ -106,8 +127,11 @@ function PagosColaboradores() {
         setErrorMonto("");
       })
       .catch((err) => {
-        console.error("Error al registrar pago:", err);
-        alert("❌ No se pudo registrar el pago");
+        Swal.fire({
+          title: "Error...",
+          text: "al registrar el pago",
+          icon: "error"
+        });
       });
   };
 

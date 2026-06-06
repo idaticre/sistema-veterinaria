@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 import { useState } from "react";
+import Swal from 'sweetalert2';
 
 function Login() {
   const [usuario, setUsuario] = useState("");
@@ -24,14 +25,17 @@ function Login() {
       });
 
       if (!response.ok) {
-        alert("Credenciales incorrectas");
+        Swal.fire({
+          title: "Error",
+          text: "Credenciales incorrectas",
+          icon: "error"
+        });
         setUsuario("");
         setPassword("");
         return;
       }
 
       const data = await response.json(); 
-      console.log("Respuesta del servidor:", data);
 
       if (data.token) {
         sessionStorage.setItem("token", data.token);
@@ -40,13 +44,20 @@ function Login() {
 
         navigate("/administracion/home");
       } else {
-        alert("Credenciales incorrectas");
+        Swal.fire({
+          title: "Error",
+          text: "Credenciales incorrectas",
+          icon: "error"
+        });
         setUsuario("");
         setPassword("");
       }
     } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-      alert("Error al conectar con el servidor");
+      Swal.fire({
+          title: "Error desconocido",
+          text: "por favor refresque la página",
+          icon: "error"
+        });
     }
   };
 

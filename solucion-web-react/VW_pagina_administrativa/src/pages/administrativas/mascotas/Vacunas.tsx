@@ -3,6 +3,7 @@ import Br_administrativa from '../../../components/barra_administrativa/Br_admin
 import "./vacunas.css"
 import type { Especialidad } from '../../../components/interfaces/interfaces';
 import IST from '../../../components/proteccion/IST';
+import Swal from 'sweetalert2';
 
 function Vacunas() {
   const [minimizado, setMinimizado] = useState(false);
@@ -20,7 +21,11 @@ function Vacunas() {
       setEspecialidades(res.data);
     })
     .catch(err => {
-      console.error("Error en la carga de datos", err)
+      Swal.fire({
+        title: "Error desconocido",
+        text: "Por favor refresque la página",
+        icon: "error"
+      });
     });
   }, [])
 
@@ -37,14 +42,23 @@ function Vacunas() {
           );
           limpiarFormulario();
         })
-        .catch(err => console.error("Error al editar", err));
+        .catch(err => Swal.fire({
+            title: "Error",
+            text: "al editar",
+            icon: "error"
+          })
+        );
     } else {
       IST.post("http://localhost:8088/api/especialidades", especialidad)
         .then(res => {
           setEspecialidades([...especialidades, res.data]);
           limpiarFormulario();
         })
-        .catch(err => console.error("Error al guardar", err));
+        .catch(err => Swal.fire({
+            title: "Error",
+            text: "al guardar",
+            icon: "error"
+          }));
     }
   };
 

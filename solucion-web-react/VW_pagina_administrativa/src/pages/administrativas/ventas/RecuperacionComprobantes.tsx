@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
 import "./RecuperacionComprobantes.css";
+import Swal from 'sweetalert2';
 
 interface Comprobante {
     id: number;
@@ -50,7 +51,11 @@ const buscarPorTipo = async () => {
         );
 
     } catch {
-    alert("No se pudo obtener los comprobantes.");
+    Swal.fire({
+        title: "Error",
+        text: "al obtener los comprobantes, por faovr refresque la página",
+        icon: "error"
+      });
 } finally {
         setLoading(false);
     }
@@ -83,14 +88,22 @@ setMostrarDetalle(true);
 
 
     } catch {
-    alert("No se pudo obtener los comprobantes.");
+    Swal.fire({
+        title: "Error",
+        text: "al obtener los comprobantes, por faovr refresque la página",
+        icon: "error"
+      });
 }
 };
 
 const buscarPorCliente = async () => {
 
     if (!clienteId.trim()) {
-        alert("Ingrese un ID de cliente");
+        Swal.fire({
+            title: "Alerta",
+            text: "Ingrese un id de un cliente",
+            icon: "warning"
+        });
         return;
     }
 
@@ -123,7 +136,11 @@ const buscarPorCliente = async () => {
         );
 
     } catch {
-    alert("No se pudo obtener los comprobantes.");
+    Swal.fire({
+        title: "Alerta",
+        text: "No se pudo obtener los comprobantes",
+        icon: "warning"
+      });
 } finally {
         setLoading(false);
     }

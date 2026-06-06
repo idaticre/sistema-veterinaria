@@ -7,6 +7,7 @@ import type {
   UsuarioRol,
 } from "../../../../components/interfaces/interfaces";
 import IST from "../../../../components/proteccion/IST";
+import Swal from 'sweetalert2';
 
 // --- CONSTANTES EXACTAS DE TU BASE DE DATOS (SQL) ---
 const ROL_ADMIN_GENERAL = "ADMINISTRADOR GENERAL";
@@ -64,7 +65,6 @@ const AsignarRolesPermisos: React.FC = () => {
         );
       }
     } catch (e) {
-      console.error("Error al leer roles", e);
       setAccesoDenegado(true);
       setCargando(false);
       return;
@@ -98,39 +98,43 @@ const AsignarRolesPermisos: React.FC = () => {
     try {
       const res = await IST.get(`${baseURL}/usuarios`);
       setUsuarios(res.data);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   };
 
   const obtenerRoles = async () => {
     try {
       const res = await IST.get(`${baseURL}/roles`);
       setRoles(res.data);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   };
 
   const obtenerUsuariosRoles = async () => {
     try {
       const res = await IST.get(`${baseURL}/usuarios-roles`);
       setUsuariosRoles(res.data.data);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   };
 
   const asignarRol = async (idUsuario: number) => {
     const idRol = rolSeleccionado[idUsuario];
-    if (!idRol) return alert("Selecciona un rol primero");
+    if (!idRol) return Swal.fire({
+      title: "Seleccione un rol",
+      icon: "question"
+    });
     try {
       await IST.post(`${baseURL}/usuarios-roles`, { idUsuario, idRol });
-      alert("Rol asignado correctamente");
+      Swal.fire({
+        title: "Rol asignado correctamente",
+        icon: "success"
+      });
       obtenerUsuariosRoles();
       setRolSeleccionado({ ...rolSeleccionado, [idUsuario]: 0 });
     } catch (error) {
-      alert("Error al asignar el rol");
+      Swal.fire({
+        title: "Error...",
+        text: "al asignar el rol",
+        icon: "error"
+      });
     }
   };
 
@@ -139,10 +143,17 @@ const AsignarRolesPermisos: React.FC = () => {
       await IST.delete(`${baseURL}/usuarios-roles`, {
         data: { idUsuario, idRol },
       });
-      alert("Rol eliminado correctamente");
+      Swal.fire({
+        title: "Operación exitosa",
+        icon: "success"
+      });
       obtenerUsuariosRoles();
     } catch (error) {
-      alert("Error al eliminar el rol");
+      Swal.fire({
+        title: "Error...",
+        text: "al eliminar el rol",
+        icon: "error"
+      });
     }
   };
 

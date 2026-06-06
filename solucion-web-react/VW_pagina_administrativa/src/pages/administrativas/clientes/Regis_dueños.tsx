@@ -8,6 +8,7 @@ import type {
 } from "../../../components/interfaces/interfaces";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import IST from "../../../components/proteccion/IST";
+import Swal from 'sweetalert2';
 
 function regis_dueños() {
   const [minimizado, setMinimizado] = useState(false);
@@ -84,7 +85,11 @@ function regis_dueños() {
         setTipDoc(res.data);
       })
       .catch((err) => {
-        console.error("Error en la carga de datos", err);
+        Swal.fire({
+        title: "Error...",
+        text: "Hubo un error desconocido. Refresque la página",
+        icon: "error"
+      });
       });
   }, []);
 
@@ -133,18 +138,30 @@ function regis_dueños() {
 
     // Validaciones básicas
     if (!nombre.trim()) {
-      alert("El nombre es obligatorio");
+      Swal.fire({
+        title: "Alerta",
+        text: "El nombre es obligatorio",
+        icon: "warning"
+      });
       return;
     }
 
     if (!documento.trim()) {
-      alert("El documento es obligatorio");
+      Swal.fire({
+        title: "Alerta",
+        text: "El documento es obligatorio",
+        icon: "warning"
+      });
       return;
     }
 
     // Para personas naturales, validar que tenga sexo
     if (!esPersonaJuridica && !sexo) {
-      alert("El sexo es obligatorio para personas naturales");
+      Swal.fire({
+        title: "Alerta",
+        text: "Elegir un sexo es obligatorio para personas naturales",
+        icon: "warning"
+      });
       return;
     }
 
@@ -167,24 +184,37 @@ function regis_dueños() {
     if (clienteSelecc) {
       IST.put(`/clientes/${clienteSelecc.id}`, nuevoCliente)
         .then((res) => {
-          console.log("cliente actualizado:", res.data);
-          alert("Cliente actualizado correctamente ✅");
+          Swal.fire({
+            title: "Éxito",
+            text: "Operación exitosa",
+            icon: "error"
+          });
           navigate("/administracion/cliente/lista");
         })
         .catch((err) => {
-          console.error("Error al actualizar cliente", err);
-          alert("Error al actualizar cliente ❌");
+          Swal.fire({
+            title: "Error...",
+            text: "al actualizar cliente",
+            icon: "error"
+          });
+
         });
     } else {
       IST.post("/clientes", nuevoCliente)
         .then((res) => {
-          console.log("cliente creado:", res.data);
-          alert("Entidad registrada correctamente ✅");
+          Swal.fire({
+            title: "Éxito",
+            text: "Operación exitosa",
+            icon: "error"
+          });
           navigate("/administracion/cliente/lista");
         })
         .catch((err) => {
-          console.error("Error al registrar entidad", err);
-          alert("Error al registrar entidad ❌");
+          Swal.fire({
+            title: "Error...",
+            text: "al registrar entidad",
+            icon: "error"
+          });
         });
     }
   };

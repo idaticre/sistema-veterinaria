@@ -8,6 +8,7 @@ import type {
   TipoPersonaJuridica,
 } from "../../../../components/interfaces/interfaces";
 import IST from "../../../../components/proteccion/IST";
+import Swal from 'sweetalert2';
 
 const GestionarColaboradores: React.FC = () => {
   const [minimizado, setMinimizado] = useState(false);
@@ -27,7 +28,6 @@ const GestionarColaboradores: React.FC = () => {
   const [masInformacion, setMasInformacion] =useState<ColaboradorResponse | null>(null);
   const [mostrarModalInformativo, setMostrarModalInformativo] = useState(false);
 
-  // Obtener tipos de documentos
   useEffect(() => {
     obtenerTiposDocumento();
   }, []);
@@ -36,11 +36,14 @@ const GestionarColaboradores: React.FC = () => {
       const response = await IST.get(`/tipo-documento`);
       setTiposDocumento(response.data);
     } catch (error) {
-      console.error("Error al obtener tipos de documento:", error);
+      Swal.fire({
+        title: "Error...",
+        text: "al obtener tipos de documentos",
+        icon: "error"
+      });
     }
   };
 
-  // Obtener tipos de personas jurídicas
   useEffect(() => {
     obtenerTiposPersonasJuridicas();
   }, []);
@@ -49,11 +52,14 @@ const GestionarColaboradores: React.FC = () => {
       const response = await IST.get(`/tipo-persona-juridica`);
       setTiposPersonasJuridicas(response.data);
     } catch (error) {
-      console.error("Error al obtener tipos de personas jurídicas", error);
+      Swal.fire({
+        title: "Error...",
+        text: "al obtener tipos de personas jurídicas",
+        icon: "error"
+      });
     }
   };
 
-  // Efecto de cerrar ventana
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -64,7 +70,6 @@ const GestionarColaboradores: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Filtra por búsqueda
   useEffect(() => {
     const lista = colaboradores.filter((value) =>
       value.nombre.toLowerCase().includes(busqueda.toLowerCase()),
@@ -72,7 +77,6 @@ const GestionarColaboradores: React.FC = () => {
     setFiltrado(lista);
   }, [busqueda, colaboradores]);
 
-  // Listar
   useEffect(() => {
     listarColaboradores();
   }, []);
@@ -89,11 +93,14 @@ const GestionarColaboradores: React.FC = () => {
       setColaboradores(activos);
       setFiltrado(activos);
     } catch (error) {
-      console.error("Error al obtener los colaboradores", error);
+      Swal.fire({
+        title: "Error...",
+        text: "al obtener los colaboradores",
+        icon: "error"
+      });
     }
   };
 
-  // Formulario nuevo y vacío
   const abrirFormularioNuevo = () => {
     const nuevo: ColaboradorRequest = {
       nombre: "",
@@ -115,7 +122,6 @@ const GestionarColaboradores: React.FC = () => {
     setMostrarModal(true);
   };
 
-  // Formulario para editar
   const abrirFormularioEditar = (colaborador: ColaboradorResponse) => {
     const editado: ColaboradorRequest = {
       id: colaborador.id,
@@ -138,10 +144,8 @@ const GestionarColaboradores: React.FC = () => {
     setMostrarModal(true);
   };
 
-  // Guardar
   const guardarColaborador = async () => {
     if (!edicion) return;
-
     try {
       if (edicion.id && edicion.id > 0) {
         await IST.put(`/colaboradores`, edicion);
@@ -152,24 +156,28 @@ const GestionarColaboradores: React.FC = () => {
       setEdicion(null);
       setMostrarModal(false);
     } catch (error) {
-      console.error("Error al registrar/actualizar: ", error);
-      alert("Error al aregistrar o actualizar");
+      Swal.fire({
+        title: "Error...",
+        text: "al guardar/registrar un colaborador",
+        icon: "error"
+      });
     }
   };
 
-  // Eliminar
   const eliminarColaborador = async (id: number) => {
     try {
       await IST.delete(`/colaboradores/${id}`);
       listarColaboradores();
-      alert("Eliminación exitosa");
+      Swal.fire("Operación exitosa");
     } catch (error) {
-      alert(error);
-      console.error("Error al eliminar: ", error);
+      Swal.fire({
+        title: "Error...",
+        text: "al eliminar el colaborador",
+        icon: "error"
+      });
     }
   };
 
-  // Botón amarillo: ver más información
   const verMasInformacion = (colaborador: ColaboradorResponse) => {
     const fullInfo: ColaboradorResponse = {
       id: colaborador.id,
