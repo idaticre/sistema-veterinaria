@@ -128,7 +128,10 @@ public class ComprobanteEntity implements Serializable{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medio_pago_id")
     private MedioPagoEntity medioPago;
-    
+
+    @Column(name = "pdfurl_nubefact", length = 256)
+    private String pdfurlNubefact;
+
     @OneToMany(mappedBy = "comprobante", fetch = FetchType.LAZY)
     private List<ComprobanteDetalleEntity> detalles;
 }

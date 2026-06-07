@@ -37,6 +37,8 @@ public class ComprobanteResponseDTO {
     private BigDecimal total;
     
     private String observaciones;
+
+    private String pdfurlNubefact;
     
     //private boolean enviadoSunat;
     //private String estadoSunat;

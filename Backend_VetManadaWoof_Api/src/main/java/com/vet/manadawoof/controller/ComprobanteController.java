@@ -30,12 +30,12 @@ public class ComprobanteController {
         return ResponseEntity.ok(comprobanteService.generarComprobante(request));
     }
 
-    @PostMapping("/enviar-sunat/{id}")
+    /*@PostMapping("/enviar-sunat/{id}")
     public ResponseEntity<Map<String, Object>> enviarComprobanteSunat(
             @PathVariable Long id
     ) {
         return ResponseEntity.ok(comprobanteService.enviarComprobanteSunat(id));
-    }
+    }*/
     
     @GetMapping
     public List<ComprobanteResponseDTO> listarComprobantes() {

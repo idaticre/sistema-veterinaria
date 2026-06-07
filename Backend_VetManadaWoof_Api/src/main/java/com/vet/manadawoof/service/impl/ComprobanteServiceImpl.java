@@ -277,14 +277,14 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         return respuestaSunat;
     }
 
-    @Override
+    /*@Override
     @Transactional(readOnly = true)
     public Map<String, Object> enviarComprobanteSunat(Long id) {
         ComprobanteEntity comprobante = comprobanteRepository
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("Comprobante no encontrado"));
         return enviarASunat(comprobante);
-    }
+    }*/
 
     private Map<String, Object> enviarASunat(ComprobanteEntity comprobante) {
         ComprobanteSunatDTO sunatDTO = ComprobanteSunatMapper.toSunatDTO(comprobante);
@@ -310,9 +310,13 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                 }
             }
 
+            String enlacePdf = String.valueOf(respuesta.getOrDefault("enlace_del_pdf", ""));
+            comprobante.setPdfurlNubefact(enlacePdf);
+            comprobanteRepository.save(comprobante);
+
             return Map.of(
                 "mensaje", "Comprobante enviado y registrado correctamente",
-                "enlace_del_pdf", respuesta.getOrDefault("enlace_del_pdf", "")
+                "enlace_del_pdf", enlacePdf
             );
         } catch (Exception e) {
             return Map.of(

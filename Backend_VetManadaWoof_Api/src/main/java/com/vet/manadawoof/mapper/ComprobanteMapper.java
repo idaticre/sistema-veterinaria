@@ -155,6 +155,10 @@ public class ComprobanteMapper {
                         comprobante.getObservaciones()
                 )
 
+                .pdfurlNubefact(
+                        comprobante.getPdfurlNubefact()
+                )
+
                 .detalles(
                         detalles
                 )
