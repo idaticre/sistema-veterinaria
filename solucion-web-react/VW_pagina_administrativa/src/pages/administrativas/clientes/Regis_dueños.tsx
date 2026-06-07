@@ -187,7 +187,7 @@ function regis_dueños() {
           Swal.fire({
             title: "Éxito",
             text: "Operación exitosa",
-            icon: "error"
+            icon: "success"
           });
           navigate("/administracion/cliente/lista");
         })
@@ -205,7 +205,7 @@ function regis_dueños() {
           Swal.fire({
             title: "Éxito",
             text: "Operación exitosa",
-            icon: "error"
+            icon: "success"
           });
           navigate("/administracion/cliente/lista");
         })

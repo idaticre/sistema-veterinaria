@@ -595,7 +595,7 @@ const guardarEvento = async () => {
     try {
       // 🔥 PASO 1: INSERTAR CITA EN BD
       const responseDB = await axios.post(
-        "http://localhost:8080/api/agenda",
+        "https://sistema-veterinaria.onrender.com/api/agenda",
         AgendaRequestDTO,
         { headers: { Authorization: `Bearer ${token}` } }
       );

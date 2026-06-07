@@ -281,7 +281,7 @@ function Regis_mascotas() {
         Swal.fire({
           title: "Éxito",
           text: "Operación exitosa",
-          icon: "error"
+          icon: "success"
         });
 
         return;

@@ -66,7 +66,7 @@ function FacturacionElectronica() {
       
       
       const response = await fetch(
-        `http://localhost:8080/api/clientes/documento/${doc}`,
+        `https://sistema-veterinaria.onrender.com/api/clientes/documento/${doc}`,
         {
           method: "GET",
           headers: {
@@ -91,7 +91,7 @@ function FacturacionElectronica() {
 
       // 🔥 CITAS DEL CLIENTE
       const citasResponse = await fetch(
-        `http://localhost:8080/api/agenda/cliente/${clienteData.id}`,
+        `https://sistema-veterinaria.onrender.com/api/agenda/cliente/${clienteData.id}`,
         {
           method: "GET",
           headers: {
@@ -181,7 +181,7 @@ function FacturacionElectronica() {
       
 
       const response = await fetch(
-        `http://localhost:8080/api/agenda/${cita.id}/servicios`,
+        `https://sistema-veterinaria.onrender.com/api/agenda/${cita.id}/servicios`,
         {
           method: "GET",
           headers: {
@@ -313,7 +313,7 @@ const request = {
   }))
 };
     const response = await fetch(
-      "http://localhost:8080/api/comprobantes/generar",
+      "https://sistema-veterinaria.onrender.com/api/comprobantes/generar",
       {
         method: "POST",
         headers: {

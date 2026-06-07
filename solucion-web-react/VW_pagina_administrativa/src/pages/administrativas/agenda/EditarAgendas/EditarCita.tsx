@@ -938,7 +938,7 @@ setServiciosRegistrados(serviciosConvertidos);
       const token = sessionStorage.getItem("token");
 
 const responseDB = await axios.put(
-  "http://localhost:8080/api/agenda",
+  "https://sistema-veterinaria.onrender.com/api/agenda",
   req,
   {
     headers: {

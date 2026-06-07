@@ -30,7 +30,7 @@ const buscarPorTipo = async () => {
         const token = sessionStorage.getItem("token");
 
         const response = await fetch(
-            `http://localhost:8080/api/comprobantes/tipo/${tipo}`,
+            `https://sistema-veterinaria.onrender.com/api/comprobantes/tipo/${tipo}`,
             {
                 method: "GET",
                 headers: {
@@ -67,7 +67,7 @@ const verComprobante = async (id: number) => {
             sessionStorage.getItem("token");
 
         const response = await fetch(
-            `http://localhost:8080/api/comprobantes/${id}`,
+            `https://sistema-veterinaria.onrender.com/api/comprobantes/${id}`,
             {
                 headers: {
                     Authorization:
@@ -113,7 +113,7 @@ const buscarPorCliente = async () => {
         const token = sessionStorage.getItem("token");
 
         const response = await fetch(
-            `http://localhost:8080/api/comprobantes/cliente/${clienteId}`,
+            `https://sistema-veterinaria.onrender.com/api/comprobantes/cliente/${clienteId}`,
             {
                 method: "GET",
                 headers: {

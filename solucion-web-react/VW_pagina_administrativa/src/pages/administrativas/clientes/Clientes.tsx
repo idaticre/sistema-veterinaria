@@ -23,7 +23,6 @@ function Lst_clientes() {
   const [clientes, setClientes] = useState<ClienteResponse[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] =
     useState<ClienteResponse | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     IST.get("/clientes")
