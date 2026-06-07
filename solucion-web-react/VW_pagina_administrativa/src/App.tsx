@@ -143,16 +143,16 @@ function App() {
             <Route path='/administracion/agenda/Agenda_general' element={<Agenda_general />} />
           </Route>
 
-          {/* Distribución */}
+          {/* Distribución 
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
             <Route path='/administracion/distribucion/inventario' element={<Inventario/>}/>
-          </Route>
+          </Route>*/}
 
           {/* Ventas */}
           <Route>
-  <Route path='/administracion/ventas/facturacion' element={<FacturacionElectronica />}/>
-  <Route path='/administracion/ventas/recuperacion_comprobantes' element={<RecuperacionComprobantes />}/>
-</Route>
+            <Route path='/administracion/ventas/facturacion' element={<FacturacionElectronica />}/>
+            <Route path='/administracion/ventas/recuperacion_comprobantes' element={<RecuperacionComprobantes />}/>
+          </Route>
 
           {/* Reportes e informes */}
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]}/>}>
@@ -162,11 +162,11 @@ function App() {
           {/* Administración */}
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
             <Route path='/administracion/administracion/gestionar_colaboradores' element={<Gestionar_colaboradores/>}/>
-            <Route path='/administracion/administracion/gestionar_usuarios' element={<Gestionar_usuarios/>}/>
-           {/*<Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}*/}
-            <Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>
-            <Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>
-            <Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>
+            {/*<Route path='/administracion/administracion/gestionar_usuarios' element={<Gestionar_usuarios/>}/>*/}
+            {/*<Route path='/administracion/administracion/turnos_y_horarios' element={<Turnos_y_horarios/>}*/}
+            {/*<Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>*/}
+            {/*<Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>*/}
+            {/*<Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>*/}
           </Route>
 
           {/* Aquí van las nuevas páginas administrativas */}
@@ -174,10 +174,10 @@ function App() {
             <Route path='/administracion/administracion/dashboard_administrativo' element={<DashboardAdministrativo/>}/>
           </Route>  
 
-          {/* Seguridad y mantenimiento */}
+          {/* Seguridad y mantenimiento 
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
             <Route path='/administracion/administracion/Asignar_roles_y_permisos' element={<AsignarRolesPermisos/>}/>
-          </Route>
+          </Route>*/}
 
         </Route>
       </Routes>

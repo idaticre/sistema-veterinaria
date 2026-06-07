@@ -146,6 +146,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                 </li>
                             )}
+                            {/* 
                             {RolesPermitidos("ADMINISTRADOR GENERAL") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("distribucion")}
@@ -158,11 +159,11 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <ul ref={distribRef} className="submenu">
                                         <li><Link to="/administracion/distribucion/inventario" className="sub_opcion">Inventario</Link></li>
                                         <li><Link to="" className="sub_opcion">Ordenes de compra</Link></li>
-                                        <li><Link to="" className="sub_opcion">Proveedores</Link></li>
-                                                
+                                        <li><Link to="" className="sub_opcion">Proveedores</Link></li> 
                                     </ul>
                                 </li>
                             )}
+                                */}
                             <li className={`opcion opcion_desplegable ${openMenu === "venta"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("venta")}>
                                 <Link to="" className="enlace_opcion">
@@ -171,12 +172,10 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={ventaRef} className="submenu">
-                                    
-                                    <li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestion de ventas</Link></li>
+                                    {/*<li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestion de ventas</Link></li>*/}
                                     <li><Link to="/administracion/ventas/facturacion" className="sub_opcion">Facturación electronica</Link></li>
                                     <li><Link to="/administracion/ventas/recuperacion_comprobantes" className="sub_opcion">Recuperación de comprobantes</Link></li>
-                                    <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Notas de credito</Link></li>
-                                    
+                                    {/*<li><Link to="/administracion/mascotas/especies" className="sub_opcion">Notas de credito</Link></li>*/}
                                 </ul>
                             </li>
                             <li className={`opcion opcion_desplegable ${openMenu === "informe"?"toggle_submenu":""}`} 
@@ -188,15 +187,14 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={informRef} className="submenu">
-                                    <li><Link to="" className="sub_opcion">Ventas</Link></li>
-                                    <li><Link to="" className="sub_opcion">Financieros</Link></li>
-                                    <li><Link to="" className="sub_opcion">Inventarios</Link></li>
+                                    {/*<li><Link to="" className="sub_opcion">Ventas</Link></li>*/}
+                                    {/*<li><Link to="" className="sub_opcion">Financieros</Link></li>*/}
+                                    {/*<li><Link to="" className="sub_opcion">Inventarios</Link></li>*/}
                                     <li><Link to="/administracion/reportes_e_informes/clientes" className="sub_opcion">Clientes</Link></li>
-                                    <li><Link to="" className="sub_opcion">Proveedores</Link></li>
-                                    <li><Link to="" className="sub_opcion">Caja general</Link></li>
+                                    {/*<li><Link to="" className="sub_opcion">Proveedores</Link></li>*/}
+                                    {/*<li><Link to="" className="sub_opcion">Caja general</Link></li>*/}
                                 </ul>
                             </li>
-                            
                             {RolesPermitidos("ADMINISTRADOR GENERAL") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "administracion"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("administracion")}
@@ -208,15 +206,15 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                     <ul ref={adminRef} className="submenu">
                                         <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestión de colaboradores</Link></li>
-                                        <li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos a colaboradores</Link></li>
-                                        <li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Horarios de colaboradores</Link></li>
-                                        <li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>
-                                        <li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>
-                                        {<li><Link to="/administracion/administracion/dashboard_administrativo" className="sub_opcion">Dashboard de colaboradores</Link></li>}
-                                        
+                                        {/*<li><Link to="/administracion/administracion/pagos_a_colaboradores" className="sub_opcion">Pagos a colaboradores</Link></li>*/}
+                                        {/*<li><Link to="/administracion/administracion/turnos_y_horarios" className="sub_opcion">Horarios de colaboradores</Link></li>*/}
+                                        {/*<li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>*/}
+                                        {/*<li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>*/}
+                                        {/*<li><Link to="/administracion/administracion/dashboard_administrativo" className="sub_opcion">Dashboard de colaboradores</Link></li>*/}
                                     </ul>
                                 </li>
                             )}
+                            {/*
                             {RolesPermitidos("ADMINISTRADOR GENERAL") && (
                                 <li className={`opcion opcion_desplegable ${openMenu === "seguridad"?"toggle_submenu":""}`} 
                                     onClick={() => toggleMenu("seguridad")}
@@ -229,10 +227,11 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <ul ref={seguridadRef   } className="submenu">
                                         <li><Link to="/administracion/administracion/gestionar_usuarios" className="sub_opcion">Usuarios del sistema</Link></li>
                                         <li><Link to="/administracion/administracion/Asignar_roles_y_permisos" className="sub_opcion">Asignar y gestionar roles</Link></li>
-                                        {/*<li><Link to="/administracion/mascotas/especies" className="sub_opcion">Copia de seguridad</Link></li>*/}
+                                        <li><Link to="/administracion/mascotas/especies" className="sub_opcion">Copia de seguridad</Link></li>
                                     </ul>
                                 </li>
                             )}
+                            */}
                         </ul>
                     </div>
                     <div id="br_footer">
