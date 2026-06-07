@@ -13,6 +13,7 @@ import type { ClienteResponse,
 import IST from '../../../components/proteccion/IST';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import Swal from 'sweetalert2';
 
 pdfMake.vfs = pdfFonts.vfs; 
 
