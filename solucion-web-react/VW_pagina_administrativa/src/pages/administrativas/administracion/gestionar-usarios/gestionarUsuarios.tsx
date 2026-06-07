@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../../components/barra_administrativa/Br_administrativa'
 import type { UsuarioRequest, UsuarioResponse } from "../../../../components/interfaces/interfaces";
 import IST from '../../../../components/proteccion/IST';
+import Swal from 'sweetalert2';
 
 const gestionarUsuarios: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);
@@ -43,7 +44,13 @@ const gestionarUsuarios: React.FC = () => {
 
             setUsuarios(activos);
             setFiltrado(activos);
-        } catch (error) {console.error("Error al obtener los usuarios", error);}
+        } catch (error) {
+            Swal.fire({
+                title: "Error...",
+                text: "conseguir los usuarios",
+                icon: "error"
+            });
+        }
     };
 
     /* Formulario nuevo y vacío
@@ -75,8 +82,20 @@ const gestionarUsuarios: React.FC = () => {
     // Guardar
     const guardarUsuario = async () => {
         if (!edicion) return;
-        if (!edicion.username.trim()) {alert("Ingrese un nombre de usuario"); return;}
-        if (!edicion.passwordHash.trim()) {alert("Ingrese una contraseña"); return;}
+        if (!edicion.username.trim()) {
+            Swal.fire({
+                title: "Alerta",
+                text: "Debe ingresar un nombre de usuario",
+                icon: "warning"
+            });
+            return;}
+        if (!edicion.passwordHash.trim()) {
+            Swal.fire({
+                title: "Alerta",
+                text: "Debe ingresar una contraseña",
+                icon: "warning"
+            });
+            return;}
 
         try {
             if (edicion.id && edicion.id > 0) {await IST.put(`/usuarios/${edicion.id}`, edicion);}
@@ -85,8 +104,11 @@ const gestionarUsuarios: React.FC = () => {
             setEdicion(null);
             setMostrarModal(false);
         } catch (error) {
-            console.error("Error al registrar/actualizar: ", error);
-            alert("Ocurrió un error al guardar el usuario.");
+            Swal.fire({
+                title: "Error...",
+                text: "al guardar el usuario",
+                icon: "warning"
+            });
         }
     };
 

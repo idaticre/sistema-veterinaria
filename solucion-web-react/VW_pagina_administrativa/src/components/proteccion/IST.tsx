@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const IST = axios.create({
-  baseURL: "https://sistema-veterinaria.onrender.com",
+  baseURL: "https://sistema-veterinaria.onrender.com/api",
 });
 
 IST.interceptors.request.use((config) => {
