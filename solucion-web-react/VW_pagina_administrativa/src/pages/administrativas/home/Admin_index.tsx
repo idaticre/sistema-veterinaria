@@ -27,7 +27,6 @@ function Admin_index() {
             try {
                 const clientesRes = await IST.get("/clientes");
                 const mascotasRes = await IST.get("/mascotas");
-                const especieRes = await IST.get("/especies")
                 const usuariosRes = await IST.get("/usuarios");
                 const citasRes = await IST.get("/agenda");
                 const estadoCRes = await IST.get("/estados-agenda");
@@ -42,7 +41,6 @@ function Admin_index() {
 
                 const citas = citasRes.data.data.content;
                 const estadosC = estadoCRes.data;
-                const especies = especieRes.data;
                 const mascotas = mascotasRes.data.data;
 
                 const estadosMap = estadosC.reduce((acc: any, estado: any) => {
@@ -66,19 +64,10 @@ function Admin_index() {
                 );
                 setCitaEs(dataPie);
 
-                const especiesMap: Record<number, string> = especies.reduce(
-                    (acc: Record<number, string>, especie: any) => {
-                        acc[especie.id] = especie.nombre;
-                        return acc;
-                    },
-                    {}
-                );
-
                 const conteoM: Record<string, number> = {};
 
-                mascotas.forEach((mascota: any) => {
-                const nombreEspecie =
-                    especiesMap[mascota.idEspecie] || "SIN ESPECIE";
+                mascotas.forEach((mascota: MascotaResponse) => {
+                    const nombreEspecie = mascota.especie?.nombre || "SIN ESPECIE";
 
                     conteoM[nombreEspecie] = (conteoM[nombreEspecie] || 0) + 1;
                 });

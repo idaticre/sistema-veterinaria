@@ -47,7 +47,7 @@ public class MascotaMapper {
                         .build() : null)
                 .tamano(e.getTamano() != null ? MascotaRelacionResponseDTO.builder()
                         .id(e.getTamano().getId())
-                        .nombre(e.getTamano().getTamano())
+                        .nombre(e.getTamano().getDescripcion())
                         .build() : null)
                 .etapa(e.getEtapa() != null ? MascotaRelacionResponseDTO.builder()
                         .id(e.getEtapa().getId())
