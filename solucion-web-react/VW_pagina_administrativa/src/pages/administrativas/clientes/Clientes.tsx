@@ -132,42 +132,22 @@ function Lst_clientes() {
                 <tbody>
                   {filtrados.map((cliente) => (
                     <tr key={cliente.id}>
-                      <td
-                        className="cliente_dato_vd"
-                        onClick={() => setClienteSeleccionado(cliente)}
-                      >
-                        {cliente.nombre}
-                      </td>
-                      <td
-                        className="cliente_dato_vd"
-                        onClick={() => setClienteSeleccionado(cliente)}
-                      >
+                      <td className="cliente_dato_vd" onClick={() => setClienteSeleccionado(cliente)}>{cliente.nombre}</td>
+                      <td className="cliente_dato_vd" onClick={() => setClienteSeleccionado(cliente)}>
                         {cliente.documento}
-                      </td>
-                      <td
-                        className="cliente_dato_vd"
-                        onClick={() => setClienteSeleccionado(cliente)}
-                      >
-                        {cliente.correo}
-                      </td>
-                      <td>{cliente.activo ? "✅" : "❌"}</td>
-                      <td>
-                        <Link
-                          to="/administracion/cliente/registro"
-                          state={{ cliente }}
-                        >
-                          ✏️
-                        </Link>
-                      </td>
-                      <td>
-                        <i
-                          onClick={() => {
-                            handleDelete(cliente.id);
+                        <span title="Copiar documento"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Evita que dispare el onClick del td
+                            navigator.clipboard.writeText(cliente.documento);
                           }}
-                        >
-                          🗑️
-                        </i>
+                          style={{ cursor: "pointer", marginLeft: "6px" }}>
+                          📋
+                        </span>
                       </td>
+                      <td className="cliente_dato_vd" onClick={() => setClienteSeleccionado(cliente)}>{cliente.correo}</td>
+                      <td>{cliente.activo ? "✅" : "❌"}</td>
+                      <td><Link to="/administracion/cliente/registro" state={{ cliente }}>✏️</Link></td>
+                      <td><i onClick={() => {handleDelete(cliente.id);}}>🗑️</i></td>
                     </tr>
                   ))}
                 </tbody>
@@ -257,9 +237,9 @@ function Lst_clientes() {
                           state={{ idMascota: masc.id }}
                         >
                           <div className="masc_dueño">
-                            <div className="masc_dueño_img">
-                              <img src={masc.foto} alt="" />
-                            </div>
+                            {/*<div className="masc_dueño_img">
+                               <img src={masc.foto} alt="" /> 
+                            </div>*/}
                             <div className="masc_dueño_dataS masc_superior">
                               <p>{masc.nombre}</p>
                               <span>{masc.estado?.nombre}</span>

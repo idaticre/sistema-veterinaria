@@ -201,7 +201,7 @@ function Lst_mascotas() {
                                 </tr>
                               </tbody>
                             </table>
-                            {mascotaSeleccionado.foto && <img src={mascotaSeleccionado.foto} alt="" />}
+                            {/* mascotaSeleccionado.foto && <img src={mascotaSeleccionado.foto} alt="" /> */}
                           </section>
                           <table>
                             <tbody>
