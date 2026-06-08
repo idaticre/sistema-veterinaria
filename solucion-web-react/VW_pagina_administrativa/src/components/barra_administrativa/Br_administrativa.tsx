@@ -234,7 +234,9 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                             */}
                         </ul>
                     </div>
+                    
                     <div id="br_footer">
+                        {/*
                         <ul id="opciones">
                             <li className="opcion opcion_simple">
                                 <Link to="" className="enlace_opcion">
@@ -243,6 +245,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 </Link>
                             </li>
                         </ul>
+                        */}
                         <div id="user">
                             <div id="img_user">
                                 <img src="/baño.png" alt="" />
