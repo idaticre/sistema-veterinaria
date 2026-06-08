@@ -146,6 +146,28 @@ const GestionarColaboradores: React.FC = () => {
 
   const guardarColaborador = async () => {
     if (!edicion) return;
+
+    // Validación de campos requeridos (*)
+    const camposRequeridos: { campo: keyof typeof edicion; etiqueta: string }[] = [
+      { campo: "nombre",   etiqueta: "Nombre del colaborador" },
+      { campo: "documento", etiqueta: "Documento" },
+      { campo: "ciudad",   etiqueta: "Ciudad" },
+      { campo: "distrito", etiqueta: "Distrito" },
+    ];
+
+    const campoVacio = camposRequeridos.find(
+      ({ campo }) => !edicion[campo]?.toString().trim()
+    );
+
+    if (campoVacio) {
+      Swal.fire({
+        title: "Campo requerido",
+        text: `El campo "${campoVacio.etiqueta}" es obligatorio.`,
+        icon: "warning",
+      });
+      return;
+    }
+
     try {
       if (edicion.id && edicion.id > 0) {
         await IST.put(`/colaboradores`, edicion);
@@ -319,7 +341,7 @@ const GestionarColaboradores: React.FC = () => {
             </p>
             <input
               type="text"
-              placeholder="Nombre del colaborador"
+              placeholder="Nombre del colaborador*"
               value={edicion?.nombre || ""}
               onChange={(nuevoValor) =>
                 setEdicion(
@@ -345,18 +367,22 @@ const GestionarColaboradores: React.FC = () => {
             <select
               value={edicion.idTipoPersonaJuridica}
               onChange={(nuevoValor) => {
-                const nuevoId = Number(nuevoValor.target.value);
-                setEdicion((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        idTipoPersonaJuridica: nuevoId,
-                        idTipoDocumento:
-                          nuevoId === 2 ? 2 : prev.idTipoDocumento, // Si se elige "Jurídica", forzamos RUC (id = 2)
-                      }
-                    : null,
-                );
-              }}
+              const nuevoId = Number(nuevoValor.target.value);
+              setEdicion((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      idTipoPersonaJuridica: nuevoId,
+                      idTipoDocumento:
+                        nuevoId === 2
+                          ? 2                              // Jurídica → forzar RUC
+                          : prev.idTipoDocumento === 2     // Natural y tenía RUC...
+                            ? 1                            // ...resetear al primer tipo (ej: DNI)
+                            : prev.idTipoDocumento,        // Natural y ya tenía otro → mantener
+                    }
+                  : null,
+              );
+            }}
             >
               {tiposPersonasJuridicas.map((tipoPersonaJuridica) => (
                 <option
@@ -382,10 +408,10 @@ const GestionarColaboradores: React.FC = () => {
               disabled={edicion.idTipoPersonaJuridica === 2}
             >
               {tiposDocumento
-                // Si se selecciona persona jurídica, solo mostramos el RUC como opción
-                .filter((tipo) =>
-                  edicion.idTipoPersonaJuridica === 2 ? tipo.id === 2 : true,
-                )
+                .filter((tipo) => {
+                  if (edicion.idTipoPersonaJuridica === 2) return tipo.id === 2;  // Jurídica: solo RUC
+                  return tipo.id !== 2;                                            // Natural: excluir RUC
+                })
                 .map((tipo) => (
                   <option key={tipo.id} value={tipo.id}>
                     {tipo.descripcion}
@@ -394,7 +420,7 @@ const GestionarColaboradores: React.FC = () => {
             </select>
             <input
               type="text"
-              placeholder="Documento"
+              placeholder="Documento*"
               value={edicion.documento}
               onChange={(nuevoValor) =>
                 setEdicion(
@@ -442,7 +468,7 @@ const GestionarColaboradores: React.FC = () => {
             />
             <input
               type="text"
-              placeholder="Ciudad"
+              placeholder="Ciudad*"
               value={edicion.ciudad}
               onChange={(nuevoValor) =>
                 setEdicion(
@@ -454,7 +480,7 @@ const GestionarColaboradores: React.FC = () => {
             />
             <input
               type="text"
-              placeholder="Distrito"
+              placeholder="Distrito*"
               value={edicion.distrito}
               onChange={(nuevoValor) =>
                 setEdicion(
