@@ -364,6 +364,7 @@ function Regis_mascotas() {
                             </label>
                             <input
                               type="date"
+                              max={new Date().toISOString().split('T')[0]}
                               id="birth-date"
                               name="birth-date"
                               value={formMascota.fechaNacimiento}
@@ -474,6 +475,7 @@ function Regis_mascotas() {
                             </div>
                           </div>
                         </div>
+                        {/* 
                         <div className="photo-section-form">
                           <h4
                             style={{
@@ -527,10 +529,11 @@ function Regis_mascotas() {
                             </button>
                           )}
                         </div>
+                        */}
                       </section>
 
                       <div className="form-group">
-                        <label>¿Está castrado/a?</label>
+                        <label>¿Está castrado/esterilizada?</label>
                         <div className="gender-group">
                           <div className="radio-group">
                             <input
@@ -697,7 +700,7 @@ function Regis_mascotas() {
                             }))
                           }
                         />
-                        <label htmlFor="agresividad">Agresivo</label>
+                        <label htmlFor="agresividad">Agresivo/a</label>
                         <input
                           type="checkbox"
                           id="agresividad"

@@ -51,8 +51,6 @@ const buscarPorTipo = async () => {
         }
 
         const data = await response.json();
-        console.log("COMPROBANTE:", data);
-
         setResultado(
             Array.isArray(data) ? data : [data]
         );

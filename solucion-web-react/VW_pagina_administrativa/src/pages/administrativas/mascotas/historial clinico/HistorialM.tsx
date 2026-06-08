@@ -35,7 +35,6 @@ function HistorialM() {
             const citasRegist = res.data.data.content;
             
             const concluidos = citasRegist.filter((cita: CitaResponse) => cita.idEstado === 5);
-            console.log("datos de historial:", res.data.data.content);
             setCitas(concluidos);
         })
         .catch(err => {
