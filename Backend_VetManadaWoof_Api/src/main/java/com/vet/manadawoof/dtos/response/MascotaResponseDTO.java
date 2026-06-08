@@ -27,23 +27,12 @@ public class MascotaResponseDTO {
     // Sexo de la mascota: M/H/O
     private String sexo;
 
-    // ID del cliente propietario
-    private Long idCliente;
-
-    // ID de la raza asociada
-    private Integer idRaza;
-
-    // ID de la especie asociada
-    private Integer idEspecie;
-
-    // ID del estado actual de la mascota
-    private Integer idEstado;
-
-    // ID del tamaño
-    private Integer idTamano;
-
-    // ID de la etapa de vida
-    private Integer idEtapa;
+    private MascotaRelacionResponseDTO cliente;
+    private MascotaRelacionResponseDTO raza;
+    private MascotaRelacionResponseDTO especie;
+    private MascotaRelacionResponseDTO estado;
+    private MascotaRelacionResponseDTO tamano;
+    private MascotaRelacionResponseDTO etapa;
 
     // Fecha de nacimiento de la mascota
     private LocalDate fechaNacimiento;

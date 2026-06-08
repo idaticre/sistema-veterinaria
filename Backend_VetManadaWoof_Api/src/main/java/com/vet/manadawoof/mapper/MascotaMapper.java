@@ -1,6 +1,7 @@
 package com.vet.manadawoof.mapper;
 
 import com.vet.manadawoof.dtos.request.MascotaRequestDTO;
+import com.vet.manadawoof.dtos.response.MascotaRelacionResponseDTO;
 import com.vet.manadawoof.dtos.response.MascotaResponseDTO;
 import com.vet.manadawoof.entity.*;
 import org.springframework.stereotype.Component;
@@ -28,12 +29,30 @@ public class MascotaMapper {
                 .codigo(e.getCodigo())
                 .nombre(e.getNombre())
                 .sexo(e.getSexo())
-                .idCliente(e.getCliente() != null ? e.getCliente().getId() : null)
-                .idRaza(e.getRaza() != null ? e.getRaza().getId() : null)
-                .idEspecie(e.getEspecie() != null ? e.getEspecie().getId() : null)
-                .idEstado(e.getEstado() != null ? e.getEstado().getId() : null)
-                .idTamano(e.getTamano() != null ? e.getTamano().getId() : null)
-                .idEtapa(e.getEtapa() != null ? e.getEtapa().getId() : null)
+                .cliente(e.getCliente() != null ? MascotaRelacionResponseDTO.builder()
+                        .id(e.getCliente().getId() != null ? e.getCliente().getId().intValue() : null)
+                        .nombre(e.getCliente().getEntidad() != null ? e.getCliente().getEntidad().getNombre() : null)
+                        .build() : null)
+                .raza(e.getRaza() != null ? MascotaRelacionResponseDTO.builder()
+                        .id(e.getRaza().getId())
+                        .nombre(e.getRaza().getNombre())
+                        .build() : null)
+                .especie(e.getEspecie() != null ? MascotaRelacionResponseDTO.builder()
+                        .id(e.getEspecie().getId())
+                        .nombre(e.getEspecie().getNombre())
+                        .build() : null)
+                .estado(e.getEstado() != null ? MascotaRelacionResponseDTO.builder()
+                        .id(e.getEstado().getId())
+                        .nombre(e.getEstado().getNombre())
+                        .build() : null)
+                .tamano(e.getTamano() != null ? MascotaRelacionResponseDTO.builder()
+                        .id(e.getTamano().getId())
+                        .nombre(e.getTamano().getTamano())
+                        .build() : null)
+                .etapa(e.getEtapa() != null ? MascotaRelacionResponseDTO.builder()
+                        .id(e.getEtapa().getId())
+                        .nombre(e.getEtapa().getDescripcion())
+                        .build() : null)
                 .fechaNacimiento(e.getFechaNacimiento())
                 .pelaje(e.getPelaje())
                 .esterilizado(e.getEsterilizado())
