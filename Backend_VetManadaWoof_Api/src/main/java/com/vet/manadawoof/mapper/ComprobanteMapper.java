@@ -149,6 +149,10 @@ public class ComprobanteMapper {
 
                 .total(
                         comprobante.getTotal()
+                ) 
+                
+                .totalAnticipio(
+                         comprobante.getTotalAnticipio()
                 )
 
                 .observaciones(

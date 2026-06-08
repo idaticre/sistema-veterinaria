@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -35,6 +36,7 @@ public class ComprobanteResponseDTO {
     private BigDecimal totalExonerada;
     private BigDecimal totalIGV;
     private BigDecimal total;
+    private BigDecimal totalAnticipio;
     
     private String observaciones;
 

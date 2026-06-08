@@ -523,3 +523,7 @@
 .swal2-popup {
   z-index: 999999 !important;
 }
+.required{
+  color: red;
+  font-weight: bold;
+}

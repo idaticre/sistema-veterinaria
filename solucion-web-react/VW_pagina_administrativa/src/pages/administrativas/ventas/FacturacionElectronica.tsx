@@ -37,6 +37,7 @@ function FacturacionElectronica() {
   const [citasCliente, setCitasCliente] = useState<Cita[]>([]);
   const [totalAnticipio, setTotalAnticipio] = useState(0);
   const [agendaId, setAgendaId] = useState(0);
+  const [comprobanteEmitido, setComprobanteEmitido] = useState(false);
 
   // 🔥 BUSCAR CLIENTE
   const buscarCliente = async (doc: string) => {
@@ -239,9 +240,20 @@ setTotalAnticipio(Number(cita.abonoInicial || 0));
   };
 
   // 🔥 ELIMINAR
-  const eliminarServicio = (index: number) => {
-    setServicios(servicios.filter((_, i) => i !== index));
-  };
+const eliminarServicio = (index: number) => {
+
+  const nuevosServicios =
+    servicios.filter((_, i) => i !== index);
+
+  setServicios(nuevosServicios);
+
+  // Si ya no quedan servicios,
+  // limpiar también el abono
+  if (nuevosServicios.length === 0) {
+    setTotalAnticipio(0);
+    setAgendaId(0);
+  }
+};
 
   // 🔥 BUSCADOR
   const citasFiltradas = useMemo(() => {
@@ -325,12 +337,31 @@ const request = {
     );
 
     const data = await response.json();
+    
 
     Swal.fire({
         title: "Éxito",
         text: "operación exitosa",
         icon: "success"
       });
+      setServicios([]);
+
+setServicio("");
+setCantidad(1);
+setPrecio(0);
+
+setBuscarCodigo("");
+
+setCliente("");
+setDocumento("");
+setClienteId(0);
+
+setCitasCliente([]);
+
+setAgendaId(0);
+
+setTotalAnticipio(0);
+setComprobanteEmitido(true);
 
   } catch (error) {
     Swal.fire({
@@ -521,46 +552,71 @@ const request = {
               <button onClick={agregarServicio}>➕ Agregar</button>
             </div>
 
-            <table className="tabla-servicios">
-              <thead>
-                <tr>
-                  <th>Descripción</th>
-                  <th>Cantidad</th>
-                  <th>Precio</th>
-                  <th>Subtotal</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {servicios.map((s, index) => (
-                  <tr key={index}>
-                    <td>{s.descripcion}</td>
-                    <td>{s.cantidad}</td>
-                    <td>S/ {s.precio.toFixed(2)}</td>
-                    <td>S/ {s.subtotal.toFixed(2)}</td>
-                    <td>
-                      <button
-                        className="btn-eliminar"
-                        onClick={() => eliminarServicio(index)}
-                      >
-                        🗑
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+           <table className="tabla-servicios">
+  <thead>
+    <tr>
+      <th>Descripción</th>
+      <th>Cantidad</th>
+      <th>Precio</th>
+      <th>Subtotal</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {servicios.map((s, index) => (
+      <tr key={index}>
+        <td>{s.descripcion}</td>
+        <td>{s.cantidad}</td>
+        <td>S/ {s.precio.toFixed(2)}</td>
+        <td>S/ {s.subtotal.toFixed(2)}</td>
+        <td>
+          <button
+            className="btn-eliminar"
+            onClick={() => eliminarServicio(index)}
+          >
+            🗑
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+
+  <tfoot>
+    <tr>
+      <td
+        colSpan={3}
+        style={{
+          textAlign: "right",
+          fontWeight: "bold"
+        }}
+      >
+        Abono:
+      </td>
+
+      <td
+        style={{
+          fontWeight: "bold",
+          color: "green"
+        }}
+      >
+        S/ {totalAnticipio.toFixed(2)}
+      </td>
+
+      <td></td>
+    </tr>
+  </tfoot>
+</table>
 
             <div className="totales">
+              <h3>Total Servicios: S/{subtotalServicios.toFixed(2)}</h3>
               <h3>Subtotal: S/{subtotal.toFixed(2)}</h3>
               <h3>IGV (18%): S/{igv.toFixed(2)}</h3>
               <h2>Total: S/{total.toFixed(2)}</h2>
             </div>
 
             <div className="acciones">
-              <button className="btn-guardar" onClick={guardarComprobante}>
-                💾 Guardar comprobante
-              </button>
+              <button className="btn-guardar" onClick={guardarComprobante} disabled={comprobanteEmitido}>💾 Guardar comprobante</button>
 
               
             </div>

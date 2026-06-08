@@ -106,6 +106,7 @@ const [fechasBloqueadas, setFechasBloqueadas] = useState<string[]>([
   "2026-04-17",
   "2026-04-18",
   "2026-05-01",
+  "2026-06-07",
   "2026-06-29",
   "2026-07-28",
   "2026-07-29",
@@ -117,7 +118,7 @@ const [fechasBloqueadas, setFechasBloqueadas] = useState<string[]>([
 const [permitirFeriados, setPermitirFeriados] = useState(false);
 
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [status, setStatus] = useState("🔌 Inicializando Google Calendar...");
+  const [status, setStatus] = useState("🔓 Google Calendar iniciado");
   const [tokenClient, setTokenClient] = useState<any>(null);
   const [gapiInited, setGapiInited] = useState(false);
   const [gisInited, setGisInited] = useState(false);
@@ -430,19 +431,45 @@ const [permitirFeriados, setPermitirFeriados] = useState(false);
     const servicioInfo = serviciosDisponibles.find((s) => s.id === sId);
     const veterinarioInfo = colaboradores.find((v) => v.id === vId);
 
-    if (
-      !servicioInfo ||
-      !veterinarioInfo ||
-      servicioTemporal.valor_servicio <= 0 ||
-      servicioTemporal.cantidad <= 0 ||
-      servicioTemporal.duracion_min <= 0
-    ) {
-      return Swal.fire({
-        title: "Alerta",
-        text: "Asegurese de ingresar correctamente todos los datos",
-        icon: "warning"
-      });
-    }
+if (!servicioInfo) {
+  return Swal.fire({
+    title: "Campo requerido",
+    text: "Debe seleccionar un servicio válido.",
+    icon: "warning",
+  });
+}
+
+if (!veterinarioInfo) {
+  return Swal.fire({
+    title: "Campo requerido",
+    text: "Debe seleccionar un veterinario.",
+    icon: "warning",
+  });
+}
+
+if (servicioTemporal.valor_servicio <= 0) {
+  return Swal.fire({
+    title: "Campo requerido",
+    text: "El valor del servicio debe ser mayor a 0.",
+    icon: "warning",
+  });
+}
+
+if (servicioTemporal.cantidad <= 0) {
+  return Swal.fire({
+    title: "Campo requerido",
+    text: "La cantidad debe ser mayor a 0.",
+    icon: "warning",
+  });
+}
+
+if (servicioTemporal.duracion_min <= 0) {
+  return Swal.fire({
+    title: "Campo requerido",
+    text: "La duración debe ser mayor a 0 minutos.",
+    icon: "warning",
+  });
+}
 
     const cantidad = servicioTemporal.cantidad;
     const valorUnitario = servicioTemporal.valor_servicio;
@@ -861,7 +888,7 @@ const guardarEvento = async () => {
           <div className="modal-content">
                         <h3>Agendar nueva cita 🗓️</h3>          
             <div className="col-izq">
-                            <label>Número de documento *</label>
+                            <label> Numero de Documento <span className="required">*</span></label>
                            
               <input
                 type="text"
@@ -887,10 +914,10 @@ const guardarEvento = async () => {
                   }
                 }}
               />
-                            <label>Cliente *</label>
+                            <label>Cliente  <span className="required">*</span></label>
                           
               <input type="text" value={nuevoEvento.cliente} disabled />       
-                    <label>Mascota *</label>            
+                     <label>Mascota  <span className="required">*</span></label>           
               <select
                 value={nuevoEvento.mascota}
                 onChange={(e) =>
@@ -913,7 +940,7 @@ const guardarEvento = async () => {
             </div>
                        
             <div className="col-der">
-                            <label>Fecha *</label>
+                             <label>Fecha <span className="required">*</span></label>
                            
               <input
                 type="date"
@@ -922,7 +949,7 @@ const guardarEvento = async () => {
                   setNuevoEvento({ ...nuevoEvento, date: e.target.value })
                 }
               />
-                            <label>Hora *</label>
+                             <label>Hora  <span className="required">*</span></label>
                           
               <input
                 type="time"
@@ -956,11 +983,11 @@ const guardarEvento = async () => {
                     }
                   >
                                       
-                    <option value="">Seleccione un servicio</option>           
+                    <option value="">Seleccione un servicio *</option>           
                           
                     {serviciosDisponibles.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.nombre} ({s.duracion} min)
+                        {s.nombre} 
                       </option>
                     ))}
                                    
@@ -971,7 +998,7 @@ const guardarEvento = async () => {
                 <div>
                                   
                   <label htmlFor="valor_servicio">
-                    Valor servicio<span className="required">*</span>
+                    Valor servicio <span className="required">*</span>
                   </label>
                                  
                   <input
@@ -996,7 +1023,7 @@ const guardarEvento = async () => {
                 </div>
                                
                 <div>
-                                    <label htmlFor="cantidad">Cantidad</label>
+                                   <label>Cantidad <span className="required">*</span></label>
                                   
                   <input
                     type="number"
@@ -1016,7 +1043,7 @@ const guardarEvento = async () => {
                              
                 <div>
                                   
-                  <label htmlFor="duracion_min">Duración Servicio</label>
+                  <label htmlFor="duracion_min">Duración Servicio <span className="required">*</span></label>
                                   
                   <input
                     type="number"
@@ -1037,7 +1064,7 @@ const guardarEvento = async () => {
                 <div>
                                   
                   <label htmlFor="id_veterinario">
-                    Veterinario <span className="required">*</span>
+                    Veterinario<span className="required">*</span>
                   </label>
                                   
                   <select
@@ -1064,7 +1091,7 @@ const guardarEvento = async () => {
                             
                 <div>
                                  
-                  <label htmlFor="adicionales">Adicionales</label>
+                  <label>Adicionales  <span className="required">*</span></label>
                                  
                   <input
                     type="text"
@@ -1213,7 +1240,7 @@ const guardarEvento = async () => {
               </table>
             </div>
                         {/* Estado y Observaciones */}          
-            <label>Estado *</label>           
+             <label>Estado <span className="required">*</span></label>           
             <select
               value={nuevoEvento.estado}
               onChange={(e) =>
@@ -1228,7 +1255,7 @@ const guardarEvento = async () => {
               ))}
                          
             </select>
-                        <label className="label-obs">Observaciones</label>
+                        <label>Observaciones  <span className="required">*</span></label>
             <textarea
               className="textarea-obs"
               value={nuevoEvento.description}

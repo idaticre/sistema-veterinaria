@@ -87,6 +87,7 @@ const MASCOTAS_SIMULADAS: MascotaBase[] = [];
 const ESTADOS_AGENDA_SIMULADOS: EstadoAgenda[] = [];
 const COLABORADORES_SIMULADOS: EntityBase[] = [];
 
+
 // --- FUNCIÓN AUXILIAR: Obtiene detalles ---
 const getDetallesMascotaCliente = (
   cita: CitaBD,
@@ -126,6 +127,9 @@ function EditarCita() {
   const [gapiInited, setGapiInited] = useState(false);
   const [gisInited, setGisInited] = useState(false);
   const [editingGCId, setEditingGCId] = useState<string | undefined>(undefined);
+  const [serviciosEliminados, setServiciosEliminados] = useState<
+  { idIngreso: number; idAgenda: number }[]
+>([]);
 
   const [eventos, setEventos] = useState<CitaBD[]>([]);
   const [eventosFiltrados, setEventosFiltrados] = useState<CitaBD[]>([]);
@@ -641,6 +645,7 @@ const nuevoServicio: ServicioDetalle = {
     setEditandoCita(null);
     setEditingGCId(undefined);
     setServiciosRegistrados([]);
+     setServiciosEliminados([]);
 
     // 🧹 LIMPIEZA NUEVA
     setServicioTemporal({
@@ -1067,7 +1072,24 @@ await IST.put("/agenda", AgendaRequestDTO);
 
 // 2. Obtener servicios viejos
 
+for (const servicio of serviciosEliminados) {
 
+  try {
+
+    await IST.delete(
+      `/ingresos-servicios/${servicio.idIngreso}/${servicio.idAgenda}`
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Error eliminando servicio",
+      servicio.idIngreso,
+      error
+    );
+
+  }
+}
 
 // 4. Crear servicios nuevos
 for (const srv of serviciosRegistrados) {
@@ -1263,6 +1285,7 @@ if (isSignedIn && editingGCId) {
 await fetchCitas();
 
 resetModalState();
+setServiciosEliminados([]);
 
 Swal.fire({
   icon: "success",
@@ -1288,8 +1311,21 @@ Swal.fire({
     adicionales: s.adicionales,
   });
 };
-
 const eliminarServicio = (index: number) => {
+
+  const servicio = serviciosRegistrados[index];
+
+  if (servicio?.id && editandoCita?.id) {
+
+    setServiciosEliminados(prev => [
+      ...prev,
+      {
+        idIngreso: servicio.id,
+        idAgenda: editandoCita.id
+      }
+    ]);
+
+  }
 
   setServiciosRegistrados(prev =>
     prev.filter((_, i) => i !== index)
@@ -1466,7 +1502,7 @@ const eliminarServicio = (index: number) => {
                             min
                           </p>
                           <p>
-                            <strong>💰 Abono:</strong> $
+                            <strong>💰 Abono:</strong> S/
                             {e.abonoInicial.toFixed(2)}
                           </p>
                         </div>
@@ -1511,7 +1547,7 @@ const eliminarServicio = (index: number) => {
             <div className="form-grid">
               {/* Cliente (SOLO NOMBRE - DESHABILITADO) */}
               <div className="form-group">
-                <label>Cliente *</label>
+                <label>Cliente  <span className="required">*</span></label>
                 <input
                   id="cliente-nombre"
                   name="cliente-nombre"
@@ -1524,7 +1560,7 @@ const eliminarServicio = (index: number) => {
 
               {/* DNI (CAMPO SEPARADO - DESHABILITADO) */}
               <div className="form-group">
-                <label>DNI *</label>
+                <label>DNI  <span className="required">*</span></label>
                 <input
                   id="cliente-dni"
                   name="cliente-dni"
@@ -1537,7 +1573,7 @@ const eliminarServicio = (index: number) => {
 
               {/* Select de Mascotas (EDITABLE, lista asegurada) */}
               <div className="form-group">
-                <label>Mascota *</label>
+                <label>Mascota <span className="required">*</span></label>
                 <select
                   id="mascota-select"
                   name="mascota-select"
@@ -1556,7 +1592,7 @@ const eliminarServicio = (index: number) => {
 
               {/* Fecha y Hora (EDITABLE) */}
               <div className="form-group">
-                <label>Fecha *</label>
+                <label>Fecha <span className="required">*</span></label>
                 <input
                   id="cita-fecha"
                   name="cita-fecha"
@@ -1569,7 +1605,7 @@ const eliminarServicio = (index: number) => {
               </div>
 
               <div className="form-group">
-                <label>Hora *</label>
+                <label>Hora <span className="required">*</span></label>
                 <input
                   id="cita-hora"
                   name="cita-hora"
@@ -1586,7 +1622,7 @@ const eliminarServicio = (index: number) => {
 
               {/* Duración Estimada (BLOQUEADA) */}
               <div className="form-group">
-                <label>Duración Estimada (min)</label>
+                <label>Duración Estimada </label>
                 <input
                   id="duracion-min"
                   name="duracion-min"
@@ -1600,7 +1636,7 @@ const eliminarServicio = (index: number) => {
 
               {/* Abono (BLOQUEADO) */}
               <div className="form-group">
-                <label>Abono Inicial</label>
+                <label>Abono Inicial <span className="required">*</span></label>
                 <input
                   id="abono-inicial"
                   name="abono-inicial"
@@ -1618,7 +1654,7 @@ const eliminarServicio = (index: number) => {
 
               {/* Estado (EDITABLE) */}
               <div className="form-group">
-                <label>Estado *</label>
+                <label>Estado <span className="required">*</span></label>
                 <select
                   id="estado-select"
                   name="estado-select"
@@ -1659,7 +1695,7 @@ const eliminarServicio = (index: number) => {
                 }}
               >
                 <div className="form-group" style={{ gridColumn: "span 6" }}>
-                  <label htmlFor="id_servicio_add">Servicio *</label>
+                   <label>Servicio <span className="required">*</span></label>
                   <select
                     id="id_servicio_add"
                     name="id_servicio_add"
@@ -1678,7 +1714,7 @@ const eliminarServicio = (index: number) => {
                 
 
                 <div className="form-group" style={{ gridColumn: "span 6" }}>
-                  <label htmlFor="id_veterinario_add">Veterinario *</label>
+                  <label>Veterinario <span className="required">*</span></label>
                   <select
                   
                     id="id_veterinario_add"
@@ -1702,7 +1738,7 @@ const eliminarServicio = (index: number) => {
                 </div>
 
                 <div className="form-group" style={{ gridColumn: "span 2" }}>
-                  <label htmlFor="valor_servicio_add">Costo ($)</label>
+                  <label htmlFor="valor_servicio_add">Costo (S/)<span className="required">*</span></label>
                   <input
                     type="number"
                     id="valor_servicio_add"
@@ -1721,7 +1757,7 @@ const eliminarServicio = (index: number) => {
                 </div>
 
                 <div className="form-group" style={{ gridColumn: "span 2" }}>
-                  <label htmlFor="cantidad_add">Cant.</label>
+                  <label htmlFor="cantidad_add">Cantidad <span className="required">*</span></label>
                   <input
                     type="number"
                     id="cantidad_add"
@@ -1740,12 +1776,12 @@ const eliminarServicio = (index: number) => {
                 </div>
 
                 <div className="form-group" style={{ gridColumn: "span 2" }}>
-                  <label htmlFor="duracion_servicio_add">Dur. (min)</label>
+                  <label htmlFor="duracion_servicio_add">Duracion <span className="required">*</span></label>
                   <input
                     type="number"
                     id="duracion_servicio_add"
                     name="duracion_servicio_add"
-                    min="1"
+                    min="0"
                     step="5"
                     value={servicioTemporal.duracion_min}
                     onChange={(e) =>
@@ -1759,7 +1795,7 @@ const eliminarServicio = (index: number) => {
                 </div>
 
                 <div className="form-group" style={{ gridColumn: "span 6" }}>
-                  <label htmlFor="adicionales_add">Adicionales</label>
+                  <label htmlFor="duracion_servicio_add">Adcionales <span className="required">*</span></label>
                   <input
                     type="text"
                     id="adicionales_add"
@@ -1925,7 +1961,7 @@ const eliminarServicio = (index: number) => {
                               textAlign: "right",
                             }}
                           >
-                            ${s.valor_servicio.toFixed(2)}
+                            S/ {s.valor_servicio.toFixed(2)}
                           </td>
                           <td
                             style={{
@@ -1934,7 +1970,7 @@ const eliminarServicio = (index: number) => {
                               textAlign: "right",
                             }}
                           >
-                            ${Number(s.subtotal || 0).toFixed(2)}
+                            S/{Number(s.subtotal || 0).toFixed(2)}
                           </td>
                           <td
                             style={{
@@ -2013,7 +2049,7 @@ const eliminarServicio = (index: number) => {
                             textAlign: "right",
                           }}
                         >
-                          ${totalCosto.toFixed(2)}
+                          S/{totalCosto.toFixed(2)}
                         </td>
                         <td></td>
                       </tr>
@@ -2032,7 +2068,7 @@ const eliminarServicio = (index: number) => {
                             textAlign: "right",
                           }}
                         >
-                          ${abonoEditable.toFixed(2)}
+                          S/ {abonoEditable.toFixed(2)}
                         </td>
                         <td></td>
                       </tr>
@@ -2048,7 +2084,7 @@ const eliminarServicio = (index: number) => {
                             fontSize: "1.1em",
                           }}
                         >
-                          ${Math.max(0, totalCosto - abonoEditable).toFixed(2)}
+                          S/ {Math.max(0, totalCosto - abonoEditable).toFixed(2)}
                         </td>
                         <td></td>
                       </tr>
@@ -2060,7 +2096,7 @@ const eliminarServicio = (index: number) => {
 
             {/* Observaciones */}
             <div className="form-group-full">
-              <label>Observaciones</label>
+              <label>Observaciones <span className="required">*</span></label>
               <textarea
                 id="observaciones"
                 name="observaciones"
