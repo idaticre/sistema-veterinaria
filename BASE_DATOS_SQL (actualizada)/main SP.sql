@@ -3529,55 +3529,84 @@ CREATE PROCEDURE sp_consultar_historial_mascota(
 )
 BEGIN
     DECLARE v_id_historia BIGINT;
-    
-    IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM mascotas
+        WHERE id = p_id_mascota
+    ) THEN
+
         SET p_mensaje = 'ERROR: Mascota no existe.';
+
     ELSE
-        -- Obtener ID de historia
-        SELECT id INTO v_id_historia 
-        FROM historia_clinica 
-        WHERE id_mascota = p_id_mascota;
-        
+
+        SELECT id
+        INTO v_id_historia
+        FROM historia_clinica
+        WHERE id_mascota = p_id_mascota
+        LIMIT 1;
+
         IF v_id_historia IS NULL THEN
+
             SET p_mensaje = 'ADVERTENCIA: Mascota no tiene historia clínica creada.';
+
         ELSE
+
             SET p_mensaje = 'Consulta exitosa.';
-            
+
             -- ========================================
             -- RESULTADO 1: INFO GENERAL MASCOTA + HISTORIA
             -- ========================================
-            SELECT 
+            SELECT
                 m.id AS mascota_id,
+                m.codigo AS mascota_codigo,
                 m.nombre AS mascota_nombre,
-                m.especie,
-                m.raza,
+
+                m.id_especie,
+                e.nombre AS especie,
+
+                m.id_raza,
+                r.nombre AS raza,
+
                 m.fecha_nacimiento,
                 m.sexo,
-                m.color,
-                m.chip_identificacion,
-                
+                m.pelaje,
+                m.peso,
+                m.chip,
+                m.esterilizado,
+                m.alergias,
+
                 hc.id AS historia_id,
                 hc.codigo AS historia_codigo,
                 hc.fecha_apertura,
                 hc.observaciones_generales,
-                hc.activa,
-                
-                (SELECT COUNT(*) 
-                 FROM historia_clinica_registros 
-                 WHERE id_historia_clinica = hc.id) AS total_atenciones,
-                 
-                (SELECT MAX(fecha_atencion) 
-                 FROM historia_clinica_registros 
-                 WHERE id_historia_clinica = hc.id) AS ultima_atencion
-                
+                hc.activo,
+
+                (
+                    SELECT COUNT(*)
+                    FROM historia_clinica_registros hcr
+                    WHERE hcr.id_historia_clinica = hc.id
+                ) AS total_atenciones,
+
+                (
+                    SELECT MAX(hcr.fecha_atencion)
+                    FROM historia_clinica_registros hcr
+                    WHERE hcr.id_historia_clinica = hc.id
+                ) AS ultima_atencion
+
             FROM mascotas m
-            INNER JOIN historia_clinica hc ON hc.id_mascota = m.id
+            INNER JOIN historia_clinica hc
+                ON hc.id_mascota = m.id
+            LEFT JOIN especies e
+                ON e.id = m.id_especie
+            LEFT JOIN razas r
+                ON r.id = m.id_raza
             WHERE m.id = p_id_mascota;
-            
+
             -- ========================================
-            -- RESULTADO 2: TODOS LOS REGISTROS DE ATENCIÓN
+            -- RESULTADO 2: REGISTROS DE ATENCIÓN
             -- ========================================
-            SELECT 
+            SELECT
                 reg.id AS registro_id,
                 reg.codigo AS registro_codigo,
                 reg.fecha_atencion,
@@ -3594,72 +3623,100 @@ BEGIN
                 reg.observaciones,
                 reg.proximo_control,
                 reg.fecha_registro,
-                
+
                 a.codigo AS agenda_codigo,
                 a.fecha AS fecha_cita,
                 a.hora AS hora_cita,
-                
-                CONCAT(vet.nombres, ' ', vet.apellidos) AS veterinario_nombre,
+
+                ent_vet.nombre AS veterinario_nombre,
                 vet.cmp AS veterinario_cmp,
-                
-                CONCAT(col.nombres, ' ', col.apellidos) AS colaborador_nombre,
-                
+
+                ent_col.nombre AS colaborador_nombre,
+
                 ehc.nombre AS estado,
-                
-                -- Servicios realizados en esa atención
-                (SELECT GROUP_CONCAT(s.nombre SEPARATOR ', ')
-                 FROM ingresos_servicios ins
-                 INNER JOIN servicios s ON ins.id_servicio = s.id
-                 WHERE ins.id_agenda = reg.id_agenda) AS servicios_realizados,
-                
-                -- Total de la cita
-                (SELECT a.total_cita
-                 FROM agenda a
-                 WHERE a.id = reg.id_agenda) AS total_cita,
-                
-                -- Total pagado
-                (SELECT COALESCE(SUM(ap.monto), 0)
-                 FROM agenda_pagos ap
-                 WHERE ap.id_agenda = reg.id_agenda) AS total_pagado,
-                 
-                -- Cantidad de archivos
-                (SELECT COUNT(*)
-                 FROM historia_clinica_archivos
-                 WHERE id_registro_atencion = reg.id) AS total_archivos
-                
+
+                (
+                    SELECT GROUP_CONCAT(s.nombre SEPARATOR ', ')
+                    FROM ingresos_servicios ins
+                    INNER JOIN servicios s
+                        ON s.id = ins.id_servicio
+                    WHERE ins.id_agenda = reg.id_agenda
+                ) AS servicios_realizados,
+
+                (
+                    SELECT a2.total_cita
+                    FROM agenda a2
+                    WHERE a2.id = reg.id_agenda
+                ) AS total_cita,
+
+                (
+                    SELECT COALESCE(SUM(ap.monto), 0)
+                    FROM agenda_pagos ap
+                    WHERE ap.id_agenda = reg.id_agenda
+                ) AS total_pagado,
+
+                (
+                    SELECT COUNT(*)
+                    FROM historia_clinica_archivos hca
+                    WHERE hca.id_registro_atencion = reg.id
+                ) AS total_archivos
+
             FROM historia_clinica_registros reg
-            LEFT JOIN agenda a ON reg.id_agenda = a.id
-            LEFT JOIN veterinarios vet ON reg.id_veterinario = vet.id
-            LEFT JOIN colaboradores col ON reg.id_colaborador = col.id
-            LEFT JOIN estado_historia_clinica ehc ON reg.id_estado = ehc.id
+
+            LEFT JOIN agenda a
+                ON reg.id_agenda = a.id
+
+            LEFT JOIN veterinarios vet
+                ON reg.id_veterinario = vet.id
+
+            LEFT JOIN colaboradores col_vet
+                ON vet.id_colaborador = col_vet.id
+
+            LEFT JOIN entidades ent_vet
+                ON col_vet.id_entidad = ent_vet.id
+
+            LEFT JOIN colaboradores col
+                ON reg.id_colaborador = col.id
+
+            LEFT JOIN entidades ent_col
+                ON col.id_entidad = ent_col.id
+
+            LEFT JOIN estado_historia_clinica ehc
+                ON reg.id_estado = ehc.id
+
             WHERE reg.id_historia_clinica = v_id_historia
             ORDER BY reg.fecha_atencion DESC, reg.hora_inicio DESC;
-            
+
             -- ========================================
             -- RESULTADO 3: ARCHIVOS MÉDICOS
             -- ========================================
-            SELECT 
+            SELECT
                 hca.id AS archivo_id,
                 hca.codigo AS archivo_codigo,
                 hca.nombre_archivo,
                 hca.extension_archivo,
                 hca.descripcion,
                 hca.fecha_subida,
-                
+
                 tac.nombre AS tipo_archivo,
                 tac.descripcion AS tipo_descripcion,
-                
+
                 reg.codigo AS registro_codigo,
                 reg.fecha_atencion,
                 reg.motivo_consulta
-                
+
             FROM historia_clinica_archivos hca
-            INNER JOIN historia_clinica_registros reg ON hca.id_registro_atencion = reg.id
-            LEFT JOIN tipos_archivo_clinico tac ON hca.id_tipo_archivo = tac.id
+            INNER JOIN historia_clinica_registros reg
+                ON hca.id_registro_atencion = reg.id
+            LEFT JOIN tipos_archivo_clinico tac
+                ON tac.id = hca.id_tipo_archivo
             WHERE reg.id_historia_clinica = v_id_historia
             ORDER BY hca.fecha_subida DESC;
+
         END IF;
+
     END IF;
+
 END$$
 DELIMITER ;
 
