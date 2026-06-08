@@ -787,7 +787,7 @@ DROP PROCEDURE IF EXISTS registrar_veterinario;
 DELIMITER $$
 
 CREATE PROCEDURE registrar_veterinario (
-    IN p_id_entidad INT, -- Si es 0 o NULL, se crea entidad + colaborador
+    -- IN p_id_entidad INT, -- Si es 0 o NULL, se crea entidad + colaborador
     IN p_id_tipo_persona_juridica INT,
     IN p_nombre VARCHAR(128),
     IN p_sexo CHAR(1),
@@ -807,7 +807,7 @@ CREATE PROCEDURE registrar_veterinario (
     OUT p_mensaje VARCHAR(255)
 )
 registro: BEGIN
-    DECLARE v_id_tipo_entidad BIGINT DEFAULT NULL;-- ESTO YA NO EXISTE LA TABLA SE ELIMINO Y TODA RELACION
+    -- DECLARE v_id_tipo_entidad BIGINT DEFAULT NULL;-- ESTO YA NO EXISTE LA TABLA SE ELIMINO Y TODA RELACION
     DECLARE v_id_entidad BIGINT DEFAULT NULL;
     DECLARE v_id_colaborador BIGINT DEFAULT NULL;
     DECLARE v_id_veterinario BIGINT DEFAULT NULL;
@@ -816,11 +816,11 @@ registro: BEGIN
     DECLARE v_codigo_veterinario_local VARCHAR(20);
 
     -- Obtener id tipo entidad 'COLABORADOR'
-    SELECT id INTO v_id_tipo_entidad FROM tipo_entidad WHERE nombre = 'COLABORADOR' LIMIT 1;
+    /*SELECT id INTO v_id_tipo_entidad FROM tipo_entidad WHERE nombre = 'COLABORADOR' LIMIT 1;
     IF v_id_tipo_entidad IS NULL THEN
         SET p_mensaje = 'ERROR: Tipo entidad COLABORADOR no encontrado.';
         LEAVE registro;
-    END IF;
+    END IF;*/
 
     -- Caso 1: Si p_id_entidad es NULL o 0, crear entidad + colaborador
     IF p_id_entidad IS NULL OR p_id_entidad = 0 THEN
@@ -3170,7 +3170,6 @@ DROP PROCEDURE IF EXISTS sp_crear_historia_clinica;
 DELIMITER $$
 
 CREATE PROCEDURE sp_crear_historia_clinica(
-	IN p_accion VARCHAR(10),
     IN p_id_mascota BIGINT,
     IN p_observaciones_generales TEXT,
     OUT p_id_historia BIGINT,
@@ -3179,39 +3178,42 @@ CREATE PROCEDURE sp_crear_historia_clinica(
 )
 main_block: BEGIN
     DECLARE v_nuevo_codigo VARCHAR(16);
-    
-    SET p_accion = 'CREAR';
-    
+
     -- Validar que la mascota existe
     IF NOT EXISTS (SELECT 1 FROM mascotas WHERE id = p_id_mascota) THEN
         SET p_mensaje = 'ERROR: Mascota no existe.';
         LEAVE main_block;
     END IF;
-    
+
     -- Validar que la mascota no tenga ya una historia clínica
     IF EXISTS (SELECT 1 FROM historia_clinica WHERE id_mascota = p_id_mascota) THEN
-        SELECT id, codigo INTO p_id_historia, p_codigo
-        FROM historia_clinica 
+        SELECT id, codigo
+        INTO p_id_historia, p_codigo
+        FROM historia_clinica
         WHERE id_mascota = p_id_mascota;
-        
+
         SET p_mensaje = CONCAT('ADVERTENCIA: La mascota ya tiene historia clínica: ', p_codigo);
         LEAVE main_block;
     END IF;
-    
+
     -- Generar código único
     SET v_nuevo_codigo = CONCAT('HIS-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
-    
-    WHILE EXISTS (SELECT 1 FROM historia_clinica WHERE codigo = v_nuevo_codigo) DO
+
+    WHILE EXISTS (
+        SELECT 1
+        FROM historia_clinica
+        WHERE codigo = v_nuevo_codigo
+    ) DO
         SET v_nuevo_codigo = CONCAT('HIS-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
     END WHILE;
-    
+
     -- Insertar historia clínica
     INSERT INTO historia_clinica (
         codigo,
         id_mascota,
         fecha_apertura,
         observaciones_generales,
-        activa
+        activo
     ) VALUES (
         v_nuevo_codigo,
         p_id_mascota,
@@ -3219,11 +3221,11 @@ main_block: BEGIN
         p_observaciones_generales,
         1
     );
-    
+
     SET p_id_historia = LAST_INSERT_ID();
     SET p_codigo = v_nuevo_codigo;
     SET p_mensaje = CONCAT('Historia clínica ', v_nuevo_codigo, ' creada exitosamente.');
-    
+
 END$$
 DELIMITER ;
 
@@ -3769,6 +3771,7 @@ main_block: BEGIN
 END$$
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS sp_get_comprobantes_por_tipo;
 DELIMITER //
 CREATE PROCEDURE sp_get_comprobantes_por_tipo(IN p_tipo INT)
 BEGIN

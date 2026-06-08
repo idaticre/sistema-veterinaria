@@ -224,7 +224,7 @@ function Regis_mascotas() {
             } catch (error) {
               Swal.fire({
                 title: "Error",
-                text: "al crear lista clínica",
+                text: "al crear historia clínica",
                 icon: "error"
               });
             }

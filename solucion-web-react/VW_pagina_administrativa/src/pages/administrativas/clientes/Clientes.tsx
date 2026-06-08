@@ -9,11 +9,7 @@ import type {
 } from "../../../components/interfaces/interfaces";
 import Swal from 'sweetalert2';
 
-type Mascotaextendido = MascotaResponse & {
-  nombre_raza?: string;
-  nombre_especie?: string;
-  nombre_estado?: string;
-};
+type Mascotaextendido = MascotaResponse;
 
 function Lst_clientes() {
   const [minimizado, setMinimizado] = useState(false);
@@ -47,51 +43,16 @@ function Lst_clientes() {
 
   useEffect(() => {
     IST.get<{ data: MascotaResponse[] }>("/mascotas")
-      .then(async (res) => {
-        const lista = res.data.data;
-
-        const mascotasConExtras = await Promise.all(
-          lista.map(async (m: MascotaResponse) => {
-            try {
-              const [razaRes, especieRes, estadoRes] = await Promise.all([
-                IST.get(`/razas/${m.idRaza}`),
-                IST.get(`/especies/${m.idEspecie}`),
-                IST.get(`/estado-mascota/${m.idEstado}`),
-              ]);
-              return {
-                ...m,
-                nombre_raza: razaRes.data.nombre,
-                nombre_especie: especieRes.data.nombre,
-                nombre_estado: estadoRes.data.nombre,
-              };
-            } catch (error) {
-              Swal.fire({
-                title: "Error desconocido",
-                text: "Por favor refresque la página",
-                icon: "error"
-              });
-              return {
-                ...m,
-                nombre_raza: "Desconocido",
-                nombre_especie: "Desconocido",
-                nombre_estado: "Desconocido",
-              };
-            }
-          }),
-        );
-
-        setMascota(mascotasConExtras);
-      })
-      .catch((err) => Swal.fire({
-          title: "Error desconocido",
-          text: "Por favor refresque la página",
-          icon: "error"
-        })
-      );
+      .then((res) => setMascota(res.data.data))
+      .catch(() => Swal.fire({
+        title: "Error desconocido",
+        text: "Por favor refresque la página",
+        icon: "error"
+      }));
   }, []);
 
   const mascotaDueño = clienteSeleccionado
-    ? mascota.filter((masc) => masc.idCliente == clienteSeleccionado.id)
+    ? mascota.filter((masc) => masc.cliente?.id == clienteSeleccionado.id)
     : [];
 
   const handleDelete = (id?: number) => {
@@ -301,11 +262,11 @@ function Lst_clientes() {
                             </div>
                             <div className="masc_dueño_dataS masc_superior">
                               <p>{masc.nombre}</p>
-                              <span>{masc.nombre_estado}</span>
+                              <span>{masc.estado?.nombre}</span>
                             </div>
                             <div className="masc_dueño_dataS masc_inferior">
-                              <p>Especie: {masc.nombre_especie}</p>
-                              <span>Raza: {masc.nombre_raza}</span>
+                              <p>Especie: {masc.especie?.nombre}</p>
+                              <span>Raza: {masc.raza?.nombre}</span>
                             </div>
                           </div>
                         </Link>

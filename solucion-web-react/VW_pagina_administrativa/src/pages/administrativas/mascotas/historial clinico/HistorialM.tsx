@@ -121,7 +121,7 @@ function HistorialM() {
                             </div>
                         </div>        
                         <div className='DT_foto'>
-                            <img src={hMascota?.foto} alt="" />
+                            {hMascota?.foto && <img src={hMascota.foto} alt="" />}
                         </div>
                     </div>
                     <div className='filtro_historial'>

@@ -32,7 +32,7 @@ public class HistoriaClinicaServiceImpl implements HistoriaClinicaService {
     @Override
     @Transactional
     public HistoriaClinicaResponseDTO crear(HistoriaClinicaRequestDTO dto) {
-        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("crear_historia_clinica");
+        StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("sp_crear_historia_clinica");
 
         registrarParametros(sp);
 
