@@ -169,11 +169,17 @@ export interface MascotaResponse{
     nombre: string;
     sexo: "M" | "H";
     idCliente: number;
+    cliente?: { id: number; nombre: string };
     idRaza: number;
+    raza?: { id: number; nombre: string };
     idEspecie: number;
+    especie?: { id: number; nombre: string };
     idEstado: number;
+    estado?: { id: number; nombre: string };
     idTamano: number;
+    tamano?: { id: number; nombre: string };
     idEtapa: number;
+    etapa?: { id: number; nombre: string };
     fechaNacimiento: string;
     pelaje: string;
     esterilizado: boolean;

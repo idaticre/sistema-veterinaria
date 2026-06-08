@@ -6,14 +6,7 @@ import type { MascotaResponse } from "../../../components/interfaces/interfaces"
 import IST from "../../../components/proteccion/IST";
 import Swal from 'sweetalert2';
 
-type Mascotaextendido = MascotaResponse & {
-  nombre_dueño?: string;
-  nombre_raza?: string;
-  nombre_especie?: string;
-  nombre_estado?: string;
-  nombre_tamaño?: string;
-  nombre_etapa?: string;
-};
+type Mascotaextendido = MascotaResponse;
 
 function Lst_mascotas() {
   const [minimizado, setMinimizado] = useState(false);
@@ -27,73 +20,21 @@ function Lst_mascotas() {
 
   useEffect(() => {
     IST.get<{ data: MascotaResponse[] }>("/mascotas")
-      .then(async (res) => {
+      .then((res) => {
         const lista = res.data.data;
-
-        const mascotasConExtras = await Promise.all(
-          lista.map(async (m: MascotaResponse) => {
-            try {
-              const [
-                dueñoRes,
-                razaRes,
-                especieRes,
-                estadoRes,
-                tamanoRes,
-                etapaRes,
-              ] = await Promise.all([
-                IST.get(`/clientes/${m.idCliente}`),
-                IST.get(`/razas/${m.idRaza}`),
-                IST.get(`/especies/${m.idEspecie}`),
-                IST.get(`/estado-mascota/${m.idEstado}`),
-                IST.get(`/tamanos/${m.idTamano}`),
-                IST.get(`/etapasVida/${m.idEtapa}`),
-              ]);
-
-              return {
-                ...m,
-                nombre_dueño: dueñoRes.data.data.nombre,
-                nombre_raza: razaRes.data.nombre,
-                nombre_especie: especieRes.data.nombre,
-                nombre_estado: estadoRes.data.nombre,
-                nombre_tamaño: tamanoRes.data.descripcion,
-                nombre_etapa: etapaRes.data.descripcion,
-              };
-            } catch (error) {
-              Swal.fire({
-                title: "Error desconocido",
-                text: "Por favor refresque la página",
-                icon: "error"
-              });
-              return {
-                ...m,
-                nombre_dueño: "Desconocido",
-                nombre_raza: "Desconocido",
-                nombre_especie: "Desconocido",
-                nombre_estado: "Desconocido",
-                nombre_tamaño: "Desconocido",
-                nombre_etapa: "Desconocido",
-              };
-            }
-          }),
-        );
-
-        setMascotas(mascotasConExtras);
-        setFiltrados(mascotasConExtras);
+        setMascotas(lista);
+        setFiltrados(lista);
 
         if (idMDCS) {
-          const encontrada = mascotasConExtras.find((m) => m.id === idMDCS);
-
-          if (encontrada) {
-            setMascotaSeleccionado(encontrada);
-          }
+          const encontrada = lista.find((m) => m.id === idMDCS);
+          if (encontrada) setMascotaSeleccionado(encontrada);
         }
       })
-      .catch((err) => Swal.fire({
-          title: "Error...",
-          text: "al cargar las mascotas",
-          icon: "error"
-        })
-      );
+      .catch(() => Swal.fire({
+        title: "Error...",
+        text: "al cargar las mascotas",
+        icon: "error"
+      }));
   }, []);
 
   const handleDelete = (id?: number) => {
@@ -132,7 +73,7 @@ function Lst_mascotas() {
     const palabrasBusqueda = busqueda.toLowerCase().split(" ").filter(Boolean);
 
     const resultado = mascotas.filter((mascota) => {
-      const texto = `${mascota.nombre} ${mascota.idCliente}`.toLowerCase();
+      const texto = `${mascota.nombre} ${mascota.cliente?.nombre ?? ""}`.toLowerCase();
       return palabrasBusqueda.every((palabra) => texto.includes(palabra));
     });
     setFiltrados(resultado);
@@ -163,10 +104,10 @@ function Lst_mascotas() {
             <section className="tabla_registosM">
               <div id="lista_mascotas">
                 {filtrados
-                .filter((mascota) => mascota.idEstado !== 9)
+                .filter((mascota) => mascota.estado?.id !== 9)
                 .length > 0 ? (
                   filtrados
-                  .filter((mascota) => mascota.idEstado !== 9)
+                  .filter((mascota) => mascota.estado?.id !== 9)
                   .map((mascota) => (
                     <div
                       className={`registro_mascota ${mascotaSeleccionado?.id === mascota.id ? "seleccionado" : ""}`}
@@ -179,12 +120,12 @@ function Lst_mascotas() {
                       <div className="datosB_mascota">
                         <p>{mascota.nombre}</p>
                         <p>
-                          Dueño: {mascota.nombre_dueño} <br />{" "}
-                          {mascota.nombre_especie} | {mascota.nombre_raza}{" "}
+                          Dueño: {mascota.cliente?.nombre} <br />{" "}
+                          {mascota.especie?.nombre} | {mascota.raza?.nombre}{" "}
                         </p>
                       </div>
                       <div className="estado_mascota">
-                        <p>{mascota.nombre_estado}</p>
+                        <p>{mascota.estado?.nombre}</p>
                       </div>
                     </div>
                   ))
@@ -223,18 +164,18 @@ function Lst_mascotas() {
                                     <strong>Dueño:</strong>
                                   </td>
                                   <td colSpan={3}>
-                                    {mascotaSeleccionado.nombre_dueño}
+                                    {mascotaSeleccionado.cliente?.nombre}
                                   </td>
                                 </tr>
                                 <tr>
                                   <td>
                                     <strong>Especie:</strong>
                                   </td>
-                                  <td>{mascotaSeleccionado.nombre_especie}</td>
+                                  <td>{mascotaSeleccionado.especie?.nombre}</td>
                                   <td>
                                     <strong>Raza:</strong>
                                   </td>
-                                  <td>{mascotaSeleccionado.nombre_raza}</td>
+                                  <td>{mascotaSeleccionado.raza?.nombre}</td>
                                 </tr>
                                 <tr>
                                   <td>
@@ -248,14 +189,14 @@ function Lst_mascotas() {
                                   <td>
                                     <strong>Etapa:</strong>
                                   </td>
-                                  <td>{mascotaSeleccionado.nombre_etapa}</td>
+                                  <td>{mascotaSeleccionado.etapa?.nombre}</td>
                                 </tr>
                                 <tr>
                                   <td>
                                     <strong>Tamaño:</strong>
                                   </td>
                                   <td colSpan={3}>
-                                    {mascotaSeleccionado.nombre_tamaño}
+                                    {mascotaSeleccionado.tamano?.nombre}
                                   </td>
                                 </tr>
                               </tbody>
@@ -280,7 +221,7 @@ function Lst_mascotas() {
                                   Alergias: {mascotaSeleccionado.alergias}
                                 </td>
                                 <td>
-                                  estado: {mascotaSeleccionado.nombre_estado}
+                                  estado: {mascotaSeleccionado.estado?.nombre}
                                 </td>
                               </tr>
                             </tbody>
