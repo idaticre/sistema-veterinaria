@@ -6,6 +6,7 @@ import { Link,  useParams } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./historialM.css"
+import Swal from 'sweetalert2';
 
 function HistorialM() {
     const [minimizado, setMinimizado] = useState(false);
@@ -25,7 +26,11 @@ function HistorialM() {
 
             })
             .catch(err => {
-                console.error("Error en la carga de datos", err);
+                Swal.fire({
+                    title: "Error desconocido",
+                    text: "Por favor refresque la página",
+                    icon: "error"
+                });
             });
     }, [id]);
 
@@ -38,7 +43,11 @@ function HistorialM() {
             setCitas(concluidos);
         })
         .catch(err => {
-            console.error("Error en la carga de datos", err);
+            Swal.fire({
+                title: "Error desconocido",
+                text: "Por favor refresque la página",
+                icon: "error"
+            });
         });
     }, []);
 

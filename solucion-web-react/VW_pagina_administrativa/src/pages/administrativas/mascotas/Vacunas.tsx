@@ -90,7 +90,11 @@ function Vacunas() {
         setEspecialidades(especialidades.filter(e => e.id !== id));
       })
       .catch(err => {
-        console.error("Error al eliminar la especialidad", err);
+        Swal.fire({
+          title: "Error",
+          text: "al elimina la especialidad",
+          icon: "error"
+        });
       });
   };
 

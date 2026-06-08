@@ -229,7 +229,6 @@ function EditarCita() {
 
     // 🔥 evita bugs
     if (!s) {
-      console.warn("Servicio no encontrado:", serviceId);
       return;
     }
 
@@ -487,7 +486,6 @@ const nuevoServicio: ServicioDetalle = {
         setStatus("🔓 Google Calendar sesión restaurada.");
       } else {
         // Si ya expiró, limpiamos todo y obligamos a loguear
-        console.warn("Token expirado, cerrando sesión local.");
         localStorage.removeItem("google_token_editor");
         localStorage.removeItem("google_token_expires");
         setIsSignedIn(false);
@@ -1081,13 +1079,11 @@ for (const servicio of serviciosEliminados) {
     );
 
   } catch (error) {
-
-    console.error(
-      "Error eliminando servicio",
-      servicio.idIngreso,
-      error
-    );
-
+    Swal.fire({
+      title: "Error",
+      text: "al eliminar servicio",
+      icon: "error"
+    });
   }
 }
 

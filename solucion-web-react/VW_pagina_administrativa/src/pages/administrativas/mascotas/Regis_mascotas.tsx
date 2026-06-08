@@ -419,7 +419,7 @@ function Regis_mascotas() {
                             </select>
                           </div>
                           <div className="form-group">
-                            <label htmlFor="weight">Peso (kg)</label>
+                            <label htmlFor="weight">Peso (kg)*</label>
                             <input
                               type="number"
                               id="weight"
