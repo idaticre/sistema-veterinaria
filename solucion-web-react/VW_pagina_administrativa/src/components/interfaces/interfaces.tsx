@@ -163,23 +163,17 @@ export interface ClienteResponse{
     mensaje: string;
 }
 
-export interface MascotaResponse{
+export interface MascotaResponse {
     id?: number;
     codigo: string;
     nombre: string;
     sexo: "M" | "H";
-    idCliente: number;
-    cliente?: { id: number; nombre: string };
-    idRaza: number;
-    raza?: { id: number; nombre: string };
-    idEspecie: number;
-    especie?: { id: number; nombre: string };
-    idEstado: number;
-    estado?: { id: number; nombre: string };
-    idTamano: number;
-    tamano?: { id: number; nombre: string };
-    idEtapa: number;
-    etapa?: { id: number; nombre: string };
+    cliente?: {id: number; nombre: string;};
+    raza?: {id: number; nombre: string;};
+    especie?: {id: number; nombre: string;};
+    estado?: {id: number; nombre: string;};
+    tamano?: {id: number; nombre: string;};
+    etapa?: {id: number; nombre: string;};
     fechaNacimiento: string;
     pelaje: string;
     esterilizado: boolean;
@@ -190,9 +184,13 @@ export interface MascotaResponse{
     factorDea: boolean;
     agresividad: boolean;
     foto: string;
-    fechaModificacion: string;
-}
 
+    fechaRegistro?: string;
+    fechaModificacion: string;
+
+    idColaborador?: number | null;
+    idVeterinario?: number | null;
+}
 export interface EntidadResponse{
     id: number;
     codigo: string;
