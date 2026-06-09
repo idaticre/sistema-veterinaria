@@ -242,7 +242,7 @@ const GestionarColaboradores: React.FC = () => {
         const resCliente = await IST.get(`/clientes/${clienteSeleccionado}`);
         const cliente = resCliente.data.data || resCliente.data;
         let mascotasCliente: MascotaExtendido[] = [];
-        if (incluirMascotas) {mascotasCliente = mascotas.filter((m) => m.idCliente === clienteSeleccionado);}
+        if (incluirMascotas) {mascotasCliente = mascotas.filter((m) => m.cliente?.id === clienteSeleccionado);}
         setDatosReporte({
             cliente,
             mascotas: mascotasCliente,
