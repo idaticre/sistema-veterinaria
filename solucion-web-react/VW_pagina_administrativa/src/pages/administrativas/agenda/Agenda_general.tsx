@@ -578,7 +578,7 @@ const guardarEvento = async () => {
 
     // 3. IDENTIFICACIÓN DE IDS (MASCOTA Y ESTADO)
     const mascotaEncontrada = mascotas.find(
-      (m) => m.nombre === nuevoEvento.mascota && m.idCliente === nuevoEvento.clienteId
+  (m) => m.nombre === nuevoEvento.mascota && Number(m.cliente?.id) === Number(nuevoEvento.clienteId)
     );
     const idMascota = mascotaEncontrada ? mascotaEncontrada.id : null;
 
@@ -896,7 +896,9 @@ const guardarEvento = async () => {
                 onChange={(e) => {
                   const dni = e.target.value;
                   setNuevoEvento({ ...nuevoEvento, dni });
-                  const encontrado = clientes.find((c) => c.documento === dni);
+                  const encontrado = clientes.find(
+  (c) => String(c.documento) === String(dni)
+);
                   if (encontrado) {
                     setNuevoEvento((p) => ({
                       ...p,
@@ -919,23 +921,22 @@ const guardarEvento = async () => {
               <input type="text" value={nuevoEvento.cliente} disabled />       
                      <label>Mascota  <span className="required">*</span></label>           
               <select
-                value={nuevoEvento.mascota}
-                onChange={(e) =>
-                  setNuevoEvento({ ...nuevoEvento, mascota: e.target.value })
-                }
-                disabled={!nuevoEvento.clienteId}
+               value={nuevoEvento.mascota}
+               onChange={(e) =>
+               setNuevoEvento({ ...nuevoEvento, mascota: e.target.value })
+                 }
+              disabled={!nuevoEvento.clienteId}
               >
-                                <option value="">Seleccione mascota...</option> 
-                             
-                {mascotas
-                  .filter((m) => m.idCliente === nuevoEvento.clienteId)
-                  .map((m) => (
-                    <option key={m.id} value={m.nombre}>
-                      {m.nombre}
-                    </option>
-                  ))}
-                             
-              </select>
+             <option value="">Seleccione mascota...</option>
+
+              {mascotas
+             .filter((m) => Number(m.cliente?.id) === Number(nuevoEvento.clienteId))
+            .map((m) => (
+            <option key={m.id} value={m.nombre}>
+            {m.nombre}
+            </option>
+            ))}
+            </select>
                         
             </div>
                        

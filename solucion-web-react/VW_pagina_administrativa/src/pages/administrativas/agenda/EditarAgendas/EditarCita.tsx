@@ -52,7 +52,10 @@ interface EntityBase {
 interface MascotaBase {
   id: number;
   nombre: string;
-  idCliente: number;
+  cliente: {
+    id: number;
+    nombre: string;
+  };
 }
 
 // 🚨 Interfaces de Servicios
@@ -877,22 +880,24 @@ setServiciosRegistrados(serviciosConvertidos);
     });
   };
 
-  const mascotasDisponibles = useMemo(() => {
-    const mascotasCliente = mascotas.filter(
-      (m) => m.idCliente === nuevoEvento.clienteId,
-    );
+ const mascotasDisponibles = useMemo(() => {
+  const mascotasCliente = mascotas.filter(
+    (m: any) => Number(m.cliente?.id) === Number(nuevoEvento.clienteId)
+  );
 
-    const currentMascota = mascotas.find((m) => m.id === nuevoEvento.mascotaId);
+  const currentMascota = mascotas.find(
+    (m) => m.id === nuevoEvento.mascotaId
+  );
 
-    if (
-      currentMascota &&
-      !mascotasCliente.some((m) => m.id === currentMascota.id)
-    ) {
-      return [...mascotasCliente, currentMascota];
-    }
+  if (
+    currentMascota &&
+    !mascotasCliente.some((m) => m.id === currentMascota.id)
+  ) {
+    return [...mascotasCliente, currentMascota];
+  }
 
-    return mascotasCliente;
-  }, [mascotas, nuevoEvento.clienteId, nuevoEvento.mascotaId]);
+  return mascotasCliente;
+}, [mascotas, nuevoEvento.clienteId, nuevoEvento.mascotaId]);
 
   const eliminarEvento = async (id: number) => {
     // 🔒 BLOQUEO: También impedimos cancelar si no está logueado
@@ -1090,30 +1095,26 @@ for (const servicio of serviciosEliminados) {
 // 4. Crear servicios nuevos
 for (const srv of serviciosRegistrados) {
 
-  const dto = {
+ const dto = {
 
-    idIngreso: srv.id,
+  idIngreso: srv.id,
 
-    idAgenda: citaEditada.id,
+  idAgenda: citaEditada.id,
 
-    idServicio: srv.id_servicio,
+  idServicio: srv.id_servicio,
 
-    idColaborador:
-      nuevoEvento.colaboradorId,
+  idColaborador: srv.id_veterinario,
 
-    idVeterinario: null,
+  idVeterinario: null,
 
-    cantidad: srv.cantidad,
+  cantidad: srv.cantidad,
 
-    duracionMin:
-      srv.duracion_min,
+  duracionMin: srv.duracion_min,
 
-    valorServicio:
-      srv.valor_servicio,
+  valorServicio: srv.valor_servicio,
 
-    observaciones:
-      srv.adicionales || ""
-  };
+  observaciones: srv.adicionales || ""
+};
 
   if (srv.id) {
 
