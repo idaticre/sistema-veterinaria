@@ -492,6 +492,7 @@ setComprobanteEmitido(true);
                       <th>Acción</th>
                     </tr>
                   </thead>
+                  {/* 
                   <tbody>
                     {citasFiltradas.map((cita) => {
                       const pendiente =
@@ -519,6 +520,7 @@ setComprobanteEmitido(true);
                       );
                     })}
                   </tbody>
+                  */}
                 </table>
               </div>
             )}
