@@ -1,3 +1,7 @@
+# Pedazo de ignore de José para que NO se suban los 'application.properties' NI 'properties.example' a GitHub de cada integrante
+Backend_VetManadaWoof_Api/src/main/resources/application.properties
+Backend_VetManadaWoof_Api/src/main/resources/properties.example
+
 # Logs
 logs
 *.log

@@ -1862,7 +1862,6 @@ DELIMITER ;
 
 -- BLOQUE 02 PROCEDIMIENTOS ALMACENADOS CRUD
 
--- USE vet_manada_woof;
 -- ========================================
 -- SP: REGISTRAR_MASCOTA
 -- Registra una nueva mascota validando cliente, duplicados y consistencia de datos.
@@ -2464,8 +2463,6 @@ proc_main: BEGIN
     COMMIT;
 END$$
 DELIMITER ;
-
-USE vet_manada_woof;
 
 -- ========================================
 -- SP 1: GESTIONAR AGENDA (Crear/Actualizar)
@@ -3160,8 +3157,6 @@ main_block: BEGIN
     
 END$$
 DELIMITER ;
-
-USE vet_manada_woof;
 
 -- ========================================
 -- SP 1: CREAR HISTORIA CLÍNICA (una vez por mascota)

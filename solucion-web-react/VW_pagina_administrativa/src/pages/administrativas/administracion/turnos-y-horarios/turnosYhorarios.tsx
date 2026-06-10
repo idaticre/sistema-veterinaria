@@ -9,7 +9,7 @@
     - dia_id
     - trabaja (boolean)
     - hora_inicio (timestamp)
-    - hora_fin (timestamp) 
+    - hora_fin (timestamp)
 
     "Horarios base", "Horarios base por roles", sus ramificaciones y sus tablas que puedan tener (que son conjuntos de horarios inmutables al parecer) no se seguirán usando por su nula modificabilidad, en cambio, se sugiere usar los siguientes endpoints usando 2 únicas tablas: HORARIOS y DIAS (antiguamente dias_semana)
     - Endpoint /horarios: muestra todos los horarios de la tabla HORARIOS. Todos los días de todos los colaboradores en el display principal de la página agrupados en tarjetas por colaborador
@@ -17,7 +17,6 @@
     - Parámetro "Trabajan en cierto día": es una extensión de /horarios que toma un parámetro ?dia={dia_id}. Muestra las personas que trabajan en un día específico. Necesita el ID del día.
     - Parámetro "Trabajan hoy": lo mismo que lo de arriba pero el frontend envía automáticamente el id del día en el que se está. ?dia={dia_id}
     - Funcionalidad buscar horario asignado por nombre: esto se maneja en el front-end
-
 
     POST: /asignar-horario permite añadir los registros en la tabla HORARIOS
     PUT: /asignar-horario permite editar los registros
