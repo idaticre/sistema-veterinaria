@@ -1548,7 +1548,8 @@ CREATE TABLE comprobantes (
     cliente_id BIGINT NOT NULL,
     total_anticipio DECIMAL(14,2) NOT NULL DEFAULT 0,
     medio_pago_id INT NULL DEFAULT NULL,
-
+	pdfurl_nubefact VARCHAR(256),
+    
     CONSTRAINT fk_comprobantes_agenda FOREIGN KEY (agenda_id) REFERENCES agenda(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_comprobantes_tipo FOREIGN KEY (tipo_comprobante_id) REFERENCES tipos_comprobantes(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_comprobantes_moneda FOREIGN KEY (tipo_moneda_id) REFERENCES monedas(id) ON DELETE CASCADE ON UPDATE CASCADE,
