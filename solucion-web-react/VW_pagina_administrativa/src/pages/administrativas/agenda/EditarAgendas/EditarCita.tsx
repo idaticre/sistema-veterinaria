@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./EditarCita.css";
 import IST from "../../../../components/proteccion/IST";
-import axios from "axios";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 // 🚨 Nuevas Constantes y Declaraciones de Google Calendar
@@ -945,16 +944,7 @@ setServiciosRegistrados(serviciosConvertidos);
 
       const token = sessionStorage.getItem("token");
 
-const responseDB = await axios.put(
-  "https://sistema-veterinaria.onrender.com/api/agenda",
-  req,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
-
+      const responseDB = await IST.put("/agenda", req);
 
       if (responseDB.data.success) {
         setStatus(`🗑️ Cita ${citaActual.codigo} CANCELADA.`);

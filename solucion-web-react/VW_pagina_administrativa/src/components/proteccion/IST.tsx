@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const IST = axios.create({
-  baseURL: "https://sistema-veterinaria.onrender.com/api",
+  // Usando el backend en la nube de Rende baseURL: "https://sistema-veterinaria.onrender.com/api",
+  baseURL: "http://localhost:8080/api",
 });
 
 IST.interceptors.request.use((config) => {
@@ -11,7 +12,5 @@ IST.interceptors.request.use((config) => {
   }
   return config;
 }, (error) => Promise.reject(error));
-
-
 
 export default IST;

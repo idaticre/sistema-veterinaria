@@ -5,7 +5,6 @@ import "react-calendar/dist/Calendar.css";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
 import "./Agenda_general.css";
 import IST from "../../../components/proteccion/IST";
-import axios from "axios";
 import Swal from "sweetalert2";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -621,20 +620,11 @@ const guardarEvento = async () => {
 
     try {
       // 🔥 PASO 1: INSERTAR CITA EN BD
-      const responseDB = await axios.post(
-        "https://sistema-veterinaria.onrender.com/api/agenda",
-        AgendaRequestDTO,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const responseDB = await IST.post("/agenda", AgendaRequestDTO);
 
-      if (!responseDB.data || !responseDB.data.success) {
-        throw new Error(responseDB.data.message || "Error al crear la cita en BD");
-      }
+      if (!responseDB.data || !responseDB.data.success) {throw new Error(responseDB.data.message || "Error al crear la cita en BD");}
 
       const citaCreada = responseDB.data.data;
-
-   
-
 
       // 🔥 PASO 2: INSERTAR SERVICIOS UNO POR UNO
       for (const servicio of serviciosRegistrados) {

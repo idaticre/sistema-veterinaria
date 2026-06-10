@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import IST from "../../../../components/proteccion/IST";
 import Br_administrativa from "../../../../components/barra_administrativa/Br_administrativa";
 import "./pagos.css";
 import Swal from 'sweetalert2';
@@ -39,19 +39,17 @@ function PagosColaboradores() {
   });
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8088/api/colaboradores")
+    IST.get("/colaboradores")
       .then((res) => setColaboradores(res.data.data || []))
-      .catch((err) => Swal.fire({
+      .catch(() => Swal.fire({
         title: "Error...",
         text: "al obtener colaboradores",
         icon: "error"
       }));
 
-    axios
-      .get("http://localhost:8088/api/pagos")
+    IST.get("/pagos")
       .then((res) => setPagos(res.data.data || []))
-      .catch((err) => Swal.fire({
+      .catch(() => Swal.fire({
         title: "Error...",
         text: "al obtener pagos",
         icon: "error"
@@ -60,9 +58,8 @@ function PagosColaboradores() {
 
   
   useEffect(() => {
-    if (busqueda.trim() === "") {
-      setFiltrados([]);
-    } else {
+    if (busqueda.trim() === "") {setFiltrados([]);} 
+    else {
       setFiltrados(
         colaboradores.filter((c) =>
           c.nombre?.toLowerCase().includes(busqueda.toLowerCase())
@@ -71,9 +68,7 @@ function PagosColaboradores() {
     }
   }, [busqueda, colaboradores]);
 
-  const pagosColaborador = pagos.filter(
-    (p) => p.colaborador?.id === colaboradorSeleccionado?.id
-  );
+  const pagosColaborador = pagos.filter((p) => p.colaborador?.id === colaboradorSeleccionado?.id);
 
   const registrarPago = () => {
     if (!colaboradorSeleccionado) {
@@ -109,8 +104,7 @@ function PagosColaboradores() {
       estado: nuevoPago.estado,
     };
 
-    axios
-      .post("http://localhost:8088/api/pagos", pagoNuevo)
+    IST.post("/pagos", pagoNuevo)
       .then((res) => {
         Swal.fire({
           title: "Operación exitosa",
@@ -126,7 +120,7 @@ function PagosColaboradores() {
         });
         setErrorMonto("");
       })
-      .catch((err) => {
+      .catch(() => {
         Swal.fire({
           title: "Error...",
           text: "al registrar el pago",
