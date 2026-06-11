@@ -4101,3 +4101,160 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_horarios_listar_todos;
+DELIMITER $$
+CREATE PROCEDURE sp_horarios_listar_todos()
+BEGIN
+    SELECT
+        h.id,
+        h.trabajador_id,
+        e.nombre      AS nombre_colaborador,
+        h.dia_id,
+        d.nombre      AS nombre_dia,
+        h.trabaja,
+        h.hora_inicio,
+        h.hora_fin
+    FROM horarios h
+    INNER JOIN colaboradores c ON h.trabajador_id = c.id
+    INNER JOIN entidades     e ON c.id_entidad    = e.id
+    INNER JOIN dias_semana   d ON h.dia_id        = d.id
+    ORDER BY e.nombre, d.orden;
+END $$
+DELIMITER ;
+
+-- ============================================================
+-- 2. SELECT POR DÍA: colaboradores que trabajan en un día dado
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_horarios_listar_por_dia;
+DELIMITER $$
+CREATE PROCEDURE sp_horarios_listar_por_dia(IN p_dia_id INT)
+BEGIN
+    SELECT
+        h.id,
+        h.trabajador_id,
+        e.nombre      AS nombre_colaborador,
+        h.dia_id,
+        d.nombre      AS nombre_dia,
+        h.trabaja,
+        h.hora_inicio,
+        h.hora_fin
+    FROM horarios h
+    INNER JOIN colaboradores c ON h.trabajador_id = c.id
+    INNER JOIN entidades     e ON c.id_entidad    = e.id
+    INNER JOIN dias_semana   d ON h.dia_id        = d.id
+    WHERE h.dia_id = p_dia_id
+      AND h.trabaja = TRUE
+    ORDER BY e.nombre;
+END $$
+DELIMITER ;
+
+-- ============================================================
+-- 3. INSERT: asignar horario a un colaborador en un día
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_horarios_insertar;
+DELIMITER $$
+CREATE PROCEDURE sp_horarios_insertar(
+    IN  p_trabajador_id BIGINT,
+    IN  p_dia_id        INT,
+    IN  p_trabaja       BOOLEAN,
+    IN  p_hora_inicio   TIME,
+    IN  p_hora_fin      TIME,
+    OUT p_id            BIGINT
+)
+BEGIN
+    -- Validar que no exista ya ese colaborador+día
+    IF EXISTS (
+        SELECT 1 FROM horarios
+        WHERE trabajador_id = p_trabajador_id AND dia_id = p_dia_id
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Ya existe un horario para este colaborador en ese día';
+    END IF;
+
+    INSERT INTO horarios (trabajador_id, dia_id, trabaja, hora_inicio, hora_fin)
+    VALUES (p_trabajador_id, p_dia_id, p_trabaja, p_hora_inicio, p_hora_fin);
+
+    SET p_id = LAST_INSERT_ID();
+END $$
+DELIMITER ;
+
+-- ============================================================
+-- 4. UPDATE: editar un horario existente por su id
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_horarios_actualizar;
+DELIMITER $$
+CREATE PROCEDURE sp_horarios_actualizar(
+    IN p_id           BIGINT,
+    IN p_trabajador_id BIGINT,
+    IN p_dia_id       INT,
+    IN p_trabaja      BOOLEAN,
+    IN p_hora_inicio  TIME,
+    IN p_hora_fin     TIME
+)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM horarios WHERE id = p_id) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Horario no encontrado';
+    END IF;
+
+    UPDATE horarios
+    SET trabajador_id = p_trabajador_id,
+        dia_id        = p_dia_id,
+        trabaja       = p_trabaja,
+        hora_inicio   = p_hora_inicio,
+        hora_fin      = p_hora_fin
+    WHERE id = p_id;
+END $$
+DELIMITER ;
+
+-- ============================================================
+-- 5. DELETE: eliminar todos los horarios de un colaborador
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_horarios_eliminar_por_colaborador;
+DELIMITER $$
+CREATE PROCEDURE sp_horarios_eliminar_por_colaborador(
+    IN  p_trabajador_id BIGINT,
+    OUT p_filas_afectadas INT
+)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_trabajador_id) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Colaborador no encontrado';
+    END IF;
+
+    DELETE FROM horarios WHERE trabajador_id = p_trabajador_id;
+
+    SET p_filas_afectadas = ROW_COUNT();
+END $$
+DELIMITER ;
+
+-- ============================================================
+-- 6. SELECT POR COLABORADOR: horarios de lunes a domingo
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_horarios_listar_por_colaborador;
+DELIMITER $$
+CREATE PROCEDURE sp_horarios_listar_por_colaborador(IN p_trabajador_id BIGINT)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM colaboradores WHERE id = p_trabajador_id) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Colaborador no encontrado';
+    END IF;
+ 
+    SELECT
+        h.id,
+        h.trabajador_id,
+        e.nombre      AS nombre_colaborador,
+        h.dia_id,
+        d.nombre      AS nombre_dia,
+        h.trabaja,
+        h.hora_inicio,
+        h.hora_fin
+    FROM horarios h
+    INNER JOIN colaboradores c ON h.trabajador_id = c.id
+    INNER JOIN entidades     e ON c.id_entidad    = e.id
+    INNER JOIN dias_semana   d ON h.dia_id        = d.id
+    WHERE h.trabajador_id = p_trabajador_id
+    ORDER BY d.orden;
+END $$
+DELIMITER ;

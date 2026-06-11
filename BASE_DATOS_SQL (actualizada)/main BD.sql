@@ -1612,4 +1612,19 @@ CREATE TABLE comprobante_detalles(
     codigo_producto_sunat varchar(8)
 );
 
-CREATE INDEX idx_comprobante_detalle_comprobante ON comprobante_detalles(comprobante_id)
+CREATE INDEX idx_comprobante_detalle_comprobante ON comprobante_detalles(comprobante_id);
+
+CREATE TABLE horarios(
+	id bigint primary key not null auto_increment,
+    trabajador_id bigint not null,
+    dia_id int not null,
+    trabaja boolean default (false),
+    hora_inicio timestamp,
+    hora_fin timestamp,
+    
+    foreign key (trabajador_id) references colaboradores(id),
+    foreign key (dia_id) references dias_semana(id),
+    
+    index idx_trabajador (idx_trabajador_id),
+    index idx_dia (idx_dia_id)
+);

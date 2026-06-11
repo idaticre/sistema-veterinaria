@@ -70,15 +70,6 @@ export interface ColaboradorResponse{
     mensaje: string;
 }
 
-export interface HorarioTrabajoRequest{
-    id: number;
-    idColaborador: number;
-    idDiaSemana: number;
-    idTipoDia: number;
-    horaInicio: string;
-    horaFin: string;
-}
-
 export interface ProveedorRequest{
     id: number;
     idTipoPersonaJuridica: number;
@@ -209,17 +200,6 @@ export interface EntidadResponse{
     tipoDocumento: string;
     tipoPersonaJuridica: string;
     fechaRegistro: string;
-}
-    
-
-export interface HorarioTrabajoResponse{
-    id: number;
-    codigo: string;
-    idColaborador: number;
-    idDiaSemana: number;
-    idTipoDia: number;
-    horaInicio: string;
-    horaFin: string;
 }
 
 export interface ProveedorResponse{
@@ -498,3 +478,29 @@ export const mapInfoGeneral = (info: InfoGeneral): historialCPorMascota => ({
   activo: Boolean(info[28]),
   fechaModificacion: info[29],
 });
+
+export interface HorarioResponse {
+    id: number;
+    trabajadorId: number;
+    nombreColaborador: string;
+    diaId: number;
+    nombreDia: string;
+    trabaja: boolean;
+    horaInicio: string | null; // "HH:mm:ss"
+    horaFin: string | null;    // "HH:mm:ss"
+}
+
+export interface HorarioRequest {
+    trabajadorId: number;
+    diaId: number;
+    trabaja: boolean;
+    horaInicio: string | null;
+    horaFin: string | null;
+}
+
+// Tarjeta agrupada por colaborador para renderizar en el frontend
+export interface HorarioColaboradorCard {
+    trabajadorId: number;
+    nombreColaborador: string;
+    dias: HorarioResponse[];
+}

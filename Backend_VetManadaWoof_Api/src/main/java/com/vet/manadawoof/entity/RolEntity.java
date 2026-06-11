@@ -34,8 +34,4 @@ public class RolEntity implements Serializable {
     @OneToMany(mappedBy = "rol", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<UsuarioRolEntity> usuarioRoles;
-
-    @OneToMany(mappedBy = "rol")
-    @JsonIgnore
-    private List<HorarioBaseRolEntity> horarioBaseRoles;
 }

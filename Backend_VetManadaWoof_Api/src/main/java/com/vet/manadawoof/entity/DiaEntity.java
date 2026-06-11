@@ -32,9 +32,5 @@ public class DiaEntity implements Serializable {
 
     @OneToMany(mappedBy = "dia")
     @JsonIgnore
-    private List<HorarioBaseRolEntity> horarioBaseRoles;
-
-    @OneToMany(mappedBy = "dia")
-    @JsonIgnore
-    private List<AsignacionHorarioEntity> asignaciones;
+    private List<HorarioEntity> horarioBaseRoles;
 }

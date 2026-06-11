@@ -11,16 +11,14 @@ import java.time.LocalTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class HorarioBaseRolResponseDTO {
+public class HorarioResponseDTO {
 
     private Long id;
-    private Integer idRol;
-    private String nombreRol;
-    private Integer idHorarioBase;
-    private String nombreHorarioBase;
+    private Long trabajadorId;
+    private String nombreColaborador;
+    private Integer diaId;
+    private String nombreDia;
+    private Boolean trabaja;
     private LocalTime horaInicio;
     private LocalTime horaFin;
-    private Integer idDiaSemana;
-    private String nombreDia;
-    private Integer ordenDia;
 }

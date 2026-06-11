@@ -31,10 +31,6 @@ public class RegistroAsistenciaEntity implements Serializable {
     @JoinColumn(name = "id_colaborador", nullable = false)
     private ColaboradorEntity colaborador;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_horario_base")
-    private HorarioBaseEntity horarioBase;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_estado_asistencia", nullable = false)
     private EstadoAsistenciaEntity estadoAsistencia;
