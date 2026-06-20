@@ -35,12 +35,13 @@ import Parametros_y_promociones from './pages/administrativas/administracion/par
 
 import AsignarRolesPermisos from './pages/administrativas/administracion/Asignar-Gestionar-Roles/AsignarRolesPermisos';
 
-
 import DashboardAdministrativo from './pages/administrativas/administracion/DashboardAdministrativo/DashboardAdministrativo';
 import RutaProtegida from './components/proteccion/IPRT';
 import RutaProtegidaPorRol from './components/proteccion/IPRR';
 import IPRR from './components/proteccion/IPRR';
-import Inventario from './pages/distribucion/Inventario';
+import Inventario from './pages/administrativas/distribución/inventario';
+import InventarioMovimientos from './pages/administrativas/distribución/movimientos';
+import Proveedores from './pages/administrativas/distribución/proveedores';
 import HistorialM from './pages/administrativas/mascotas/historial clinico/HistorialM';
 import { useEffect, useState } from 'react';
 import "./App.css";
@@ -134,7 +135,6 @@ function App() {
             <Route path='/administracion/servicios' element={<Servicios/>}/>      
           </Route>
 
-          
           {/* Agenda */}
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA"]} />}>
             <Route path='/administracion/agenda/EditarCita' element={<EditarCita />} />
@@ -143,10 +143,12 @@ function App() {
             <Route path='/administracion/agenda/Agenda_general' element={<Agenda_general />} />
           </Route>
 
-          {/* Distribución 
+          {/* Inventario */}
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL"]} />}>
             <Route path='/administracion/distribucion/inventario' element={<Inventario/>}/>
-          </Route>*/}
+            <Route path='/administracion/distribucion/proveedores' element={<Proveedores/>}/>            
+            <Route path='/administracion/distribucion/movimientos' element={<InventarioMovimientos/>}/>
+          </Route>
 
           {/* Ventas */}
           <Route>

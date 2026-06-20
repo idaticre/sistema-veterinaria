@@ -4258,3 +4258,207 @@ BEGIN
     ORDER BY d.orden;
 END $$
 DELIMITER ;
+
+- ============================================================
+-- SP 1: Obtener todos los productos
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_productos_listar;
+DELIMITER $$
+CREATE PROCEDURE sp_productos_listar()
+BEGIN
+    SELECT
+        p.id,
+        p.codigo,
+        p.nombre,
+        p.descripcion,
+        p.marca,
+        p.precio,
+        p.stock,
+        p.proveedor_id,
+        pv.codigo   AS codigo_proveedor,
+        e.nombre    AS nombre_proveedor,
+        p.foto,
+        p.activo
+    FROM productos p
+    INNER JOIN proveedores pv ON p.proveedor_id = pv.id
+    INNER JOIN entidades   e  ON pv.id_entidad  = e.id
+    ORDER BY p.nombre;
+END $$
+DELIMITER ;
+
+-- ============================================================
+-- SP 2: Obtener productos por proveedor_id
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_productos_listar_por_proveedor;
+DELIMITER $$
+CREATE PROCEDURE sp_productos_listar_por_proveedor(IN p_proveedor_id BIGINT)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM proveedores WHERE id = p_proveedor_id) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Proveedor no encontrado';
+    END IF;
+
+    SELECT
+        p.id,
+        p.codigo,
+        p.nombre,
+        p.descripcion,
+        p.marca,
+        p.precio,
+        p.stock,
+        p.proveedor_id,
+        pv.codigo   AS codigo_proveedor,
+        e.nombre    AS nombre_proveedor,
+        p.foto,
+        p.activo
+    FROM productos p
+    INNER JOIN proveedores pv ON p.proveedor_id = pv.id
+    INNER JOIN entidades   e  ON pv.id_entidad  = e.id
+    WHERE p.proveedor_id = p_proveedor_id
+    ORDER BY p.nombre;
+END $$
+DELIMITER ;
+
+-- ============================================================
+-- SP 3: Registrar nuevo producto
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_productos_registrar;
+DELIMITER $$
+CREATE PROCEDURE sp_productos_registrar(
+    IN  p_nombre       VARCHAR(128),
+    IN  p_descripcion  VARCHAR(512),
+    IN  p_marca        VARCHAR(64),
+    IN  p_precio       DECIMAL(10, 2),
+    IN  p_stock        INT,
+    IN  p_proveedor_id BIGINT,
+    IN  p_foto         VARCHAR(512),
+    OUT p_id           BIGINT,
+    OUT p_codigo       VARCHAR(32),
+    OUT p_mensaje      VARCHAR(255)
+)
+BEGIN
+    DECLARE v_codigo VARCHAR(32);
+
+    validacion: BEGIN
+
+        IF p_nombre IS NULL OR TRIM(p_nombre) = '' THEN
+            SET p_mensaje = 'ERROR: El nombre del producto es obligatorio';
+            LEAVE validacion;
+        END IF;
+
+        IF p_precio < 0 THEN
+            SET p_mensaje = 'ERROR: El precio no puede ser negativo';
+            LEAVE validacion;
+        END IF;
+
+        IF p_stock < 0 THEN
+            SET p_mensaje = 'ERROR: El stock no puede ser negativo';
+            LEAVE validacion;
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM proveedores WHERE id = p_proveedor_id) THEN
+            SET p_mensaje = 'ERROR: Proveedor no encontrado';
+            LEAVE validacion;
+        END IF;
+
+        -- Generar código único
+        SET v_codigo = CONCAT('PROD-', LPAD((SELECT IFNULL(MAX(id), 0) + 1 FROM productos), 6, '0'));
+
+        INSERT INTO productos (codigo, nombre, descripcion, marca, precio, stock, proveedor_id, foto, activo)
+        VALUES (v_codigo, p_nombre, p_descripcion, p_marca, p_precio, p_stock, p_proveedor_id, p_foto, TRUE);
+
+        SET p_id      = LAST_INSERT_ID();
+        SET p_codigo  = v_codigo;
+        SET p_mensaje = 'Producto registrado correctamente';
+
+    END validacion;
+END $$
+DELIMITER ;
+
+-- ============================================================
+-- SP 4: Actualizar producto
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_productos_actualizar;
+DELIMITER $$
+CREATE PROCEDURE sp_productos_actualizar(
+    IN  p_id           BIGINT,
+    IN  p_nombre       VARCHAR(128),
+    IN  p_descripcion  VARCHAR(512),
+    IN  p_marca        VARCHAR(64),
+    IN  p_precio       DECIMAL(10, 2),
+    IN  p_stock        INT,
+    IN  p_proveedor_id BIGINT,
+    IN  p_foto         VARCHAR(512),
+    IN  p_activo       BOOLEAN,
+    OUT p_mensaje      VARCHAR(255)
+)
+BEGIN
+    validacion: BEGIN -- Validaciones
+		IF NOT EXISTS (SELECT 1 FROM productos WHERE id = p_id) THEN
+			SET p_mensaje = 'ERROR: Producto no encontrado';
+			LEAVE validacion;
+		END IF;
+
+		IF p_nombre IS NULL OR TRIM(p_nombre) = '' THEN
+			SET p_mensaje = 'ERROR: El nombre del producto es obligatorio';
+			LEAVE validacion;
+		END IF;
+
+		IF p_precio < 0 THEN
+			SET p_mensaje = 'ERROR: El precio no puede ser negativo';
+			LEAVE validacion;
+		END IF;
+
+		IF p_stock < 0 THEN
+			SET p_mensaje = 'ERROR: El stock no puede ser negativo';
+			LEAVE validacion;
+		END IF;
+
+		IF NOT EXISTS (SELECT 1 FROM proveedores WHERE id = p_proveedor_id) THEN
+			SET p_mensaje = 'ERROR: Proveedor no encontrado';
+			LEAVE validacion;
+		END IF;
+
+		-- Actualizar
+		UPDATE productos
+		SET nombre       = p_nombre,
+			descripcion  = p_descripcion,
+			marca        = p_marca,
+			precio       = p_precio,
+			stock        = p_stock,
+			proveedor_id = p_proveedor_id,
+			foto         = p_foto,
+			activo       = p_activo
+		WHERE id = p_id;
+
+		SET p_mensaje = 'Producto actualizado correctamente';
+	END validacion;
+END $$
+DELIMITER ;
+
+-- ============================================================
+-- SP 5: Eliminación lógica de producto (activo = FALSE)
+-- ============================================================
+DROP PROCEDURE IF EXISTS sp_productos_eliminar;
+DELIMITER $$
+CREATE PROCEDURE sp_productos_eliminar(
+    IN  p_id      BIGINT,
+    OUT p_mensaje VARCHAR(255)
+)
+BEGIN
+	validacion: BEGIN
+		IF NOT EXISTS (SELECT 1 FROM productos WHERE id = p_id) THEN
+			SET p_mensaje = 'ERROR: Producto no encontrado';
+			LEAVE validacion;
+		END IF;
+
+		UPDATE productos
+		SET activo = FALSE
+		WHERE id = p_id;
+
+		SET p_mensaje = 'Producto desactivado correctamente';
+	END validacion;
+END $$
+DELIMITER ;
+
+DESC Proveedores;

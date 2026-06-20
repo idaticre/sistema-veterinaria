@@ -21,7 +21,7 @@ public class ProveedorServiceImpl implements ProveedorService {
     
     @PersistenceContext
     // Manejador de persistencia JPA para ejecutar SPs y SQL nativo
-    private final EntityManager entityManager;
+    private EntityManager entityManager;
     
     /**
      * Registra un nuevo proveedor en la base de datos usando el procedimiento almacenado `registrar_proveedor`.
@@ -347,7 +347,7 @@ public class ProveedorServiceImpl implements ProveedorService {
                 .ciudad((String) row[13])
                 .distrito((String) row[14])
                 .representante((String) row[15])
-                .activo(row[16] != null ? ((Number) row[16]).intValue() == 1 : true)
+                // .activo(row[16] != null ? ((Number) row[16]).intValue() == 1 : true)
                 .fechaRegistro(row[17] != null ? ((Timestamp) row[17]).toLocalDateTime() : null)
                 .mensaje("Operación exitosa")
                 .build();
@@ -378,7 +378,7 @@ public class ProveedorServiceImpl implements ProveedorService {
                 .ciudad((String) row[13])
                 .distrito((String) row[14])
                 .representante((String) row[15])
-                .activo(row[16] != null ? ((Number) row[16]).intValue() == 1 : true)
+                // .activo(row[16] != null ? ((Number) row[16]).intValue() == 1 : true)
                 .fechaRegistro(row[17] != null ? ((Timestamp) row[17]).toLocalDateTime() : null)
                 .mensaje("Operación exitosa")
                 .build();

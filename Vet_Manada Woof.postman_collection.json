@@ -289,47 +289,6 @@
               "response": []
             },
             {
-              "name": "Proveedores",
-              "protocolProfileBehavior": {
-                "disableBodyPruning": true
-              },
-              "request": {
-                "auth": {
-                  "type": "noauth"
-                },
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/proveedores",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "proveedores"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
               "name": "Tipo_Documento",
               "protocolProfileBehavior": {
                 "disableBodyPruning": true
@@ -493,42 +452,6 @@
               "response": []
             },
             {
-              "name": "Proveedores",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Distribuidora AnimalCare SAC\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"20555888991\",\r\n  \"correo\": \"ventas@animalcare.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Fresnos 245\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena del Mar\",\r\n  \"representante\": \"Carlos Pérez\",\r\n  \"activo\": true\r\n}\r\n",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/proveedores/registrar",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "proveedores",
-                    "registrar"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
               "name": "Colaboradores",
               "request": {
                 "method": "POST",
@@ -682,42 +605,6 @@
                 }
               },
               "response": []
-            },
-            {
-              "name": "Proveedores",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"id\": 1,\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Distribuidora AnimalCare SAC\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"20555888991\",\r\n  \"correo\": \"contacto@animalcare.com\",\r\n  \"telefono\": \"999888777\",\r\n  \"direccion\": \"Av. Los Álamos 452\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"representante\": \"Carlos Pérez\",\r\n  \"activo\": true\r\n}\r\n",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/proveedores/actualizar",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "proveedores",
-                    "actualizar"
-                  ]
-                }
-              },
-              "response": []
             }
           ]
         },
@@ -791,43 +678,6 @@
                   "path": [
                     "api",
                     "colaboradores",
-                    "eliminar",
-                    "1"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Proveedores",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8088/api/proveedores/eliminar/1",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8088",
-                  "path": [
-                    "api",
-                    "proveedores",
                     "eliminar",
                     "1"
                   ]
@@ -3309,7 +3159,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc4MTEyOTU1NywiZXhwIjoxNzgxMjE1OTU3fQ.guYmTbr25dwxVU9UlMNkKsVYtMZuOsYvWcfpksvK1KM",
                   "type": "string"
                 }
               ]
@@ -3515,7 +3365,363 @@
                 "1"
               ]
             },
-            "description": "eliminar-horario/{idColaborador} no lleva body y elimina físicamente los registros. {idColaborador} es un número entero, el id del colaborador.\n\nTesteado y comprobado."
+            "description": "eliminar-horario/{idColaborador} no lleva body y elimina físicamente los registros. {idColaborador} es un número entero, el id del colaborador. Alternativamente, en vez de usar esto puedes poner el campo de \"trabaja\" en false para que la horaInicio y horaFin sean null.\n\nTesteado y comprobado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Proveedores",
+      "item": [
+        {
+          "name": "Listar-todos",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc4MTcwMjY4MywiZXhwIjoxNzgxNzg5MDgzfQ.fG3klmAJz9tfG8HHaXq4rsbrB84DWusFoPVaTamgvXs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8088/api/proveedores",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8088",
+              "path": [
+                "api",
+                "proveedores"
+              ]
+            },
+            "description": "Devuelve todos los proveedores de la tabla proveedores en un JSON.\n\nTesteado y comprobado."
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc4MTcwMjY4MywiZXhwIjoxNzgxNzg5MDgzfQ.fG3klmAJz9tfG8HHaXq4rsbrB84DWusFoPVaTamgvXs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Distribuidora AnimalCare SAC\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"20555888991\",\r\n  \"correo\": \"ventas@animalcare.com\",\r\n  \"telefono\": \"987654321\",\r\n  \"direccion\": \"Av. Los Fresnos 245\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena del Mar\",\r\n  \"representante\": \"Carlos Pérez\",\r\n  \"activo\": true\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8088/api/proveedores",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8088",
+              "path": [
+                "api",
+                "proveedores"
+              ]
+            },
+            "description": "Registra un proveedor en la tabla proveedores, necesita algo así:\n\n\"idTipoPersonaJuridica\": {ID INT}, \n\n\"idTipoDocumento\": {ID INT}, \n\n\"nombre\": {STRING}, \n\n\"sexo\": F | M, \n\n\"documento\": {STRING}, \n\n\"correo\": {STRING}, \n\n\"telefono\": {STRING}, \n\n\"direccion\": {STRING}, \n\n\"ciudad\": {STRING}, \n\n\"distrito\": {STRING}, \n\n\"representante\": {STRING}, \n\n\"activo\": {BOOLEAN}\n\n}"
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc4MTcyMjk3NywiZXhwIjoxNzgxODA5Mzc3fQ.3NVe24ghwZOFB2vXY0D7Jrsu5ST_DELNgzwZ06U_EHM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8088/api/proveedores/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8088",
+              "path": [
+                "api",
+                "proveedores",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar-proveedor",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc4MTcwMjY4MywiZXhwIjoxNzgxNzg5MDgzfQ.fG3klmAJz9tfG8HHaXq4rsbrB84DWusFoPVaTamgvXs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": 1,\r\n  \"idTipoPersonaJuridica\": 1,\r\n  \"idTipoDocumento\": 1,\r\n  \"nombre\": \"Distribuidora AnimalCare SAC\",\r\n  \"sexo\": \"M\",\r\n  \"documento\": \"20555888991\",\r\n  \"correo\": \"contacto@animalcare.com\",\r\n  \"telefono\": \"999888777\",\r\n  \"direccion\": \"Av. Los Álamos 452\",\r\n  \"ciudad\": \"Lima\",\r\n  \"distrito\": \"Magdalena\",\r\n  \"representante\": \"Mbappé\",\r\n  \"activo\": true\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8088/api/proveedores",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8088",
+              "path": [
+                "api",
+                "proveedores"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Listar-todos",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc4MTk5MzQyNywiZXhwIjoxNzgyMDc5ODI3fQ.N1tYG_KmEUhm4D12lQ0KFs-jaE2HZ-m03XBNL5LMEeo",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8088/api/productos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8088",
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "Lista todos. Testeado y comprobado."
+          },
+          "response": []
+        },
+        {
+          "name": "Por-proveedor",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc4MTk5NDU2MywiZXhwIjoxNzgyMDgwOTYzfQ.FAWZrcdJUOi2IZIYIgUhK_xpkc_YaCcUk7vffiGfHK0",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8088/api/productos?proveedor=1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8088",
+              "path": [
+                "api",
+                "productos"
+              ],
+              "query": [
+                {
+                  "key": "proveedor",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Devuelve productos de un proveedor en específico usando ?proveedor={id} donde {id} es el int id de un proveedor."
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Shampoo para perros\",\r\n  \"descripcion\": \"Shampoo hipoalergénico 500ml\",\r\n  \"marca\": \"PetCare\",\r\n  \"precio\": 25.90,\r\n  \"stock\": 50,\r\n  \"proveedorId\": 1,\r\n  \"foto\": \"https://ejemplo.com/foto.jpg\",\r\n  \"activo\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8088/api/productos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8088",
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "Registra un producto. Usa algo como esto.\n\n{  \n\"nombre\": \"Shampoo para perros\",  \n\"descripcion\": \"Shampoo hipoalergénico 500ml\",  \n\"marca\": \"PetCare\",  \n\"precio\": 25.90,  \n\"stock\": 50,  \n\"proveedorId\": 1,  \n\"foto\": \"[https://ejemplo.com/foto.jpg\"](https://ejemplo.com/foto.jpg),  \n\"activo\": true  \n}\n\nTesteado y comprobado."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbl93b29mIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiBHRU5FUkFMIl0sImlhdCI6MTc4MTk5NDE0MiwiZXhwIjoxNzgyMDgwNTQyfQ.DkHsdxE0hOBcdqJX5EgxY4jcQCeWSHXDnJekT5NYGZ4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Comida para perros\",\r\n  \"descripcion\": \"Para adultos\",\r\n  \"marca\": \"Ganador\",\r\n  \"precio\": 25.90,\r\n  \"stock\": 50,\r\n  \"proveedorId\": 1,\r\n  \"foto\": \"https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi5.walmartimages.com.mx%2Fgr%2Fimages%2Fproduct-images%2Fimg_large%2F00750200287246L.jpg&f=1&nofb=1&ipt=3f7d9b6f65b72b58077df336b3db268a443ea90a2d97a47190553ca443eca3bd\",\r\n  \"activo\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8088/api/productos/{id}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8088",
+              "path": [
+                "api",
+                "productos",
+                "{id}"
+              ]
+            },
+            "description": "Actualiza un producto.\n\n{ \n\n\"nombre\": \"Comida para perros\", \n\n\"descripcion\": \"Para adultos\", \n\n\"marca\": \"Ganador\", \n\n\"precio\": 25.90, \n\n\"stock\": 50, \n\n\"proveedorId\": 1, \n\n\"foto\": \"https://external-content.duckduckgo.com/iu/?u=https://i5.walmartimages.com.mx/gr/images/product-images/img_large/00750200287246L.jpg&f=1&nofb=1&ipt=3f7d9b6f65b72b58077df336b3db268a443ea90a2d97a47190553ca443eca3bd\", \n\n\"activo\": true\n\n}\n\nTesteado y comprobado."
+          },
+          "response": []
+        },
+        {
+          "name": "Desactivar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8088/api/productos/{id}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8088",
+              "path": [
+                "api",
+                "productos",
+                "{id}"
+              ]
+            }
           },
           "response": []
         }

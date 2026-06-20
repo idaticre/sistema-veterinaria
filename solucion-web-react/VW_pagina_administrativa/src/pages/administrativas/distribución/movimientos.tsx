@@ -1,11 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import Br_administrativa from '../../../components/barra_administrativa/Br_administrativa'
-import type { ServicioResponse, ServicioRequest } from '../../../components/interfaces/interfaces'
-import "./styles.css"
 import IST from '../../../components/proteccion/IST'
 import Swal from 'sweetalert2';
 
-const GestionarServicios: React.FC = () => {
+interface ServicioResponse {
+    id: number,
+    nombre: string,
+    descripcion?: string,
+}
+
+interface ServicioRequest {
+    id?: number,
+    nombre: string,
+    descripcion?: string
+}
+
+const InventarioMovimientos: React.FC = () => {
     const [minimizado, setMinimizado] = useState(false);
     const [servicios, setServicios] = useState<ServicioResponse[]>([]);
     const [filtrado, setFiltrado] = useState<ServicioResponse[]>([]);
@@ -169,4 +179,4 @@ const GestionarServicios: React.FC = () => {
     )
 }
 
-export default GestionarServicios;
+export default InventarioMovimientos;

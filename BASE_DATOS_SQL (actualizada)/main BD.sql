@@ -1618,7 +1618,7 @@ CREATE TABLE horarios(
 	id bigint primary key not null auto_increment,
     trabajador_id bigint not null,
     dia_id int not null,
-    trabaja boolean default (false),
+    trabaja boolean default false,
     hora_inicio timestamp,
     hora_fin timestamp,
     
@@ -1627,4 +1627,23 @@ CREATE TABLE horarios(
     
     index idx_trabajador (idx_trabajador_id),
     index idx_dia (idx_dia_id)
+);
+
+CREATE TABLE IF NOT EXISTS productos (
+    id           BIGINT         NOT NULL AUTO_INCREMENT,
+    codigo       VARCHAR(32)    UNIQUE,
+    nombre       VARCHAR(128)   NOT NULL,
+    descripcion  VARCHAR(512),
+    marca        VARCHAR(64),
+    precio       DECIMAL(10, 2) NOT NULL,
+    stock        INT            NOT NULL DEFAULT 0,
+    proveedor_id BIGINT         NOT NULL,
+    foto         VARCHAR(512),
+    activo       BOOLEAN        NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT pk_productos          PRIMARY KEY (id),
+    CONSTRAINT fk_producto_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores(id),
+
+    CONSTRAINT chk_precio_positivo   CHECK (precio >= 0),
+    CONSTRAINT chk_stock_positivo    CHECK (stock  >= 0)
 );

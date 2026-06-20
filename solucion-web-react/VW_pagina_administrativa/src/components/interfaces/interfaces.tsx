@@ -86,6 +86,26 @@ export interface ProveedorRequest{
     activo: boolean;
 }
 
+export interface ProveedorResponse{
+    id: number;
+    codigoProveedor: string;
+    idEntidad: number;
+    nombre: string;
+    sexo: string;
+    documento: string;
+    idTipoPersonaJuridica: number;
+    idTipoDocumento: number;
+    correo: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    distrito: string;
+    representante: string;
+    activo: boolean;
+    fechaRegistro: string;
+    mensaje: string;
+}
+
 export interface veterinarioRequest{
     id: number;
     nombre: string;
@@ -104,7 +124,6 @@ export interface veterinarioRequest{
     idEspecialidad: number;
     cmp: string;
 }
-
 
 export interface MascotaRequest {
   id?: number;
@@ -200,26 +219,6 @@ export interface EntidadResponse{
     tipoDocumento: string;
     tipoPersonaJuridica: string;
     fechaRegistro: string;
-}
-
-export interface ProveedorResponse{
-    id: number;
-    codigoProveedor: string;
-    idEntidad: number;
-    nombre: string;
-    sexo: string;
-    documento: string;
-    idTipoPersonaJuridica: number;
-    idTipoDocumento: number;
-    correo: string;
-    telefono: string;
-    direccion: string;
-    ciudad: string;
-    distrito: string;
-    representante: string;
-    activo: boolean;
-    fechaRegistro: string;
-    mensaje: string;
 }
 
 export interface veterinarioResponse{
@@ -503,4 +502,29 @@ export interface HorarioColaboradorCard {
     trabajadorId: number;
     nombreColaborador: string;
     dias: HorarioResponse[];
+}
+
+export interface ServicioResponse {
+    id: number,
+    nombre: string,
+    descripcion?: string,
+}
+
+export interface ServicioRequest {
+    id?: number,
+    nombre: string,
+    descripcion?: string
+}
+
+export interface Productos {
+  id: number,
+  codigo?: string,
+  nombre: string,
+  descripcion?: string,
+  marca?: string,
+  precio: number,
+  stock: number,
+  proveedor: string,
+  foto?: string,
+  activo: boolean
 }

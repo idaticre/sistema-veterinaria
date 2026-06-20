@@ -146,11 +146,8 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                 </li>
                             )}
-                            {/* 
                             {RolesPermitidos("ADMINISTRADOR GENERAL") && (
-                                <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} 
-                                    onClick={() => toggleMenu("distribucion")}
-                                >
+                                <li className={`opcion opcion_desplegable ${openMenu === "distribucion"?"toggle_submenu":""}`} onClick={() => toggleMenu("distribucion")}>
                                     <Link to="" className="enlace_opcion">
                                         <i className="fa-solid fa-truck-moving"></i>
                                         <span>Distribución</span>
@@ -158,12 +155,11 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                     <ul ref={distribRef} className="submenu">
                                         <li><Link to="/administracion/distribucion/inventario" className="sub_opcion">Inventario</Link></li>
-                                        <li><Link to="" className="sub_opcion">Ordenes de compra</Link></li>
-                                        <li><Link to="" className="sub_opcion">Proveedores</Link></li> 
+                                        {/*<li><Link to="/administracion/distribucion/movimientos" className="sub_opcion">Movimientos</Link></li>*/}
+                                        <li><Link to="/administracion/distribucion/proveedores" className="sub_opcion">Proveedores</Link></li> 
                                     </ul>
                                 </li>
                             )}
-                                */}
                             <li className={`opcion opcion_desplegable ${openMenu === "venta"?"toggle_submenu":""}`} 
                                 onClick={() => toggleMenu("venta")}>
                                 <Link to="" className="enlace_opcion">
