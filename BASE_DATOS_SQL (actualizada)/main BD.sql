@@ -1647,3 +1647,24 @@ CREATE TABLE IF NOT EXISTS productos (
     CONSTRAINT chk_precio_positivo   CHECK (precio >= 0),
     CONSTRAINT chk_stock_positivo    CHECK (stock  >= 0)
 );
+
+CREATE TABLE tipo_accion (
+    id_tipo_accion INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(30) NOT NULL UNIQUE,
+    descripcion VARCHAR(100)
+);
+
+CREATE TABLE auditoria (
+    id_auditoria BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_tipo_accion INT NOT NULL,
+    entidad VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    fecha_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_auditoria_usuario FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id),
+
+    CONSTRAINT fk_auditoria_tipo_accion FOREIGN KEY (id_tipo_accion)
+        REFERENCES tipo_accion(id_tipo_accion)
+);

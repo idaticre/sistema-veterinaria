@@ -63,7 +63,7 @@ CALL gestionar_rol_usuario('ASIGNAR', 1, 1, @msg); SELECT @msg; -- admin_woof â†
 -- Usamos id_entidad del colaborador 5 (ENT000005)
 
 CALL registrar_veterinario(
-    5, 1, 'Diego Alvarado Quispe', 'M', '45567890', 1,
+    1, 'Diego Alvarado Quispe', 'M', '45567890', 1,
     'diego.alvarado@manadawoof.com', '954321098',
     'Av. Salaverry 234', 'Lima', 'Jesus Maria', NULL,
     1, 'CMP-45678',
@@ -399,4 +399,4 @@ SELECT 'historia_clinica',                    COUNT(*) FROM historia_clinica
 UNION ALL
 SELECT 'historia_clinica_registros',          COUNT(*) FROM historia_clinica_registros
 UNION ALL
-SELECT 'historia_clinica_archivos',           COUNT(*) FROM historia_clinica_archivos;
+SELECT 'historia_clinica_archivos',           COUNT(*) FROM historia_clinica_archivos;CALL registrar_veterinario(     5, 1, 'Diego Alvarado Quispe', 'M', '45567890', 1,     'diego.alvarado@manadawoof.com', '954321098',     'Av. Salaverry 234', 'Lima', 'Jesus Maria', NULL,     1, 'CMP-45678',     @cod_ent, @cod_col, @cod_vet, @msg )

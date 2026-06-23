@@ -3553,49 +3553,70 @@ BEGIN
             -- RESULTADO 1: INFO GENERAL MASCOTA + HISTORIA
             -- ========================================
             SELECT
-                m.id AS mascota_id,
-                m.codigo AS mascota_codigo,
-                m.nombre AS mascota_nombre,
+                m.id,                       -- 0
+                m.codigo,                   -- 1
+                m.nombre,                   -- 2
+                m.sexo,                     -- 3
+                m.fecha_nacimiento,         -- 4
+                m.pelaje,                   -- 5
+                m.peso,                     -- 6
+                m.esterilizado,             -- 7
+                m.alergias,                 -- 8
+                m.chip,                     -- 9
+                m.pedigree,                 -- 10
+                m.factor_dea,               -- 11
+                m.agresividad,              -- 12
+                m.foto,                     -- 13
 
-                m.id_especie,
-                e.nombre AS especie,
+                e.nombre,                   -- 14 especie
+                r.nombre,                   -- 15 raza
+                t.descripcion,              -- 16 tamaño
+                ev.descripcion,             -- 17 etapa vida
+                em.nombre,                  -- 18 estado
 
-                m.id_raza,
-                r.nombre AS raza,
+                c.id,                       -- 19 idCliente
+                c.codigo,                   -- 20 codigoCliente
 
-                m.fecha_nacimiento,
-                m.sexo,
-                m.pelaje,
-                m.peso,
-                m.chip,
-                m.esterilizado,
-                m.alergias,
+                ent.nombre,                 -- 21 nombreCliente
+                ent.telefono,               -- 22 telefono
+                ent.correo,                 -- 23 correo
 
-                hc.id AS historia_id,
-                hc.codigo AS historia_codigo,
-                hc.fecha_apertura,
-                hc.observaciones_generales,
-                hc.activo,
+                hc.id,                      -- 24 idHistorial
+                hc.codigo,                  -- 25 codigoHistorial
+                hc.fecha_apertura,          -- 26 fechaHistorial
 
-                (
-                    SELECT COUNT(*)
-                    FROM historia_clinica_registros hcr
-                    WHERE hcr.id_historia_clinica = hc.id
-                ) AS total_atenciones,
+                hc.observaciones_generales, -- 27 extra
 
-                (
-                    SELECT MAX(hcr.fecha_atencion)
-                    FROM historia_clinica_registros hcr
-                    WHERE hcr.id_historia_clinica = hc.id
-                ) AS ultima_atencion
+                hc.activo,                  -- 28 activo
+
+                m.fecha_modificacion        -- 29 fechaModificacion
 
             FROM mascotas m
+
             INNER JOIN historia_clinica hc
                 ON hc.id_mascota = m.id
+
             LEFT JOIN especies e
                 ON e.id = m.id_especie
+
             LEFT JOIN razas r
                 ON r.id = m.id_raza
+
+            LEFT JOIN tamanos t
+                ON t.id = m.id_tamano
+
+            LEFT JOIN etapas_vida ev
+                ON ev.id = m.id_etapa
+
+            LEFT JOIN estado_mascota em
+                ON em.id = m.id_estado
+
+            LEFT JOIN clientes c
+                ON c.id = m.id_cliente
+
+            LEFT JOIN entidades ent
+                ON ent.id = c.id_entidad
+
             WHERE m.id = p_id_mascota;
 
             -- ========================================
@@ -3701,11 +3722,15 @@ BEGIN
                 reg.motivo_consulta
 
             FROM historia_clinica_archivos hca
+
             INNER JOIN historia_clinica_registros reg
                 ON hca.id_registro_atencion = reg.id
+
             LEFT JOIN tipos_archivo_clinico tac
                 ON tac.id = hca.id_tipo_archivo
+
             WHERE reg.id_historia_clinica = v_id_historia
+
             ORDER BY hca.fecha_subida DESC;
 
         END IF;
