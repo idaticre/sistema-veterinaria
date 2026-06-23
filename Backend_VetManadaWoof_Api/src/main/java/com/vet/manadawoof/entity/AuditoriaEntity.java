@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -48,6 +48,6 @@ public class AuditoriaEntity implements Serializable {
     private String entidad;
     
     @Column(name = "fecha_hora")
-    private LocalDate fecha;
+    private LocalDateTime fecha;
     
 }
