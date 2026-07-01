@@ -4,6 +4,7 @@ import com.vet.manadawoof.dtos.request.MascotaRequestDTO;
 import com.vet.manadawoof.dtos.response.MascotaResponseDTO;
 import com.vet.manadawoof.entity.*;
 import com.vet.manadawoof.mapper.MascotaMapper;
+import com.vet.manadawoof.service.AuditoriaService;
 import com.vet.manadawoof.service.MascotaService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
@@ -20,6 +21,7 @@ public class MascotaServiceImpl implements MascotaService {
     
     private final EntityManager entityManager;
     private final MascotaMapper mascotaMapper; // <- inyección correcta del mapper
+    private final AuditoriaService auditoriaService;
     
     // ---------------- CREAR MASCOTA ----------------
     @Override
@@ -78,6 +80,12 @@ public class MascotaServiceImpl implements MascotaService {
         entity.setColaborador(null); // o asignar colaborador "Sistema"
         entity.setVeterinario(null);
         
+        auditoriaService.crear(
+                1,
+                "MASCOTA",
+                "Se registró la mascota " + entity.getNombre()
+        );
+        
         return mascotaMapper.toResponse(entity);
     }
     
@@ -112,6 +120,12 @@ public class MascotaServiceImpl implements MascotaService {
         
         entityManager.merge(entity);
         
+        auditoriaService.crear(
+                2,
+                "MASCOTA",
+                "Se actualizo el regisro de " + entity.getNombre()
+        );
+        
         return mascotaMapper.toResponse(entity);
     }
     
@@ -132,6 +146,12 @@ public class MascotaServiceImpl implements MascotaService {
         
         MascotaRequestDTO dto = mascotaMapper.toRequest(entity);
         dto.setIdEstado(estadoInactivaId);
+        
+        auditoriaService.crear(
+                3,
+                "MASCOTA",
+                "Se deshabilito el regisro de " + entity.getNombre()
+        );
         
         return actualizarMascota(entity.getId(), dto);
     }

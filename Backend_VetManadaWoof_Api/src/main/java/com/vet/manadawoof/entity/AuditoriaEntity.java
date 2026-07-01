@@ -47,6 +47,9 @@ public class AuditoriaEntity implements Serializable {
     @Column(name = "entidad")
     private String entidad;
     
+    @Column(name = "descripcion")
+    private String descripcion;
+    
     @Column(name = "fecha_hora")
     private LocalDateTime fecha;
     

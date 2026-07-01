@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TipoAccionRepository extends JpaRepository<TipoAccionEntity, Long>{
+public interface TipoAccionRepository extends JpaRepository<TipoAccionEntity, Integer>{
     
 }

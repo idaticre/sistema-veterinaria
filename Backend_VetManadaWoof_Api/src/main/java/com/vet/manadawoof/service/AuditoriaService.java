@@ -1,9 +1,15 @@
 package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.entity.AuditoriaEntity;
+import java.util.List;
 
 public interface AuditoriaService {
     
-    AuditoriaEntity crear(AuditoriaEntity entity);
+    void crear(
+            Integer idTipoAccion,
+            String entidad,
+            String descripcion
+    );
     
+    List<AuditoriaEntity> listar();
 }
