@@ -1,5 +1,6 @@
 package com.vet.manadawoof.controller;
 
+import com.vet.manadawoof.dtos.response.AuditoriaResponseDTO;
 import com.vet.manadawoof.entity.AuditoriaEntity;
 import com.vet.manadawoof.service.AuditoriaService;
 import java.util.List;
@@ -17,7 +18,7 @@ public class AuditoriaController {
     private final AuditoriaService auditoriaService;
     
     @GetMapping
-    public ResponseEntity<List<AuditoriaEntity>> listar(){
+    public ResponseEntity<List<AuditoriaResponseDTO>> listar(){
         return ResponseEntity.ok(auditoriaService.listar());
     }
     

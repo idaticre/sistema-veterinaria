@@ -47,6 +47,7 @@ import { useEffect, useState } from 'react';
 import "./App.css";
 import FacturacionElectronica from './pages/administrativas/ventas/FacturacionElectronica';
 import RecuperacionComprobantes from './pages/administrativas/ventas/RecuperacionComprobantes';
+import Auditoria from './pages/administrativas/administracion/Auditoria/Auditoria';
 
 function App() {
 
@@ -169,6 +170,7 @@ function App() {
             {/*<Route path='/administracion/administracion/asistencia_de_colaboradores' element={<Asistencia_de_colaboradores/>}/>*/}
             {/*<Route path='/administracion/administracion/pagos_a_colaboradores' element={<Pagos_a_colaboradores/>}/>*/}
             {/*<Route path='/administracion/administracion/parametros_y_promociones' element={<Parametros_y_promociones/>}/>*/}
+            <Route path='/administracion/administracion/auditoria' element={<Auditoria/>}/>
           </Route>
 
           {/* Aquí van las nuevas páginas administrativas */}

@@ -1,5 +1,6 @@
 package com.vet.manadawoof.service.impl;
 
+import com.vet.manadawoof.dtos.response.AuditoriaResponseDTO;
 import com.vet.manadawoof.entity.AuditoriaEntity;
 import com.vet.manadawoof.entity.TipoAccionEntity;
 import com.vet.manadawoof.entity.UsuarioEntity;
@@ -60,7 +61,7 @@ public class AuditoriaServiceImpl implements AuditoriaService {
     
     @Override
     @Transactional(readOnly =  true)
-    public List<AuditoriaEntity> listar(){
+    public List<AuditoriaResponseDTO> listar(){
         return auditoriaRepository.findAll().stream().map(auditoriaMapper :: toResponse).toList();
     }
     

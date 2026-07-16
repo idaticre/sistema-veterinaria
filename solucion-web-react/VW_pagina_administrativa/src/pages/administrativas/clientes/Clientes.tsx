@@ -17,8 +17,7 @@ function Lst_clientes() {
   const [filtrados, setFiltrados] = useState<ClienteResponse[]>([]);
   const [mascota, setMascota] = useState<Mascotaextendido[]>([]);
   const [clientes, setClientes] = useState<ClienteResponse[]>([]);
-  const [clienteSeleccionado, setClienteSeleccionado] =
-    useState<ClienteResponse | null>(null);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteResponse | null>(null);
 
   useEffect(() => {
     IST.get("/clientes")

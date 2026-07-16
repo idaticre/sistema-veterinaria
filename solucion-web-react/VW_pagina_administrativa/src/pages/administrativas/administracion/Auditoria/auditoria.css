@@ -1,0 +1,183 @@
+#auditoria {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f6e0bf; /* Matches the project body background color */
+}
+
+#lst_auditoria {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Allows overflow-y auto of list container to work */
+}
+
+/* Encabezado */
+#auditoria #encabezado {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+#auditoria #encabezado h2 {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+#auditoria #encabezado h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  width: 50%;
+  height: 3px;
+  background-color: #ff9900;
+  border-radius: 2px;
+}
+
+/* Buscador */
+#auditoria #buscador {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+#auditoria #br_buscador {
+  width: 100%;
+}
+
+#auditoria #br_buscador input {
+  width: 100%;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  outline: none;
+  background-color: #f8fafc;
+}
+
+#auditoria #br_buscador input:focus {
+  border-color: #ff9900;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.25);
+}
+
+/* Tabla contenedor */
+#lista_auditoria {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+#lista_auditoria table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+#lista_auditoria thead {
+  background-color: #f8fafc;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+#lista_auditoria th {
+  padding: 1rem;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: #f8fafc;
+}
+
+#lista_auditoria td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.92rem;
+  color: #334155;
+  vertical-align: middle;
+}
+
+#lista_auditoria tr:hover td {
+  background-color: #f1f5f9;
+}
+
+/* Badges / Chips styles */
+.usuario-badge {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.entidad-badge {
+  background-color: #f1f5f9;
+  color: #475569;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.accion-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Badge variants depending on action */
+.accion-badge.crear {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.accion-badge.actualizar,
+.accion-badge.modificar,
+.accion-badge.editar {
+  background-color: #fef9c3;
+  color: #a16207;
+}
+
+.accion-badge.eliminar,
+.accion-badge.borrar {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Description column style */
+.desc-celda {
+  word-break: break-word;
+  max-width: 300px;
+  line-height: 1.4;
+}
+
+/* Empty records */
+.sin-registros {
+  text-align: center;
+  padding: 2.5rem !important;
+  color: #64748b;
+  font-style: italic;
+}

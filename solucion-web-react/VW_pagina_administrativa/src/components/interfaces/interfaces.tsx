@@ -528,3 +528,24 @@ export interface Productos {
   foto?: string,
   activo: boolean
 }
+
+export interface usuarioAuResponse{
+    id: number;
+    username: string;
+    nombre?: string;
+}
+
+export interface tipo_accion{
+    id: number;
+    nombre: string;
+    descripcion: string | null;
+}
+
+export interface auditoriaResponse{
+    id: number;
+    usuario: usuarioAuResponse;
+    tipoAccion: tipo_accion;
+    entidad: string;
+    descripcion: string;
+    fecha: string | null;
+}

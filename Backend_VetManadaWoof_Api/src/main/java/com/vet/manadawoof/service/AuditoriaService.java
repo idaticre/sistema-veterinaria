@@ -1,5 +1,6 @@
 package com.vet.manadawoof.service;
 
+import com.vet.manadawoof.dtos.response.AuditoriaResponseDTO;
 import com.vet.manadawoof.entity.AuditoriaEntity;
 import java.util.List;
 
@@ -11,5 +12,5 @@ public interface AuditoriaService {
             String descripcion
     );
     
-    List<AuditoriaEntity> listar();
+    List<AuditoriaResponseDTO> listar();
 }
