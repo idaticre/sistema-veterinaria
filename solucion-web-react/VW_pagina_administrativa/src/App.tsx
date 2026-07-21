@@ -48,6 +48,8 @@ import "./App.css";
 import FacturacionElectronica from './pages/administrativas/ventas/FacturacionElectronica';
 import RecuperacionComprobantes from './pages/administrativas/ventas/RecuperacionComprobantes';
 import Auditoria from './pages/administrativas/administracion/Auditoria/Auditoria';
+import not_found from './pages/administrativas/administracion/No-encontrado/not_found';
+import Not_found from './pages/administrativas/administracion/No-encontrado/not_found';
 
 function App() {
 
@@ -93,7 +95,7 @@ function App() {
           </div>
         </div>
       </div>
-    )}
+      )}
 
       {/*Rutas*/}
       <Routes>
@@ -101,6 +103,8 @@ function App() {
         
         {/* Login */}
         <Route path='/administracion/login' element={<Login/>} />
+
+        <Route path='*' element={<Not_found/>} />
         
         <Route element={<RutaProtegida />}>
         

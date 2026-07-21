@@ -207,6 +207,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                         {/*<li><Link to="/administracion/administracion/asistencia_de_colaboradores" className="sub_opcion">Asistencia de colaboradores</Link></li>*/}
                                         {/*<li><Link to="/administracion/administracion/parametros_y_promociones" className="sub_opcion">Parámetros y promociones</Link></li>*/}
                                         {/*<li><Link to="/administracion/administracion/dashboard_administrativo" className="sub_opcion">Dashboard de colaboradores</Link></li>*/}
+                                        <li><Link to="/administracion/administracion/auditoria" className="sub_opcion">Auditoria</Link></li>
                                     </ul>
                                 </li>
                             )}

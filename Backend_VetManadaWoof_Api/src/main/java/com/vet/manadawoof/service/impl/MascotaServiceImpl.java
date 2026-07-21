@@ -80,11 +80,13 @@ public class MascotaServiceImpl implements MascotaService {
         entity.setColaborador(null); // o asignar colaborador "Sistema"
         entity.setVeterinario(null);
         
+        //auditoria
         auditoriaService.crear(
                 1,
                 "MASCOTA",
                 "Se registró la mascota " + entity.getNombre()
         );
+        //-----
         
         return mascotaMapper.toResponse(entity);
     }
@@ -120,11 +122,13 @@ public class MascotaServiceImpl implements MascotaService {
         
         entityManager.merge(entity);
         
+        //auditoria
         auditoriaService.crear(
                 2,
                 "MASCOTA",
                 "Se actualizo el regisro de " + entity.getNombre()
         );
+        //----
         
         return mascotaMapper.toResponse(entity);
     }
@@ -147,11 +151,13 @@ public class MascotaServiceImpl implements MascotaService {
         MascotaRequestDTO dto = mascotaMapper.toRequest(entity);
         dto.setIdEstado(estadoInactivaId);
         
+        //auditoria
         auditoriaService.crear(
                 3,
                 "MASCOTA",
                 "Se deshabilito el regisro de " + entity.getNombre()
         );
+        //----
         
         return actualizarMascota(entity.getId(), dto);
     }
