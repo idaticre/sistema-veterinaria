@@ -151,7 +151,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <Link to="" className="enlace_opcion">
                                         <i className="fa-solid fa-truck-moving"></i>
                                         <span>Distribución</span>
-                                        <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                        <i className={`fa-solid ${openMenu === "distribucion" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                     </Link>
                                     <ul ref={distribRef} className="submenu">
                                         <li><Link to="/administracion/distribucion/inventario" className="sub_opcion">Inventario</Link></li>
@@ -165,7 +165,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <Link to="" className="enlace_opcion">
                                     <i className="fa-solid fa-cart-shopping"></i>
                                     <span>Ventas</span>
-                                    <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    <i className={`fa-solid ${openMenu === "venta" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={ventaRef} className="submenu">
                                     {/*<li><Link to="/administracion/mascotas/lista" className="sub_opcion">Gestion de ventas</Link></li>*/}
@@ -180,7 +180,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                 <Link to="" className="enlace_opcion"> 
                                     <i className="fa-solid fa-file"></i>
                                     <span>Reportes e Informes</span>
-                                    <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                    <i className={`fa-solid ${openMenu === "informe" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                 </Link>
                                 <ul ref={informRef} className="submenu">
                                     {/*<li><Link to="" className="sub_opcion">Ventas</Link></li>*/}
@@ -198,7 +198,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <Link to="" className="enlace_opcion"> 
                                         <i className="fa-solid fa-toolbox"></i>
                                         <span>Administracion</span>
-                                        <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                        <i className={`fa-solid ${openMenu === "administracion" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                     </Link>
                                     <ul ref={adminRef} className="submenu">
                                         <li><Link to="/administracion/administracion/gestionar_colaboradores" className="sub_opcion">Gestión de colaboradores</Link></li>
@@ -219,7 +219,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     <Link to="" className="enlace_opcion"> 
                                         <i className="fa-solid fa-shield-halved"></i>
                                         <span>Seguridad y Mantenimiento</span>
-                                        <i className={`fa-solid ${openMenu === "mascotas" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                                        <i className={`fa-solid ${openMenu === "seguridad" ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                                     </Link>
                                     <ul ref={seguridadRef   } className="submenu">
                                         <li><Link to="/administracion/administracion/gestionar_usuarios" className="sub_opcion">Usuarios del sistema</Link></li>
