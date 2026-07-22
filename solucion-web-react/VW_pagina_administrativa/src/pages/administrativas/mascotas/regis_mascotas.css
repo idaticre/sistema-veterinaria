@@ -271,6 +271,28 @@ main.minimize{
             cursor: pointer;
         }
         
+        .owner-info {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px dashed #e9ecef;
+            grid-column: 1 / -1;
+        }
+
+        .owner-info h4 {
+            color: #444;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .owner-info h4::before {
+            content: "👤";
+            font-size: 18px;
+        }
+
         .owner-search {
             position: relative;
             display: flex;
@@ -282,31 +304,32 @@ main.minimize{
         /* Caja de texto del buscador */
         .owner-search input[type="text"] {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 15px;
-            transition: border 0.2s, box-shadow 0.2s;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
         }
 
         .owner-search input[type="text"]:focus {
-            border-color: #4CAF50;
-            box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
+            border-color: #ff9900;
+            box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.15);
             outline: none;
         }
 
         /* Lista desplegable */
         .suggestions-list {
             position: absolute;
-            top: 92%; /* Justo debajo del input */
+            top: 100%; /* Justo debajo del input */
             left: 0;
-            width: 50%;
+            width: 100%;
             background: white;
-            border: 1px solid #ddd;
+            border: 2px solid #e9ecef;
             border-top: none;
-            border-radius: 0 0 6px 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            max-height: 180px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            max-height: 200px;
             overflow-y: auto;
             z-index: 1000;
             list-style: none;
@@ -316,16 +339,25 @@ main.minimize{
 
         /* Cada opción */
         .suggestions-list li {
-            padding: 10px 12px;
+            padding: 12px 16px;
             font-size: 14px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f8f9fa;
+            color: #444;
+        }
+
+        .suggestions-list li:last-child {
+            border-bottom: none;
+            border-radius: 0 0 8px 8px;
         }
 
         /* Efecto hover */
         .suggestions-list li:hover {
-            background: #f0f8f0;
-            color: #333;
+            background: #fff8f0;
+            color: #ff9900;
+            font-weight: 500;
+            padding-left: 20px;
         }
 
         /* Cuando no hay resultados */
@@ -334,3 +366,4 @@ main.minimize{
             color: #777;
             font-style: italic;
         }
+

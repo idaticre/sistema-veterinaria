@@ -686,7 +686,6 @@ function Regis_mascotas() {
                           }
                         />
                       </div>
-
                       <div className="form-group">
                         <label htmlFor="factor-dea">Factor DEA</label>
                         <input
@@ -724,29 +723,29 @@ function Regis_mascotas() {
                           onChange={(e) => handleBusqueda(e.target.value)}
                         />
                         <input type="hidden" value={formMascota.idCliente} />
+
+                        {resultados.length > 0 && (
+                          <ul className="suggestions-list">
+                            {resultados.map((cliente) => (
+                              <li
+                                key={cliente.id}
+                                onClick={() => {
+                                  setBusqueda(cliente.nombre);
+
+                                  setFormMascota(prev => ({
+                                    ...prev,
+                                    idCliente: cliente.id
+                                  }));
+
+                                  setResultados([]);
+                                }}
+                              >
+                                {cliente.nombre} — {cliente.documento}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
-
-                      {resultados.length > 0 && (
-                        <ul className="suggestions-list">
-                          {resultados.map((cliente) => (
-                            <li
-                              key={cliente.id}
-                              onClick={() => {
-                                setBusqueda(cliente.nombre);
-
-                                setFormMascota(prev => ({
-                                  ...prev,
-                                  idCliente: cliente.id
-                                }));
-
-                                setResultados([]);
-                              }}
-                            >
-                              {cliente.nombre} — {cliente.documento}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
                     </div>
 
                     <button type="submit" className="submit-btn">
