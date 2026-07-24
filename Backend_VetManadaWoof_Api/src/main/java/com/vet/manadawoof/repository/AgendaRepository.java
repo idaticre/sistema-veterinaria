@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,4 +36,18 @@ public interface AgendaRepository
             @Param("horaActual") java.time.LocalTime horaActual,
             @Param("estados") List<Integer> estados
     );
+@Query("""
+SELECT COUNT(i)
+FROM IngresoServicioEntity i
+JOIN i.agenda a
+WHERE i.colaborador.id = :idColaborador
+AND a.fecha = :fecha
+AND a.hora = :hora
+AND a.estado.id NOT IN (4,6)
+""")
+long contarColaboradorOcupado(
+        @Param("idColaborador") Long idColaborador,
+        @Param("fecha") LocalDate fecha,
+        @Param("hora") LocalTime hora
+);
 }

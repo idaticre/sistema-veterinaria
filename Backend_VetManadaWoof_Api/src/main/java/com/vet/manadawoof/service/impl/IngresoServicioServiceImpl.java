@@ -44,9 +44,9 @@ public class IngresoServicioServiceImpl implements IngresoServicioService {
         sp.setParameter("p_duracion_min", dto.getDuracionMin());
         sp.setParameter("p_valor_servicio", dto.getValorServicio());
         sp.setParameter("p_observaciones", dto.getObservaciones());
-        
+            
         sp.execute();
-        
+              
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
         BigDecimal nuevoTotal = (BigDecimal) sp.getOutputParameterValue("p_nuevo_total_cita");
 

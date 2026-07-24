@@ -567,13 +567,13 @@ const guardarEvento = async () => {
     const start = new Date(`${nuevoEvento.date}T${nuevoEvento.startTime}`);
     const end = new Date(start.getTime() + duracionCitaTotal * 60000);
 
-    if (horaOcupada(start, end, nuevoEvento.id)) {
+   /* if (horaOcupada(start, end, nuevoEvento.id)) {
       return Swal.fire({
         title: "Alerta",
         text: "Ya existe una cita en este horario en Google Calendar. Elige otro horario",
         icon: "warning"
       });
-    }
+    }*/
 
     // 3. IDENTIFICACIÓN DE IDS (MASCOTA Y ESTADO)
     const mascotaEncontrada = mascotas.find(
@@ -592,19 +592,26 @@ const guardarEvento = async () => {
     const estadoEncontrado = estadosAgenda.find((e) => e.nombre === nuevoEvento.estado);
     const idEstado = estadoEncontrado ? estadoEncontrado.id : 1;
 
-    // 4. PREPARAR DTO PARA BACKEND (Limpio para AgendaRequestDTO de Java)
-    const AgendaRequestDTO = {
-      idCliente: Number(nuevoEvento.clienteId),
-      idMascota: Number(idMascota),
-      idMedioSolicitud: 4, 
-      fecha: nuevoEvento.date,
-      hora: horaDBFormateada,
-      duracionEstimadaMin: Number(duracionCitaTotal),
-      abonoInicial: Number(bonoTemporal) || 0,
-      totalCita: Number(totalCosto) || 0,
-      idEstado: Number(idEstado),
-      observaciones: nuevoEvento.description || ""
-    };
+const AgendaRequestDTO = {
+  idCliente: Number(nuevoEvento.clienteId),
+  idMascota: Number(idMascota),
+
+  // NUEVOS CAMPOS
+  idServicio: Number(serviciosRegistrados[0].id_servicio),
+  idColaborador: serviciosRegistrados[0].id_veterinario
+      ? Number(serviciosRegistrados[0].id_veterinario)
+      : null,
+  idVeterinario: null,
+
+  idMedioSolicitud: 4,
+  fecha: nuevoEvento.date,
+  hora: horaDBFormateada,
+  duracionEstimadaMin: Number(duracionCitaTotal),
+  abonoInicial: Number(bonoTemporal) || 0,
+  totalCita: Number(totalCosto) || 0,
+  idEstado: Number(idEstado),
+  observaciones: nuevoEvento.description || ""
+};
 
     // 5. PREPARAR RECURSO PARA GOOGLE CALENDAR
     const serviciosListaGC = serviciosRegistrados
@@ -656,7 +663,43 @@ const guardarEvento = async () => {
       "/ingresos-servicios",
       ingresoDTO
     );
+
+if (!responseIngreso.data.success) {
+  await Swal.fire({
+    icon: "error",
+    title: "Error",
+    text: responseIngreso.data.message,
+  });
+  return;
+}
+
+  if (
+    responseIngreso.data?.mensaje &&
+    responseIngreso.data.mensaje.startsWith("ERROR")
+  ) {
+
+    Swal.fire({
+      icon: "error",
+      title: "Colaborador ocupado",
+      text: responseIngreso.data.mensaje,
+      confirmButtonText: "Aceptar"
+    });
+
+    return;
+  }
+
 } catch (error: any) {
+
+  Swal.fire({
+    icon: "error",
+    title: "Error",
+    text:
+      error.response?.data?.mensaje ||
+      error.message ||
+      "Error al registrar servicio"
+  });
+
+  return;
 }
       }
       // 🔥 PASO 3: INSERTAR EN GOOGLE CALENDAR

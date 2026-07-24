@@ -787,7 +787,7 @@ DROP PROCEDURE IF EXISTS registrar_veterinario;
 DELIMITER $$
 
 CREATE PROCEDURE registrar_veterinario (
-    -- IN p_id_entidad INT, -- Si es 0 o NULL, se crea entidad + colaborador
+    IN p_id_entidad BIGINT,-- IN p_id_entidad INT, -- Si es 0 o NULL, se crea entidad + colaborador
     IN p_id_tipo_persona_juridica INT,
     IN p_nombre VARCHAR(128),
     IN p_sexo CHAR(1),
@@ -826,7 +826,7 @@ registro: BEGIN
     IF p_id_entidad IS NULL OR p_id_entidad = 0 THEN
         -- Crear entidad base (tipo colaborador)
         CALL registrar_entidad_base(
-            v_id_tipo_entidad,
+             -- v_id_tipo_entidad,
             p_id_tipo_persona_juridica,
             p_nombre,
             p_sexo,
@@ -2764,7 +2764,7 @@ END$$
 DELIMITER ;
 
 -- ========================================
--- SP 2: GESTIONAR INGRESO SERVICIO (Crear/Actualizar/Eliminar lógico)
+-- SP 2: GESTIONAR INGRESO SERVICIO (Crear/Actualizar/Eliminar)
 -- ========================================
 DROP PROCEDURE IF EXISTS sp_gestionar_ingreso_servicio;
 DELIMITER $$
@@ -2789,6 +2789,13 @@ main_block: BEGIN
     DECLARE v_nuevo_codigo VARCHAR(16);
     DECLARE v_estado_cita INT;
     DECLARE v_existe_servicio INT DEFAULT 0;
+    DECLARE v_requiere_sala BIT DEFAULT 0;
+    DECLARE v_sala_libre BIGINT DEFAULT NULL;
+    DECLARE v_sala_actual BIGINT DEFAULT NULL;
+    
+    -- Variables para almacenar los datos de la cita y evitar subconsultas anidadas
+    DECLARE v_fecha_cita DATE;
+    DECLARE v_hora_cita TIME;
     
     SET p_accion = UPPER(TRIM(p_accion));
     
@@ -2805,8 +2812,11 @@ main_block: BEGIN
         LEAVE main_block;
     END IF;
     
-    -- Validar estado de la cita
-    SELECT id_estado INTO v_estado_cita FROM agenda WHERE id = p_id_agenda;
+    -- Almacenamos el estado, la fecha y hora de la cita en variables
+    SELECT id_estado, fecha, hora 
+    INTO v_estado_cita, v_fecha_cita, v_hora_cita 
+    FROM agenda 
+    WHERE id = p_id_agenda;
     
     IF v_estado_cita IN (4, 5) THEN -- CANCELADA, ATENDIDA
         SET p_mensaje = 'ERROR: No se pueden agregar servicios a una cita cancelada o atendida.';
@@ -2848,8 +2858,6 @@ main_block: BEGIN
             LEAVE main_block;
         END IF;
         
-        -- Validar duplicados: mismo servicio en la misma cita (opcional, depende de tu lógica)
-        -- Si quieres permitir duplicados, comenta esto
         SELECT COUNT(*) INTO v_existe_servicio
         FROM ingresos_servicios
         WHERE id_agenda = p_id_agenda
@@ -2866,27 +2874,108 @@ main_block: BEGIN
         WHILE EXISTS (SELECT 1 FROM ingresos_servicios WHERE codigo = v_nuevo_codigo) DO
             SET v_nuevo_codigo = CONCAT('IS-', LPAD(FLOOR(1 + RAND() * 999999), 6, '0'));
         END WHILE;
+
+      -- =========================================
+-- VALIDAR DISPONIBILIDAD DEL RESPONSABLE
+-- (Colaborador o Veterinario)
+-- =========================================
+
+-- Si viene un veterinario, obtener su colaborador
+IF p_id_veterinario IS NOT NULL THEN
+
+    SELECT id_colaborador
+    INTO p_id_colaborador
+    FROM veterinarios
+    WHERE id = p_id_veterinario;
+
+END IF;
+
+-- Validar disponibilidad del colaborador
+IF p_id_colaborador IS NOT NULL THEN
+
+SELECT COUNT(*)
+INTO v_existe_servicio
+FROM ingresos_servicios i
+INNER JOIN agenda a
+    ON a.id = i.id_agenda
+WHERE i.id_colaborador = p_id_colaborador
+  AND a.fecha = v_fecha_cita
+  AND a.hora = v_hora_cita
+  AND a.id <> p_id_agenda          -- Ignorar la agenda actual
+  AND a.id_estado NOT IN (4, 6);
+
+    IF v_existe_servicio > 0 THEN
+
+        SET p_mensaje = CONCAT(
+            'ERROR: Colaborador ocupado. Coincidencias encontradas: ',
+            v_existe_servicio
+        );
+
+        LEAVE main_block;
+
+    END IF;
+
+END IF;
+
+       -- ==========================
+-- NUEVA LÓGICA DE SALAS
+-- ==========================
+
+SELECT requiere_sala
+INTO v_requiere_sala
+FROM servicios
+WHERE id = p_id_servicio;
+
+IF v_requiere_sala = 1 THEN
+
+    SELECT id_sala
+    INTO v_sala_actual
+    FROM agenda
+    WHERE id = p_id_agenda;
+
+    IF v_sala_actual IS NULL THEN
+
+        SET v_sala_libre = NULL;
+
+        SELECT s.id
+        INTO v_sala_libre
+        FROM salas s
+        WHERE s.activo = 1
+          AND s.id NOT IN (
+                SELECT DISTINCT a.id_sala
+                FROM agenda a
+                WHERE a.fecha = v_fecha_cita
+                  AND a.hora = v_hora_cita
+                  AND a.id_sala IS NOT NULL
+                  AND a.id_estado NOT IN (4,6)
+                  AND a.id <> p_id_agenda
+          )
+        LIMIT 1;
+
+        IF v_sala_libre IS NULL THEN
+            SET p_mensaje = 'ERROR: No existen salas disponibles.';
+            LEAVE main_block;
+        END IF;
+
+        UPDATE agenda
+        SET id_sala = v_sala_libre
+        WHERE id = p_id_agenda;
+
+    ELSE
+
+        SET v_sala_libre = v_sala_actual;
+
+    END IF;
+
+END IF;
         
+        -- Inserción del registro del servicio
         INSERT INTO ingresos_servicios (
-            codigo,
-            id_agenda,
-            id_servicio,
-            id_colaborador,
-            id_veterinario,
-            cantidad,
-            duracion_min,
-            valor_servicio,
-            observaciones
+            codigo, id_agenda, id_servicio, id_colaborador, id_veterinario,
+            cantidad, duracion_min, valor_servicio, observaciones
         ) VALUES (
-            v_nuevo_codigo,
-            p_id_agenda,
-            p_id_servicio,
-            p_id_colaborador,
-            p_id_veterinario,
-            p_cantidad,
-            p_duracion_min,
-            p_valor_servicio,
-            p_observaciones
+            v_nuevo_codigo, p_id_agenda, p_id_servicio, p_id_colaborador, p_id_veterinario,
+            p_cantidad, p_duracion_min, p_valor_servicio, p_observaciones
         );
         
         SET p_id_resultado = LAST_INSERT_ID();
@@ -2902,12 +2991,12 @@ main_block: BEGIN
         WHERE id = p_id_agenda;
         
         SELECT total_cita INTO p_nuevo_total_cita FROM agenda WHERE id = p_id_agenda;
-        
         SET p_mensaje = CONCAT('Servicio ', v_nuevo_codigo, ' agregado exitosamente.');
     
     -- ========================================
     -- ACTUALIZAR SERVICIO EXISTENTE
     -- ========================================
+    
     ELSEIF p_accion = 'ACTUALIZAR' THEN
         
         IF p_id_ingreso IS NULL THEN
@@ -2940,14 +3029,104 @@ main_block: BEGIN
             LEAVE main_block;
         END IF;
         
+-- =========================================
+-- VALIDAR COLABORADOR OCUPADO (IGNORANDO LA MISMA CITA)
+-- =========================================
+
+IF p_id_colaborador IS NOT NULL THEN
+
+    SELECT COUNT(*)
+    INTO v_existe_servicio
+    FROM ingresos_servicios i
+    INNER JOIN agenda a
+        ON a.id = i.id_agenda
+    WHERE i.id_colaborador = p_id_colaborador
+      AND a.fecha = v_fecha_cita
+      AND a.hora = v_hora_cita
+      AND a.id_estado NOT IN (4,6)
+      AND i.id <> p_id_ingreso
+      AND a.id <> p_id_agenda;
+
+    IF v_existe_servicio > 0 THEN
+        SET p_mensaje = 'ERROR: Colaborador ocupado en ese horario.';
+        LEAVE main_block;
+    END IF;
+
+END IF;
+
+-- =========================================
+-- VALIDAR VETERINARIO OCUPADO
+-- =========================================
+
+IF p_id_veterinario IS NOT NULL THEN
+
+    SELECT COUNT(*)
+    INTO v_existe_servicio
+    FROM ingresos_servicios i
+    INNER JOIN agenda a
+        ON a.id = i.id_agenda
+    WHERE i.id_veterinario = p_id_veterinario
+      AND a.fecha = v_fecha_cita
+      AND a.hora = v_hora_cita
+      AND a.id_estado NOT IN (4,6)
+      AND i.id <> p_id_ingreso
+      AND a.id <> p_id_agenda;
+
+    IF v_existe_servicio > 0 THEN
+        SET p_mensaje = 'ERROR: Veterinario ocupado en ese horario.';
+        LEAVE main_block;
+    END IF;
+
+END IF;
+-- =========================================
+-- VALIDAR SALAS EN ACTUALIZAR
+-- =========================================
+
+SELECT requiere_sala
+INTO v_requiere_sala
+FROM servicios
+WHERE id = p_id_servicio;
+
+IF v_requiere_sala = 1 THEN
+
+    SELECT s.id
+    INTO v_sala_libre
+    FROM salas s
+    WHERE s.activo = 1
+      AND s.id NOT IN (
+            SELECT a.id_sala
+            FROM agenda a
+            WHERE a.fecha = v_fecha_cita
+              AND a.hora = v_hora_cita
+              AND a.id_sala IS NOT NULL
+              AND a.id_estado NOT IN (4,6)
+
+              -- IMPORTANTE:
+              -- Ignorar la misma cita
+              AND a.id <> p_id_agenda
+      )
+    LIMIT 1;
+
+    IF v_sala_libre IS NULL THEN
+        SET p_mensaje = 'ERROR: No existen salas disponibles.';
+        LEAVE main_block;
+    END IF;
+
+    UPDATE agenda
+    SET id_sala = v_sala_libre
+    WHERE id = p_id_agenda;
+
+END IF;
+        
         UPDATE ingresos_servicios SET
-            id_colaborador = p_id_colaborador,
-            id_veterinario = p_id_veterinario,
-            cantidad = p_cantidad,
-            duracion_min = p_duracion_min,
-            valor_servicio = p_valor_servicio,
-            observaciones = p_observaciones
-        WHERE id = p_id_ingreso;
+    id_servicio = p_id_servicio,
+    id_colaborador = p_id_colaborador,
+    id_veterinario = p_id_veterinario,
+    cantidad = p_cantidad,
+    duracion_min = p_duracion_min,
+    valor_servicio = p_valor_servicio,
+    observaciones = p_observaciones
+WHERE id = p_id_ingreso;
         
         SELECT codigo INTO p_codigo FROM ingresos_servicios WHERE id = p_id_ingreso;
         SET p_id_resultado = p_id_ingreso;
@@ -2962,11 +3141,10 @@ main_block: BEGIN
         WHERE id = p_id_agenda;
         
         SELECT total_cita INTO p_nuevo_total_cita FROM agenda WHERE id = p_id_agenda;
-        
         SET p_mensaje = CONCAT('Servicio ', p_codigo, ' actualizado exitosamente.');
     
     -- ========================================
-    -- ELIMINAR SERVICIO (Elimina físicamente, ajusta según tu necesidad)
+    -- ELIMINAR SERVICIO
     -- ========================================
     ELSEIF p_accion = 'ELIMINAR' THEN
         
@@ -2983,7 +3161,6 @@ main_block: BEGIN
         SELECT codigo INTO p_codigo FROM ingresos_servicios WHERE id = p_id_ingreso;
         
         DELETE FROM ingresos_servicios WHERE id = p_id_ingreso;
-        
         SET p_id_resultado = p_id_ingreso;
         
         -- Actualizar total de la cita
@@ -2996,14 +3173,12 @@ main_block: BEGIN
         WHERE id = p_id_agenda;
         
         SELECT total_cita INTO p_nuevo_total_cita FROM agenda WHERE id = p_id_agenda;
-        
         SET p_mensaje = CONCAT('Servicio ', p_codigo, ' eliminado exitosamente.');
     
     END IF;
     
 END$$
 DELIMITER ;
-
 -- ========================================
 -- SP 3: REGISTRAR PAGO AGENDA (Crear/Eliminar)
 -- ========================================

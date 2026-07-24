@@ -753,7 +753,7 @@ const editarEvento = async (cita: CitaBD) => {
       await IST.get(
         `/agenda/${cita.id}/servicios`
       );
-
+  
 
 const listaServicios =
   responseServicios.data.data || [];
@@ -766,10 +766,7 @@ const serviciosConvertidos = listaServicios.map((srv:any) => ({
   id_servicio: srv.idServicio,
   nombre_servicio: srv.descripcion,
 
- id_veterinario:
-  srv.idVeterinario ||
-  srv.idColaborador ||
-  "",
+ id_veterinario: srv.idVeterinario,
 
   nombre_veterinario:
   srv.nombreVeterinario ||
@@ -1038,27 +1035,32 @@ setServiciosRegistrados(serviciosConvertidos);
         }
       }
 
-      const AgendaRequestDTO = {
-        id: citaEditada.id,
-        idCliente: nuevoEvento.clienteId,
-        idMascota: nuevoEvento.mascotaId,
-        idMedioSolicitud:
-          citaEditada.idMedioSolicitud || ID_MEDIO_SOLICITUD_DEFAULT,
+    const AgendaRequestDTO = {
+    id: citaEditada.id,
 
-        totalCita: totalMinimoNecesario,
-        abonoInicial: abonoEditable,
+    idCliente: nuevoEvento.clienteId,
+    idMascota: nuevoEvento.mascotaId,
 
-        idColaborador: nuevoEvento.colaboradorId,
+    // NUEVOS CAMPOS
+    idServicio: Number(serviciosRegistrados[0].id_servicio),
+    idColaborador: Number(nuevoEvento.colaboradorId),
+    idVeterinario: null,
 
-        fecha: nuevoEvento.date,
-        hora: nuevoEvento.startTime + ":00",
-        duracionEstimadaMin: duracionFinal,
-        idEstado: idEstado,
-        observaciones: nuevoEvento.observaciones,
+    idMedioSolicitud:
+        citaEditada.idMedioSolicitud || ID_MEDIO_SOLICITUD_DEFAULT,
 
-        idGoogleCalendar: editingGCId || citaEditada.idGoogleCalendar || null,
-      };
-      
+    totalCita: totalMinimoNecesario,
+    abonoInicial: abonoEditable,
+
+    fecha: nuevoEvento.date,
+    hora: nuevoEvento.startTime + ":00",
+    duracionEstimadaMin: duracionFinal,
+    idEstado: idEstado,
+    observaciones: nuevoEvento.observaciones,
+
+    idGoogleCalendar:
+        editingGCId || citaEditada.idGoogleCalendar || null,
+};
 
 // 1. Actualizar agenda
 await IST.put("/agenda", AgendaRequestDTO);
@@ -1085,27 +1087,22 @@ for (const servicio of serviciosEliminados) {
 // 4. Crear servicios nuevos
 for (const srv of serviciosRegistrados) {
 
- const dto = {
+  const dto = {
+    idIngreso: srv.id ?? null,
+    idAgenda: citaEditada.id,
+    idServicio: Number(srv.id_servicio),
 
-  idIngreso: srv.id,
+    // El responsable del servicio
+    idColaborador: Number(srv.id_veterinario),
 
-  idAgenda: citaEditada.id,
+    // No se utiliza
+    idVeterinario: null,
 
-  idServicio: srv.id_servicio,
-
-  idColaborador: srv.id_veterinario,
-
-  idVeterinario: null,
-
-  cantidad: srv.cantidad,
-
-  duracionMin: srv.duracion_min,
-
-  valorServicio: srv.valor_servicio,
-
-  observaciones: srv.adicionales || ""
-};
-
+    cantidad: Number(srv.cantidad),
+    duracionMin: Number(srv.duracion_min),
+    valorServicio: Number(srv.valor_servicio),
+    observaciones: srv.adicionales || ""
+  };
   if (srv.id) {
 
    Swal.fire({
@@ -1121,9 +1118,6 @@ for (const srv of serviciosRegistrados) {
     );
 
   } else {
-
-  
-
     await IST.post(
       "/ingresos-servicios",
       dto

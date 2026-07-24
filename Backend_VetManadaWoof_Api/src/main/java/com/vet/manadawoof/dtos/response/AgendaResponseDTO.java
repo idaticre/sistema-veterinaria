@@ -27,6 +27,7 @@ public class AgendaResponseDTO {
     private BigDecimal abonoInicial;
     private BigDecimal totalCita;
     private Integer idEstado;
+    private Integer idSala;
     private String observaciones;
     private LocalDateTime fechaRegistro;
 

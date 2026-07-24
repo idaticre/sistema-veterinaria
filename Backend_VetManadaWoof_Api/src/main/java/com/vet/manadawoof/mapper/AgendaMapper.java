@@ -20,6 +20,7 @@ public class AgendaMapper {
                 .hora(entity.getHora())
                 .duracionEstimadaMin(entity.getDuracionEstimadaMin())
                 .abonoInicial(entity.getAbonoInicial())
+                .idSala(entity.getSala() != null ? entity.getSala().getId() : null)
                 .totalCita(entity.getTotalCita())
                 .idEstado(entity.getEstado() != null ? entity.getEstado().getId() : null)
                 .observaciones(entity.getObservaciones())

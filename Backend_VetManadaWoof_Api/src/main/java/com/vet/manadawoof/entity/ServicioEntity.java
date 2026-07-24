@@ -29,6 +29,9 @@ public class ServicioEntity implements Serializable {
 
     @Column(length = 128)
     private String descripcion;
+    
+    @Column(name = "requiere_sala", nullable = false)
+    private Boolean requiereSala;
 
     @OneToMany(mappedBy = "servicio", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore

@@ -30,6 +30,13 @@ public class AgendaRequestDTO {
 
     @NotNull(message = "La mascota es obligatoria")
     private Long idMascota;
+    
+    @NotNull(message = "El servicio es obligatorio")
+    private Integer idServicio;
+
+    private Long idColaborador;
+
+    private Long idVeterinario;
 
     @NotNull(message = "La fecha es obligatoria")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -41,7 +48,7 @@ public class AgendaRequestDTO {
 
     @NotNull(message = "El estado es obligatorio")
     private Integer idEstado;
-
+    
     // --- Datos opcionales ---
     private Integer idMedioSolicitud;
 
@@ -52,7 +59,7 @@ public class AgendaRequestDTO {
     private BigDecimal abonoInicial;
     
     @DecimalMin(value = "0.0", message = "El total no puede ser negativo")
-private BigDecimal totalCita;
+    private BigDecimal totalCita;
 
     @Size(max = 256, message = "Las observaciones no deben superar 256 caracteres")
     private String observaciones;

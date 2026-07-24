@@ -41,6 +41,10 @@ public class AgendaEntity implements Serializable {
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
     private java.time.LocalDate fecha;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_sala")
+    private SalaEntity sala;
 
     @Column(nullable = false)
     private java.time.LocalTime hora;

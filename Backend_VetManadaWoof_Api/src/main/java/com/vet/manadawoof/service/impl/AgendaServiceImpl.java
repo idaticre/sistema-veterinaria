@@ -4,6 +4,10 @@ import com.vet.manadawoof.dtos.request.AgendaRequestDTO;
 import com.vet.manadawoof.dtos.response.AgendaResponseDTO;
 import com.vet.manadawoof.mapper.AgendaMapper;
 import com.vet.manadawoof.repository.AgendaRepository;
+import com.vet.manadawoof.entity.ServicioEntity;
+import com.vet.manadawoof.entity.SalaEntity;
+import com.vet.manadawoof.repository.ServicioRepository;
+import com.vet.manadawoof.repository.SalaRepository;
 import com.vet.manadawoof.service.AgendaService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
@@ -28,13 +32,52 @@ public class AgendaServiceImpl implements AgendaService {
     private EntityManager entityManager;
 
     private final AgendaRepository agendaRepository;
+    private final ServicioRepository servicioRepository;
+    private final SalaRepository salaRepository;
     private final AgendaMapper agendaMapper;
 
-    @Override
-    @Transactional
-    public AgendaResponseDTO crear(AgendaRequestDTO dto) {
-        return ejecutarProcedimiento("CREAR", dto);
+@Override
+@Transactional
+public AgendaResponseDTO crear(AgendaRequestDTO dto) {
+
+    // 1. Validar colaborador ocupado
+    if (dto.getIdColaborador() != null) {
+
+        long ocupadas = agendaRepository.contarColaboradorOcupado(
+                dto.getIdColaborador(),
+                dto.getFecha(),
+                dto.getHora()
+        );
+
+        if (ocupadas > 0) {
+            return AgendaResponseDTO.builder()
+                    .mensaje("ERROR: El colaborador ya tiene una cita en ese horario. Seleccione otro colaborador.")
+                    .build();
+        }
     }
+
+    // 2. Validar salas
+    ServicioEntity servicio = servicioRepository
+            .findById(dto.getIdServicio())
+            .orElseThrow();
+
+    if (Boolean.TRUE.equals(servicio.getRequiereSala())) {
+
+        List<SalaEntity> salas = salaRepository.buscarSalasDisponibles(
+                dto.getFecha(),
+                dto.getHora()
+        );
+
+        if (salas.isEmpty()) {
+            return AgendaResponseDTO.builder()
+                    .mensaje("ERROR: No existen salas disponibles para el horario seleccionado.")
+                    .build();
+        }
+    }
+
+    // 3. Crear la agenda
+    return ejecutarProcedimiento("CREAR", dto);
+}
 
     @Override
     @Transactional
