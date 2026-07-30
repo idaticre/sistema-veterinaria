@@ -1091,7 +1091,8 @@ INSERT INTO medio_solicitud (nombre, descripcion) VALUES
 CREATE TABLE IF NOT EXISTS servicios (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) NOT NULL UNIQUE,
-    descripcion VARCHAR(128)
+    descripcion VARCHAR(128),
+    requiere_sala TINYINT NOT NULL DEFAULT 0 CHECK (requiere_sala IN (0,1))
 );
 INSERT INTO servicios (nombre, descripcion) VALUES
 -- ÁREA MÉDICA
@@ -1117,6 +1118,32 @@ INSERT INTO servicios (nombre, descripcion) VALUES
 ('VENTA DE PRODUCTOS', 'Adquisición de alimentos, accesorios, medicamentos o juguetes.'),
 ('RECOJO A DOMICILIO', 'Transporte seguro de la mascota desde o hacia la veterinaria.'),
 ('SERVICIO A DOMICILIO', 'Consulta o atención médica veterinaria en el hogar.');
+-- ========================================
+-- TABLA: salas
+-- ========================================
+CREATE TABLE salas (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(200),
+    activo BIT DEFAULT 1
+);
+INSERT INTO salas(nombre, descripcion)
+VALUES
+('Sala 1', 'Sala principal'),
+('Sala 2', 'Sala secundaria');
+UPDATE servicios
+SET requiere_sala = 1
+WHERE nombre IN (
+'VACUNACIÓN',
+'DESPARASITACIÓN',
+'BAÑO Y CORTE',
+'BAÑO MEDICADO',
+'CORTE DE UÑAS',
+'LIMPIEZA DENTAL',
+'SPA RELAJANTE',
+'PEINADO Y DESENREDADO',
+'TRATAMIENTO CAPILAR'
+);
 
 -- ========================================
 -- TABLA: agenda
@@ -1130,6 +1157,7 @@ CREATE TABLE IF NOT EXISTS agenda (
     id_cliente BIGINT NOT NULL,
     id_mascota BIGINT NOT NULL,
     id_medio_solicitud INT NULL,
+    id_sala BIGINT NULL,
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
     duracion_estimada_min INT CHECK (duracion_estimada_min >= 0),
@@ -1148,7 +1176,9 @@ ALTER TABLE agenda
     ADD CONSTRAINT fk_agenda_mascota FOREIGN KEY (id_mascota) REFERENCES mascotas(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_agenda_estado FOREIGN KEY (id_estado) REFERENCES estado_agenda(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE;
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_agenda_sala FOREIGN KEY (id_sala) REFERENCES salas(id)
+		ON DELETE RESTRICT ON UPDATE CASCADE;    
 
 -- Índice para búsquedas rápidas de citas por cliente
 CREATE INDEX idx_agenda_cliente ON agenda(id_cliente);
@@ -1164,6 +1194,8 @@ CREATE INDEX idx_agenda_cliente_fecha ON agenda (id_cliente, fecha);
 
 -- Índice para consultas directas por fecha de cita (calendario)
 CREATE INDEX idx_agenda_fecha ON agenda(fecha);
+
+CREATE INDEX idx_agenda_sala ON agenda(id_sala);
 
 -- ========================================
 -- TABLA: ingresos_servicios
@@ -1615,18 +1647,18 @@ CREATE TABLE comprobante_detalles(
 CREATE INDEX idx_comprobante_detalle_comprobante ON comprobante_detalles(comprobante_id);
 
 CREATE TABLE horarios(
-	id bigint primary key not null auto_increment,
-    trabajador_id bigint not null,
-    dia_id int not null,
-    trabaja boolean default false,
-    hora_inicio timestamp,
-    hora_fin timestamp,
-    
-    foreign key (trabajador_id) references colaboradores(id),
-    foreign key (dia_id) references dias_semana(id),
-    
-    index idx_trabajador (idx_trabajador_id),
-    index idx_dia (idx_dia_id)
+    id BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    trabajador_id BIGINT NOT NULL,
+    dia_id INT NOT NULL,
+    trabaja BOOLEAN DEFAULT FALSE,
+    hora_inicio TIME,
+    hora_fin TIME,
+
+    FOREIGN KEY (trabajador_id) REFERENCES colaboradores(id),
+    FOREIGN KEY (dia_id) REFERENCES dias_semana(id),
+
+    INDEX idx_trabajador (trabajador_id),
+    INDEX idx_dia (dia_id)
 );
 
 CREATE TABLE IF NOT EXISTS productos (
