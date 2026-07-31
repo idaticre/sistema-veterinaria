@@ -1092,7 +1092,7 @@ CREATE TABLE IF NOT EXISTS servicios (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(32) NOT NULL UNIQUE,
     descripcion VARCHAR(128),
-    requiere_sala TINYINT NOT NULL DEFAULT 0 CHECK (requiere_sala IN (0,1))
+    requiere_sala BIT(1) NOT NULL DEFAULT b'0'
 );
 INSERT INTO servicios (nombre, descripcion) VALUES
 -- ÁREA MÉDICA
