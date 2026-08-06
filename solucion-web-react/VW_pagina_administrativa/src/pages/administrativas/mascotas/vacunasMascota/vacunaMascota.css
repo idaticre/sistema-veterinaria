@@ -1,0 +1,333 @@
+/* Modal overlay styling */
+.modal-vacuna-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2500;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Modal box content */
+.modal-vacuna-contenido {
+  background-color: #ffffff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 950px;
+  max-height: 92vh; /* Aumentado de 85vh a 92vh */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  position: relative;
+  animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Header */
+.modal-vacuna-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #f6e0bf;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.modal-vacuna-cabecera h2 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-vacuna-cierre {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: transform 0.2s ease;
+}
+
+.modal-vacuna-cierre:hover {
+  transform: scale(1.15);
+}
+
+/* Top Action Buttons */
+.modal-vacuna-acciones-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+/* Modal Body */
+.modal-vacuna-cuerpo {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 200px;
+  margin-bottom: 0.5rem;
+}
+
+/* Table styling */
+.tabla-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+}
+
+.tabla-vacunas {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.tabla-vacunas th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #e9ecef;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tabla-vacunas td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e9ecef;
+  color: #333333;
+  vertical-align: middle;
+}
+
+.tabla-vacunas tr:hover td {
+  background-color: #f8f9fa;
+}
+
+/* Row elements */
+.badge-vacuna {
+  background-color: #dcfce7;
+  color: #15803d;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.badge-via {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.fecha-prox {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.observaciones-celda {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Buttons style */
+.btn-vacuna {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-primario {
+  background-color: #ff9900;
+  color: white;
+}
+
+.btn-primario:hover {
+  background-color: #e08800;
+  transform: translateY(-1px);
+}
+
+.btn-secundario {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secundario:hover {
+  background-color: #5a6268;
+}
+
+.btn-exito {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-exito:hover {
+  background-color: #218838;
+}
+
+/* Icon Buttons in cells */
+.acciones-celdas {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+  background-color: #e9ecef;
+}
+
+/* Form overlay inner modal */
+.form-vacuna-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  animation: fadeIn 0.2s ease;
+  padding: 2rem;
+}
+
+.form-vacuna-contenido {
+  background-color: white;
+  border: 1px solid #ced4da;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 650px;
+  padding: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  max-height: 95%;
+  overflow-y: auto;
+}
+
+.form-vacuna-contenido h3 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  text-align: center;
+  border-bottom: 1.5px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+.form-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-grupo label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.2rem;
+}
+
+.form-grupo input,
+.form-grupo select,
+.form-grupo textarea {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-grupo input:focus,
+.form-grupo select:focus,
+.form-grupo textarea:focus {
+  border-color: #ff9900;
+  box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.2);
+}
+
+.form-dos-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.input-readonly {
+  background-color: #e9ecef;
+  color: #495057;
+  cursor: not-allowed;
+}
+
+.checkbox-grupo label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #495057;
+}
+
+.form-vacuna-botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.sin-registros {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.loading-text {
+  text-align: center;
+  padding: 2rem;
+  color: #ff9900;
+  font-weight: 600;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleUp {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

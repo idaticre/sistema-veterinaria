@@ -47,6 +47,9 @@ public class AuditoriaEntity implements Serializable {
     @Column(name = "entidad")
     private String entidad;
     
+    @Column(name = "id_registro")
+    private Long idRegistro; 
+    
     @Column(name = "descripcion")
     private String descripcion;
     

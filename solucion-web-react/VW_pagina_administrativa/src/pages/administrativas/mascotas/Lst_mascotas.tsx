@@ -5,6 +5,7 @@ import "./lst_mascotas.css";
 import type { MascotaResponse } from "../../../components/interfaces/interfaces";
 import IST from "../../../components/proteccion/IST";
 import Swal from 'sweetalert2';
+import VacunaMascota from "./vacunasMascota/VacunaMascota";
 
 type Mascotaextendido = MascotaResponse;
 
@@ -15,6 +16,7 @@ function Lst_mascotas() {
   const [mascotas, setMascotas] = useState<Mascotaextendido[]>([]);
   const [mascotaSeleccionado, setMascotaSeleccionado] =
     useState<Mascotaextendido | null>(null);
+  const [modalVacunasOpen, setModalVacunasOpen] = useState(false);
   const location = useLocation();
   const idMDCS = location.state?.idMascota ?? null;
 
@@ -259,6 +261,11 @@ function Lst_mascotas() {
                             <button>Historia Clinica</button>
                           </Link>
                           <button
+                            onClick={() => setModalVacunasOpen(true)}
+                          >
+                            Vacunas
+                          </button>
+                          <button
                             onClick={() => {
                               handleDelete(mascotaSeleccionado.id);
                             }}
@@ -282,6 +289,13 @@ function Lst_mascotas() {
           </section>
         </main>
       </div>
+      {modalVacunasOpen && mascotaSeleccionado && (
+        <VacunaMascota
+          mascotaId={mascotaSeleccionado.id!}
+          mascotaNombre={mascotaSeleccionado.nombre}
+          onClose={() => setModalVacunasOpen(false)}
+        />
+      )}
     </>
   );
 }

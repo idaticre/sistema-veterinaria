@@ -546,6 +546,55 @@ export interface auditoriaResponse{
     usuario: usuarioAuResponse;
     tipoAccion: tipo_accion;
     entidad: string;
+    idRegistro?: number;
     descripcion: string;
     fecha: string | null;
+}
+
+export interface vacunaMascotaRequest{
+    id?: number;
+    idVacuna: number;
+    idMascota: number;
+    idVia: number;
+    dosis: string;
+    fechaAplicacion: string | null;
+    durabilidad: number;
+    proxDosis: string;
+    idColaborador?: number;
+    idVeterinario?: number;
+    observaciones: string;
+    activo: boolean;
+}
+
+export interface vacunaMascotaResponse{
+    id?: number;
+    codigo: string;
+    idVacuna: number;
+    idMascota: number;
+    idVia: number;
+    dosis: string;
+    fechaAplicacion: string | null;
+    fechaModificacion: string | null;
+    durabilidad: number;
+    proxDosis: string;
+    idColaborador?: number;
+    idVeterinario?: number;
+    observaciones: string;
+    fechaRegistro: string;
+    activo: boolean;
+    mensaje: string;
+}
+
+export interface VacunaResponse {
+    id: number;
+    nombre: string;
+    idEspecie: number;
+    descripcion: string;
+    activo: boolean;
+}
+
+export interface AplicacionViaResponse {
+    id: number;
+    nombre: string;
+    activo: boolean;
 }

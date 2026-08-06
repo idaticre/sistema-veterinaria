@@ -30,6 +30,7 @@ public class AuditoriaServiceImpl implements AuditoriaService {
     public void crear(
             Integer idTipoAccion,
             String entidad,
+            Long idRegistro,
             String descripcion) {
 
         // Obtener el username del usuario autenticado
@@ -53,6 +54,7 @@ public class AuditoriaServiceImpl implements AuditoriaService {
         auditoria.setUsuario(usuario);
         auditoria.setTipoAccion(tipoAccion);
         auditoria.setEntidad(entidad);
+        auditoria.setIdRegistro(idRegistro);
         auditoria.setDescripcion(descripcion);
         auditoria.setFecha(LocalDateTime.now());
 
