@@ -34,6 +34,7 @@ interface CitaBD {
   fechaRegistro: string;
   idColaborador?: number;
   idGoogleCalendar?: string;
+  idSala?: number; // 🆕 SALA ASIGNADA A LA CITA
 }
 
 interface EstadoAgenda {
@@ -57,6 +58,14 @@ interface MascotaBase {
   };
 }
 
+// 🆕 INTERFAZ DE SALA
+interface Sala {
+  id: number;
+  nombre: string;
+  descripcion?: string;
+  activo?: boolean;
+}
+
 // 🚨 Interfaces de Servicios
 interface ServicioDetalle {
   id: any;
@@ -71,6 +80,7 @@ interface ServicioDetalle {
   duracion_total: number;
   subtotal: number;
   adicionales: string;
+  requiereSala?: boolean; // 🆕
 }
 
 interface ServicioBase {
@@ -78,6 +88,7 @@ interface ServicioBase {
   nombre: string;
   duracion: number;
   precio: number;
+  requiereSala?: boolean; // 🆕
 }
 
 // --- CONSTANTES DEL BACKEND Y ESTADOS TERMINALES ---
@@ -187,7 +198,14 @@ function EditarCita() {
     observaciones: "",
     colaboradorId: 0,
     colaboradorNombre: "",
+    nombreSala: "", // 🆕
   });
+
+  // 🆕 ESTADOS DE SALAS
+  const [salas, setSalas] = useState<Sala[]>([]);
+  const [salasDisponibles, setSalasDisponibles] = useState<Sala[]>([]);
+  const [salaSeleccionada, setSalaSeleccionada] = useState<number | null>(null);
+  const [cargandoSalas, setCargandoSalas] = useState(false);
 
   const idsEstadosTerminales = useMemo(() => {
     return estadosAgenda
@@ -205,6 +223,18 @@ function EditarCita() {
     (sum, s) => sum + s.subtotal,
     0,
   );
+
+  // 🆕 ¿La cita actual requiere sala? (por el servicio seleccionado en el combo o por alguno ya agregado)
+  const requiereSalaActual = useMemo(() => {
+    const servicioSeleccionado = serviciosDisponibles.find(
+      (s) => s.id === parseInt(servicioTemporal.id_servicio as string),
+    );
+    const requiereEnSeleccionado = servicioSeleccionado?.requiereSala === true;
+    const requiereEnRegistrados = serviciosRegistrados.some(
+      (s) => s.requiereSala === true,
+    );
+    return requiereEnSeleccionado || requiereEnRegistrados;
+  }, [servicioTemporal.id_servicio, serviciosDisponibles, serviciosRegistrados]);
 
   // =======================================================
   // ✅ EFECTO: ACTUALIZAR DURACIÓN ESTIMADA
@@ -375,6 +405,8 @@ const nuevoServicio: ServicioDetalle = {
 
   adicionales:
     servicioTemporal.adicionales,
+
+  requiereSala: servicioInfo.requiereSala === true, // 🆕
 };
 
   // 2. Guardar
@@ -568,6 +600,7 @@ const nuevoServicio: ServicioDetalle = {
         ...s,
         duracion: parseInt(s.duracion) || 0,
         precio: parseFloat(s.precio) || 0,
+        requiereSala: s.requiereSala ?? s.requiere_sala ?? false, // 🆕
       }));
       setServiciosDisponibles(serviciosParseados);
 
@@ -589,6 +622,43 @@ const nuevoServicio: ServicioDetalle = {
     setFiltroFecha(fechaURL);
   }
 }, [fechaURL]);
+
+  // 🆕 CARGAR LISTA DE SALAS (independiente del Promise.all existente)
+  useEffect(() => {
+    const listarSalas = async () => {
+      try {
+        const res = await IST.get("/salas");
+        const listaSalas = Array.isArray(res.data) ? res.data : res.data?.data;
+        setSalas(Array.isArray(listaSalas) ? listaSalas : []);
+      } catch {
+        setSalas([]);
+      }
+    };
+    listarSalas();
+  }, []);
+
+  // 🆕 CONSULTAR SALAS DISPONIBLES CUANDO EL SERVICIO REQUIERE SALA O CAMBIA FECHA/HORA
+  const cargarSalasDisponibles = async (fecha: string, hora: string) => {
+    if (!fecha || !hora) return;
+    setCargandoSalas(true);
+    try {
+      const res = await IST.get(`/salas/disponibles?fecha=${fecha}&hora=${hora}`);
+      const lista = Array.isArray(res.data) ? res.data : res.data?.data || [];
+      setSalasDisponibles(lista);
+    } catch (error) {
+      setSalasDisponibles([]);
+    } finally {
+      setCargandoSalas(false);
+    }
+  };
+
+  useEffect(() => {
+    if (requiereSalaActual && nuevoEvento.date && nuevoEvento.startTime) {
+      cargarSalasDisponibles(nuevoEvento.date, nuevoEvento.startTime);
+    } else {
+      setSalasDisponibles([]);
+    }
+  }, [requiereSalaActual, nuevoEvento.date, nuevoEvento.startTime]);
 
   // ================== FUNCIONES DE FILTRADO UNIFICADO ==================
   useEffect(() => {
@@ -659,6 +729,10 @@ const nuevoServicio: ServicioDetalle = {
 
     setEditIndexServicio(null);
 
+    // 🆕 LIMPIEZA DE SALAS
+    setSalaSeleccionada(null);
+    setSalasDisponibles([]);
+
     setNuevoEvento({
       dni: "",
       cliente: "",
@@ -672,6 +746,7 @@ const nuevoServicio: ServicioDetalle = {
       observaciones: "",
       colaboradorId: 0,
       colaboradorNombre: "",
+      nombreSala: "", // 🆕
     });
   };
 
@@ -736,6 +811,9 @@ const editarEvento = async (cita: CitaBD) => {
 
   setServiciosRegistrados([]);
 
+  // 🆕 PRECARGAR SALA YA ASIGNADA A LA CITA
+  setSalaSeleccionada(cita.idSala || null);
+
   let fetchedObservaciones =
     cita.observaciones || "";
 
@@ -789,7 +867,12 @@ const serviciosConvertidos = listaServicios.map((srv:any) => ({
     Number(srv.subtotal),
 
   adicionales:
-    srv.observaciones || ""
+    srv.observaciones || "",
+
+  // 🆕 marca si el servicio requiere sala, según el catálogo cargado
+  requiereSala:
+    serviciosDisponibles.find((sd) => sd.id === srv.idServicio)
+      ?.requiereSala === true,
 }));
 
 setServiciosRegistrados(serviciosConvertidos);
@@ -860,7 +943,11 @@ setServiciosRegistrados(serviciosConvertidos);
       colaboradorAsignado?.id || 0,
 
     colaboradorNombre:
-      colaboradorAsignado?.nombre || ""
+      colaboradorAsignado?.nombre || "",
+
+    // 🆕 nombre de la sala ya asignada (si existe)
+    nombreSala:
+      salas.find((s) => s.id === cita.idSala)?.nombre || "",
   });
 
   // 🔥 ABRIR MODAL
@@ -1009,6 +1096,16 @@ setServiciosRegistrados(serviciosConvertidos);
             text: "La duración estimada debe ser mayor a 0 (Agregue servicios)",
             icon: "warning"
           });
+
+    // 🆕 VALIDAR SALA CUANDO EL SERVICIO LA REQUIERE
+    if (requiereSalaActual && !salaSeleccionada) {
+      return Swal.fire({
+        title: "Alerta",
+        text: "Debe seleccionar una sala disponible para este servicio",
+        icon: "warning"
+      });
+    }
+
     const totalMinimoNecesario = totalCosto || editandoCita.totalCita || 0;
     const duracionFinal = totalDuracion || nuevoEvento.duracionEstimadaMin;
 
@@ -1046,6 +1143,11 @@ setServiciosRegistrados(serviciosConvertidos);
     idColaborador: Number(nuevoEvento.colaboradorId),
     idVeterinario: null,
 
+    // 🆕 SALA DINÁMICA (se envía siempre que el servicio la requiera)
+    idSala: requiereSalaActual
+      ? (salaSeleccionada ? Number(salaSeleccionada) : null)
+      : null,
+
     idMedioSolicitud:
         citaEditada.idMedioSolicitud || ID_MEDIO_SOLICITUD_DEFAULT,
 
@@ -1063,7 +1165,17 @@ setServiciosRegistrados(serviciosConvertidos);
 };
 
 // 1. Actualizar agenda
-await IST.put("/agenda", AgendaRequestDTO);
+// 🆕 FIX: ahora se valida la respuesta del backend. Antes se ignoraba, así que si
+// el servidor rechazaba el cambio (por ejemplo el nuevo estado o la nueva hora),
+// el modal igual se cerraba y mostraba "éxito" sin haber guardado nada.
+const responseAgenda = await IST.put("/agenda", AgendaRequestDTO);
+
+if (!responseAgenda.data || !responseAgenda.data.success) {
+  throw new Error(
+    responseAgenda.data?.message ||
+      "El servidor rechazó la actualización de la cita (revisa hora/estado)."
+  );
+}
 
 // 2. Obtener servicios viejos
 
@@ -1274,7 +1386,17 @@ Swal.fire({
   text: "La cita fue actualizada correctamente"
 });
  } catch (error: any) {
-
+  // 🆕 FIX: antes este catch estaba vacío y silenciaba cualquier error
+  // (de red o del backend), por eso parecía que "no pasaba nada" al
+  // fallar la actualización de hora/estado. Ahora se muestra el motivo real.
+  Swal.fire({
+    title: "Error",
+    text:
+      error.response?.data?.message ||
+      error.message ||
+      "Ocurrió un error al actualizar la cita.",
+    icon: "error"
+  });
 }
   }
   const seleccionarServicio = (index: number) => {
@@ -1813,7 +1935,74 @@ const eliminarServicio = (index: number) => {
                   </button>
                 </div>
               </div>
-            
+
+              {/* 🆕 BLOQUE DE SALAS: solo aparece si algún servicio (agregado o en el
+                  formulario) requiere asignación de sala */}
+              {requiereSalaActual && (
+                <div className="salas-section">
+                  <h4>🏠 Sala</h4>
+
+                  {cargandoSalas && (
+                    <p className="salas-cargando">
+                      Cargando disponibilidad de salas...
+                    </p>
+                  )}
+
+                  {!cargandoSalas && salas.length === 0 && (
+                    <p className="salas-cargando">No hay salas registradas.</p>
+                  )}
+
+                  {!cargandoSalas && salas.length > 0 && (
+                    <div className="salas-grid">
+                      {salas.map((sala) => {
+                        // La sala ya asignada a esta cita se considera disponible
+                        // aunque el backend la marque como ocupada por sí misma.
+                        const disponible =
+                          salasDisponibles.some((s) => s.id === sala.id) ||
+                          sala.id === salaSeleccionada;
+                        const seleccionada = salaSeleccionada === sala.id;
+
+                        return (
+                          <div
+                            key={sala.id}
+                            className={`card-sala ${
+                              disponible ? "libre" : "ocupada"
+                            } ${seleccionada ? "seleccionada" : ""}`}
+                            onClick={() => {
+                              if (!disponible) return;
+                              setSalaSeleccionada(sala.id);
+                              setNuevoEvento((prev) => ({
+                                ...prev,
+                                nombreSala: sala.nombre,
+                              }));
+                            }}
+                          >
+                            <div className="sala-info">
+                              <strong>{sala.nombre}</strong>
+                              <p>
+                                <span
+                                  className={`dot ${disponible ? "verde" : "rojo"}`}
+                                ></span>
+                                {disponible ? "Disponible" : "Ocupada"}
+                              </p>
+                              {sala.descripcion && <small>{sala.descripcion}</small>}
+                            </div>
+                            <div
+                              className={`sala-radio ${seleccionada ? "activo" : ""}`}
+                            ></div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="sala-leyenda">
+                    <span><span className="dot verde"></span>Disponible</span>
+                    <span><span className="dot rojo"></span>Ocupada</span>
+                  </div>
+                </div>
+              )}
+
               {/* TABLA DE DETALLES DE SERVICIOS - DISEÑO COMPACTO */}
               {serviciosRegistrados.length > 0 && (
                 <div style={{ overflowX: "auto" }}>

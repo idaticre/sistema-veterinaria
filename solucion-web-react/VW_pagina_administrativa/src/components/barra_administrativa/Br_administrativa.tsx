@@ -132,6 +132,7 @@ function Br_administrativa({ onMinimizeChange }: BrProps) {
                                     </Link>
                                     <ul ref={agendaRef} className="submenu">
                                         <li><Link to="/administracion/agenda/Agenda_general" className="sub_opcion">Agenda general</Link></li>
+                                        <li><Link to="/administracion/agenda/DashboardAgenda" className="sub_opcion">DashboardAgenda</Link></li>
                                         {!RolesPermitidos("AUXILIAR GROOMERS") && (
                                             <li><Link to="/administracion/agenda/EditarCita" className="sub_opcion">Editar cita</Link></li>
                                         )}

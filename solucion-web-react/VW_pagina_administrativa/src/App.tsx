@@ -22,6 +22,7 @@ import Vacunas from './pages/administrativas/mascotas/Vacunas';
 import Servicios from './pages/administrativas/servicios/servicios';
 
 import Agenda_general from './pages/administrativas/agenda/Agenda_general';
+import DashboardAgenda from './pages/administrativas/agenda/DashboardAgenda';
 import EditarCita from './pages/administrativas/agenda/EditarAgendas/EditarCita';
 
 import Reportes_e_informes from './pages/administrativas/reportes_e_informes/clientes';
@@ -143,6 +144,9 @@ function App() {
           {/* Agenda */}
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA"]} />}>
             <Route path='/administracion/agenda/EditarCita' element={<EditarCita />} />
+          </Route>
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS"]} />}>
+            <Route path='/administracion/agenda/DashboardAgenda' element={<DashboardAgenda />} />
           </Route>
           <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS"]} />}>
             <Route path='/administracion/agenda/Agenda_general' element={<Agenda_general />} />

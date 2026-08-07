@@ -90,3 +90,347 @@
     grid-template-columns: 1fr;
   }
 }
+/* ================================================================
+   AGREGAR ESTE BLOQUE AL FINAL DE TU DashboardAgenda.css EXISTENTE
+   (no reemplaza nada, solo suma las clases nuevas usadas por el
+   dashboard conectado a datos reales)
+================================================================ */
+
+/* ================== TOOLBAR: FILTROS + STATUS ================== */
+#dashboard_toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.filtros-dashboard {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.filtro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filtro-item label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.filtro-item input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.btn-limpiar-dash {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  align-self: flex-end;
+  height: 36px;
+}
+
+.status-dashboard {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 0.85rem;
+  color: #555;
+  flex-wrap: wrap;
+}
+
+.ultima-act {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.btn-refrescar {
+  background: #4d7cff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.btn-refrescar:hover {
+  background: #2f5fdb;
+}
+
+/* ================== CARD DE ALERTA (pagos pendientes) ================== */
+.card_resumen_alerta {
+  background: #fff3f0;
+  border: 1px solid #ffcdc2;
+}
+
+.card_resumen_alerta p {
+  color: #d9534f;
+}
+
+/* ================== SIN DATOS ================== */
+.sin-datos {
+  text-align: center;
+  color: #888;
+  padding: 30px 0;
+  font-size: 0.95rem;
+}
+
+/* ================== LISTA DE PORCENTAJES ================== */
+.lista-porcentajes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 5px;
+}
+
+.fila-porcentaje {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.dot-estado {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.nombre-estado {
+  flex: 1;
+  color: #333;
+  font-weight: 500;
+}
+
+.valor-estado {
+  color: #555;
+  font-weight: 600;
+}
+
+/* ================== ALERTAS DE PAGOS PENDIENTES ================== */
+#alertas_pagos {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.alertas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.alertas-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.contador-alertas {
+  background: #fff3f0;
+  color: #d9534f;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tabla-alertas {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.tabla-alertas thead tr {
+  background: #f8f9fa;
+}
+
+.tabla-alertas th,
+.tabla-alertas td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.tabla-alertas tbody tr:hover {
+  background: #fafbff;
+}
+
+.tabla-alertas tr.fila-atendida {
+  opacity: 0.55;
+}
+
+.saldo-pendiente {
+  color: #d9534f;
+  font-weight: 700;
+}
+
+.estado-badge {
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.estado-pendiente {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.estado-confirmada {
+  background: #d6e4ff;
+  color: #2f5fdb;
+}
+
+.estado-reprogramada {
+  background: #f0e6cc;
+  color: #7a5c00;
+}
+
+.estado-cancelada {
+  background: #fddede;
+  color: #c0392b;
+}
+
+.estado-atendida {
+  background: #d9f2d9;
+  color: #1e7e1e;
+}
+
+.estado-no.estado-asistió,
+.estado-no {
+  background: #e2e3e5;
+  color: #495057;
+}
+
+.badge-atendida {
+  color: #1e7e1e;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.badge-no-atendida {
+  color: #d9534f;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.acciones-alerta {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-recordatorio,
+.btn-toggle-alerta {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s ease;
+}
+
+.btn-recordatorio {
+  background: #4d7cff;
+  color: white;
+}
+
+.btn-recordatorio:hover {
+  background: #2f5fdb;
+}
+
+.btn-toggle-alerta {
+  background: #28a745;
+  color: white;
+}
+
+.btn-toggle-alerta:hover {
+  background: #1e7e1e;
+}
+
+/* ================== DETALLE DE GESTIÓN (fecha/usuario) ================== */
+.gestion-detalle {
+  font-size: 0.72rem;
+  color: #888;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+/* ================== TOAST (reemplaza al alert() bloqueante) ================== */
+.toast-dashboard {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #2f5fdb;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  font-size: 0.88rem;
+  max-width: 360px;
+  z-index: 2000;
+  animation: toast-in 0.25s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================== RESPONSIVE ================== */
+@media (max-width: 768px) {
+  #dashboard_toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filtros-dashboard {
+    flex-direction: column;
+  }
+
+  .status-dashboard {
+    justify-content: space-between;
+  }
+
+  .toast-dashboard {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+}

@@ -56,23 +56,10 @@ public AgendaResponseDTO crear(AgendaRequestDTO dto) {
         }
     }
 
-    // 2. Validar salas
-    ServicioEntity servicio = servicioRepository
-            .findById(dto.getIdServicio())
-            .orElseThrow();
-
-    if (Boolean.TRUE.equals(servicio.getRequiereSala())) {
-
-        List<SalaEntity> salas = salaRepository.buscarSalasDisponibles(
-                dto.getFecha(),
-                dto.getHora()
-        );
-
-        if (salas.isEmpty()) {
-            return AgendaResponseDTO.builder()
-                    .mensaje("ERROR: No existen salas disponibles para el horario seleccionado.")
-                    .build();
-        }
+    // 2. Validar salas (existencia de disponibles + que la elegida sea válida)
+    AgendaResponseDTO errorSala = validarSala(dto);
+    if (errorSala != null) {
+        return errorSala;
     }
 
     // 3. Crear la agenda
@@ -82,7 +69,56 @@ public AgendaResponseDTO crear(AgendaRequestDTO dto) {
     @Override
     @Transactional
     public AgendaResponseDTO actualizar(AgendaRequestDTO dto) {
+
+        // 🆕 Misma validación de sala al editar/reprogramar una cita
+        AgendaResponseDTO errorSala = validarSala(dto);
+        if (errorSala != null) {
+            return errorSala;
+        }
+
         return ejecutarProcedimiento("ACTUALIZAR", dto);
+    }
+
+    // 🆕 VALIDA QUE, SI EL SERVICIO REQUIERE SALA, EXISTA UNA DISPONIBLE Y QUE LA ELEGIDA SEA VÁLIDA
+    private AgendaResponseDTO validarSala(AgendaRequestDTO dto) {
+
+        ServicioEntity servicio = servicioRepository
+                .findById(dto.getIdServicio())
+                .orElseThrow();
+
+        if (!Boolean.TRUE.equals(servicio.getRequiereSala())) {
+            return null; // Este servicio no requiere sala, no hay nada que validar
+        }
+
+        List<SalaEntity> salasDisponibles = salaRepository.buscarSalasDisponibles(
+                dto.getFecha(),
+                dto.getHora()
+        );
+
+        if (dto.getIdSala() == null) {
+            return AgendaResponseDTO.builder()
+                    .mensaje("ERROR: Debe seleccionar una sala para este servicio.")
+                    .build();
+        }
+
+        boolean salaValida = salasDisponibles.stream()
+                .anyMatch(s -> s.getId().equals(dto.getIdSala()));
+
+        // 🆕 Si no aparece como "disponible", puede ser porque ya está ocupada
+        // por esta MISMA cita (edición sin cambiar horario) — eso sí es válido.
+        if (!salaValida && dto.getId() != null) {
+            salaValida = agendaRepository.findById(dto.getId())
+                    .map(a -> a.getSala() != null && a.getSala().getId().equals(dto.getIdSala()))
+                    .orElse(false);
+        }
+
+        if (!salaValida) {
+            return AgendaResponseDTO.builder()
+                    .mensaje("ERROR: La sala seleccionada no está disponible para el horario elegido.")
+                    .build();
+        }
+
+        return null; // Todo correcto
     }
 
     private AgendaResponseDTO ejecutarProcedimiento(String accion, AgendaRequestDTO dto) {
@@ -115,8 +151,26 @@ public AgendaResponseDTO crear(AgendaRequestDTO dto) {
     Object resultadoId = sp.getOutputParameterValue(13);
     Long idResultado = (resultadoId instanceof Number) ? ((Number) resultadoId).longValue() : null;
 
+    // 🆕 ASIGNAR (O LIBERAR) LA SALA DE LA CITA YA CREADA/ACTUALIZADA POR EL SP
+    asignarSala(idResultado, dto);
+
     return obtenerPorId(idResultado);
 }
+
+    // 🆕 Asigna la sala elegida a la agenda, o la libera si ya no aplica
+    private void asignarSala(Long idAgenda, AgendaRequestDTO dto) {
+        if (idAgenda == null) return;
+
+        agendaRepository.findById(idAgenda).ifPresent(agenda -> {
+            if (dto.getIdSala() != null) {
+                SalaEntity sala = salaRepository.findById(dto.getIdSala()).orElse(null);
+                agenda.setSala(sala);
+            } else {
+                agenda.setSala(null);
+            }
+            agendaRepository.save(agenda);
+        });
+    }
 
 private void registrarParametros(StoredProcedureQuery sp) {
     // REGISTRO POR ÍNDICE (Obligatorio para MySQL en la nube)
