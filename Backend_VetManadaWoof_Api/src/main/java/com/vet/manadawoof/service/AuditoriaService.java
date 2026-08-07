@@ -9,6 +9,7 @@ public interface AuditoriaService {
     void crear(
             Integer idTipoAccion,
             String entidad,
+            Long idRegistro,
             String descripcion
     );
     

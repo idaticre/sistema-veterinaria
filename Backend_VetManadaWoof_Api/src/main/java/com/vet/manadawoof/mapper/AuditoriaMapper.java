@@ -30,6 +30,7 @@ public class AuditoriaMapper {
                         .build() : null
                     )
                 .entidad(entity.getEntidad())
+                .idRegistro(entity.getIdRegistro())
                 .descripcion(entity.getDescripcion())
                 .fecha(entity.getFecha())
                 .build();

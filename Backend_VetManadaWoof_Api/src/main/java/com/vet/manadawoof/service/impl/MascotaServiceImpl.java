@@ -84,6 +84,7 @@ public class MascotaServiceImpl implements MascotaService {
         auditoriaService.crear(
                 1,
                 "MASCOTA",
+                entity.getId(),
                 "Se registró la mascota " + entity.getNombre()
         );
         //-----
@@ -126,6 +127,7 @@ public class MascotaServiceImpl implements MascotaService {
         auditoriaService.crear(
                 2,
                 "MASCOTA",
+                entity.getId(),
                 "Se actualizo el regisro de " + entity.getNombre()
         );
         //----
@@ -155,6 +157,7 @@ public class MascotaServiceImpl implements MascotaService {
         auditoriaService.crear(
                 3,
                 "MASCOTA",
+                entity.getId(),
                 "Se deshabilito el regisro de " + entity.getNombre()
         );
         //----

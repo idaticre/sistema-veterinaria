@@ -53,14 +53,14 @@ function Auditoria() {
             const date = new Date(fechaStr);
             if (isNaN(date.getTime())) return fechaStr;
             
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const dia = String(date.getDate()).padStart(2, '0');
+            const mes = String(date.getMonth() + 1).padStart(2, '0');
+            const año = date.getFullYear();
+            const hora = String(date.getHours()).padStart(2, '0');
+            const minutos = String(date.getMinutes()).padStart(2, '0');
             const seconds = String(date.getSeconds()).padStart(2, '0');
             
-            return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+            return `${dia}/${mes}/${año} ${hora}:${minutos}:${seconds}`;
         } catch {
             return fechaStr;
         }

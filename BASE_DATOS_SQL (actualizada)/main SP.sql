@@ -4660,5 +4660,3 @@ BEGIN
 	END validacion;
 END $$
 DELIMITER ;
-
-DESC Proveedores;

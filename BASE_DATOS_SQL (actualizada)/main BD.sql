@@ -1691,6 +1691,7 @@ CREATE TABLE auditoria (
     id_usuario INT NOT NULL,
     id_tipo_accion INT NOT NULL,
     entidad VARCHAR(50) NOT NULL,
+    id_registro BIGINT NULL,
     descripcion VARCHAR(255) NOT NULL,
     fecha_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
 
@@ -1701,7 +1702,6 @@ CREATE TABLE auditoria (
         REFERENCES tipo_accion(id)
 );
 
-select * from auditoria;
 
 INSERT INTO tipo_accion (nombre, descripcion) VALUES
 ('CREAR', 'Registro de un nuevo recurso en el sistema'),
