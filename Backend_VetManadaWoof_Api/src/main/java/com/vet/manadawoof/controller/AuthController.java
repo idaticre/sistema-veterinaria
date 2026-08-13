@@ -3,6 +3,9 @@ package com.vet.manadawoof.controller;
 
 import com.vet.manadawoof.dtos.request.LoginRequestDTO;
 import com.vet.manadawoof.dtos.response.JwtResponseDTO;
+import com.vet.manadawoof.entity.UsuarioEntity;
+import com.vet.manadawoof.repository.UsuarioRepository;
+import com.vet.manadawoof.service.AuditoriaService;
 import com.vet.manadawoof.service.JwtService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -25,10 +29,14 @@ public class AuthController {
     
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final AuditoriaService auditoriaService;
+    private final UsuarioRepository usuarioRepository;
     
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService) {
+    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, AuditoriaService auditoriaService, UsuarioRepository usuarioRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.auditoriaService = auditoriaService;
+        this.usuarioRepository = usuarioRepository;
     }
     
     @PostMapping("/login")
@@ -48,6 +56,18 @@ public class AuthController {
         // Extraer ID del usuario (necesitarías modificar UserDetails para incluir el ID)
         // Por simplicidad, aquí se retorna 0, deberías implementar la lógica para obtener el ID real
         Long userId = 0L;
+        Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findByUsername(userDetails.getUsername());
+        if (usuarioOpt.isPresent() && usuarioOpt.get().getId() != null) {
+            userId = usuarioOpt.get().getId().longValue();
+        }
+
+        // Registrar auditoría del inicio de sesión (Tipo 4 = LOGIN)
+        auditoriaService.crear(
+                4,
+                "USUARIO",
+                userId,
+                "Inicio de sesión exitoso del usuario " + userDetails.getUsername()
+        );
         
         return ResponseEntity.ok(new JwtResponseDTO(jwt, userId, userDetails.getUsername(), roles));
     }

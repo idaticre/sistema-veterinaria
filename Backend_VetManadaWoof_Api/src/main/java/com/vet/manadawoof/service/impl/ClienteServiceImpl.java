@@ -3,6 +3,7 @@ package com.vet.manadawoof.service.impl;
 import com.vet.manadawoof.dtos.request.ClienteRequestDTO;
 import com.vet.manadawoof.dtos.response.ClienteResponseDTO;
 import com.vet.manadawoof.mapper.ClienteMapper;
+import com.vet.manadawoof.service.AuditoriaService;
 import com.vet.manadawoof.service.ClienteService;
 import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class ClienteServiceImpl implements ClienteService {
     @PersistenceContext
     private final EntityManager entityManager;
     private final ClienteMapper mapper;
+    private final AuditoriaService auditoriaService;
     
     // REGISTRAR CLIENTE (SP)
     @Override
@@ -79,6 +81,16 @@ public class ClienteServiceImpl implements ClienteService {
             response.setMensaje(mensaje);
         }
         
+        // Registrar auditoría
+        if (idCliente != null) {
+            auditoriaService.crear(
+                    1,
+                    "CLIENTE",
+                    idCliente,
+                    "Se registró el cliente " + (dto.getNombre() != null ? dto.getNombre() : "")
+            );
+        }
+        
         return response;
     }
     
@@ -133,6 +145,15 @@ public class ClienteServiceImpl implements ClienteService {
         
         ClienteResponseDTO response = obtenerPorId(id);
         response.setMensaje(mensaje);
+        
+        // Registrar auditoría
+        auditoriaService.crear(
+                2,
+                "CLIENTE",
+                id,
+                "Se actualizó el registro del cliente " + (dto.getNombre() != null ? dto.getNombre() : "")
+        );
+        
         return response;
     }
     
@@ -219,6 +240,14 @@ public ClienteResponseDTO buscarPorDocumento(String documento) {
         // Limpiar caché de JPA para que el select traiga el valor actualizado
         entityManager.flush();
         entityManager.clear();
+        
+        // Registrar auditoría
+        auditoriaService.crear(
+                3,
+                "CLIENTE",
+                idCliente,
+                "Se deshabilitó el cliente con ID " + idCliente
+        );
         
         // Obtener cliente actualizado usando el mismo query de listar/obtenerPorId
         List<Object[]> results = entityManager.createNativeQuery("""

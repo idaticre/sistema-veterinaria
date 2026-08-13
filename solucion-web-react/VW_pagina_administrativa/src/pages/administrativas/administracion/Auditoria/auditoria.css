@@ -47,12 +47,13 @@
 #auditoria #buscador {
   display: flex;
   align-items: center;
+  gap: 1rem;
   margin-bottom: 1.5rem;
   width: 100%;
 }
 
 #auditoria #br_buscador {
-  width: 100%;
+  flex: 1;
 }
 
 #auditoria #br_buscador input {
@@ -68,6 +69,25 @@
 }
 
 #auditoria #br_buscador input:focus {
+  border-color: #ff9900;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.25);
+}
+
+.filtro-accion-select {
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background-color: #f8fafc;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filtro-accion-select:focus {
   border-color: #ff9900;
   background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.25);
@@ -167,11 +187,44 @@
   color: #b91c1c;
 }
 
+.accion-badge.login {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
 /* Description column style */
 .desc-celda {
   word-break: break-word;
   max-width: 300px;
   line-height: 1.4;
+}
+
+/* Botón ver registro */
+.btn-ver-registro {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.btn-ver-registro:hover {
+  background-color: #4338ca;
+  transform: translateY(-1px);
+}
+
+.sin-enlace {
+  color: #94a3b8;
+  font-weight: 500;
+  display: block;
+  text-align: center;
 }
 
 /* Empty records */

@@ -263,7 +263,7 @@ function Lst_mascotas() {
                           <button
                             onClick={() => setModalVacunasOpen(true)}
                           >
-                            Vacunas
+                            Vacuna
                           </button>
                           <button
                             onClick={() => {

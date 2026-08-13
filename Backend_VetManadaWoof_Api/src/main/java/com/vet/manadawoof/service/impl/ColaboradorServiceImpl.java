@@ -3,6 +3,7 @@ package com.vet.manadawoof.service.impl;
 import com.vet.manadawoof.dtos.request.ColaboradorRequestDTO;
 import com.vet.manadawoof.dtos.response.ColaboradorResponseDTO;
 import com.vet.manadawoof.mapper.ColaboradorMapper;
+import com.vet.manadawoof.service.AuditoriaService;
 import com.vet.manadawoof.service.ColaboradorService;
 import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     @PersistenceContext
     private final EntityManager entityManager;
     private final ColaboradorMapper colaboradorMapper;
+    private final AuditoriaService auditoriaService;
     
     /**
      * Registra un nuevo colaborador en la base de datos usando el SP `registrar_colaborador`.
@@ -64,7 +66,16 @@ public class ColaboradorServiceImpl implements ColaboradorService {
                 .getSingleResult();
         
         // Mapear resultado combinado al DTO de respuesta
-        return colaboradorMapper.toDto(entRow, colRow, mensaje);
+        ColaboradorResponseDTO response = colaboradorMapper.toDto(entRow, colRow, mensaje);
+        if (response != null && response.getId() != null) {
+            auditoriaService.crear(
+                    1,
+                    "COLABORADOR",
+                    response.getId(),
+                    "Se registró el colaborador " + (dto.getNombre() != null ? dto.getNombre() : "")
+            );
+        }
+        return response;
     }
     
     // Actualiza la información de un colaborador existente
@@ -106,7 +117,16 @@ public class ColaboradorServiceImpl implements ColaboradorService {
                 .getSingleResult();
         
         // Mapear datos combinados al DTO de respuesta
-        return colaboradorMapper.toDto(entRow, colRow, mensaje);
+        ColaboradorResponseDTO response = colaboradorMapper.toDto(entRow, colRow, mensaje);
+        if (response != null && response.getId() != null) {
+            auditoriaService.crear(
+                    2,
+                    "COLABORADOR",
+                    response.getId(),
+                    "Se actualizó el colaborador " + (dto.getNombre() != null ? dto.getNombre() : "")
+            );
+        }
+        return response;
     }
     
     // Lista todos los colaboradores con los datos generales de su entidad asociada.
@@ -180,6 +200,15 @@ public class ColaboradorServiceImpl implements ColaboradorService {
         ColaboradorResponseDTO dto = colaboradorMapper.toFullDto(row);
         dto.setActivo(false);
         dto.setMensaje("Colaborador eliminado lógicamente con éxito");
+        
+        // Registrar auditoría
+        auditoriaService.crear(
+                3,
+                "COLABORADOR",
+                idColaborador,
+                "Se deshabilitó el colaborador con ID " + idColaborador
+        );
+        
         return dto;
     }
     
