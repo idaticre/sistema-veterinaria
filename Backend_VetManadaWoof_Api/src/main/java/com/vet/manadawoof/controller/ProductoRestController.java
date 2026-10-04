@@ -2,6 +2,7 @@ package com.vet.manadawoof.controller;
 
 import com.vet.manadawoof.dtos.request.ProductoRequestDTO;
 import com.vet.manadawoof.dtos.response.ApiResponse;
+import com.vet.manadawoof.dtos.response.PaginadoResponseDTO;
 import com.vet.manadawoof.dtos.response.ProductoResponseDTO;
 import com.vet.manadawoof.service.ProductoService;
 import jakarta.validation.Valid;
@@ -22,19 +23,29 @@ public class ProductoRestController {
     // GET /api/productos
     // GET /api/productos?proveedor={proveedorId}
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProductoResponseDTO>>> listar(
-            @RequestParam(required = false) Long proveedor
+    public ResponseEntity<ApiResponse<PaginadoResponseDTO<ProductoResponseDTO>>> listar(
+            @RequestParam(required = false) Long proveedor,
+            @RequestParam(defaultValue = "0")  int pagina,
+            @RequestParam(defaultValue = "10") int tamanio
     ) {
         try {
-            List<ProductoResponseDTO> lista = proveedor != null
-                    ? service.listarPorProveedor(proveedor)
-                    : service.listar();
+            if (proveedor != null) {
+                List<ProductoResponseDTO> lista = service.listarPorProveedor(proveedor);
+                return ResponseEntity.ok(new ApiResponse<>(true,
+                    "Productos del proveedor obtenidos correctamente", 
+                    PaginadoResponseDTO.<ProductoResponseDTO>builder()
+                        .contenido(lista)
+                        .paginaActual(0)
+                        .totalPaginas(1)
+                        .totalRegistros(lista.size())
+                        .tamanio(lista.size())
+                        .build()));
+            }
 
-            String mensaje = proveedor != null
-                    ? "Productos del proveedor obtenidos correctamente"
-                    : "Lista de productos obtenida correctamente";
+            PaginadoResponseDTO<ProductoResponseDTO> resultado = service.listar(pagina, tamanio);
+            return ResponseEntity.ok(new ApiResponse<>(true,
+                "Lista de productos obtenida correctamente", resultado));
 
-            return ResponseEntity.ok(new ApiResponse<>(true, mensaje, lista));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(false, e.getMessage(), null));

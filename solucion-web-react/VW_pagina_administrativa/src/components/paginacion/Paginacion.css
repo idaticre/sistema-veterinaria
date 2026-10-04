@@ -1,0 +1,89 @@
+/* ── Contenedor principal ─────────────────────────────── */
+.paginacion-contenedor {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 4px;
+    margin-top: 8px;
+    border-top: 1px solid #f0e6df;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+/* ── Info de registros ────────────────────────────────── */
+.paginacion-info {
+    white-space: nowrap;
+}
+
+/* ── Botones de navegación ────────────────────────────── */
+.paginacion-botones {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pag-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    color: #555;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.pag-btn:hover:not(:disabled) {
+    background-color: #f0e6df;
+    border-color: #b34d16;
+    color: #b34d16;
+}
+
+.pag-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pag-btn--activo {
+    background-color: #b34d16;
+    border-color: #b34d16;
+    color: white;
+    font-weight: 600;
+}
+
+.pag-btn--activo:hover {
+    background-color: #b34d16 !important;
+    color: white !important;
+}
+
+.pag-ellipsis {
+    padding: 0 4px;
+    color: #aaa;
+    user-select: none;
+}
+
+/* ── Selector de tamaño ───────────────────────────────── */
+.paginacion-tamanio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.paginacion-tamanio select {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    accent-color: #b34d16;
+}
+
+.paginacion-tamanio select:focus {
+    outline: none;
+    border-color: #b34d16;
+}

@@ -4464,8 +4464,20 @@ DELIMITER ;
 -- ============================================================
 DROP PROCEDURE IF EXISTS sp_productos_listar;
 DELIMITER $$
-CREATE PROCEDURE sp_productos_listar()
+CREATE PROCEDURE sp_productos_listar(
+    IN  p_pagina           INT,
+    IN  p_tamanio          INT,
+    OUT p_total_registros  INT
+)
 BEGIN
+    DECLARE v_offset INT;
+    SET v_offset = p_pagina * p_tamanio;
+
+    SELECT COUNT(*) INTO p_total_registros
+    FROM productos p
+    INNER JOIN proveedores pv ON p.proveedor_id = pv.id
+    INNER JOIN entidades   e  ON pv.id_entidad  = e.id;
+
     SELECT
         p.id,
         p.codigo,
@@ -4482,9 +4494,11 @@ BEGIN
     FROM productos p
     INNER JOIN proveedores pv ON p.proveedor_id = pv.id
     INNER JOIN entidades   e  ON pv.id_entidad  = e.id
-    ORDER BY p.nombre;
+    ORDER BY p.nombre
+    LIMIT p_tamanio OFFSET v_offset;
 END $$
 DELIMITER ;
+
 
 -- ============================================================
 -- SP 2: Obtener productos por proveedor_id

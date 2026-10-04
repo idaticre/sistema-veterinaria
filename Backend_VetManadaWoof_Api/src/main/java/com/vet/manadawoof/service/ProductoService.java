@@ -1,6 +1,7 @@
 package com.vet.manadawoof.service;
 
 import com.vet.manadawoof.dtos.request.ProductoRequestDTO;
+import com.vet.manadawoof.dtos.response.PaginadoResponseDTO;
 import com.vet.manadawoof.dtos.response.ProductoResponseDTO;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 public interface ProductoService {
 
     // GET /productos
-    List<ProductoResponseDTO> listar();
+    PaginadoResponseDTO<ProductoResponseDTO> listar(int pagina, int tamanio);
 
     // GET /productos?proveedor={proveedorId}
     List<ProductoResponseDTO> listarPorProveedor(Long proveedorId);

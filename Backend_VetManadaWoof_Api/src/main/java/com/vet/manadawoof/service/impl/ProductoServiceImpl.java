@@ -1,6 +1,7 @@
 package com.vet.manadawoof.service.impl;
 
 import com.vet.manadawoof.dtos.request.ProductoRequestDTO;
+import com.vet.manadawoof.dtos.response.PaginadoResponseDTO;
 import com.vet.manadawoof.dtos.response.ProductoResponseDTO;
 import com.vet.manadawoof.service.ProductoService;
 import jakarta.persistence.EntityManager;
@@ -26,10 +27,28 @@ public class ProductoServiceImpl implements ProductoService {
     // ----------------------------------------------------------------
     @Override
     @Transactional
-    public List<ProductoResponseDTO> listar() {
+    public PaginadoResponseDTO<ProductoResponseDTO> listar(int pagina, int tamanio) {
         StoredProcedureQuery sp = em.createStoredProcedureQuery("sp_productos_listar");
+        sp.registerStoredProcedureParameter("p_pagina",          Integer.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_tamanio",         Integer.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_registros", Integer.class, ParameterMode.OUT);
+
+        sp.setParameter("p_pagina",  pagina);
+        sp.setParameter("p_tamanio", tamanio);
         sp.execute();
-        return mapResultList(sp.getResultList());
+
+        int total        = ((Number) sp.getOutputParameterValue("p_total_registros")).intValue();
+        int totalPaginas = (int) Math.ceil((double) total / tamanio);
+
+        List<ProductoResponseDTO> contenido = mapResultList(sp.getResultList());
+
+        return PaginadoResponseDTO.<ProductoResponseDTO>builder()
+                .contenido(contenido)
+                .paginaActual(pagina)
+                .totalPaginas(totalPaginas)
+                .totalRegistros(total)
+                .tamanio(tamanio)
+                .build();
     }
 
     // ----------------------------------------------------------------
