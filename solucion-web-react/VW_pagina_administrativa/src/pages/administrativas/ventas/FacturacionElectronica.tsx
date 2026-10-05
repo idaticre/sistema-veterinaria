@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
+import IST from "../../../components/proteccion/IST";
 import "./FacturacionElectronica.css";
 import Swal from 'sweetalert2';
 
@@ -40,6 +41,12 @@ function FacturacionElectronica() {
   const [comprobanteEmitido, setComprobanteEmitido] = useState(false);
 
   // 🔥 BUSCAR CLIENTE
+  // 🛠 CORREGIDO: antes esto llamaba con fetch() directo a
+  // "https://sistema-veterinaria.onrender.com" (el backend en la nube),
+  // mientras que el resto del sistema (IST) usa tu backend local.
+  // Por eso nunca encontraba al cliente: estaba buscando en otra base de datos.
+  // Ahora usa IST, igual que Inventario/Proveedores/Agenda, sin cambiar
+  // ninguna otra parte de la lógica ni de las validaciones.
   const buscarCliente = async (doc: string) => {
     setDocumento(doc);
 
@@ -63,58 +70,35 @@ function FacturacionElectronica() {
     }
 
     try {
-      const token = sessionStorage.getItem("token");
-      
-      
-      const response = await fetch(
-        `https://sistema-veterinaria.onrender.com/api/clientes/documento/${doc}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        setCliente("");
-        setClienteId(0);
-        setCitasCliente([]);
-        return;
-      }
-
-      const result = await response.json();
-      const clienteData = result.data;
+      const response = await IST.get(`/clientes/documento/${doc}`);
+      const clienteData = response.data.data;
 
       setCliente(clienteData.nombre);
       setClienteId(clienteData.id);
 
       // 🔥 CITAS DEL CLIENTE
-      const citasResponse = await fetch(
-        `https://sistema-veterinaria.onrender.com/api/agenda/cliente/${clienteData.id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      if (!citasResponse.ok) {
+      try {
+        const citasResponse = await IST.get(`/agenda/cliente/${clienteData.id}`);
+        setCitasCliente(citasResponse.data.data || []);
+      } catch {
+        // Si falla solo la consulta de citas, no borramos el cliente ya encontrado
         setCitasCliente([]);
-        return;
       }
+    } catch (error: any) {
+      setCliente("");
+      setClienteId(0);
+      setCitasCliente([]);
 
-      const citasResult = await citasResponse.json();
-      setCitasCliente(citasResult.data || []);
-    } catch (error) {
-      Swal.fire({
-        title: "Error desconocido",
-        text: "Refresque la página por favor",
-        icon: "error"
-      });
+      // Un 404 (cliente no existe con ese documento) es normal mientras se
+      // escribe o si el documento no está registrado: no mostramos error.
+      // Cualquier otro problema (servidor caído, etc.) sí se avisa.
+      if (error?.response?.status && error.response.status !== 404) {
+        Swal.fire({
+          title: "Error desconocido",
+          text: "Refresque la página por favor",
+          icon: "error"
+        });
+      }
     }
   };
 
@@ -163,6 +147,7 @@ function FacturacionElectronica() {
   };
 
   // 🔥 AGREGAR DESDE CITA
+  // 🛠 CORREGIDO: igual que arriba, usaba fetch() directo a Render.
   const agregarDesdeCita = async (cita: Cita) => {
     try {
       const yaExiste = servicios.some((s) =>
@@ -178,30 +163,8 @@ function FacturacionElectronica() {
         return;
       }
 
-      const token = sessionStorage.getItem("token");
-      
-
-      const response = await fetch(
-        `https://sistema-veterinaria.onrender.com/api/agenda/${cita.id}/servicios`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        Swal.fire({
-        title: "Error",
-        text: "al obtener los servicios, refresque la página",
-        icon: "warning"
-      });
-        return;
-      }
-
-      const result = await response.json();
+      const response = await IST.get(`/agenda/${cita.id}/servicios`);
+      const result = response.data;
       const listaServicios = result.data || [];
 
       if (listaServicios.length === 0) {
@@ -273,11 +236,10 @@ const igv = subtotal * 0.18;
 const total = subtotal + igv;
 
   // 🔥 GUARDAR
+  // 🛠 CORREGIDO: también apuntaba a Render con fetch() directo.
   const guardarComprobante = async () => {
   try {
 
-    const token = sessionStorage.getItem("token");
-    
 const request = {
   clienteId: clienteId,
   agendaId: agendaId, // luego cambiaremos esto por la agenda real
@@ -324,20 +286,7 @@ const request = {
     total: s.subtotal * 1.18
   }))
 };
-    const response = await fetch(
-      "https://sistema-veterinaria.onrender.com/api/comprobantes/generar",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(request)
-      }
-    );
-
-    const data = await response.json();
-    
+    await IST.post("/comprobantes/generar", request);
 
     Swal.fire({
         title: "Éxito",

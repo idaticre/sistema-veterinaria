@@ -50,6 +50,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/clientes/documento/**").permitAll()
                 .requestMatchers("/api/agenda/cliente/**").permitAll()
+                // Solo LECTURA pública: la página comercial no tiene login.
+                // POST/PUT/DELETE de /api/productos NO están permitAll, así que caen en
+                // el .anyRequest().authenticated() de más abajo: siguen exigiendo estar
+                // logueado (cualquier rol). Si quieres restringirlo solo a ADMIN, avísame.
+                .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/**").permitAll()
 
                 // --- 2. AGENDA Y SERVICIOS (Acceso para Admin y Auxiliares) ---
                 .requestMatchers("/api/agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")

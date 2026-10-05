@@ -76,6 +76,10 @@ function Filtro_tienda({ onPrecioChange, precioMaximo, categoriaSeleccionada, on
   return (
     <>
       <div className={`filtro_tienda ${categoriaSeleccionada == 0?"Ubi_destacado":""}`}>
+        <div className="filtro_titulo">
+          <span className="filtro_titulo_icono">🔍</span>
+          <h3>Filtros</h3>
+        </div>
         <div className="filtro">
           <p>Marcas</p>
           <ul className="opciones_filtro">
@@ -111,7 +115,7 @@ function Filtro_tienda({ onPrecioChange, precioMaximo, categoriaSeleccionada, on
           </ul>
         </div>
         <div className="filtro_precio">
-          <h4>Precio</h4>
+          <p>Precio</p>
           <Range
             step={1}
             min={min}
@@ -126,13 +130,13 @@ function Filtro_tienda({ onPrecioChange, precioMaximo, categoriaSeleccionada, on
                   width: "92%",
                   background: getTrackBackground({
                     values,
-                    colors: ["#ccc", "#548BF4", "#ccc"],
+                    colors: ["#e2e8f0", "#1eab7f", "#e2e8f0"],
                     min,
                     max: precioMaximo,
                   }),
                   alignSelf: "center",
                   borderRadius: "4px",
-                  margin: "0.5rem 0 0 0.7rem",
+                  margin: "0.6rem 0 0 0.7rem",
                 }}
               >
                 {children}
@@ -143,11 +147,12 @@ function Filtro_tienda({ onPrecioChange, precioMaximo, categoriaSeleccionada, on
                 {...props}
                 style={{
                   ...props.style,
-                  height: "20px",
-                  width: "20px",
-                  backgroundColor: "#548BF4",
+                  height: "18px",
+                  width: "18px",
+                  backgroundColor: "#1eab7f",
                   borderRadius: "50%",
-                  boxShadow: "0px 2px 6px #AAA",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                  border: "2px solid white",
                 }}
               />
             )}
@@ -155,7 +160,6 @@ function Filtro_tienda({ onPrecioChange, precioMaximo, categoriaSeleccionada, on
           <div className="precios_mostrados">
             <span>S/ {values[0]}</span> - <span>S/ {values[1]}</span>
           </div>
-          {/*<button className="btn_filtrado">Filtrar</button>*/}
         </div>
       </div>
     </>

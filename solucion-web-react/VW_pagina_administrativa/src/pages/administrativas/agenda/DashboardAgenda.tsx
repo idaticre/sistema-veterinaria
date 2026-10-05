@@ -459,7 +459,7 @@ export default function DashboardAgenda() {
             </div>
 
             {/* ======================================================
-                FILA DE GRÁFICOS
+                FILA DE GRÁFICOS (los 3 juntos, altura fija vía CSS)
             ====================================================== */}
             <div id="fila_graficos">
               <div className="grafico_box">
@@ -516,31 +516,30 @@ export default function DashboardAgenda() {
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* -------- Citas por estado (barras) -------- */}
-            <div id="servicios_grafico">
-              <h3>Comparativo de Citas por Estado</h3>
-              {citasPorEstado.length === 0 ? (
-                <p className="sin-datos">No hay citas para el filtro seleccionado.</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={citasPorEstado}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" stroke="#333" />
-                    <YAxis stroke="#333" allowDecimals={false} />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#4d7cff">
-                      {citasPorEstado.map((entry, i) => (
-                        <Cell
-                          key={i}
-                          fill={COLORS[entry.name] || COLORS_FALLBACK[i % COLORS_FALLBACK.length]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
+              <div className="grafico_box">
+                <h3>Comparativo de Citas por Estado</h3>
+                {citasPorEstado.length === 0 ? (
+                  <p className="sin-datos">No hay citas para el filtro seleccionado.</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={citasPorEstado}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" stroke="#333" />
+                      <YAxis stroke="#333" allowDecimals={false} />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#4d7cff">
+                        {citasPorEstado.map((entry, i) => (
+                          <Cell
+                            key={i}
+                            fill={COLORS[entry.name] || COLORS_FALLBACK[i % COLORS_FALLBACK.length]}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
             </div>
 
             {/* ======================================================

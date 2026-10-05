@@ -713,6 +713,20 @@ function Agenda_general() {
       });
     }
 
+    // 🆕 VALIDAR QUE LA FECHA/HORA DE LA CITA NO HAYA PASADO YA
+    // (antes no existía ningún control de esto: se podía guardar una cita
+    // para una hora anterior a la actual del mismo día, o para un día pasado)
+    const fechaHoraSeleccionada = new Date(
+      `${nuevoEvento.date}T${nuevoEvento.startTime}`
+    );
+    if (fechaHoraSeleccionada.getTime() < Date.now()) {
+      return Swal.fire({
+        title: "Alerta",
+        text: "No se puede agendar una cita en una fecha u hora que ya pasó",
+        icon: "warning"
+      });
+    }
+
     if (!nuevoEvento.cliente || !nuevoEvento.mascota || !nuevoEvento.dni) {
       return Swal.fire({
         title: "Alerta",

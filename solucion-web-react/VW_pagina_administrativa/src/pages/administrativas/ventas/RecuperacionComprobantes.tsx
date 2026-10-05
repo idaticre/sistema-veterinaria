@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
+import IST from "../../../components/proteccion/IST";
 import "./RecuperacionComprobantes.css";
-import Swal from 'sweetalert2';
-
+import Swal from "sweetalert2";
 
 interface Comprobante {
     id: number;
@@ -14,268 +14,165 @@ interface Comprobante {
 }
 
 const RecuperacionComprobantes = () => {
-
     const [minimizado, setMinimizado] = useState(false);
 
-    const [tipo, setTipo] = useState("1");
+    const [tipo, setTipo] = useState("1"); // 1 = Factura, 2 = Boleta
     const [resultado, setResultado] = useState<Comprobante[]>([]);
     const [loading, setLoading] = useState(false);
     const [detalle, setDetalle] = useState<any>(null);
     const [mostrarDetalle, setMostrarDetalle] = useState(false);
     const [documento, setDocumento] = useState("");
-const [clienteId, setClienteId] = useState(0);
-const [clientes, setClientes] = useState<any[]>([]);
-const [clienteNombre, setClienteNombre] = useState("");
+    const [clienteId, setClienteId] = useState(0);
 
-    
+    // 🔥 BUSCAR CLIENTE POR DOCUMENTO (igual que en Facturación)
+    const buscarCliente = async (doc: string) => {
+        setDocumento(doc);
 
-const buscarPorTipo = async () => {
-    try {
-        setLoading(true);
+        // Validar longitud: Factura = RUC (11), Boleta = DNI (8)
+        const longitudEsperada = tipo === "1" ? 11 : 8;
 
-        const token = sessionStorage.getItem("token");
-
-        const response = await fetch(
-            `https://sistema-veterinaria.onrender.com/api/comprobantes/tipo/${tipo}`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
+        if (doc.length !== longitudEsperada) {
+            setClienteId(0);
+            return;
         }
 
-        const data = await response.json();
-        setResultado(
-            Array.isArray(data) ? data : [data]
-        );
-
-    } catch {
-    Swal.fire({
-        title: "Error",
-        text: "al obtener los comprobantes, por faovr refresque la página",
-        icon: "error"
-      });
-} finally {
-        setLoading(false);
-    }
-};
-const verComprobante = async (id: number) => {
-    try {
-
-        const token =
-            sessionStorage.getItem("token");
-
-        const response = await fetch(
-            `https://sistema-veterinaria.onrender.com/api/comprobantes/${id}`,
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`
-                }
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error();
-        }
-
-        const data = await response.json();
-
-setDetalle(data);
-setMostrarDetalle(true);
-
-
-
-    } catch {
-    Swal.fire({
-        title: "Error",
-        text: "al obtener los comprobantes, por faovr refresque la página",
-        icon: "error"
-      });
-}
-};
-
-const buscarPorCliente = async () => {
-
-    if (!documento.trim()) {
-        return Swal.fire({
-            title: "Alerta",
-            text: "Ingrese un número de documento",
-            icon: "warning"
-        });
-    }
-
-    if (!clienteId || clienteId === 0) {
-        return Swal.fire({
-            title: "Alerta",
-            text: "No se encontró un cliente con ese documento",
-            icon: "warning"
-        });
-    }
-
-    try {
-        setLoading(true);
-
-        const token = sessionStorage.getItem("token");
-
-        const response = await fetch(
-            `https://sistema-veterinaria.onrender.com/api/comprobantes/cliente/${clienteId}`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        setResultado(
-            Array.isArray(data) ? data : [data]
-        );
-
-    } catch {
-
-        Swal.fire({
-            title: "Alerta",
-            text: "No se pudo obtener los comprobantes",
-            icon: "warning"
-        });
-
-    } finally {
-        setLoading(false);
-    }
-
-};
-useEffect(() => {
-    const cargarClientes = async () => {
         try {
-            const token = sessionStorage.getItem("token");
+            const response = await IST.get(`/clientes/documento/${doc}`);
+            setClienteId(response.data.data.id);
+        } catch (error: any) {
+            setClienteId(0);
 
-            const response = await fetch(
-                "https://sistema-veterinaria.onrender.com/api/clientes",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
-
-            const data = await response.json();
-
-            setClientes(data.data || []);
-
-        } catch {
-            console.error("Error cargando clientes");
+            // 404 = no existe cliente con ese documento (normal), no se avisa aquí
+            if (error?.response?.status && error.response.status !== 404) {
+                Swal.fire({
+                    title: "Error desconocido",
+                    text: "Refresque la página por favor",
+                    icon: "error"
+                });
+            }
         }
     };
 
-    cargarClientes();
-}, []);
+    // 🔥 BUSCAR POR TIPO
+    const buscarPorTipo = async () => {
+        try {
+            setLoading(true);
+
+            const response = await IST.get(`/comprobantes/tipo/${tipo}`);
+            const data = response.data;
+
+            setResultado(Array.isArray(data) ? data : [data]);
+        } catch {
+            Swal.fire({
+                title: "Error",
+                text: "al obtener los comprobantes, por favor refresque la página",
+                icon: "error"
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 🔥 BUSCAR POR CLIENTE
+    const buscarPorCliente = async () => {
+        if (!documento.trim()) {
+            return Swal.fire({
+                title: "Alerta",
+                text: "Ingrese un número de documento",
+                icon: "warning"
+            });
+        }
+
+        if (!clienteId) {
+            return Swal.fire({
+                title: "Alerta",
+                text: "No se encontró un cliente con ese documento",
+                icon: "warning"
+            });
+        }
+
+        try {
+            setLoading(true);
+
+            const response = await IST.get(`/comprobantes/cliente/${clienteId}`);
+            const data = response.data;
+
+            setResultado(Array.isArray(data) ? data : [data]);
+        } catch {
+            Swal.fire({
+                title: "Alerta",
+                text: "No se pudo obtener los comprobantes",
+                icon: "warning"
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 🔥 VER DETALLE
+    const verComprobante = async (id: number) => {
+        try {
+            const response = await IST.get(`/comprobantes/${id}`);
+
+            setDetalle(response.data);
+            setMostrarDetalle(true);
+        } catch {
+            Swal.fire({
+                title: "Error",
+                text: "al obtener el comprobante, por favor refresque la página",
+                icon: "error"
+            });
+        }
+    };
 
     return (
         <>
-            <Br_administrativa
-                onMinimizeChange={setMinimizado}
-            />
+            <Br_administrativa onMinimizeChange={setMinimizado} />
 
             <section
                 id="recuperacion-comprobantes"
-                className={
-                    minimizado
-                        ? "contenido-minimizado"
-                        : "contenido-normal"
-                }
+                className={minimizado ? "contenido-minimizado" : "contenido-normal"}
             >
                 <div className="recuperacion-container">
-
                     <div className="header-recuperacion">
                         <h2>Recuperación de Comprobantes</h2>
                     </div>
 
                     <div className="recuperacion-card">
-
                         <div className="form-grid">
-
                             <div>
                                 <label>Tipo Comprobante</label>
 
                                 <select
                                     value={tipo}
-                                    onChange={(e) =>
-                                        setTipo(e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        setTipo(e.target.value);
+                                        setDocumento("");
+                                        setClienteId(0);
+                                    }}
                                 >
-                                    <option value="1">
-                                        Factura
-                                    </option>
-
-                                    <option value="2">
-                                        Boleta
-                                    </option>
+                                    <option value="1">Factura</option>
+                                    <option value="2">Boleta</option>
                                 </select>
                             </div>
 
-                           <div>
-    <label>Número de Documento</label>
+                            <div>
+                                <label>{tipo === "1" ? "RUC" : "DNI"}</label>
 
-    <input
-        type="number"
-        placeholder="Ingrese DNI o RUC"
-        value={documento}
-        onChange={(e) => {
-
-            const doc = e.target.value;
-
-            setDocumento(doc);
-
-            const encontrado = clientes.find(
-                (c) => c.documento === doc
-            );
-
-            if (encontrado) {
-
-                setClienteId(encontrado.id);
-                setClienteNombre(encontrado.nombre);
-
-            } else {
-
-                setClienteId(0);
-                setClienteNombre("");
-
-            }
-        }}
-    />
-</div>
-
-{/* <div>
-    <label>Cliente</label>
-
-    <input
-        type="text"
-        value={clienteNombre}
-        disabled
-        placeholder="Cliente encontrado"
-    />
-</div>*/}
+                                <input
+                                    type="text"
+                                    placeholder="Ingrese DNI o RUC"
+                                    value={documento}
+                                    onChange={(e) => buscarCliente(e.target.value)}
+                                />
+                            </div>
                         </div>
 
                         <div className="acciones">
-
                             <button
                                 className="btn-buscar"
                                 onClick={buscarPorTipo}
+                                disabled={loading}
                             >
                                 Buscar por Tipo
                             </button>
@@ -283,121 +180,113 @@ useEffect(() => {
                             <button
                                 className="btn-buscar"
                                 onClick={buscarPorCliente}
+                                disabled={loading}
                             >
                                 Buscar por Cliente
                             </button>
-
                         </div>
 
-                       <table className="tabla-comprobantes">
-    <thead>
-        <tr>
-            <th>Serie</th>
-            <th>Número</th>
-            <th>Cliente</th>
-            <th>Fecha</th>
-            <th>Total</th>
-            <th>Acción</th>
-        </tr>
-    </thead>
+                        <table className="tabla-comprobantes">
+                            <thead>
+                                <tr>
+                                    <th>Serie</th>
+                                    <th>Número</th>
+                                    <th>Cliente</th>
+                                    <th>Fecha</th>
+                                    <th>Total</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
 
-    <tbody>
-        {resultado.length === 0 ? (
-            <tr>
-               <td colSpan={6} className="sin-datos">
-                    No existen comprobantes
-                </td>
-            </tr>
-        ) : (
-            resultado.map((item) => (
-                <tr key={item.id}>
-                    <td>{item.serie}</td>
-                    <td>{item.numero}</td>
-                    <td>{item.nombreCliente}</td>
-                    <td>{item.fechaEmision}</td>
-                    <td>S/ {item.total}</td>
+                            <tbody>
+                                {resultado.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="sin-datos">
+                                            No existen comprobantes
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    resultado.map((item) => (
+                                        <tr key={item.id}>
+                                            <td>{item.serie}</td>
+                                            <td>{item.numero}</td>
+                                            <td>{item.nombreCliente}</td>
+                                            <td>{item.fechaEmision}</td>
+                                            <td>S/ {Number(item.total).toFixed(2)}</td>
 
-                    <td>
-                        <button
-                            className="btn-buscar"
-                            onClick={() =>
-                                verComprobante(item.id)
-                            }
-                        >
-                            👁 Ver
-                        </button>
-                    </td>
-                </tr>
-            ))
-        )}
-    </tbody>
-</table>
+                                            <td>
+                                                <button
+                                                    className="btn-buscar"
+                                                    onClick={() => verComprobante(item.id)}
+                                                >
+                                                    👁 Ver
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
 
-{mostrarDetalle && detalle && (
-    <div className="modal-overlay">
+                        {mostrarDetalle && detalle && (
+                            <div className="modal-overlay">
+                                <div className="modal-comprobante">
+                                    <div className="modal-header">
+                                        <h3>
+                                            Comprobante {detalle.serie}-{detalle.numero}
+                                        </h3>
 
-        <div className="modal-comprobante">
+                                        <button
+                                            className="btn-cerrar"
+                                            onClick={() => setMostrarDetalle(false)}
+                                        >
+                                            ✖ Cerrar
+                                        </button>
+                                    </div>
 
-            <div className="modal-header">
-                <h3>
-                    Comprobante {detalle.serie}-{detalle.numero}
-                </h3>
+                                    <div className="info-comprobante">
+                                        <p>
+                                            <strong>Cliente:</strong> {detalle.nombreCliente}
+                                        </p>
 
-                <button
-                    className="btn-cerrar"
-                    onClick={() => setMostrarDetalle(false)}
-                >
-                    ✖ Cerrar
-                </button>
-            </div>
+                                        <p>
+                                            <strong>Fecha:</strong> {detalle.fechaEmision}
+                                        </p>
 
-            <div className="info-comprobante">
-    <p>
-        <strong>Cliente:</strong> {detalle.nombreCliente}
-    </p>
+                                        <p>
+                                            <strong>Abono:</strong> S/{" "}
+                                            {Number(detalle.totalAnticipio || 0).toFixed(2)}
+                                        </p>
 
-    <p>
-        <strong>Fecha:</strong> {detalle.fechaEmision}
-    </p>
+                                        <p>
+                                            <strong>Total:</strong> S/{" "}
+                                            {Number(detalle.total).toFixed(2)}
+                                        </p>
+                                    </div>
 
-    <p>
-        <strong>Abono:</strong> S/
-{Number(detalle.totalAnticipio || 0).toFixed(2)}
-    </p>
+                                    <table className="tabla-comprobantes">
+                                        <thead>
+                                            <tr>
+                                                <th>Descripción</th>
+                                                <th>Cantidad</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
 
-    <p>
-        <strong>Total:</strong> S/
-        {Number(detalle.total).toFixed(2)}
-    </p>
-</div>
-
-            <table className="tabla-comprobantes">
-                <thead>
-                    <tr>
-                        <th>Descripción</th>
-                        <th>Cantidad</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {detalle.detalles?.map(
-                        (d: any, index: number) => (
-                            <tr key={index}>
-                                <td>{d.descripcion}</td>
-                                <td>{d.cantidad}</td>
-                                <td>S/ {d.total}</td>
-                            </tr>
-                        )
-                    )}
-                </tbody>
-            </table>
-
-        </div>
-
-    </div>
-)}                             
-                </div>
+                                        <tbody>
+                                            {detalle.detalles?.map((d: any, index: number) => (
+                                                <tr key={index}>
+                                                    <td>{d.descripcion}</td>
+                                                    <td>{d.cantidad}</td>
+                                                    <td>S/ {Number(d.total).toFixed(2)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </section>
         </>
