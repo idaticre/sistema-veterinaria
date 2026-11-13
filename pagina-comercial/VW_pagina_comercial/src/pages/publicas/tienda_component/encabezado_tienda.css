@@ -1,127 +1,154 @@
+/* Quita el margen por defecto del body solo en la tienda, para que las
+   barras lleguen de borde a borde. */
+body:has(.pagina_tienda) {
+    margin: 0;
+}
+
 .encabezado_tienda {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.7rem 1.5rem;
     background: linear-gradient(90deg, rgb(30, 171, 127) 0%, rgb(25, 150, 110) 100%);
-    margin: 0.6rem 0.6rem 0;
-    gap: 1rem;
-    border-radius: 1rem 1rem 0 0;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.encabezado_interno {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0.6rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
 }
 
 #logo_tienda {
-    width: 10%;
-    min-width: 80px;
-    max-width: 150px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    flex-shrink: 0;
 }
 
 #logo_tienda img {
-    width: 100%;
-    height: auto;
+    height: 84px;
+    width: auto;
+    display: block;
 }
 
 #buscador_tienda {
-    flex: 1;
-    padding: 0.3rem;
     position: relative;
+    flex: 1;
     display: flex;
-    align-items: center;
+    min-width: 0;
+    max-width: 680px;
+    height: 2.9rem;
+    margin: 0 auto;
+    overflow: hidden;
+    background-color: #fff;
+    border-radius: 0.6rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .buscador_icono {
     position: absolute;
-    left: 1.1rem;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
     color: #94a3b8;
     pointer-events: none;
 }
 
 #buscador_tienda input {
+    flex: 1;
     width: 100%;
-    height: 2.9rem;
-    font-size: 1rem;
-    padding: 0 1rem 0 2.6rem;
+    min-width: 0;
+    padding: 0 1rem 0 2.5rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: #0c2436;
+    background: transparent;
     border: none;
-    border-radius: 2rem;
     outline: none;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    transition: box-shadow 0.2s ease;
 }
 
 #buscador_tienda input::placeholder {
     color: #8a8a8a;
 }
 
-#buscador_tienda input:focus {
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.15);
+#buscador_tienda button {
+    width: 3.4rem;
+    border: none;
+    background-color: #158563;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+#buscador_tienda button:hover {
+    background-color: #0f6b4e;
 }
 
 .carrito_btn {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: auto;
+    flex-shrink: 0;
 }
 
 .carrito_btn a {
-    font-size: 1.5rem;
-    padding: 0.65rem;
-    border-radius: 50%;
-    background-color: wheat;
-    border: 2px solid wheat;
-    transition: all 0.25s ease;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    display: inline-block;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    gap: 0.6rem;
+    color: #fff;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
 }
 
 .carrito_btn a:hover {
-    background-color: white;
-    border-color: rgb(30, 171, 127);
-    box-shadow: 0 0 10px rgba(30, 171, 127, 0.5);
-    transform: scale(1.07);
+    opacity: 0.85;
+}
+
+.carrito_icono {
+    position: relative;
+    display: inline-flex;
+    line-height: 1;
 }
 
 .carrito_cantidad {
-    width: 1.6rem;
-    height: 1.6rem;
+    position: absolute;
+    top: -0.6rem;
+    right: -0.7rem;
+    min-width: 1.3rem;
+    height: 1.3rem;
+    padding: 0 0.2rem;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    top: -0.4rem;
-    right: -0.4rem;
-    left: auto;
-    background-color: #e23b3b;
-    color: white;
-    font-size: 0.85rem;
-    font-weight: bold;
-    padding: 0;
-    border-radius: 50%;
-    min-width: 1.6rem;
-    text-align: center;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-    border: 2px solid white;
+    background-color: rgb(228, 173, 106);
+    color: #0c2436;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 999px;
 }
 
 @media (max-width: 700px) {
-    .encabezado_tienda {
+    .encabezado_interno {
         flex-wrap: wrap;
+        gap: 0.7rem;
+        padding: 0.6rem 1rem;
     }
 
-    #logo_tienda {
-        min-width: 60px;
-        max-width: 100px;
+    #logo_tienda img {
+        height: 60px;
     }
 
     #buscador_tienda {
         order: 3;
         flex: 1 1 100%;
+        max-width: none;
+    }
+
+    .carrito_btn {
+        margin-left: auto;
     }
 }

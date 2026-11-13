@@ -39,8 +39,8 @@ type ApiResponse<T> = {
   data: T;
 };
 
-// Este es el mismo tipo que ya usaba la Tienda para pintar las tarjetas.
-// Se mantiene igual a propósito para no tener que tocar el diseño/JSX.
+// Este es el mismo tipo que ya usaba la Tienda para pintar las tarjetas,
+// ahora con el campo "stock" que sí manda el backend.
 export type ArticuloData = {
   id: number;
   titulo: string;
@@ -51,6 +51,7 @@ export type ArticuloData = {
   categoriaID: number;
   idEspecie: number;
   foto: string;
+  stock: number;
 };
 
 // Imagen que se muestra si el producto no tiene foto cargada en el sistema.
@@ -110,6 +111,7 @@ function mapearProducto(dto: ProductoAPI): ArticuloData {
     categoriaID: inferirCategoria(textoParaClasificar),
     idEspecie: inferirEspecie(textoParaClasificar),
     foto: dto.foto?.trim() || FOTO_POR_DEFECTO,
+    stock: Number(dto.stock) || 0,
   };
 }
 
