@@ -55,15 +55,17 @@ CALL registrar_colaborador(
 SELECT @cod_ent, @cod_col, @msg;
 
 -- SP: gestionar_rol_usuario
--- Auto-asigna horarios al asignar el primer rol
-
-CALL gestionar_rol_usuario('ASIGNAR', 1, 1, @msg); SELECT @msg; -- admin_woof → ADMINISTRADOR GENERAL
+-- NOTA: el seed de main BD.sql ya asigna el rol ADMINISTRADOR GENERAL (id=1) a
+-- admin_woof (id=1) en usuarios_roles, así que este CALL daría "ERROR: ya tiene
+-- asignado el rol". Se deja comentado para poder re-ejecutar el script sin ruido.
+-- Si lo necesitas para BD limpia sin el seed, descoméntalo:
+-- CALL gestionar_rol_usuario('ASIGNAR', 1, 1, @msg); SELECT @msg; -- admin_woof → ADMINISTRADOR GENERAL
 
 -- SP: registrar_veterinario
 -- Usamos id_entidad del colaborador 5 (ENT000005)
 
 CALL registrar_veterinario(
-    1, 'Diego Alvarado Quispe', 'M', '45567890', 1,
+    5, 1, 'Diego Alvarado Quispe', 'M', '45567890', 1,
     'diego.alvarado@manadawoof.com', '954321098',
     'Av. Salaverry 234', 'Lima', 'Jesus Maria', NULL,
     1, 'CMP-45678',
@@ -143,7 +145,7 @@ CALL registrar_mascota(
 SELECT @id_masc, @cod_masc, @msg;
 
 CALL registrar_mascota(
-    'Mishi', 'F', 4, 51, 2,
+    'Mishi', 'F', 4, 52, 2,
     '2022-11-05', 'Crema', 1, 1,
     0, NULL, 3.20, 0, 0, 0, 0, NULL,
     @id_masc, @cod_masc, @msg
@@ -160,42 +162,42 @@ SELECT @id_masc, @cod_masc, @msg;
 
 -- SP: gestionar_agenda
 -- p_accion: CREAR
-CALL gestionar_agenda(
+CALL sp_gestionar_agenda(
     'CREAR', NULL, 1, 1, 2,
     DATE_ADD(CURDATE(), INTERVAL 2 DAY), '09:00:00',
-    60, 1, 0.00, 'Primera consulta general',
+    60, 1, 0.00, 80.00, 'Primera consulta general',
     @id_ag, @cod_ag, @msg
 );
 SELECT @id_ag, @cod_ag, @msg;
 
-CALL gestionar_agenda(
+CALL sp_gestionar_agenda(
     'CREAR', NULL, 2, 2, 1,
     DATE_ADD(CURDATE(), INTERVAL 3 DAY), '10:00:00',
-    90, 1, 50.00, 'Bano y corte',
+    90, 1, 50.00, 60.00, 'Bano y corte',
     @id_ag, @cod_ag, @msg
 );
 SELECT @id_ag, @cod_ag, @msg;
 
-CALL gestionar_agenda(
+CALL sp_gestionar_agenda(
     'CREAR', NULL, 3, 3, 2,
     DATE_ADD(CURDATE(), INTERVAL 4 DAY), '11:00:00',
-    45, 2, 0.00, 'Vacunacion anual',
+    45, 2, 0.00, 50.00, 'Vacunacion anual',
     @id_ag, @cod_ag, @msg
 );
 SELECT @id_ag, @cod_ag, @msg;
 
-CALL gestionar_agenda(
+CALL sp_gestionar_agenda(
     'CREAR', NULL, 4, 4, 3,
     DATE_ADD(CURDATE(), INTERVAL 5 DAY), '14:00:00',
-    30, 1, 0.00, 'Control de peso',
+    30, 1, 0.00, 40.00, 'Control de peso',
     @id_ag, @cod_ag, @msg
 );
 SELECT @id_ag, @cod_ag, @msg;
 
-CALL gestionar_agenda(
+CALL sp_gestionar_agenda(
     'CREAR', NULL, 5, 5, 2,
     DATE_ADD(CURDATE(), INTERVAL 6 DAY), '15:00:00',
-    60, 1, 0.00, 'Desparasitacion',
+    60, 1, 0.00, 35.00, 'Desparasitacion',
     @id_ag, @cod_ag, @msg
 );
 SELECT @id_ag, @cod_ag, @msg;
@@ -203,7 +205,7 @@ SELECT @id_ag, @cod_ag, @msg;
 -- SP: gestionar_ingreso_servicio
 -- p_accion: CREAR
 -- Cita 1 → consulta general con veterinario (id=1)
-CALL gestionar_ingreso_servicio(
+CALL sp_gestionar_ingreso_servicio(
     'CREAR', NULL, 1, 1, NULL, 1,
     1, 60, 80.00, 'Consulta general',
     @id_ing, @cod_ing, @total, @msg
@@ -211,7 +213,7 @@ CALL gestionar_ingreso_servicio(
 SELECT @cod_ing, @total, @msg;
 
 -- Cita 2 → bano y corte con colaborador groomer (id=4)
-CALL gestionar_ingreso_servicio(
+CALL sp_gestionar_ingreso_servicio(
     'CREAR', NULL, 2, 3, 4, NULL,
     1, 90, 60.00, 'Bano completo con corte',
     @id_ing, @cod_ing, @total, @msg
@@ -219,7 +221,7 @@ CALL gestionar_ingreso_servicio(
 SELECT @cod_ing, @total, @msg;
 
 -- Cita 3 → vacunacion con veterinario (id=1)
-CALL gestionar_ingreso_servicio(
+CALL sp_gestionar_ingreso_servicio(
     'CREAR', NULL, 3, 1, NULL, 1,
     1, 45, 50.00, 'Vacuna rabia',
     @id_ing, @cod_ing, @total, @msg
@@ -227,7 +229,7 @@ CALL gestionar_ingreso_servicio(
 SELECT @cod_ing, @total, @msg;
 
 -- Cita 4 → control con veterinario (id=1)
-CALL gestionar_ingreso_servicio(
+CALL sp_gestionar_ingreso_servicio(
     'CREAR', NULL, 4, 1, NULL, 1,
     1, 30, 40.00, 'Control de peso y revision',
     @id_ing, @cod_ing, @total, @msg
@@ -235,7 +237,7 @@ CALL gestionar_ingreso_servicio(
 SELECT @cod_ing, @total, @msg;
 
 -- Cita 5 → desparasitacion con veterinario (id=1)
-CALL gestionar_ingreso_servicio(
+CALL sp_gestionar_ingreso_servicio(
     'CREAR', NULL, 5, 2, NULL, 1,
     1, 30, 35.00, 'Desparasitacion interna',
     @id_ing, @cod_ing, @total, @msg
@@ -245,31 +247,31 @@ SELECT @cod_ing, @total, @msg;
 -- SP: gestionar_pago_agenda
 -- id_medio_pago: 1=EFECTIVO, 5=YAPE
 -- id_usuario: 3=caja_milo (quien registra el pago)
-CALL gestionar_pago_agenda(
+CALL sp_gestionar_pago_agenda(
     'CREAR', NULL, 1, 1, 3, 80.00, 'Pago completo efectivo',
     @id_pago, @cod_pago, @total_ab, @saldo, @msg
 );
 SELECT @cod_pago, @total_ab, @saldo, @msg;
 
-CALL gestionar_pago_agenda(
-    'CREAR', NULL, 2, 5, 3, 30.00, 'Abono inicial Yape',
+CALL sp_gestionar_pago_agenda(
+    'CREAR', NULL, 2, 5, 3, 10.00, 'Pago del saldo restante Yape (60 - 50 de abono inicial)',
     @id_pago, @cod_pago, @total_ab, @saldo, @msg
 );
 SELECT @cod_pago, @total_ab, @saldo, @msg;
 
-CALL gestionar_pago_agenda(
+CALL sp_gestionar_pago_agenda(
     'CREAR', NULL, 3, 1, 3, 50.00, 'Pago completo efectivo',
     @id_pago, @cod_pago, @total_ab, @saldo, @msg
 );
 SELECT @cod_pago, @total_ab, @saldo, @msg;
 
-CALL gestionar_pago_agenda(
+CALL sp_gestionar_pago_agenda(
     'CREAR', NULL, 4, 5, 3, 20.00, 'Abono Yape',
     @id_pago, @cod_pago, @total_ab, @saldo, @msg
 );
 SELECT @cod_pago, @total_ab, @saldo, @msg;
 
-CALL gestionar_pago_agenda(
+CALL sp_gestionar_pago_agenda(
     'CREAR', NULL, 5, 1, 3, 35.00, 'Pago completo efectivo',
     @id_pago, @cod_pago, @total_ab, @saldo, @msg
 );
@@ -305,32 +307,44 @@ SELECT @msg, @ok, @tard, @estado;
 CALL gestionar_asistencia(1, CURDATE(), '18:00:00', 'SALIDA',   @msg, @ok, @tard, @estado);
 SELECT @msg, @ok, @tard, @estado;
 
--- SP: registrar_cita_atendida  CITA ATENDIDA + HISTORIA CLINICA
+-- SPs: sp_crear_historia_clinica + sp_registrar_atencion_medica
+-- CITA ATENDIDA + HISTORIA CLINICA
 -- Atendemos la cita 1 (Rocky - consulta general)
-CALL registrar_cita_atendida(
-    1,          -- id_agenda
-    1,          -- id_veterinario
-    NULL,       -- id_colaborador
-    'MEDICA',   -- tipo_visita
+
+-- 1) Crear historia clínica de Rocky (mascota id=1)
+CALL sp_crear_historia_clinica(
+    1,                                      -- id_mascota
+    'Paciente activo sin antecedentes',     -- observaciones_generales
+    @id_his, @cod_his, @msg
+);
+SELECT @id_his, @cod_his, @msg;
+
+-- 2) Registrar la atención médica de la cita 1
+CALL sp_registrar_atencion_medica(
+    @id_his,     -- id_historia_clinica
+    1,           -- id_agenda
+    1,           -- id_veterinario
+    NULL,        -- id_colaborador
+    CURDATE(),   -- fecha_atencion
+    '09:00:00',  -- hora_inicio (cita de 09:00, duracion 60 min)
+    '10:00:00',  -- hora_fin
     'Revision general anual',               -- motivo_consulta
     'Paciente activo sin antecedentes',     -- anamnesis
     'Sin hallazgos relevantes',             -- examen_fisico
-    'FC:80 FR:20 TLL:2seg',                -- signos_vitales
-    28.50,      -- peso_kg
-    38.50,      -- temperatura_c
+    'FC:80 FR:20 TLL:2seg',                 -- signos_vitales
+    28.50,       -- peso_kg
+    38.50,       -- temperatura_c
     'Paciente sano',                        -- diagnostico
     'Vitaminas y control en 6 meses',       -- tratamiento
-    DATE_ADD(CURDATE(), INTERVAL 6 MONTH), -- proximo_control
-    NULL, NULL, NULL,                       -- datos esteticos
-    NULL, NULL, NULL,                       -- datos hospedaje
     'Primera visita del año',               -- observaciones
+    DATE_ADD(CURDATE(), INTERVAL 6 MONTH),  -- proximo_control
     @id_reg, @cod_reg, @msg
 );
 SELECT @id_reg, @cod_reg, @msg;
 
--- SP: subir_archivo_clinico
-CALL subir_archivo_clinico(
-    1, 4,
+-- SP: sp_subir_archivo_clinico
+CALL sp_subir_archivo_clinico(
+    @id_reg, 4,
     'fotografia_rocky_consulta_general',
     'jpg',
     'Foto de revision general Rocky',
@@ -399,4 +413,4 @@ SELECT 'historia_clinica',                    COUNT(*) FROM historia_clinica
 UNION ALL
 SELECT 'historia_clinica_registros',          COUNT(*) FROM historia_clinica_registros
 UNION ALL
-SELECT 'historia_clinica_archivos',           COUNT(*) FROM historia_clinica_archivos;CALL registrar_veterinario(     5, 1, 'Diego Alvarado Quispe', 'M', '45567890', 1,     'diego.alvarado@manadawoof.com', '954321098',     'Av. Salaverry 234', 'Lima', 'Jesus Maria', NULL,     1, 'CMP-45678',     @cod_ent, @cod_col, @cod_vet, @msg )
+SELECT 'historia_clinica_archivos',           COUNT(*) FROM historia_clinica_archivos;

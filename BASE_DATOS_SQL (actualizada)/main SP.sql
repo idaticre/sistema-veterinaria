@@ -1800,7 +1800,7 @@ BEGIN
     horarios_vigentes AS (
         SELECT 
             col.id AS id_colaborador,
-            CONCAT(col.nombres, ' ', col.apellidos) AS colaborador,
+            ent.nombre AS colaborador,
             cal.fecha,
             CASE DAYOFWEEK(cal.fecha) WHEN 1 THEN 7 ELSE DAYOFWEEK(cal.fecha)-1 END AS id_dia_semana,
             ds.nombre AS dia_semana,
@@ -1812,6 +1812,7 @@ BEGIN
             COALESCE(hd.hora_fin, hb.hora_fin) AS hora_fin_real,
             IF(hb.id IS NULL OR (hd.hora_inicio IS NULL AND hd.hora_fin IS NULL), 1, 0) AS es_descanso
         FROM colaboradores col
+        JOIN entidades ent ON ent.id = col.id_entidad
         CROSS JOIN calendario cal
         LEFT JOIN dias_semana ds ON ds.id = WEEKDAY(cal.fecha)+1
         LEFT JOIN asignacion_horarios ah ON ah.id_colaborador = col.id
@@ -3438,7 +3439,7 @@ main_block: BEGIN
     END IF;
     
     -- Validar que la historia está activa
-    IF NOT EXISTS (SELECT 1 FROM historia_clinica WHERE id = p_id_historia_clinica AND activa = 1) THEN
+    IF NOT EXISTS (SELECT 1 FROM historia_clinica WHERE id = p_id_historia_clinica AND activo = 1) THEN
         SET p_mensaje = 'ERROR: Historia clínica no está activa.';
         LEAVE main_block;
     END IF;
@@ -3955,24 +3956,29 @@ BEGIN
             
             m.id AS mascota_id,
             m.nombre AS mascota_nombre,
-            m.especie,
-            m.raza,
-            
-            CONCAT(c.nombres, ' ', c.apellidos) AS cliente_nombre,
-            c.telefono AS cliente_telefono,
-            
+            e.nombre AS especie,
+            r.nombre AS raza,
+
+            ent.nombre AS cliente_nombre,
+            ent.telefono AS cliente_telefono,
+
             a.codigo AS agenda_codigo,
-            
-            CONCAT(vet.nombres, ' ', vet.apellidos) AS veterinario_nombre,
-            
+
+            ent_vet.nombre AS veterinario_nombre,
+
             ehc.nombre AS estado
-            
+
         FROM historia_clinica_registros reg
         INNER JOIN historia_clinica hc ON reg.id_historia_clinica = hc.id
         INNER JOIN mascotas m ON hc.id_mascota = m.id
+        LEFT JOIN especies e ON e.id = m.id_especie
+        LEFT JOIN razas r ON r.id = m.id_raza
         INNER JOIN clientes c ON m.id_cliente = c.id
+        INNER JOIN entidades ent ON ent.id = c.id_entidad
         LEFT JOIN agenda a ON reg.id_agenda = a.id
         LEFT JOIN veterinarios vet ON reg.id_veterinario = vet.id
+        LEFT JOIN colaboradores col_vet ON vet.id_colaborador = col_vet.id
+        LEFT JOIN entidades ent_vet ON col_vet.id_entidad = ent_vet.id
         LEFT JOIN estado_historia_clinica ehc ON reg.id_estado = ehc.id
         WHERE reg.id = p_id_registro;
         

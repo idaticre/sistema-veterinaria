@@ -57,10 +57,11 @@ public class ComprobanteSunatMapper {
                 )
 
                 .clienteTipoDeDocumento(
-                        comprobante.getCliente() != null
-                                && comprobante.getCliente().getEntidad().getTipoDocumento() != null
-                                ? comprobante.getCliente().getEntidad().getTipoDocumento().getId()
-                                : null
+                        codigoSunatTipoDocumento(
+                                comprobante.getCliente() != null
+                                        ? comprobante.getCliente().getEntidad().getTipoDocumento()
+                                        : null
+                        )
                 )
                 .clienteNumeroDeDocumento(
                         comprobante.getCliente() != null
@@ -118,8 +119,31 @@ public class ComprobanteSunatMapper {
                 .build();
     }
 
-    private static ComprobanteSunatDTO.ItemSunatDTO toItemSunatDTO(ComprobanteDetalleEntity detalle) {
+    /**
+     * Traduce el tipo de documento del catálogo local (BD) al codigo de SUNAT/NUBEFACT.
+     * Los IDs NO coinciden entre ambos catalogos (ej. en la BD el RUC es id 2, pero
+     * SUNAT lo identifica con el codigo 6), por eso se traduce por DESCRIPCION.
+     * Codigos SUNAT: 1=DNI, 4=Carnet de extranjeria, 6=RUC, 7=Pasaporte.
+     */
+    private static Integer codigoSunatTipoDocumento(
+            com.vet.manadawoof.entity.TipoDocumentoEntity tipoDocumento) {
 
+        if (tipoDocumento == null || tipoDocumento.getDescripcion() == null) {
+            return null;
+        }
+
+        String descripcion = tipoDocumento.getDescripcion().trim().toUpperCase();
+
+        if (descripcion.startsWith("DNI")) return 1;
+        if (descripcion.startsWith("RUC")) return 6;
+        if (descripcion.startsWith("CARNET")) return 4;
+        if (descripcion.startsWith("PASAPORTE")) return 7;
+
+        // P. NAC., OTROS, etc.: sin codigo SUNAT estandar
+        return null;
+    }
+
+    private static ComprobanteSunatDTO.ItemSunatDTO toItemSunatDTO(ComprobanteDetalleEntity detalle) {
         return ComprobanteSunatDTO.ItemSunatDTO.builder()
 
                 .unidadDeMedida(

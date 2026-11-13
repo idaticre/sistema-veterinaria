@@ -21,14 +21,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ComprobanteServiceImpl implements ComprobanteService {
@@ -38,6 +41,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
 
     private final AgendaRepository agendaRepository;
     private final ComprobanteRepository comprobanteRepository;
+    private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${sunat.api.url}")
@@ -297,34 +301,99 @@ public class ComprobanteServiceImpl implements ComprobanteService {
 
         try {
             Map respuesta = restTemplate.postForObject(sunatApiUrl, entity, Map.class);
+            log.info("Respuesta NUBEFACT: {}", respuesta);
             if (respuesta == null) return Map.of("error", "Sin respuesta de la API");
 
-            if (respuesta.containsKey("data") && respuesta.get("data") instanceof Map) {
-                Map<String, Object> data = (Map<String, Object>) respuesta.get("data");
-                if ("true".equals(String.valueOf(data.get("error")))) {
-                    return Map.of(
-                        "error", "Error de SUNAT",
-                        "codigo", data.getOrDefault("respuesta_sunat_codigo", ""),
-                        "descripcion", data.getOrDefault("respuesta_sunat_descripcion", "")
-                    );
-                }
+            // NUBEFACT responde un JSON PLANO.
+            // Formato de error: {"error": true, "mensaje": "..."}
+            if (isTrue(respuesta.get("error"))) {
+                return Map.of(
+                    "error", "Error al generar el comprobante",
+                    "mensaje", String.valueOf(respuesta.getOrDefault("mensaje", ""))
+                );
             }
+          
+
+            // Formato de exito: {"aceptada_por_sunat": true/false, "sunat_description": "...",
+            // "sunat_responsecode": "...", "enlace_del_pdf": "...", ...}
+            boolean aceptadaPorSunat = isTrue(respuesta.get("aceptada_por_sunat"));
 
             String enlacePdf = String.valueOf(respuesta.getOrDefault("enlace_del_pdf", ""));
-            comprobante.setPdfurlNubefact(enlacePdf);
-            comprobanteRepository.save(comprobante);
+
+            // Deteccion de estado:
+            //  - aceptada_por_sunat = true                  → ACEPTADA
+            //  - aceptada = false y sunat_description null  → PENDIENTE (emitida y firmada,
+            //    esperando acuse de SUNAT; el PDF ya existe y sera valido al aceptarse)
+            //  - aceptada = false y sunat_description texto → RECHAZADA (con codigo y motivo)
+            String sunatDescripcion = respuesta.get("sunat_description") == null
+                ? null : String.valueOf(respuesta.get("sunat_description"));
+
+            if (aceptadaPorSunat) {
+                comprobante.setPdfurlNubefact(enlacePdf);
+                comprobanteRepository.save(comprobante);
+
+                return Map.of(
+                    "estado", "ACEPTADA",
+                    "mensaje", "Comprobante aceptado por SUNAT",
+                    "enlace_del_pdf", enlacePdf
+                );
+            }
+
+            if (sunatDescripcion == null) {
+                // PENDIENTE: el documento existe en NUBEFACT (hash, XML y PDF generados)
+                comprobante.setPdfurlNubefact(enlacePdf);
+                comprobanteRepository.save(comprobante);
+
+                return Map.of(
+                    "estado", "PENDIENTE",
+                    "mensaje", "Comprobante emitido y enviado a SUNAT. Pendiente de acuse de SUNAT.",
+                    "enlace_del_pdf", enlacePdf
+                );
+            }
+
+            // RECHAZADA: no se guarda el enlace (no hay documento valido)
+            return Map.of(
+                "estado", "RECHAZADA",
+                "error", "Comprobante rechazado por SUNAT",
+                "sunat_responsecode", String.valueOf(respuesta.getOrDefault("sunat_responsecode", "")),
+                "sunat_description", sunatDescripcion,
+                "sunat_note", String.valueOf(respuesta.getOrDefault("sunat_note", "")),
+                "sunat_soap_error", String.valueOf(respuesta.getOrDefault("sunat_soap_error", ""))
+            );
+        } catch (HttpClientErrorException e) {
+            // NUBEFACT rechaza peticiones invalidas con HTTP 4xx y un cuerpo {"errors": "...", "codigo": N}
+            String cuerpo = e.getResponseBodyAsString();
+            log.error("NUBEFACT rechazo la peticion ({}): {}", e.getStatusCode(), cuerpo);
+
+            String mensaje = cuerpo;
+            String codigo = String.valueOf(e.getStatusCode().value());
+            try {
+                Map errorBody = objectMapper.readValue(cuerpo, Map.class);
+                if (errorBody.get("errors") != null) mensaje = String.valueOf(errorBody.get("errors"));
+                else if (errorBody.get("mensaje") != null) mensaje = String.valueOf(errorBody.get("mensaje"));
+                if (errorBody.get("codigo") != null) codigo = String.valueOf(errorBody.get("codigo"));
+            } catch (Exception ignored) {
+                // cuerpo no era JSON valido; se devuelve el texto crudo
+            }
 
             return Map.of(
-                "mensaje", "Comprobante enviado y registrado correctamente",
-                "enlace_del_pdf", enlacePdf
+                "error", "NUBEFACT rechazo el comprobante",
+                "codigo", codigo,
+                "mensaje", mensaje
             );
         } catch (Exception e) {
+            log.error("Error al llamar NUBEFACT ({}): {}", sunatApiUrl, e.getMessage(), e);
             return Map.of(
                 "error", "Error al conectar con la API de SUNAT",
                 "detalle", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
             );
         }
     }
+    private static boolean isTrue(Object valor) {
+        if (valor instanceof Boolean b) return b;
+        return "true".equalsIgnoreCase(String.valueOf(valor));
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<ComprobanteResponseDTO> listarComprobantes() {

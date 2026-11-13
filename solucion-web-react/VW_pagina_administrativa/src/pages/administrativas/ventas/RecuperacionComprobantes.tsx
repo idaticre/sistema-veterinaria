@@ -233,7 +233,8 @@ const RecuperacionComprobantes = () => {
                                 <div className="modal-comprobante">
                                     <div className="modal-header">
                                         <h3>
-                                            Comprobante {detalle.serie}-{detalle.numero}
+                                            {Number(detalle.tipoComprobante) === 1 ? "Factura" : "Boleta"}{" "}
+                                            {detalle.serie}-{detalle.numero}
                                         </h3>
 
                                         <button
@@ -244,31 +245,77 @@ const RecuperacionComprobantes = () => {
                                         </button>
                                     </div>
 
-                                    <div className="info-comprobante">
+                                    {/* DATOS DEL CLIENTE */}
+                                    <div className="info-grid">
                                         <p>
                                             <strong>Cliente:</strong> {detalle.nombreCliente}
                                         </p>
-
                                         <p>
-                                            <strong>Fecha:</strong> {detalle.fechaEmision}
+                                            <strong>Documento:</strong> {detalle.clienteNumeroDoc || "—"}
                                         </p>
-
                                         <p>
-                                            <strong>Abono:</strong> S/{" "}
-                                            {Number(detalle.totalAnticipio || 0).toFixed(2)}
+                                            <strong>Fecha de emisión:</strong> {detalle.fechaEmision}
                                         </p>
-
                                         <p>
-                                            <strong>Total:</strong> S/{" "}
+                                            <strong>Dirección:</strong> {detalle.clienteDireccion || "—"}
+                                        </p>
+                                        <p>
+                                            <strong>Correo:</strong> {detalle.clienteCorreo || "—"}
+                                        </p>
+                                        <p>
+                                            <strong>Moneda:</strong>{" "}
+                                            {Number(detalle.moneda) === 1 ? "Soles (S/)" : `ID ${detalle.moneda}`}
+                                        </p>
+                                    </div>
+
+                                    {/* MONTOS */}
+                                    <div className="montos-comprobante">
+                                        <p>
+                                            <strong>Subtotal (sin IGV):</strong> S/{" "}
+                                            {Number(detalle.totalGravada || 0).toFixed(2)}
+                                        </p>
+                                        <p>
+                                            <strong>IGV (18%):</strong> S/{" "}
+                                            {Number(detalle.totalIGV || 0).toFixed(2)}
+                                        </p>
+                                        {Number(detalle.totalAnticipio || 0) > 0 && (
+                                            <p>
+                                                <strong>Abono aplicado:</strong> S/{" "}
+                                                {Number(detalle.totalAnticipio).toFixed(2)}
+                                            </p>
+                                        )}
+                                        <p className="total-final">
+                                            <strong>TOTAL:</strong> S/{" "}
                                             {Number(detalle.total).toFixed(2)}
                                         </p>
                                     </div>
 
+                                    {/* VER COMPROBANTE EN NUBEFACT */}
+                                    {detalle.pdfurlNubefact ? (
+                                        <button
+                                            className="btn-ver-pdf"
+                                            onClick={() =>
+                                                window.open(detalle.pdfurlNubefact, "_blank", "noopener")
+                                            }
+                                        >
+                                            🧾 Ver comprobante (PDF)
+                                        </button>
+                                    ) : (
+                                        <p className="pdf-no-disponible">
+                                            ⚠ PDF no disponible: el comprobante aún no fue aceptado
+                                            por SUNAT o fue rechazado.
+                                        </p>
+                                    )}
+
+                                    {/* DETALLE DE SERVICIOS */}
                                     <table className="tabla-comprobantes">
                                         <thead>
                                             <tr>
                                                 <th>Descripción</th>
-                                                <th>Cantidad</th>
+                                                <th>Cant.</th>
+                                                <th>P. Unit. (con IGV)</th>
+                                                <th>Subtotal (sin IGV)</th>
+                                                <th>IGV</th>
                                                 <th>Total</th>
                                             </tr>
                                         </thead>
@@ -277,12 +324,21 @@ const RecuperacionComprobantes = () => {
                                             {detalle.detalles?.map((d: any, index: number) => (
                                                 <tr key={index}>
                                                     <td>{d.descripcion}</td>
-                                                    <td>{d.cantidad}</td>
+                                                    <td>{Number(d.cantidad)}</td>
+                                                    <td>S/ {Number(d.precioUnitario).toFixed(2)}</td>
+                                                    <td>S/ {Number(d.subtotal).toFixed(2)}</td>
+                                                    <td>S/ {Number(d.igv).toFixed(2)}</td>
                                                     <td>S/ {Number(d.total).toFixed(2)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
+
+                                    {detalle.observaciones && (
+                                        <p className="observaciones-modal">
+                                            <strong>Observaciones:</strong> {detalle.observaciones}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         )}

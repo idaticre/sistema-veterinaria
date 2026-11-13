@@ -226,14 +226,15 @@ const eliminarServicio = (index: number) => {
   }, [citasCliente, buscarCodigo]);
 
   // 🔥 TOTALES
+ // Los precios (s.precio) son el precio FINAL que paga el cliente (con IGV incluido).
  const subtotalServicios = servicios.reduce(
   (acc, s) => acc + s.subtotal,
   0
 );
 
-const subtotal = subtotalServicios - totalAnticipio;
-const igv = subtotal * 0.18;
-const total = subtotal + igv;
+const total = subtotalServicios;    // Σ líneas con IGV = monto final
+const totalGravada = total / 1.18;  // base imponible (sin IGV)
+const igv = totalGravada * 0.18;    // IGV (18%)
 
   // 🔥 GUARDAR
   // 🛠 CORREGIDO: también apuntaba a Render con fetch() directo.
@@ -250,7 +251,7 @@ const request = {
 
   tipoMonedaId: 1,
 
-  totalGravada: subtotal,
+  totalGravada: totalGravada,
   totalInafecta: 0,
   totalExonerada: 0,
   totalIGV: igv,
@@ -276,24 +277,53 @@ const request = {
     itemId: index + 1,
     descripcion: s.descripcion,
     cantidad: s.cantidad,
-    valorUnitario: s.precio,
-    precioUnitario: s.precio,
+    valorUnitario: s.precio / 1.18, // precio sin IGV
+    precioUnitario: s.precio,       // precio con IGV (valorUnitario * 1.18)
     descuento: 0,
-    subtotal: s.subtotal,
+    subtotal: s.subtotal / 1.18,    // valor de venta (sin IGV)
     tipoIgvId: 1,
-    igv: s.subtotal * 0.18,
+    igv: (s.subtotal / 1.18) * 0.18,
     impuestosBolsas: 0,
-    total: s.subtotal * 1.18
+    total: s.subtotal               // subtotal línea con IGV (precio * cantidad)
   }))
 };
-    await IST.post("/comprobantes/generar", request);
+    let respuestaSunat: any = null;
+    try {
+      respuestaSunat = (await IST.post("/comprobantes/generar", request)).data;
+    } catch (postError: any) {
+      Swal.fire({
+        title: "Error",
+        text: postError?.response?.data?.error || "No se pudo generar el comprobante",
+        icon: "error"
+      });
+      return;
+    }
 
-    Swal.fire({
-        title: "Éxito",
-        text: "operación exitosa",
+    // El backend responde {estado: "ACEPTADA" | "PENDIENTE" | "RECHAZADA", ...}
+    const estado = respuestaSunat?.estado || "DESCONOCIDO";
+
+    if (estado === "ACEPTADA") {
+      Swal.fire({
+        title: "Comprobante aceptado por SUNAT",
+        html: `Comprobante generado correctamente.`,
         icon: "success"
       });
-      setServicios([]);
+    } else if (estado === "PENDIENTE") {
+      Swal.fire({
+        title: "Comprobante pendiente de SUNAT",
+        html: `El comprobante fue emitido y enviado a SUNAT. La aceptación se confirmará en unos minutos.`,
+        icon: "info"
+      });
+    } else {
+      Swal.fire({
+        title: "Comprobante rechazado por SUNAT",
+        html: `${respuestaSunat?.sunat_description || respuestaSunat?.mensaje || "Ver el log del backend"}`,
+        icon: "error"
+      });
+      return;
+    }
+
+    setServicios([]);
 
 setServicio("");
 setCantidad(1);
@@ -354,7 +384,7 @@ setComprobanteEmitido(true);
 
     const finalY = (doc as any).lastAutoTable.finalY + 15;
 
-    doc.text(`Subtotal: S/ ${subtotal.toFixed(2)}`, 14, finalY);
+    doc.text(`Subtotal (sin IGV): S/ ${totalGravada.toFixed(2)}`, 14, finalY);
     doc.text(`IGV (18%): S/ ${igv.toFixed(2)}`, 14, finalY + 10);
     doc.text(`TOTAL: S/ ${total.toFixed(2)}`, 14, finalY + 20);
 
@@ -561,7 +591,7 @@ setComprobanteEmitido(true);
 
             <div className="totales">
               <h3>Total Servicios: S/{subtotalServicios.toFixed(2)}</h3>
-              <h3>Subtotal: S/{subtotal.toFixed(2)}</h3>
+              <h3>Subtotal (sin IGV): S/{totalGravada.toFixed(2)}</h3>
               <h3>IGV (18%): S/{igv.toFixed(2)}</h3>
               <h2>Total: S/{total.toFixed(2)}</h2>
             </div>

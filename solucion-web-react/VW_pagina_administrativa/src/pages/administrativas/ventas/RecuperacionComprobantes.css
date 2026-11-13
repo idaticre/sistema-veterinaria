@@ -176,3 +176,64 @@
   margin: 6px 0;
   color: var(--color-subtitulo);
 }
+
+/* NUEVO: grilla de datos del cliente en el modal */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 25px;
+  margin-bottom: 20px;
+}
+
+.info-grid p {
+  margin: 6px 0;
+  color: var(--color-subtitulo);
+}
+
+/* NUEVO: bloque de montos (subtotal/igv/total) */
+.montos-comprobante {
+  background: #f7f7f7;
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+}
+
+.montos-comprobante p {
+  margin: 4px 0;
+  color: var(--color-subtitulo);
+}
+
+.montos-comprobante .total-final {
+  color: var(--color-titulo);
+  font-size: 1.15em;
+}
+
+/* NUEVO: boton para abrir el PDF de NUBEFACT */
+.btn-ver-pdf {
+  background: var(--color-editar);
+  color: var(--color-titulo);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 20px;
+  transition: .3s;
+}
+
+.btn-ver-pdf:hover {
+  transform: scale(1.03);
+}
+
+/* NUEVO: aviso cuando el PDF aun no existe */
+.pdf-no-disponible {
+  color: var(--color-peligro);
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+/* NUEVO: observaciones al final del modal */
+.observaciones-modal {
+  margin-top: 15px;
+  color: var(--color-subtitulo);
+}
