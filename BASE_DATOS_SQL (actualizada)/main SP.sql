@@ -1,15 +1,4 @@
--- ================================================================
--- SCRIPT: PROCEDIMIENTOS ALMACENADOS CRUD - SISTEMA VETERINARIA_WOOF
--- ================================================================
-USE vet_manada_woof;
 
--- BLOQUE 01 PROCEDIMIENTOS ALMACENADOS CRUD
-
--- ========================================
--- SP: gestionar_rol_usuario
--- Asigna o elimina roles de usuarios.
--- Un usuario puede tener varios roles y un rol puede estar en varios usuarios.
--- ========================================
 DROP PROCEDURE IF EXISTS gestionar_rol_usuario;
 DELIMITER $$
 
@@ -4471,36 +4460,45 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS sp_productos_listar;
 DELIMITER $$
 CREATE PROCEDURE sp_productos_listar(
-    IN  p_pagina           INT,
-    IN  p_tamanio          INT,
-    OUT p_total_registros  INT
+    IN  p_pagina          INT,
+    IN  p_tamanio         INT,
+    IN  p_busqueda        VARCHAR(128),
+    IN  p_solo_activos    BOOLEAN,
+    OUT p_total_registros INT
 )
 BEGIN
-    DECLARE v_offset INT;
-    SET v_offset = p_pagina * p_tamanio;
+    DECLARE v_offset   INT;
+    DECLARE v_busqueda VARCHAR(140);
+
+    IF p_pagina  IS NULL OR p_pagina  < 0 THEN SET p_pagina  = 0;  END IF;
+    IF p_tamanio IS NULL OR p_tamanio < 1 THEN SET p_tamanio = 10; END IF;
+
+    SET v_offset   = p_pagina * p_tamanio;
+    SET v_busqueda = CONCAT('%', IFNULL(TRIM(p_busqueda), ''), '%');
 
     SELECT COUNT(*) INTO p_total_registros
     FROM productos p
     INNER JOIN proveedores pv ON p.proveedor_id = pv.id
-    INNER JOIN entidades   e  ON pv.id_entidad  = e.id;
+    INNER JOIN entidades   e  ON pv.id_entidad  = e.id
+    WHERE (IFNULL(p_solo_activos, FALSE) = FALSE OR p.activo = TRUE)
+      AND (p.nombre LIKE v_busqueda
+           OR IFNULL(p.marca, '')  LIKE v_busqueda
+           OR IFNULL(p.codigo, '') LIKE v_busqueda);
 
     SELECT
-        p.id,
-        p.codigo,
-        p.nombre,
-        p.descripcion,
-        p.marca,
-        p.precio,
-        p.stock,
+        p.id, p.codigo, p.nombre, p.descripcion, p.marca, p.precio, p.stock,
         p.proveedor_id,
-        pv.codigo   AS codigo_proveedor,
-        e.nombre    AS nombre_proveedor,
-        p.foto,
-        p.activo
+        pv.codigo AS codigo_proveedor,
+        e.nombre  AS nombre_proveedor,
+        p.foto, p.activo
     FROM productos p
     INNER JOIN proveedores pv ON p.proveedor_id = pv.id
     INNER JOIN entidades   e  ON pv.id_entidad  = e.id
-    ORDER BY p.nombre
+    WHERE (IFNULL(p_solo_activos, FALSE) = FALSE OR p.activo = TRUE)
+      AND (p.nombre LIKE v_busqueda
+           OR IFNULL(p.marca, '')  LIKE v_busqueda
+           OR IFNULL(p.codigo, '') LIKE v_busqueda)
+    ORDER BY p.nombre, p.id
     LIMIT p_tamanio OFFSET v_offset;
 END $$
 DELIMITER ;

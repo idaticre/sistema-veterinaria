@@ -524,7 +524,8 @@ export interface Productos {
   marca?: string,
   precio: number,
   stock: number,
-  proveedor: string,
+  proveedorId: number,
+  nombreProveedor?: string,
   foto?: string,
   activo: boolean
 }

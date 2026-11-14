@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Productos, ProveedorResponse } from '../../../components/interfaces/interfaces';
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
 import Paginacion from "../../../components/paginacion/Paginacion";
 import IST from '../../../components/proteccion/IST';
 import "./inventario.css";
 import Swal from "sweetalert2";
+
+
 
 const PRODUCTO_VACIO = {
     nombre: "", descripcion: "", marca: "", precio: 0,
@@ -17,7 +19,6 @@ function Inventario() {
     const [minimizado, setMinimizado]           = useState(false);
     const [productos, setProductos]             = useState<Productos[]>([]);
     const [proveedores, setProveedores]         = useState<ProveedorResponse[]>([]);
-    const [busqueda, setBusqueda]               = useState("");
     const [soloActivos, setSoloActivos]         = useState(true);
     const [mostrarModal, setMostrarModal]       = useState(false);
     const [modoModal, setModoModal]             = useState<ModoModal>("crear");
@@ -28,18 +29,50 @@ function Inventario() {
     const [tamanio, setTamanio]                 = useState(10);
     const [totalPaginas, setTotalPaginas]       = useState(0);
     const [totalRegistros, setTotalRegistros]   = useState(0);
+    const [busqueda, setBusqueda]               = useState("");
+    const [busquedaAplicada, setBusquedaAplicada] = useState("");
+    const ultimaPeticion = useRef(0);
 
     useEffect(() => { obtenerProveedores(); }, []);
-    useEffect(() => { obtenerProductos(pagina, tamanio); }, [pagina, tamanio]);
+    useEffect(() => {
+        const t = setTimeout(() => {
+            setBusquedaAplicada(busqueda.trim());
+            setPagina(0);
+        }, 400);
+        return () => clearTimeout(t);
+    }, [busqueda]);
 
-    const obtenerProductos = async (pag = pagina, tam = tamanio) => {
+    useEffect(() => { obtenerProductos(); }, [pagina, tamanio, busquedaAplicada, soloActivos]);
+
+    const obtenerProductos = async () => {
+    const idPeticion = ++ultimaPeticion.current;
         try {
-            const res = await IST.get(`/productos?pagina=${pag}&tamanio=${tam}`);
+            const params = new URLSearchParams({
+                pagina: String(pagina),
+                tamanio: String(tamanio),
+                soloActivos: String(soloActivos),
+            });
+            if (busquedaAplicada) params.set("busqueda", busquedaAplicada);
+
+            const res = await IST.get(`/productos?${params.toString()}`);
+
+            // Ignorar respuestas viejas (clics rápidos en la paginación o al escribir)
+            if (idPeticion !== ultimaPeticion.current) return;
+
             const data = res.data.data;
+            const total = data.totalPaginas ?? 0;
+
+            // Si la página ya no existe, ir a la última válida (re-dispara el useEffect)
+            if (total > 0 && pagina >= total) {
+                setPagina(total - 1);
+                return;
+            }
+
             setProductos(data.contenido || []);
-            setTotalPaginas(data.totalPaginas ?? 0);
+            setTotalPaginas(total);
             setTotalRegistros(data.totalRegistros ?? 0);
         } catch {
+            if (idPeticion !== ultimaPeticion.current) return;
             Swal.fire({ title: "Error al cargar productos", text: "Por favor, refresque la página", icon: "error" });
         }
     };
@@ -53,12 +86,6 @@ function Inventario() {
         }
     };
 
-    const productosFiltrados = productos.filter(p => {
-        const coincideNombre = p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-                               (p.marca ?? "").toLowerCase().includes(busqueda.toLowerCase());
-        return coincideNombre && (soloActivos ? p.activo : true);
-    });
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         setForm(prev => ({
@@ -71,7 +98,7 @@ function Inventario() {
     const abrirCrear = () => { setForm(PRODUCTO_VACIO); setIdEdicion(null); setModoModal("crear"); setMostrarModal(true); };
     const abrirEditar = (p: Productos) => {
         setForm({ nombre: p.nombre, descripcion: p.descripcion ?? "", marca: p.marca ?? "",
-                  precio: p.precio, stock: p.stock, proveedorId: 0, foto: p.foto ?? "", activo: p.activo });
+          precio: p.precio, stock: p.stock, proveedorId: p.proveedorId, foto: p.foto ?? "", activo: p.activo });
         setIdEdicion(p.id); setModoModal("editar"); setMostrarModal(true);
     };
     const abrirVer = (p: Productos) => { abrirEditar(p); setModoModal("ver"); };
@@ -91,7 +118,7 @@ function Inventario() {
         try {
             await IST.post("/productos", form);
             Swal.fire({ title: "Producto registrado correctamente", icon: "success" });
-            cerrarModal(); obtenerProductos(pagina, tamanio);
+            cerrarModal(); obtenerProductos();
         } catch (err: any) {
             Swal.fire({ title: "Error al registrar", text: err.response?.data?.message || "Inténtelo de nuevo", icon: "error" });
         } finally { setGuardando(false); }
@@ -103,7 +130,7 @@ function Inventario() {
         try {
             await IST.put(`/productos/${idEdicion}`, form);
             Swal.fire({ title: "Producto actualizado correctamente", icon: "success" });
-            cerrarModal(); obtenerProductos(pagina, tamanio);
+            cerrarModal(); obtenerProductos();
         } catch (err: any) {
             Swal.fire({ title: "Error al actualizar", text: err.response?.data?.message || "Inténtelo de nuevo", icon: "error" });
         } finally { setGuardando(false); }
@@ -117,7 +144,7 @@ function Inventario() {
         try {
             await IST.delete(`/productos/${p.id}`);
             Swal.fire({ title: "Producto desactivado correctamente", icon: "success" });
-            obtenerProductos(pagina, tamanio);
+            obtenerProductos();
         } catch (err: any) {
             Swal.fire({ title: "Error al desactivar", text: err.response?.data?.message || "Inténtelo de nuevo", icon: "error" });
         }
@@ -137,7 +164,7 @@ function Inventario() {
                                 value={busqueda} onChange={e => setBusqueda(e.target.value)} />
                         </div>
                         <label className="filtro-activos">
-                            <input type="checkbox" checked={soloActivos} onChange={e => setSoloActivos(e.target.checked)} />
+                            <input type="checkbox" checked={soloActivos} onChange={e => { setSoloActivos(e.target.checked); setPagina(0); }} />
                             Solo activos
                         </label>
                         <button className="boton-goated anadir-a-goated animacion-goated" onClick={abrirCrear}>
@@ -147,10 +174,8 @@ function Inventario() {
 
                     <div className="listar-registros">
                         <div className="registros">
-                            {productosFiltrados.length === 0 && (
-                                <p style={{ padding: "1rem", color: "#888" }}>No hay productos en esta página.</p>
-                            )}
-                            {productosFiltrados.map(p => (
+                            {productos.length === 0 && (<p style={{ padding: "1rem", color: "#888" }}>No hay productos que coincidan.</p>)}
+                            {productos.map(p => (
                                 <div className={`tarjeta-producto ${!p.activo ? "tarjeta-inactiva" : ""}`} key={p.id}>
                                     <div className="tarjeta-imagen">
                                         {p.foto
@@ -163,7 +188,7 @@ function Inventario() {
                                         <h3 className="tarjeta-nombre-producto">{p.nombre}</h3>
                                         {p.marca && <p className="tarjeta-marca">{p.marca}</p>}
                                         {p.descripcion && <p className="tarjeta-descripcion">{p.descripcion}</p>}
-                                        <p className="tarjeta-proveedor">Proveedor: <span>{p.proveedor}</span></p>
+                                        <p className="tarjeta-proveedor">Proveedor: <span>{p.nombreProveedor ?? "—"}</span></p>
                                     </div>
                                     <div className="tarjeta-pie">
                                         <div className="tarjeta-precio">S/ {Number(p.precio).toFixed(2)}</div>

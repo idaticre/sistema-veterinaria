@@ -9,7 +9,7 @@ import java.util.List;
 public interface ProductoService {
 
     // GET /productos
-    PaginadoResponseDTO<ProductoResponseDTO> listar(int pagina, int tamanio);
+    PaginadoResponseDTO<ProductoResponseDTO> listar(int pagina, int tamanio, String busqueda, boolean soloActivos);
 
     // GET /productos?proveedor={proveedorId}
     List<ProductoResponseDTO> listarPorProveedor(Long proveedorId);

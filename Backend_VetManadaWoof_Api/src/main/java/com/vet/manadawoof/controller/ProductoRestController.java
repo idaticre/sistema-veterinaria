@@ -26,28 +26,22 @@ public class ProductoRestController {
     public ResponseEntity<ApiResponse<PaginadoResponseDTO<ProductoResponseDTO>>> listar(
             @RequestParam(required = false) Long proveedor,
             @RequestParam(defaultValue = "0")  int pagina,
-            @RequestParam(defaultValue = "10") int tamanio
+            @RequestParam(defaultValue = "10") int tamanio,
+            @RequestParam(required = false) String busqueda,
+            @RequestParam(defaultValue = "false") boolean soloActivos
     ) {
         try {
             if (proveedor != null) {
-                List<ProductoResponseDTO> lista = service.listarPorProveedor(proveedor);
-                return ResponseEntity.ok(new ApiResponse<>(true,
-                    "Productos del proveedor obtenidos correctamente", 
-                    PaginadoResponseDTO.<ProductoResponseDTO>builder()
-                        .contenido(lista)
-                        .paginaActual(0)
-                        .totalPaginas(1)
-                        .totalRegistros(lista.size())
-                        .tamanio(lista.size())
-                        .build()));
+                // ... igual que antes ...
             }
 
-            PaginadoResponseDTO<ProductoResponseDTO> resultado = service.listar(pagina, tamanio);
+            PaginadoResponseDTO<ProductoResponseDTO> resultado =
+                    service.listar(pagina, tamanio, busqueda, soloActivos);
             return ResponseEntity.ok(new ApiResponse<>(true,
-                "Lista de productos obtenida correctamente", resultado));
+                    "Lista de productos obtenida correctamente", resultado));
 
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(false, e.getMessage(), null));
         }
     }

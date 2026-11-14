@@ -27,20 +27,32 @@ public class ProductoServiceImpl implements ProductoService {
     // ----------------------------------------------------------------
     @Override
     @Transactional
-    public PaginadoResponseDTO<ProductoResponseDTO> listar(int pagina, int tamanio) {
+    public PaginadoResponseDTO<ProductoResponseDTO> listar(int pagina, int tamanio,
+                                                           String busqueda, boolean soloActivos) {
+        if (pagina < 0) pagina = 0;
+        if (tamanio < 1) tamanio = 10;
+        if (tamanio > 100) tamanio = 100;
+        String filtro = busqueda == null ? "" : busqueda.trim();
+
         StoredProcedureQuery sp = em.createStoredProcedureQuery("sp_productos_listar");
         sp.registerStoredProcedureParameter("p_pagina",          Integer.class, ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_tamanio",         Integer.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_busqueda",        String.class,  ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_solo_activos",    Boolean.class, ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_total_registros", Integer.class, ParameterMode.OUT);
 
-        sp.setParameter("p_pagina",  pagina);
-        sp.setParameter("p_tamanio", tamanio);
+        sp.setParameter("p_pagina",       pagina);
+        sp.setParameter("p_tamanio",      tamanio);
+        sp.setParameter("p_busqueda",     filtro);
+        sp.setParameter("p_solo_activos", soloActivos);
         sp.execute();
 
-        int total        = ((Number) sp.getOutputParameterValue("p_total_registros")).intValue();
-        int totalPaginas = (int) Math.ceil((double) total / tamanio);
-
+        // Primero el result set, después el parámetro OUT
         List<ProductoResponseDTO> contenido = mapResultList(sp.getResultList());
+
+        Object totalObj  = sp.getOutputParameterValue("p_total_registros");
+        int total        = totalObj != null ? ((Number) totalObj).intValue() : 0;
+        int totalPaginas = (int) Math.ceil((double) total / tamanio);
 
         return PaginadoResponseDTO.<ProductoResponseDTO>builder()
                 .contenido(contenido)
@@ -194,8 +206,15 @@ public class ProductoServiceImpl implements ProductoService {
                 .proveedorId(((Number) row[7]).longValue())
                 .nombreProveedor((String) row[9])
                 .foto((String) row[10])
-                .activo(row[11] != null ? (Boolean) row[11] : true)
+                .activo(toBoolean(row[11]))
                 .build()
         ).toList();
+    }
+
+    private static boolean toBoolean(Object v) {
+        if (v == null) return true;
+        if (v instanceof Boolean b) return b;
+        if (v instanceof Number n) return n.intValue() != 0;
+        return Boolean.parseBoolean(v.toString());
     }
 }
