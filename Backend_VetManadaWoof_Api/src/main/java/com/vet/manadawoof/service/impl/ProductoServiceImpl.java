@@ -12,6 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vet.manadawoof.entity.ProductoEntity;
+import com.vet.manadawoof.service.AuditoriaService;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Objects;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -19,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductoServiceImpl implements ProductoService {
 
+    private final AuditoriaService auditoriaService;
     @PersistenceContext
     private EntityManager em;
 
@@ -112,6 +118,15 @@ public class ProductoServiceImpl implements ProductoService {
         Long nuevoId   = (Long)   sp.getOutputParameterValue("p_id");
         String codigo  = (String) sp.getOutputParameterValue("p_codigo");
 
+        auditoriaService.crear(
+                1,
+                "PRODUCTO",
+                nuevoId,
+                truncar("Se registró el producto \"" + request.getNombre() + "\" (" + codigo
+                        + ") con stock " + request.getStock()
+                        + " y precio S/ " + request.getPrecio())
+        );
+
         return ProductoResponseDTO.builder()
                 .id(nuevoId)
                 .codigo(codigo)
@@ -133,6 +148,26 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional
     public ProductoResponseDTO actualizar(Long id, ProductoRequestDTO request) {
+
+        // Valores ANTES del cambio (se copian a variables antes de ejecutar el SP)
+        ProductoEntity antes = em.find(ProductoEntity.class, id);
+        String codigoAnt = null, nombreAnt = null, marcaAnt = null, descAnt = null, fotoAnt = null;
+        BigDecimal precioAnt = null;
+        Integer stockAnt = null;
+        Boolean activoAnt = null;
+        if (antes != null) {
+            codigoAnt = antes.getCodigo();
+            nombreAnt = antes.getNombre();
+            marcaAnt  = antes.getMarca();
+            descAnt   = antes.getDescripcion();
+            fotoAnt   = antes.getFoto();
+            precioAnt = antes.getPrecio();
+            stockAnt  = antes.getStock();
+            activoAnt = antes.getActivo();
+        }
+
+        boolean nuevoActivo = request.getActivo() != null ? request.getActivo() : true;
+
         em.createNativeQuery(
         "CALL sp_productos_actualizar(:p_id, :p_nombre, :p_descripcion, :p_marca, " +
         ":p_precio, :p_stock, :p_proveedor_id, :p_foto, :p_activo, @p_mensaje)")
@@ -144,13 +179,46 @@ public class ProductoServiceImpl implements ProductoService {
         .setParameter("p_stock",        request.getStock())
         .setParameter("p_proveedor_id", request.getProveedorId())
         .setParameter("p_foto",         request.getFoto())
-        .setParameter("p_activo",       request.getActivo() != null ? request.getActivo() : true)
+        .setParameter("p_activo",       nuevoActivo)
         .executeUpdate();
 
         String mensaje = (String) em.createNativeQuery("SELECT @p_mensaje").getSingleResult();
 
         if (mensaje != null && mensaje.startsWith("ERROR")) {
             return ProductoResponseDTO.builder().mensaje(mensaje).build();
+        }
+
+        // ---- Auditoría: solo lo que realmente cambió ----
+        if (antes != null) {
+            List<String> cambios = new ArrayList<>();
+
+            if (distinto(nombreAnt, request.getNombre()))
+                cambios.add("nombre \"" + nombreAnt + "\" → \"" + request.getNombre() + "\"");
+            if (distinto(marcaAnt, request.getMarca()))
+                cambios.add("marca \"" + valor(marcaAnt) + "\" → \"" + valor(request.getMarca()) + "\"");
+            if (precioAnt != null && request.getPrecio() != null
+                    && precioAnt.compareTo(request.getPrecio()) != 0)
+                cambios.add("precio S/ " + precioAnt.setScale(2, RoundingMode.HALF_UP).toPlainString()
+                        + " → S/ " + request.getPrecio().setScale(2, RoundingMode.HALF_UP).toPlainString());
+            if (!Objects.equals(stockAnt, request.getStock()))
+                cambios.add("stock " + stockAnt + " → " + request.getStock());
+            if (distinto(descAnt, request.getDescripcion()))
+                cambios.add("descripción modificada");
+            if (distinto(fotoAnt, request.getFoto()))
+                cambios.add("foto modificada");
+            if (Boolean.TRUE.equals(activoAnt) != nuevoActivo)
+                cambios.add("estado " + (Boolean.TRUE.equals(activoAnt) ? "Activo" : "Inactivo")
+                        + " → " + (nuevoActivo ? "Activo" : "Inactivo"));
+
+            if (!cambios.isEmpty()) {
+                auditoriaService.crear(
+                        2,
+                        "PRODUCTO",
+                        id,
+                        truncar("Se actualizó el producto \"" + request.getNombre() + "\" (" + codigoAnt + "): "
+                                + String.join("; ", cambios))
+                );
+            }
         }
 
         return ProductoResponseDTO.builder()
@@ -173,6 +241,10 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional
     public ProductoResponseDTO eliminar(Long id) {
+        ProductoEntity antes = em.find(ProductoEntity.class, id);
+        String nombreAnt = antes != null ? antes.getNombre() : null;
+        String codigoAnt = antes != null ? antes.getCodigo() : null;
+
         StoredProcedureQuery sp = em.createStoredProcedureQuery("sp_productos_eliminar");
         sp.registerStoredProcedureParameter("p_id",      Long.class,   ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
@@ -181,6 +253,18 @@ public class ProductoServiceImpl implements ProductoService {
         sp.execute();
 
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
+
+        if (mensaje != null && mensaje.startsWith("ERROR")) {
+            return ProductoResponseDTO.builder().id(id).mensaje(mensaje).build();
+        }
+
+        auditoriaService.crear(
+                3,
+                "PRODUCTO",
+                id,
+                truncar("Se desactivó el producto \"" + nombreAnt + "\" (" + codigoAnt + ")")
+        );
+
         return ProductoResponseDTO.builder()
                 .id(id)
                 .activo(false)
@@ -216,5 +300,18 @@ public class ProductoServiceImpl implements ProductoService {
         if (v instanceof Boolean b) return b;
         if (v instanceof Number n) return n.intValue() != 0;
         return Boolean.parseBoolean(v.toString());
+    }
+    
+    private static String valor(String s) {
+        return s == null ? "" : s.trim();
+    }
+
+    private static boolean distinto(String a, String b) {
+        return !valor(a).equals(valor(b));
+    }
+
+    // La columna auditoria.descripcion es VARCHAR(255)
+    private static String truncar(String s) {
+        return s.length() <= 255 ? s : s.substring(0, 252) + "...";
     }
 }

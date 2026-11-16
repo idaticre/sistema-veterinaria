@@ -108,3 +108,86 @@
   align-items: center;
   justify-content: center;
 }
+
+#seccion_ingresos {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 1.2rem;
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+
+.titulo_ingresos {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  border-bottom: solid 2px rgba(0, 0, 0, 0.359);
+}
+
+.kpis_ingresos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kpi_ingreso {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background-color: #fdf5f0;
+  border-left: 5px solid #b34d16;
+}
+
+.kpi_ingreso span {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.kpi_ingreso strong {
+  font-size: 1.5rem;
+  color: #b34d16;
+}
+
+.kpi_ingreso small.sube { color: #2e7d32; font-weight: 600; }
+.kpi_ingreso small.baja { color: #c62828; font-weight: 600; }
+
+.graficos_ingresos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.grafico_ingresos_barra {
+  flex: 3;
+  min-width: 320px;
+  height: 320px;
+}
+
+.grafico_ingresos_pie {
+  flex: 2;
+  min-width: 260px;
+  height: 320px;
+}
+
+.grafico_ingresos_barra h4,
+.grafico_ingresos_pie h4 {
+  margin: 0 0 0.5rem 0;
+  color: #33475B;
+}
+
+.grafico_ingresos_barra,
+.grafico_ingresos_pie {
+  display: flex;
+  flex-direction: column;
+}
+
+.sin_datos_ingresos {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  margin-top: 3rem;
+}

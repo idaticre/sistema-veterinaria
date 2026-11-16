@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Sort;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +65,9 @@ public class AuditoriaServiceImpl implements AuditoriaService {
     @Override
     @Transactional(readOnly =  true)
     public List<AuditoriaResponseDTO> listar(){
-        return auditoriaRepository.findAll().stream().map(auditoriaMapper :: toResponse).toList();
+        return auditoriaRepository
+        .findAll(Sort.by(Sort.Direction.DESC, "fecha"))
+        .stream().map(auditoriaMapper::toResponse).toList();
     }
     
 }

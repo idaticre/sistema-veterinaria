@@ -88,6 +88,8 @@ function Auditoria() {
             navigate("/administracion/cliente/lista");
         } else if (entidad === "COLABORADOR") {
             navigate("/administracion/administracion/gestionar_colaboradores");
+        } else if (entidad === "PRODUCTO") {
+            navigate("/administracion/distribucion/inventario");
         } else {
             Swal.fire({
                 title: "Información del Registro",

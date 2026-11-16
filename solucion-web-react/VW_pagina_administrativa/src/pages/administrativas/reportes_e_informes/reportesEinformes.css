@@ -45,3 +45,33 @@
 
 .amarillo {background-color: #ff9900;}
 .verde {background-color: #28a745;}
+
+/* ===== Reportes: fila con clientes + ventas ===== */
+.reportes-fila {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.diva-ventas {
+    padding: 10px 20px;
+}
+
+.titulo-reporte {
+    margin: 6px 0;
+}
+
+.fechas-ventas {
+    display: flex;
+    gap: 10px;
+}
+
+.label-fecha {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    margin: 6px;
+}

@@ -72,7 +72,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/usuarios/**").hasAuthority("ADMINISTRADOR GENERAL")
                 .requestMatchers("/api/usuarios-roles/**").hasAuthority("ADMINISTRADOR GENERAL")
                 .requestMatchers("/api/roles/**").hasAuthority("ADMINISTRADOR GENERAL")
-                
+                .requestMatchers("/api/auditoria/**").hasAuthority("ADMINISTRADOR GENERAL")
+                    
                 // --- 4. CLIENTES Y MASCOTAS (Acceso compartido) ---
                 .requestMatchers("/api/clientes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
                 .requestMatchers("/api/mascotas/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")

@@ -17,6 +17,31 @@ import Swal from 'sweetalert2';
 
 pdfMake.vfs = pdfFonts.vfs; 
 
+interface DetalleVenta {
+    descripcion: string;
+    cantidad: number;
+    precioUnitario: number;
+    subtotal: number;
+    igv: number;
+    total: number;
+}
+
+interface ComprobanteVenta {
+    id: number;
+    serie: string;
+    numero: number;
+    fechaEmision: string;
+    tipoComprobante: number;      // 1 = Factura, 2 = Boleta
+    nombreCliente: string;
+    clienteNumeroDoc: string | null;
+    totalGravada: number;
+    totalIGV: number;
+    totalAnticipio: number;
+    total: number;
+    pdfurlNubefact: string | null;
+    detalles: DetalleVenta[];
+}
+
 type MascotaExtendido = MascotaResponse & { 
     nombre_dueño?   : string;
     nombre_raza?    : string; 
@@ -137,6 +162,14 @@ const GestionarColaboradores: React.FC = () => {
     const [datosReporte, setDatosReporte] = useState<any>(null);
     const [razas, setRazas] = useState<Razas[]>([]);
     const [especies, setEspecies] = useState<Razas[]>([]);
+
+    // Reporte de ventas
+    const [tipoVenta, setTipoVenta] = useState("0"); // 0 = todos, 1 = factura, 2 = boleta
+    const [fechaDesde, setFechaDesde] = useState("");
+    const [fechaHasta, setFechaHasta] = useState("");
+    const [incluirDetalle, setIncluirDetalle] = useState(false);
+    const [excluirRechazados, setExcluirRechazados] = useState(true);
+    const [datosVentas, setDatosVentas] = useState<ComprobanteVenta[] | null>(null);
 
     // Listar clientes
     useEffect(() => {listarClientes();}, []);
@@ -350,6 +383,214 @@ const GestionarColaboradores: React.FC = () => {
     };
 
 
+    // ===== REPORTE DE VENTAS =====
+    const money = (n: number | null | undefined) => `S/ ${Number(n || 0).toFixed(2)}`;
+
+    const fmtFecha = (f: string) => {
+        if (!f) return "-";
+        const [y, m, d] = f.split("-");
+        return `${d}/${m}/${y}`;
+    };
+
+    const cargarVentas = async () => {
+        if (fechaDesde && fechaHasta && fechaDesde > fechaHasta) {
+            Swal.fire({
+                title: "Alerta",
+                text: "La fecha inicial no puede ser mayor a la final",
+                icon: "warning"
+            });
+            return;
+        }
+
+        try {
+            const url = tipoVenta === "0" ? `/comprobantes` : `/comprobantes/tipo/${tipoVenta}`;
+            const respuesta = await IST.get(url);
+            const lista: ComprobanteVenta[] = Array.isArray(respuesta.data)
+                ? respuesta.data
+                : respuesta.data.data ?? [];
+
+            const filtrada = lista
+                .filter((c) => !fechaDesde || c.fechaEmision >= fechaDesde)
+                .filter((c) => !fechaHasta || c.fechaEmision <= fechaHasta)
+                .filter((c) => !excluirRechazados || !!c.pdfurlNubefact)
+                .sort((a, b) => a.fechaEmision.localeCompare(b.fechaEmision) || a.id - b.id);
+
+            if (filtrada.length === 0) {
+                setDatosVentas(null);
+                Swal.fire({
+                    title: "Sin resultados",
+                    text: "No hay comprobantes con esos filtros",
+                    icon: "info"
+                });
+                return;
+            }
+
+            setDatosVentas(filtrada);
+            Swal.fire({
+                title: "Datos cargados",
+                text: `${filtrada.length} comprobante(s). Ahora puede generar el PDF`,
+                icon: "success"
+            });
+        } catch (error) {
+            setDatosVentas(null);
+            Swal.fire({
+                title: "Error",
+                text: "cargando las ventas, intente de nuevo",
+                icon: "error"
+            });
+        }
+    };
+
+    const generarPDFVentas = () => {
+        if (!datosVentas || datosVentas.length === 0) {
+            Swal.fire({
+                title: "Alerta",
+                text: "no hay ventas cargadas para generar un PDF",
+                icon: "warning"
+            });
+            return;
+        }
+
+        const sumar = (lista: ComprobanteVenta[], campo: "totalGravada" | "totalIGV" | "total") =>
+            lista.reduce((acc, c) => acc + Number(c[campo] || 0), 0);
+
+        const facturas = datosVentas.filter((c) => Number(c.tipoComprobante) === 1);
+        const boletas = datosVentas.filter((c) => Number(c.tipoComprobante) === 2);
+
+        const th = (t: string, alignment: string = "left") =>
+            ({ text: t, style: "th", alignment });
+        const right = (t: string, bold = false) => ({ text: t, alignment: "right", bold });
+
+        // ---- Tabla principal ----
+        const filas = datosVentas.map((c) => [
+            Number(c.tipoComprobante) === 1 ? "Factura" : "Boleta",
+            `${c.serie}-${c.numero}`,
+            fmtFecha(c.fechaEmision),
+            c.nombreCliente ?? "-",
+            c.clienteNumeroDoc ?? "-",
+            right(money(c.totalGravada)),
+            right(money(c.totalIGV)),
+            right(money(c.total)),
+        ]);
+
+        const tablaPrincipal = {
+            table: {
+                headerRows: 1,
+                widths: [50, 75, 55, "*", 65, 65, 55, 65],
+                body: [
+                    [
+                        th("Tipo"), th("Número"), th("Fecha"), th("Cliente"), th("Documento"),
+                        th("Subtotal", "right"), th("IGV", "right"), th("Total", "right"),
+                    ],
+                    ...filas,
+                    [
+                        { text: "TOTAL GENERAL", colSpan: 5, bold: true, alignment: "right" }, {}, {}, {}, {},
+                        right(money(sumar(datosVentas, "totalGravada")), true),
+                        right(money(sumar(datosVentas, "totalIGV")), true),
+                        right(money(sumar(datosVentas, "total")), true),
+                    ],
+                ],
+            },
+            layout: "lightHorizontalLines",
+            fontSize: 8,
+        };
+
+        // ---- Resumen por tipo ----
+        const resumen = {
+            table: {
+                widths: [100, 60, 90],
+                body: [
+                    [th("Tipo"), th("Cantidad", "right"), th("Total", "right")],
+                    ["Facturas", right(String(facturas.length)), right(money(sumar(facturas, "total")))],
+                    ["Boletas", right(String(boletas.length)), right(money(sumar(boletas, "total")))],
+                    [
+                        { text: "Total", bold: true },
+                        right(String(datosVentas.length), true),
+                        right(money(sumar(datosVentas, "total")), true),
+                    ],
+                ],
+            },
+            layout: "lightHorizontalLines",
+            fontSize: 9,
+        };
+
+        // ---- Detalle opcional ----
+        const bloqueDetalle: any[] = [];
+        if (incluirDetalle) {
+            bloqueDetalle.push({ text: "Detalle de comprobantes", style: "subtitulo", pageBreak: "before" });
+            datosVentas.forEach((c) => {
+                bloqueDetalle.push({
+                    text: `${Number(c.tipoComprobante) === 1 ? "Factura" : "Boleta"} ${c.serie}-${c.numero}  |  ${fmtFecha(c.fechaEmision)}  |  ${c.nombreCliente ?? "-"}`,
+                    bold: true,
+                    fontSize: 9,
+                    margin: [0, 8, 0, 3],
+                });
+                bloqueDetalle.push({
+                    table: {
+                        headerRows: 1,
+                        widths: ["*", 40, 70, 70, 60, 70],
+                        body: [
+                            [
+                                th("Descripción"), th("Cant.", "right"), th("P. Unit.", "right"),
+                                th("Subtotal", "right"), th("IGV", "right"), th("Total", "right"),
+                            ],
+                            ...(c.detalles ?? []).map((d) => [
+                                d.descripcion,
+                                right(String(Number(d.cantidad))),
+                                right(money(d.precioUnitario)),
+                                right(money(d.subtotal)),
+                                right(money(d.igv)),
+                                right(money(d.total)),
+                            ]),
+                        ],
+                    },
+                    layout: "lightHorizontalLines",
+                    fontSize: 8,
+                });
+            });
+        }
+
+        const tipoTexto = tipoVenta === "0" ? "Todos" : tipoVenta === "1" ? "Facturas" : "Boletas";
+        const rango =
+            fechaDesde || fechaHasta
+                ? `${fechaDesde ? fmtFecha(fechaDesde) : "inicio"} al ${fechaHasta ? fmtFecha(fechaHasta) : "hoy"}`
+                : "Todas las fechas";
+
+        const docDefinition: any = {
+            pageOrientation: "landscape",
+            pageMargins: [30, 30, 30, 40],
+            content: [
+                { text: "VETERINARIA MANADA WOOF", style: "empresa" },
+                { text: "Reporte de Ventas", style: "titulo" },
+                {
+                    text: `Tipo: ${tipoTexto}   |   Periodo: ${rango}   |   Generado: ${new Date().toLocaleString("es-PE")}`,
+                    alignment: "center",
+                    fontSize: 9,
+                    margin: [0, 0, 0, 12],
+                },
+                { text: "Resumen", style: "subtitulo" },
+                resumen,
+                { text: "Comprobantes", style: "subtitulo", margin: [0, 14, 0, 5] },
+                tablaPrincipal,
+                ...bloqueDetalle,
+            ],
+            footer: (currentPage: number, pageCount: number) => ({
+                text: `Página ${currentPage} de ${pageCount}`,
+                alignment: "center",
+                fontSize: 8,
+            }),
+            styles: {
+                empresa: { fontSize: 11, bold: true, alignment: "center" },
+                titulo: { fontSize: 18, bold: true, alignment: "center", margin: [0, 2, 0, 4] },
+                subtitulo: { fontSize: 13, bold: true, margin: [0, 8, 0, 5] },
+                th: { bold: true, fillColor: "#001C3D", color: "white", fontSize: 8 },
+            },
+        };
+
+        const hoy = new Date().toISOString().split("T")[0];
+        pdfMake.createPdf(docDefinition).download(`reporte_ventas_${hoy}.pdf`);
+    };
+
     return (
         <div id="cuerpo-main">
             <Br_administrativa onMinimizeChange={setMinimizado}/>
@@ -365,17 +606,52 @@ const GestionarColaboradores: React.FC = () => {
                                 <li>De click al botón de descargar en la esquina superior derecha para descargar el PDF</li>
                             </ol>
                         </div>
-                        <div className="diva">
-                            <div className="selecciones">
-                                <select className="combobo" value={clienteSeleccionado ?? ""} onChange={(cliente) => {const val = cliente.target.value; setClienteSeleccionado(val ? Number(val) : null);}}>
-                                    <option value="">Seleccione un cliente</option>
-                                    {clientes.map((cliente) => (<option key={cliente.id} value={cliente.id}>{cliente.nombre}</option>))}
-                                </select>
-                                <label className="checkbobo"><input type="checkbox" checked={incluirMascotas} onChange={(e) => setIncluirMascotas(e.target.checked)}/>Incluir mascotas</label>
+                        <div className="reportes-fila">
+                            {/* ===== REPORTE DE CLIENTES (sin cambios) ===== */}
+                            <div className="diva">
+                                <div className="selecciones">
+                                    <select className="combobo" value={clienteSeleccionado ?? ""} onChange={(cliente) => {const val = cliente.target.value; setClienteSeleccionado(val ? Number(val) : null);}}>
+                                        <option value="">Seleccione un cliente</option>
+                                        {clientes.map((cliente) => (<option key={cliente.id} value={cliente.id}>{cliente.nombre}</option>))}
+                                    </select>
+                                    <label className="checkbobo"><input type="checkbox" checked={incluirMascotas} onChange={(e) => setIncluirMascotas(e.target.checked)}/>Incluir mascotas</label>
+                                </div>
+                                <div className="botones-pdf">
+                                    <button onClick={cargarDatos} className='amarillo'>Cargar datos</button>
+                                    <button onClick={() => generarPDF(datosReporte)} disabled={!datosReporte} className='verde'>Generar PDF</button>
+                                </div>
                             </div>
-                            <div className="botones-pdf">
-                                <button onClick={cargarDatos} className='amarillo'>Cargar datos</button>
-                                <button onClick={() => generarPDF(datosReporte)} disabled={!datosReporte} className='verde'>Generar PDF</button>
+
+                            {/* ===== REPORTE DE VENTAS ===== */}
+                            <div className="diva diva-ventas">
+                                <h3 className="titulo-reporte">Reporte de ventas</h3>
+                                <div className="selecciones">
+                                    <select className="combobo" value={tipoVenta} onChange={(e) => { setTipoVenta(e.target.value); setDatosVentas(null); }}>
+                                        <option value="0">Todos los comprobantes</option>
+                                        <option value="1">Solo facturas</option>
+                                        <option value="2">Solo boletas</option>
+                                    </select>
+                                </div>
+                                <div className="selecciones fechas-ventas">
+                                    <label className="label-fecha">Desde
+                                        <input type="date" value={fechaDesde} onChange={(e) => { setFechaDesde(e.target.value); setDatosVentas(null); }} />
+                                    </label>
+                                    <label className="label-fecha">Hasta
+                                        <input type="date" value={fechaHasta} onChange={(e) => { setFechaHasta(e.target.value); setDatosVentas(null); }} />
+                                    </label>
+                                </div>
+                                <label className="checkbobo">
+                                    <input type="checkbox" checked={incluirDetalle} onChange={(e) => setIncluirDetalle(e.target.checked)} />
+                                    Incluir detalle de servicios
+                                </label>
+                                <label className="checkbobo">
+                                    <input type="checkbox" checked={excluirRechazados} onChange={(e) => { setExcluirRechazados(e.target.checked); setDatosVentas(null); }} />
+                                    Excluir rechazados (sin PDF)
+                                </label>
+                                <div className="botones-pdf">
+                                    <button onClick={cargarVentas} className='amarillo'>Cargar ventas</button>
+                                    <button onClick={generarPDFVentas} disabled={!datosVentas} className='verde'>Descargar PDF</button>
+                                </div>
                             </div>
                         </div>
                     </section>

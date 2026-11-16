@@ -1,10 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import "./Admin_index.css"
 import type { UsuarioResponse, ClienteResponse,  MascotaResponse, CitaResponse, CitaPorEstado, MascotaPorEspecie } from "../../../components/interfaces/interfaces";
 import IST from "../../../components/proteccion/IST";
 import Swal from 'sweetalert2';
+
+interface ComprobanteIngreso {
+    id: number;
+    serie: string;
+    numero: number;
+    fechaEmision: string | null;
+    tipoComprobante: number; // 1 = Factura, 2 = Boleta
+    total: number;
+    totalGravada: number;
+    totalIGV: number;
+    pdfurlNubefact: string | null;
+}
+
+const soles = (n: number) =>
+    `S/ ${n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 function Admin_index() {
     const [minimizado, setMinimizado] = useState(false);
@@ -21,6 +36,88 @@ function Admin_index() {
         cantidad: number;
     }
     const [citasM, setCitasM] = useState<CitasPorMes[]>([]);
+
+    const [comprobantes, setComprobantes] = useState<ComprobanteIngreso[]>([]);
+
+    const puedeVerIngresos = (() => {
+        try {
+            const roles: string[] = JSON.parse(sessionStorage.getItem("roles") || "[]");
+            return roles.includes("ADMINISTRADOR GENERAL");
+        } catch {
+            return false;
+        }
+    })();
+
+    useEffect(() => {
+        if (!puedeVerIngresos) return;
+
+        IST.get("/comprobantes")
+            .then(res => {
+                const lista: ComprobanteIngreso[] = Array.isArray(res.data)
+                    ? res.data
+                    : res.data.data || [];
+                // Solo comprobantes válidos (aceptados o pendientes). Los rechazados no tienen PDF.
+                setComprobantes(lista.filter(c => !!c.pdfurlNubefact));
+            })
+            .catch(() => {
+                Swal.fire({
+                    title: "Error",
+                    text: "No se pudieron cargar los ingresos",
+                    icon: "error"
+                });
+            });
+    }, [puedeVerIngresos]);
+
+    const ingresos = useMemo(() => {
+        const hoy = new Date();
+        const clave = (y: number, m: number) => `${y}-${String(m + 1).padStart(2, "0")}`;
+
+        const mesActual = clave(hoy.getFullYear(), hoy.getMonth());
+        const prev = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        const mesPrevio = clave(prev.getFullYear(), prev.getMonth());
+
+        // Últimos 7 meses (misma ventana que el gráfico de citas)
+        const meses: { key: string; label: string }[] = [];
+        const porMes: Record<string, number> = {};
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+            const key = clave(d.getFullYear(), d.getMonth());
+            meses.push({ key, label: d.toLocaleString("es-PE", { month: "short", year: "numeric" }) });
+            porMes[key] = 0;
+        }
+
+        let totalMes = 0, totalPrevio = 0, totalAnio = 0, igvMes = 0;
+        let montoFacturas = 0, montoBoletas = 0, cantMes = 0;
+
+        comprobantes.forEach(c => {
+            if (!c.fechaEmision) return;
+            const k = c.fechaEmision.slice(0, 7);
+            const t = Number(c.total) || 0;
+
+            if (k in porMes) porMes[k] += t;
+            if (c.fechaEmision.startsWith(String(hoy.getFullYear()))) totalAnio += t;
+            if (k === mesPrevio) totalPrevio += t;
+
+            if (k === mesActual) {
+                totalMes += t;
+                igvMes += Number(c.totalIGV) || 0;
+                cantMes++;
+                if (Number(c.tipoComprobante) === 1) montoFacturas += t;
+                else montoBoletas += t;
+            }
+        });
+
+        const variacion = totalPrevio > 0 ? ((totalMes - totalPrevio) / totalPrevio) * 100 : null;
+
+        return {
+            totalMes, totalAnio, igvMes, cantMes, variacion,
+            porMes: meses.map(m => ({ nombre: m.label, monto: Number(porMes[m.key].toFixed(2)) })),
+            porTipo: [
+                { nombre: "Facturas", monto: Number(montoFacturas.toFixed(2)) },
+                { nombre: "Boletas", monto: Number(montoBoletas.toFixed(2)) },
+            ].filter(x => x.monto > 0),
+        };
+    }, [comprobantes]);
 
     useEffect(() => {
         const cargarDatos = async () => {
@@ -250,6 +347,81 @@ function Admin_index() {
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
+                        {puedeVerIngresos && (
+                            <div id="seccion_ingresos">
+                                <h3 className="titulo_ingresos">Ingresos</h3>
+
+                                <div className="kpis_ingresos">
+                                    <div className="kpi_ingreso">
+                                        <span>Ingresos del mes</span>
+                                        <strong>{soles(ingresos.totalMes)}</strong>
+                                        {ingresos.variacion !== null && (
+                                            <small className={ingresos.variacion >= 0 ? "sube" : "baja"}>
+                                                {ingresos.variacion >= 0 ? "▲" : "▼"} {Math.abs(ingresos.variacion).toFixed(1)}% vs mes anterior
+                                            </small>
+                                        )}
+                                    </div>
+                                    <div className="kpi_ingreso">
+                                        <span>Ingresos del año</span>
+                                        <strong>{soles(ingresos.totalAnio)}</strong>
+                                    </div>
+                                    <div className="kpi_ingreso">
+                                        <span>IGV del mes</span>
+                                        <strong>{soles(ingresos.igvMes)}</strong>
+                                    </div>
+                                    <div className="kpi_ingreso">
+                                        <span>Comprobantes del mes</span>
+                                        <strong>{ingresos.cantMes}</strong>
+                                    </div>
+                                </div>
+
+                                <div className="graficos_ingresos">
+                                    <div className="grafico_ingresos_barra">
+                                        <h4>Ingresos por mes (últimos 7 meses)</h4>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={ingresos.porMes} margin={{ top: 10, right: 20, left: 10 }}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey="nombre" stroke="black" />
+                                                <YAxis stroke="black" />
+                                                <Tooltip formatter={(v: any) => soles(Number(v))} />
+                                                <Bar dataKey="monto" name="Ingresos" fill="#b34d16" />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+
+                                    <div className="grafico_ingresos_pie">
+                                        <h4>Mes actual: facturas vs boletas</h4>
+                                        {ingresos.porTipo.length === 0 ? (
+                                            <p className="sin_datos_ingresos">Sin comprobantes este mes</p>
+                                        ) : (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <PieChart>
+                                                    <Pie
+                                                        data={ingresos.porTipo}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        innerRadius={50}
+                                                        outerRadius={80}
+                                                        paddingAngle={5}
+                                                        dataKey="monto"
+                                                        nameKey="nombre"
+                                                    >
+                                                        {ingresos.porTipo.map((_e, i) => (
+                                                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                                                        ))}
+                                                    </Pie>
+                                                    <Tooltip formatter={(v: any) => soles(Number(v))} />
+                                                    <Legend
+                                                        verticalAlign="bottom"
+                                                        formatter={(value: any, entry: any) => `${value} (${soles(entry.payload.monto)})`}
+                                                    />
+                                                </PieChart>
+                                            </ResponsiveContainer>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </main>
             </div>
