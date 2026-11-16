@@ -64,7 +64,9 @@ function Login() {
   return (
     <div className="contenedor_login">
       <div className="form_login">
+        <img className="logo_login" src="/logo.png" alt="Vet Manada Woof" />
         <h2>INGRESO</h2>
+        <p className="sub_login">Vet Manada Woof — Panel Administrativo</p>
         <form onSubmit={handleSubmit}>
           <div className="casilla_login">
             <label>Usuario:</label>

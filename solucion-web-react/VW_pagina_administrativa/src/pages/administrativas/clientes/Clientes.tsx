@@ -103,6 +103,9 @@ function Lst_clientes() {
           <section id="lst_clientes">
             <div id="encabezado">
               <h2>Lista de clientes</h2>
+              <p className="encabezado-sub">
+                {filtrados.length} cliente(s) registrado(s)
+              </p>
             </div>
             <div id="buscador">
               <div id="br_buscador">
@@ -144,9 +147,13 @@ function Lst_clientes() {
                         </span>
                       </td>
                       <td className="cliente_dato_vd" onClick={() => setClienteSeleccionado(cliente)}>{cliente.correo}</td>
-                      <td>{cliente.activo ? "✅" : "❌"}</td>
-                      <td><Link to="/administracion/cliente/registro" state={{ cliente }}>✏️</Link></td>
-                      <td><i onClick={() => {handleDelete(cliente.id);}}>🗑️</i></td>
+                      <td>
+                        <span className={`badge-estado ${cliente.activo ? "b-activa" : "b-inactiva"}`}>
+                          {cliente.activo ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+                      <td><Link to="/administracion/cliente/registro" state={{ cliente }}><span className="btn-fila btn-editar">✏️</span></Link></td>
+                      <td><i className="btn-fila btn-eliminar" onClick={() => {handleDelete(cliente.id);}}>🗑️</i></td>
                     </tr>
                   ))}
                 </tbody>
@@ -228,7 +235,7 @@ function Lst_clientes() {
                   </table>
                   <div className="VDCliente_mis_mascotas">
                     {mascotaDueño.length === 0 ? (
-                      <p>NO HAY MASCOTAS A SU NOMBRE</p>
+                      <p className="sin-mascotas">🐾 No hay mascotas registradas a su nombre</p>
                     ) : (
                       mascotaDueño.map((masc) => (
                         <Link
@@ -236,9 +243,9 @@ function Lst_clientes() {
                           state={{ idMascota: masc.id }}
                         >
                           <div className="masc_dueño">
-                            {/*<div className="masc_dueño_img">
-                               <img src={masc.foto} alt="" /> 
-                            </div>*/}
+                            <div className="masc_dueño_img">
+                              <img src={masc.foto || "/not_found.png"} alt="" />
+                            </div>
                             <div className="masc_dueño_dataS masc_superior">
                               <p>{masc.nombre}</p>
                               <span>{masc.estado?.nombre}</span>

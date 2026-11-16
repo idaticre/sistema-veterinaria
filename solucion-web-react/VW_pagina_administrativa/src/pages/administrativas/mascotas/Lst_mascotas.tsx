@@ -20,6 +20,14 @@ function Lst_mascotas() {
   const location = useLocation();
   const idMDCS = location.state?.idMascota ?? null;
 
+  // Solo presentación: elige el color del badge según el nombre del estado
+  const claseEstado = (nombre?: string) => {
+    const n = (nombre || "").toUpperCase();
+    if (n.includes("INACTIVA")) return "b-inactiva";
+    if (n.includes("ACTIVA")) return "b-activa";
+    return "b-otra";
+  };
+
   useEffect(() => {
     IST.get<{ data: MascotaResponse[] }>("/mascotas")
       .then((res) => {
@@ -89,6 +97,9 @@ function Lst_mascotas() {
           <section id="lst_mascotas">
             <div id="encabezado">
               <h2>Lista de mascotas</h2>
+              <p className="encabezado-sub">
+                {filtrados.filter((m) => m.estado?.id !== 9).length} mascota(s) registrada(s)
+              </p>
             </div>
             <div id="buscador">
               <div id="br_buscador">
@@ -127,12 +138,14 @@ function Lst_mascotas() {
                         </p>
                       </div>
                       <div className="estado_mascota">
-                        <p>{mascota.estado?.nombre}</p>
+                        <span className={`badge-estado ${claseEstado(mascota.estado?.nombre)}`}>
+                          {mascota.estado?.nombre}
+                        </span>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p>❌ Mascota no encontrada </p>
+                  <p className="sin-resultados">🐾 Mascota no encontrada</p>
                 )}
               </div>
               <div className="Datos_mascotaR">
@@ -150,6 +163,7 @@ function Lst_mascotas() {
                           <h2>Información de {mascotaSeleccionado.nombre}</h2>
                         </div>
                         <div className="DmascotaR_contenido_info">
+                          <h4 className="seccion-titulo">📋 Datos generales</h4>
                           <section className="DmascotaR_contenido_superior">
                             <table>
                               <tbody>
@@ -203,7 +217,20 @@ function Lst_mascotas() {
                                 </tr>
                               </tbody>
                             </table>
-                            {/* mascotaSeleccionado.foto && <img src={mascotaSeleccionado.foto} alt="" /> */}
+                            <img
+                              src={mascotaSeleccionado.foto || "/not_found.png"}
+                              alt={`Foto de ${mascotaSeleccionado.nombre}`}
+                              title={
+                                mascotaSeleccionado.foto
+                                  ? undefined
+                                  : "Sin foto registrada"
+                              }
+                              className={
+                                mascotaSeleccionado.foto
+                                  ? ""
+                                  : "img-placeholder"
+                              }
+                            />
                           </section>
                           <table>
                             <tbody>
@@ -218,17 +245,15 @@ function Lst_mascotas() {
                           <table>
                             <tbody>
                               <tr>
-                                <td>Pelaje: {mascotaSeleccionado.pelaje}</td>
-                                <td>
-                                  Alergias: {mascotaSeleccionado.alergias}
-                                </td>
-                                <td>
-                                  estado: {mascotaSeleccionado.estado?.nombre}
-                                </td>
+                                <td><strong>Pelaje:</strong> {mascotaSeleccionado.pelaje || "—"}</td>
+                                <td><strong>Alergias:</strong> {mascotaSeleccionado.alergias || "—"}</td>
+                                <td><strong>Estado:</strong> {mascotaSeleccionado.estado?.nombre}</td>
                               </tr>
                             </tbody>
                           </table>
-                          <div>
+
+                          <h4 className="seccion-titulo">🏷️ Características</h4>
+                          <div className="chips-caracteristicas">
                             <span>
                               <strong>Castrado/a: </strong>
                               {mascotaSeleccionado.esterilizado ? "✅" : "❌"}
@@ -250,28 +275,33 @@ function Lst_mascotas() {
                               {mascotaSeleccionado.agresividad ? "✅" : "❌"}
                             </span>
                           </div>
-                          <Link
-                            to={`/administracion/mascotas/registro/${mascotaSeleccionado.id}`}
-                          >
-                            <button>Editar</button>
-                          </Link>
-                          <Link
-                            to= {`/administracion/historia-clinica/${mascotaSeleccionado.id}`}
-                          >
-                            <button>Historia Clinica</button>
-                          </Link>
-                          <button
-                            onClick={() => setModalVacunasOpen(true)}
-                          >
-                            Vacuna
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleDelete(mascotaSeleccionado.id);
-                            }}
-                          >
-                            Eliminar
-                          </button>
+
+                          <div className="accionesR">
+                            <Link
+                              to={`/administracion/mascotas/registro/${mascotaSeleccionado.id}`}
+                            >
+                              <button className="btn-accion btn-editar">✏️ Editar</button>
+                            </Link>
+                            <Link
+                              to= {`/administracion/historia-clinica/${mascotaSeleccionado.id}`}
+                            >
+                              <button className="btn-accion btn-historia">📋 Historia Clínica</button>
+                            </Link>
+                            <button
+                              className="btn-accion btn-vacuna"
+                              onClick={() => setModalVacunasOpen(true)}
+                            >
+                              💉 Vacunas
+                            </button>
+                            <button
+                              className="btn-accion btn-eliminar"
+                              onClick={() => {
+                                handleDelete(mascotaSeleccionado.id);
+                              }}
+                            >
+                              🗑️ Eliminar
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

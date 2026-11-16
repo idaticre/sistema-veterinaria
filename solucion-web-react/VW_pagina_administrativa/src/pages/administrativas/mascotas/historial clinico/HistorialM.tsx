@@ -73,7 +73,7 @@ function HistorialM() {
                     <Link className='boton_retorno' to="/administracion/mascotas/lista"><i className="fa-solid fa-backward"></i></Link>
                     <div className="historial_encabezado">
                         <div className="datos_historial">
-                            <h3>HISTORIAL CLÍNICO: {hMascota?.codigoHistorial}</h3>
+                            <h3>Historial Clínico <span className="hc-codigo">{hMascota?.codigoHistorial}</span></h3>
                             <div className='DT_info'>
                                 <div className='DT_info_cas'>
                                     <div className="DT_info_i">
@@ -103,14 +103,14 @@ function HistorialM() {
                                 <div className='DT_info_cas'>
                                     <div className="DT_info_i">
                                         <p>Sexo:</p>
-                                        <span>{hMascota?.sexo == 'M'? 'macho': 'hembra'}</span>
+                                        <span>{hMascota?.sexo == 'M'? 'Macho': 'Hembra'}</span>
                                     </div>
                                     <div className="DT_info_i">
                                         <p>Etapa: </p>
                                         <span>{hMascota?.etapaVida}</span>
                                     </div>
                                     <div className="DT_info_i">
-                                        <p>castrado: </p>
+                                        <p>Castrado: </p>
                                         <span>{hMascota?.castrado? '✓':'✕'}</span>
                                     </div>
                                     <div className="DT_info_i">
@@ -122,14 +122,18 @@ function HistorialM() {
                                         <span>{hMascota?.pedigree? '✓':'✕'}</span>
                                     </div>
                                     <div className="DT_info_i">
-                                        <p>Alergico: </p>
+                                        <p>Alergias: </p>
                                         <span>{hMascota?.alergias}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>        
                         <div className='DT_foto'>
-                            {hMascota?.foto && <img src={hMascota.foto} alt="" />}
+                            <img
+                              src={hMascota?.foto || "/not_found.png"}
+                              alt={hMascota ? `Foto de ${hMascota.nombre}` : "Sin foto"}
+                              className={hMascota?.foto ? "" : "img-placeholder"}
+                            />
                         </div>
                     </div>
                     <div className='filtro_historial'>
@@ -143,31 +147,28 @@ function HistorialM() {
                             dateFormat="yyyy/MM/dd"
                             placeholderText="Fecha inicio - Fecha final"
                         />
-                        {citasFiltradas.length === 0? (''):(
-                            <>
-                                <p>Citas encontras ({citasFiltradas.length})</p>
-                            </>
+                        {citasFiltradas.length > 0 && (
+                            <p className='contador-citas'>
+                                📋 Citas encontradas ({citasFiltradas.length})
+                            </p>
                         )}
                     </div>
                     <div className='citas_mascota'>
                         {citasFiltradas.length === 0? (
-                            <p>No hay registros</p>
+                            <p className='sin-registros'>🗓️ No hay registros de citas para esta mascota</p>
                         ):(
                             citasFiltradas.map((CMT) =>(
-                                <>
-                                    <div className='cita' key={CMT.id}>
-                                        <div className='citas_mascota_encabezado'>
-                                            <p>servicio{/*CMT.observaciones*/} </p><span>{new Date(CMT.fechaRegistro).toLocaleDateString("es-PE")}</span>
-                                        </div>
-                                        <div className='citas_mascota_datos'>
-                                            <p>Codigo: <span>{CMT.codigo}</span></p>
-                                            <p>Hora: <span>{CMT.fechaRegistro.split("T")[1].slice(0,5)}</span></p>
-                                            <p>Tiempo: <span>{CMT.duracionEstimadaMin} min</span></p>
-                                            <p>Monto total: {CMT.totalCita}</p>
-                                            <p>Veterinario: Nombre colaborador</p>
-                                        </div>
+                                <div className='cita' key={CMT.id}>
+                                    <div className='citas_mascota_encabezado'>
+                                        <p>{CMT.observaciones || "Cita"} </p><span>{new Date(CMT.fechaRegistro).toLocaleDateString("es-PE")}</span>
                                     </div>
-                                </>
+                                    <div className='citas_mascota_datos'>
+                                        <p>Codigo: <span>{CMT.codigo}</span></p>
+                                        <p>Hora: <span>{CMT.fechaRegistro.split("T")[1].slice(0,5)}</span></p>
+                                        <p>Tiempo: <span>{CMT.duracionEstimadaMin} min</span></p>
+                                        <p>Monto total: <span>S/ {CMT.totalCita}</span></p>
+                                    </div>
+                                </div>
                             ))
                         )}
                     </div>

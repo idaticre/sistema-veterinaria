@@ -1,111 +1,172 @@
+/* ============================================
+   HISTORIAL CLÍNICO — tema naranja
+   ============================================ */
+
 .historialM {
   width: 100%;
   height: 100%;
   display: flex;
 }
 
-.boton_retorno:hover {
-  color: #2b6cb0;
-  transform: translateX(-4px);
+/* ---------- BOTÓN DE RETORNO ---------- */
+
+.boton_retorno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  color: #7a5a1e;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  margin-bottom: 0.5rem;
 }
 
-.historiales{
-  background-color: rgb(255, 198, 122);
-  padding: 1rem;
-  flex: 1;
-  border-radius: 5px;
+.boton_retorno:hover {
+  color: #b26a00;
+  transform: translateX(-4px);
+  background: #fff8ec;
 }
+
+/* ---------- ENCABEZADO CON DATOS ---------- */
 
 .historial_encabezado {
-  background: #e3e2e2d5;
+  background: #ffffff;
   padding: 1.5rem 2rem;
   border-radius: 12px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
+  align-items: flex-start;
 }
 
-/* Contenedor de datos */
 .datos_historial {
   width: 100%;
   display: flex;
   flex-direction: column;
 }
 
-/* Título */
 .historial_encabezado h3 {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  color: #001C3D;
-  margin: 0;
-  letter-spacing: 0.5px;
-  text-decoration: underline;
-  border: none;
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.DT_info{
-  display: flex;
-}
-
-.DT_info_cas{
-  display: flex;
-  flex-direction: column;
-  gap: 0.73rem;
-  width: 50%;
-  color: #33475B;
-}
-
-.DT_info_i{
+  color: #333;
+  margin: 0 0 1rem;
   display: flex;
   align-items: center;
-  height: 1.3rem;
+  gap: 0.6rem;
 }
 
-/* Bloques */
+.hc-codigo {
+  background: #fff3e0;
+  color: #b26a00;
+  border: 1px solid #f5ddb8;
+  border-radius: 999px;
+  padding: 0.2rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.DT_info {
+  display: flex;
+  gap: 1rem;
+}
+
+.DT_info_cas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.DT_info_i {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px dashed #eee;
+  min-height: 1.3rem;
+}
+
 .DT_info_i p {
-  font-weight: bolder;
-  width: 12rem;
-  font-family:'Courier New', Courier, monospace;
-  text-transform: capitalize;
+  font-weight: 600;
+  width: 9.5rem;
+  flex-shrink: 0;
+  color: #7a5a1e;
+  font-size: 0.88rem;
 }
 
 .DT_info_i span {
-  text-transform: capitalize;
-  font-family:'Courier New', Courier, monospace;
-  flex: 1;
+  color: #444;
+  font-size: 0.92rem;
 }
 
-.DT_foto{
-  width: 20%;
-  aspect-ratio: 3 / 4;
+/* ---------- FOTO ---------- */
+
+.DT_foto {
+  width: 180px;
+  height: 220px;
+  flex-shrink: 0;
 }
 
-.DT_foto img{
-  border-radius: 10%;
+.DT_foto img {
+  border-radius: 10px;
   width: 100%;
   height: 100%;
-  object-fit: cover; 
+  object-fit: cover;
+  border: 2px solid #eee;
 }
+
+.DT_foto img.img-placeholder {
+  object-fit: contain;
+  padding: 1rem;
+  background: #fffdf8;
+  border: 2px dashed #f5ddb8;
+}
+
+/* ---------- FILTRO DE FECHAS ---------- */
 
 .filtro_historial {
   padding: 15px 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
 }
 
-.filtro_historial p{
-  font-size: larger;
-  font-family:'Courier New', Courier, monospace;
-  font-weight: 800;
+.filtro_historial p {
+  margin: 0;
 }
 
-.ftr_fechas{
+.ftr_fechas {
+  font-weight: 600;
+  height: 40px;
+  padding: 0 14px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ftr_fechas:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.contador-citas {
+  color: #b26a00;
   font-weight: 700;
+  font-size: 0.92rem;
 }
+
+/* ---------- TARJETAS DE CITAS ---------- */
 
 .citas_mascota {
   display: flex;
@@ -113,9 +174,16 @@
   gap: 1rem;
 }
 
-.cita{
-  flex: 1 1 19rem; 
-  max-width: 22rem;
+.cita {
+  flex: 1 1 19rem;
+  max-width: 24rem;
+  border-radius: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cita:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(245, 158, 11, 0.18);
 }
 
 .citas_mascota p {
@@ -123,13 +191,25 @@
 }
 
 .citas_mascota_encabezado {
-  background: #2b6cb0;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
   display: flex;
-  padding: 10px;
+  padding: 10px 14px;
   border-radius: 10px 10px 0 0;
   color: white;
-  font-weight: bold;
+  font-weight: 700;
   justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.citas_mascota_encabezado p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.citas_mascota_encabezado span {
+  flex-shrink: 0;
+  font-weight: 600;
 }
 
 .citas_mascota_datos {
@@ -140,20 +220,59 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  font-size: 15px;
-  color: #2d3748;
-  border: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+  color: #555;
+  border: 1px solid #f0f0f0;
+  border-top: none;
 }
 
+.citas_mascota_datos p {
+  padding-bottom: 4px;
+  border-bottom: 1px dashed #f4f4f4;
+}
+
+.citas_mascota_datos p:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.citas_mascota_datos p span {
+  color: #333;
+  font-weight: 600;
+}
+
+/* ---------- PANEL VACÍO ---------- */
+
+.sin-registros {
+  width: 100%;
+  text-align: center;
+  color: #999;
+  background: #fff;
+  border: 1px dashed #e5e5e5;
+  border-radius: 12px;
+  padding: 2.5rem 1rem;
+  font-size: 0.95rem;
+}
+
+/* ---------- RESPONSIVE ---------- */
 
 @media (max-width: 600px) {
   .historial_encabezado {
     flex-direction: column;
-    gap: 5px;
-    text-align: center;
+    gap: 10px;
+    text-align: left;
+  }
+
+  .DT_foto {
+    width: 100%;
+    height: 200px;
+  }
+
+  .DT_info {
+    flex-direction: column;
   }
 
   .citas_mascota_datos {
-    font-size: 14px;
+    font-size: 0.85rem;
   }
 }

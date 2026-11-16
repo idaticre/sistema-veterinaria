@@ -1,47 +1,72 @@
-#regis_dueños{
+/* ============================================
+   REGISTRO DE CLIENTES — tema naranja
+   ============================================ */
+
+#regis_dueños {
     display: flex;
     width: 100%;
     height: 100vh;
 }
 
-.container {
+/* ---------- CONTENEDOR ---------- */
+
+#regis_dueños .container {
   max-width: 1000px;
   margin: auto;
-  background: #a58dee;
+  background: linear-gradient(160deg, #fff3e0, #ffe8c7);
   border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f5c980;
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.22);
   padding: 40px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.container:hover {
+#regis_dueños .container:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.3);
 }
 
-.boton_retorno{
-  font-size: 1.6rem;
+#regis_dueños .boton_retorno {
+  font-size: 1.4rem;
   text-decoration: none;
-  color: #280d71;
+  color: #b26a00;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
-h2 {
-  color: #4b0082;
-  font-weight: 600;
+#regis_dueños .boton_retorno:hover {
+  color: #ff9900;
+  transform: translateX(-4px);
+}
+
+#regis_dueños h2 {
+  color: #94570a;
+  font-weight: 700;
   margin-bottom: 25px;
   text-align: center;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   letter-spacing: 0.5px;
+}
+
+/* ---------- FORMULARIO ---------- */
+
+#regis_dueños h3 {
+  color: #b26a00;
+  font-weight: 700;
+  margin-bottom: 20px;
+  font-size: 1.15rem;
+  border-bottom: 2px solid #f0b35e;
+  display: inline-block;
+  padding-bottom: 5px;
 }
 
 .form-box {
   display: flex;
-  background: #f8f9fb;
+  background: #ffffff;
   padding: 30px;
   border-radius: 12px;
   justify-content: space-between;
   gap: 30px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #f0f0f0;
 }
 
 .form-section {
@@ -54,60 +79,58 @@ h2 {
   text-align: center;
 }
 
-h3 {
-  color: #333;
-  font-weight: 500;
-  margin-bottom: 20px;
-  font-size: 1.2rem;
-  border-bottom: 2px solid #d8b4fe;
-  display: inline-block;
-  padding-bottom: 5px;
-}
-
-.form-row {
+#regis_dueños .form-row {
   display: flex;
   gap: 20px;
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
-.form-group {
+#regis_dueños .form-group {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.full-width {
+#regis_dueños .full-width {
   width: 100%;
   margin-bottom: 15px;
 }
 
-label {
+/* ---------- CAMPOS ---------- */
+
+#regis_dueños label {
   margin-bottom: 6px;
   font-size: 14px;
-  color: #444;
-  font-weight: 500;
+  color: #94570a;
+  font-weight: 700;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="number"],
-input[type="date"],
-select {
+#regis_dueños input[type="text"],
+#regis_dueños input[type="email"],
+#regis_dueños input[type="number"],
+#regis_dueños input[type="date"],
+#regis_dueños select {
   padding: 10px 12px;
-  border: 1px solid #ccc;
+  border: 2px solid #e9ecef;
   border-radius: 8px;
   font-size: 14px;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   background: white;
   outline: none;
 }
 
-input:focus,
-select:focus {
-  border-color: #7b61ff;
-  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.15);
+#regis_dueños input:focus,
+#regis_dueños select:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
+
+#regis_dueños input::placeholder {
+  color: #bbb;
+}
+
+/* ---------- RADIO GÉNERO ---------- */
 
 .radio-group {
   display: flex;
@@ -116,55 +139,83 @@ select:focus {
   margin-top: 5px;
 }
 
-.btn {
-  background: linear-gradient(135deg, #7b61ff, #a78bfa);
+#regis_dueños .radio-group input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #ff9900;
+}
+
+#regis_dueños .radio-group label {
+  margin: 0;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+}
+
+/* ---------- BOTÓN GUARDAR ---------- */
+
+#regis_dueños .btn {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: 12px 28px;
   border-radius: 30px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 15px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 3px 8px rgba(245, 158, 11, 0.35);
   transition: all 0.3s ease;
   margin-top: 10px;
 }
 
-.btn:hover {
-  background: linear-gradient(135deg, #6b4eff, #9673f7);
-  transform: scale(1.05);
+#regis_dueños .btn:hover {
+  background: linear-gradient(135deg, #d98709, #f59e0b);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(245, 158, 11, 0.45);
 }
 
-.profile-pic {
+#regis_dueños .btn:active {
+  transform: scale(0.97);
+}
+
+/* ---------- SECCIÓN DE FOTO ---------- */
+
+#regis_dueños .profile-pic {
   width: 10rem;
   height: 10rem;
-  background: #f3f3f3;
+  background: #fffdf8;
   border-radius: 50%;
   margin: 20px auto;
-  border: 3px solid transparent;
+  border: 3px dashed #f5ddb8;
   transition: all 0.4s ease;
   object-fit: cover;
 }
 
-.profile-pic:hover {
-  border-color: #7b61ff;
+#regis_dueños .profile-pic:hover {
+  border-color: #f59e0b;
   transform: scale(1.07);
 }
 
-.upload-label {
-  background: #f3f3ff;
-  color: #5b4b8a;
+#regis_dueños .upload-label {
+  background: #fff8ec;
+  color: #b26a00;
   padding: 8px 14px;
+  border: 1px solid #f5ddb8;
   border-radius: 8px;
   cursor: pointer;
   display: inline-block;
   font-size: 14px;
+  font-weight: 600;
   transition: all 0.3s ease;
 }
 
-.upload-label:hover {
-  background: #e8e1ff;
-  color: #3c2d7c;
+#regis_dueños .upload-label:hover {
+  background: #ffefd8;
+  color: #94570a;
 }
+
+/* ---------- RESPONSIVE ---------- */
 
 @media (max-width: 768px) {
   .form-box {

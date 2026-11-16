@@ -15,9 +15,11 @@ main.minimize{
 
 #nueva-mascota-section{
     position: relative;
-    background-color: white;
-    border-radius: 10px;
-    padding: 1rem;
+    background-color: #fff8ec;
+    border: 1px solid #f5ddb8;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.10);
+    padding: 1.2rem;
 }
 
 .formulario_superior {
@@ -46,9 +48,9 @@ main.minimize{
         }
 
         .form-header h3 {
-            color: #444444;
-            font-size: 2rem;
-            font-weight: 400;
+            color: #333;
+            font-size: 1.7rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
         }
@@ -107,6 +109,18 @@ main.minimize{
             font-size: 14px;
             transition: all 0.3s ease;
             background: white;
+            outline: none;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="tel"]:focus,
+        .form-group input[type="date"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
         }
 
         
@@ -141,7 +155,7 @@ main.minimize{
             cursor: pointer;
         }
 
-        /* Sección de foto de perfil */
+        /* SecciÃ³n de foto de perfil */
         .profile-photo {
             width: 200px;
             height: 200px;
@@ -171,7 +185,8 @@ main.minimize{
             gap: 15px;
             min-width: 200px;
             padding: 20px;
-            background: #eee69e;
+            background: #ffffff;
+            border: 1px solid #f5ddb8;
             border-radius: 12px;
             margin-left: 50px ;
         }
@@ -198,23 +213,26 @@ main.minimize{
             border: none;
             border-radius: 25px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
             margin: 20px auto 0;
-            display: block; 
+            display: block;
         }
 
         .submit-btn:hover {
+            background: #43a047;
             transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(76, 175, 80, 0.4);
         }
 
         .photo-upload-text {
             font-size: 14px;
-            color: #044bda;
+            color: #b26a00;
             text-decoration: none;
             text-align: center;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .photo-upload-text:hover {
@@ -257,7 +275,7 @@ main.minimize{
             }
         }
         .page-title.mascotas::before {
-            content: '🐕';
+            content: 'ðŸ•';
         }
 
         .pet-weight {
@@ -289,7 +307,7 @@ main.minimize{
         }
 
         .owner-info h4::before {
-            content: "👤";
+            content: "ðŸ‘¤";
             font-size: 18px;
         }
 
@@ -337,7 +355,7 @@ main.minimize{
             margin: 0;
         }
 
-        /* Cada opción */
+        /* Cada opciÃ³n */
         .suggestions-list li {
             padding: 12px 16px;
             font-size: 14px;
@@ -368,9 +386,8 @@ main.minimize{
         }
 
 
-/* ============================================
-   CHECKBOXES TIPO SWITCH (Chip/Pedigree/DEA/Agresivo)
-   ============================================ */
+
+/* SWITCHES DE CARACTERÍSTICAS (Chip/Pedigree/DEA/Agresivo) */
 .checkbox-group .checkbox-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -390,7 +407,6 @@ main.minimize{
     user-select: none;
 }
 
-/* el input real se oculta: el switch es visual */
 .switch-input {
     position: absolute;
     opacity: 0;
@@ -398,7 +414,6 @@ main.minimize{
     height: 0;
 }
 
-/* pastilla */
 .switch-slider {
     display: inline-block;
     position: relative;
@@ -410,7 +425,6 @@ main.minimize{
     transition: background 0.3s ease;
 }
 
-/* bolita */
 .switch-slider::after {
     content: "";
     position: absolute;
@@ -424,7 +438,6 @@ main.minimize{
     transition: transform 0.3s ease;
 }
 
-/* activado */
 .switch-input:checked + .switch-slider {
     background: #ff9900;
 }
@@ -433,17 +446,14 @@ main.minimize{
     transform: translateX(20px);
 }
 
-/* texto del activado */
 .switch-input:checked ~ .switch-text {
     color: #e68a00;
 }
 
-/* foco accesible con teclado */
 .switch-input:focus-visible + .switch-slider {
     box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.25);
 }
 
-/* hover */
 .switch-label:hover .switch-slider {
     box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.15);
 }
