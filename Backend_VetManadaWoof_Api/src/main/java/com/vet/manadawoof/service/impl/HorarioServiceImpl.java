@@ -163,11 +163,27 @@ public class HorarioServiceImpl implements HorarioService {
                 .nombreColaborador((String) row[2])
                 .diaId(((Number) row[3]).intValue())
                 .nombreDia((String) row[4])
-                .trabaja((Boolean) row[5])
-                .horaInicio(row[6] != null ? ((java.sql.Timestamp) row[6]).toLocalDateTime().toLocalTime() : null)
-                .horaFin(row[7]   != null ? ((java.sql.Timestamp) row[7]).toLocalDateTime().toLocalTime() : null)
+                .trabaja(toBoolean(row[5]))
+                .horaInicio(toLocalTime(row[6]))
+                .horaFin(toLocalTime(row[7]))
                 .build()
         ).toList();
+    }
+
+    private static LocalTime toLocalTime(Object v) {
+        if (v == null) return null;
+        if (v instanceof LocalTime lt) return lt;
+        if (v instanceof java.sql.Time t) return t.toLocalTime();
+        if (v instanceof java.sql.Timestamp ts) return ts.toLocalDateTime().toLocalTime();
+        if (v instanceof java.time.LocalDateTime ldt) return ldt.toLocalTime();
+        return LocalTime.parse(v.toString());
+    }
+
+    private static boolean toBoolean(Object v) {
+        if (v == null) return false;
+        if (v instanceof Boolean b) return b;
+        if (v instanceof Number n) return n.intValue() != 0;
+        return Boolean.parseBoolean(v.toString());
     }
 
     // ----------------------------------------------------------------

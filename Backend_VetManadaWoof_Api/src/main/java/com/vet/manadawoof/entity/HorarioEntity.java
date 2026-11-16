@@ -40,9 +40,9 @@ public class HorarioEntity implements Serializable {
     @JdbcTypeCode(SqlTypes.BIT)
     private Boolean trabaja = false;
 
-    @Column(name = "hora_inicio", columnDefinition = "timestamp")
+    @Column(name = "hora_inicio", columnDefinition = "time")
     private LocalTime horaInicio;
 
-    @Column(name = "hora_fin", columnDefinition = "timestamp")
+    @Column(name = "hora_fin", columnDefinition = "time")
     private LocalTime horaFin;
 }
