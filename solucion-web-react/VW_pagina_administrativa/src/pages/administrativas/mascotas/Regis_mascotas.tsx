@@ -659,58 +659,77 @@ function Regis_mascotas() {
                           placeholder="Ej: Alimentarias o ambientales"
                         />
                       </div>
-                      <div className="form-group">
-                        <label htmlFor="chip">Chip</label>
-                        <input
-                          type="checkbox"
-                          id="chip"
-                          checked={formMascota.chip}
-                          onChange={(e) =>
-                            setFormMascota(prev => ({
-                              ...prev,
-                              chip: e.target.checked
-                            }))
-                          }
-                        />
+                      <div className="form-group checkbox-group">
+                        <label>Características</label>
+                        <div className="checkbox-grid">
+                          <label className="switch-label" htmlFor="chip">
+                            <input
+                              type="checkbox"
+                              id="chip"
+                              className="switch-input"
+                              checked={formMascota.chip}
+                              onChange={(e) =>
+                                setFormMascota(prev => ({
+                                  ...prev,
+                                  chip: e.target.checked
+                                }))
+                              }
+                            />
+                            <span className="switch-slider"></span>
+                            <span className="switch-text">Chip</span>
+                          </label>
 
-                        <label htmlFor="pedigree">Pedigree</label>
-                        <input
-                          type="checkbox"
-                          id="pedigree"
-                          checked={formMascota.pedigree}
-                          onChange={(e) =>
-                            setFormMascota(prev => ({
-                              ...prev,
-                              pedigree: e.target.checked
-                            }))
-                          }
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="factor-dea">Factor DEA</label>
-                        <input
-                          type="checkbox"
-                          id="factor-dea"
-                          checked={formMascota.factorDea}
-                          onChange={(e) =>
-                            setFormMascota(prev => ({
-                              ...prev,
-                              factorDea: e.target.checked
-                            }))
-                          }
-                        />
-                        <label htmlFor="agresividad">Agresivo/a</label>
-                        <input
-                          type="checkbox"
-                          id="agresividad"
-                          checked={formMascota.agresividad}
-                          onChange={(e) =>
-                            setFormMascota(prev => ({
-                              ...prev,
-                              agresividad: e.target.checked
-                            }))
-                          }
-                        />
+                          <label className="switch-label" htmlFor="pedigree">
+                            <input
+                              type="checkbox"
+                              id="pedigree"
+                              className="switch-input"
+                              checked={formMascota.pedigree}
+                              onChange={(e) =>
+                                setFormMascota(prev => ({
+                                  ...prev,
+                                  pedigree: e.target.checked
+                                }))
+                              }
+                            />
+                            <span className="switch-slider"></span>
+                            <span className="switch-text">Pedigree</span>
+                          </label>
+
+                          <label className="switch-label" htmlFor="factor-dea">
+                            <input
+                              type="checkbox"
+                              id="factor-dea"
+                              className="switch-input"
+                              checked={formMascota.factorDea}
+                              onChange={(e) =>
+                                setFormMascota(prev => ({
+                                  ...prev,
+                                  factorDea: e.target.checked
+                                }))
+                              }
+                            />
+                            <span className="switch-slider"></span>
+                            <span className="switch-text">Factor DEA</span>
+                          </label>
+
+                          <label className="switch-label" htmlFor="agresividad">
+                            <input
+                              type="checkbox"
+                              id="agresividad"
+                              className="switch-input"
+                              checked={formMascota.agresividad}
+                              onChange={(e) =>
+                                setFormMascota(prev => ({
+                                  ...prev,
+                                  agresividad: e.target.checked
+                                }))
+                              }
+                            />
+                            <span className="switch-slider"></span>
+                            <span className="switch-text">Agresivo/a</span>
+                          </label>
+                        </div>
                       </div>
                     </div>
                     <div className="owner-info">

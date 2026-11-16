@@ -367,3 +367,83 @@ main.minimize{
             font-style: italic;
         }
 
+
+/* ============================================
+   CHECKBOXES TIPO SWITCH (Chip/Pedigree/DEA/Agresivo)
+   ============================================ */
+.checkbox-group .checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+    margin-top: 8px;
+}
+
+.switch-label {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0;
+    cursor: pointer;
+    color: #555;
+    font-weight: 500;
+    font-size: 14px;
+    user-select: none;
+}
+
+/* el input real se oculta: el switch es visual */
+.switch-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* pastilla */
+.switch-slider {
+    display: inline-block;
+    position: relative;
+    width: 42px;
+    height: 22px;
+    background: #e9ecef;
+    border-radius: 22px;
+    flex-shrink: 0;
+    transition: background 0.3s ease;
+}
+
+/* bolita */
+.switch-slider::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+/* activado */
+.switch-input:checked + .switch-slider {
+    background: #ff9900;
+}
+
+.switch-input:checked + .switch-slider::after {
+    transform: translateX(20px);
+}
+
+/* texto del activado */
+.switch-input:checked ~ .switch-text {
+    color: #e68a00;
+}
+
+/* foco accesible con teclado */
+.switch-input:focus-visible + .switch-slider {
+    box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.25);
+}
+
+/* hover */
+.switch-label:hover .switch-slider {
+    box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.15);
+}
