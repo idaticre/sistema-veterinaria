@@ -477,3 +477,15 @@
     color: #2e7d32;
     font-weight: 500;
 }
+
+/* ── Etiqueta de categoría ────────────────────────────── */
+.tarjeta-categoria {
+  display: inline-block;
+  margin: 0 0 4px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background-color: var(--naranja-claro);
+  color: var(--naranja);
+  font-size: 0.72rem;
+  font-weight: 600;
+}

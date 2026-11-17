@@ -4457,6 +4457,7 @@ DELIMITER ;
 -- ============================================================
 -- SP 1: Obtener todos los productos
 -- ============================================================
+-- SP 1: listar
 DROP PROCEDURE IF EXISTS sp_productos_listar;
 DELIMITER $$
 CREATE PROCEDURE sp_productos_listar(
@@ -4490,10 +4491,13 @@ BEGIN
         p.proveedor_id,
         pv.codigo AS codigo_proveedor,
         e.nombre  AS nombre_proveedor,
-        p.foto, p.activo
+        p.foto, p.activo,
+        p.categoria_id,
+        c.nombre  AS nombre_categoria
     FROM productos p
     INNER JOIN proveedores pv ON p.proveedor_id = pv.id
     INNER JOIN entidades   e  ON pv.id_entidad  = e.id
+    LEFT  JOIN categorias  c  ON p.categoria_id = c.id
     WHERE (IFNULL(p_solo_activos, FALSE) = FALSE OR p.activo = TRUE)
       AND (p.nombre LIKE v_busqueda
            OR IFNULL(p.marca, '')  LIKE v_busqueda
@@ -4503,10 +4507,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-
--- ============================================================
--- SP 2: Obtener productos por proveedor_id
--- ============================================================
+-- SP 2: listar por proveedor
 DROP PROCEDURE IF EXISTS sp_productos_listar_por_proveedor;
 DELIMITER $$
 CREATE PROCEDURE sp_productos_listar_por_proveedor(IN p_proveedor_id BIGINT)
@@ -4517,21 +4518,17 @@ BEGIN
     END IF;
 
     SELECT
-        p.id,
-        p.codigo,
-        p.nombre,
-        p.descripcion,
-        p.marca,
-        p.precio,
-        p.stock,
+        p.id, p.codigo, p.nombre, p.descripcion, p.marca, p.precio, p.stock,
         p.proveedor_id,
-        pv.codigo   AS codigo_proveedor,
-        e.nombre    AS nombre_proveedor,
-        p.foto,
-        p.activo
+        pv.codigo AS codigo_proveedor,
+        e.nombre  AS nombre_proveedor,
+        p.foto, p.activo,
+        p.categoria_id,
+        c.nombre  AS nombre_categoria
     FROM productos p
     INNER JOIN proveedores pv ON p.proveedor_id = pv.id
     INNER JOIN entidades   e  ON pv.id_entidad  = e.id
+    LEFT  JOIN categorias  c  ON p.categoria_id = c.id
     WHERE p.proveedor_id = p_proveedor_id
     ORDER BY p.nombre;
 END $$
@@ -4550,6 +4547,7 @@ CREATE PROCEDURE sp_productos_registrar(
     IN  p_stock        INT,
     IN  p_proveedor_id BIGINT,
     IN  p_foto         VARCHAR(512),
+    IN  p_categoria_id INT,
     OUT p_id           BIGINT,
     OUT p_codigo       VARCHAR(32),
     OUT p_mensaje      VARCHAR(255)
@@ -4579,11 +4577,15 @@ BEGIN
             LEAVE validacion;
         END IF;
 
-        -- Generar código único
+        IF p_categoria_id IS NULL OR NOT EXISTS (SELECT 1 FROM categorias WHERE id = p_categoria_id) THEN
+            SET p_mensaje = 'ERROR: Categoría no válida';
+            LEAVE validacion;
+        END IF;
+
         SET v_codigo = CONCAT('PROD-', LPAD((SELECT IFNULL(MAX(id), 0) + 1 FROM productos), 6, '0'));
 
-        INSERT INTO productos (codigo, nombre, descripcion, marca, precio, stock, proveedor_id, foto, activo)
-        VALUES (v_codigo, p_nombre, p_descripcion, p_marca, p_precio, p_stock, p_proveedor_id, p_foto, TRUE);
+        INSERT INTO productos (codigo, nombre, descripcion, marca, precio, stock, proveedor_id, categoria_id, foto, activo)
+        VALUES (v_codigo, p_nombre, p_descripcion, p_marca, p_precio, p_stock, p_proveedor_id, p_categoria_id, p_foto, TRUE);
 
         SET p_id      = LAST_INSERT_ID();
         SET p_codigo  = v_codigo;
@@ -4593,9 +4595,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- ============================================================
--- SP 4: Actualizar producto
--- ============================================================
+-- SP 4: actualizar (p_categoria_id después de p_foto)
 DROP PROCEDURE IF EXISTS sp_productos_actualizar;
 DELIMITER $$
 CREATE PROCEDURE sp_productos_actualizar(
@@ -4607,50 +4607,56 @@ CREATE PROCEDURE sp_productos_actualizar(
     IN  p_stock        INT,
     IN  p_proveedor_id BIGINT,
     IN  p_foto         VARCHAR(512),
+    IN  p_categoria_id INT,
     IN  p_activo       BOOLEAN,
     OUT p_mensaje      VARCHAR(255)
 )
 BEGIN
-    validacion: BEGIN -- Validaciones
-		IF NOT EXISTS (SELECT 1 FROM productos WHERE id = p_id) THEN
-			SET p_mensaje = 'ERROR: Producto no encontrado';
-			LEAVE validacion;
-		END IF;
+    validacion: BEGIN
+        IF NOT EXISTS (SELECT 1 FROM productos WHERE id = p_id) THEN
+            SET p_mensaje = 'ERROR: Producto no encontrado';
+            LEAVE validacion;
+        END IF;
 
-		IF p_nombre IS NULL OR TRIM(p_nombre) = '' THEN
-			SET p_mensaje = 'ERROR: El nombre del producto es obligatorio';
-			LEAVE validacion;
-		END IF;
+        IF p_nombre IS NULL OR TRIM(p_nombre) = '' THEN
+            SET p_mensaje = 'ERROR: El nombre del producto es obligatorio';
+            LEAVE validacion;
+        END IF;
 
-		IF p_precio < 0 THEN
-			SET p_mensaje = 'ERROR: El precio no puede ser negativo';
-			LEAVE validacion;
-		END IF;
+        IF p_precio < 0 THEN
+            SET p_mensaje = 'ERROR: El precio no puede ser negativo';
+            LEAVE validacion;
+        END IF;
 
-		IF p_stock < 0 THEN
-			SET p_mensaje = 'ERROR: El stock no puede ser negativo';
-			LEAVE validacion;
-		END IF;
+        IF p_stock < 0 THEN
+            SET p_mensaje = 'ERROR: El stock no puede ser negativo';
+            LEAVE validacion;
+        END IF;
 
-		IF NOT EXISTS (SELECT 1 FROM proveedores WHERE id = p_proveedor_id) THEN
-			SET p_mensaje = 'ERROR: Proveedor no encontrado';
-			LEAVE validacion;
-		END IF;
+        IF NOT EXISTS (SELECT 1 FROM proveedores WHERE id = p_proveedor_id) THEN
+            SET p_mensaje = 'ERROR: Proveedor no encontrado';
+            LEAVE validacion;
+        END IF;
 
-		-- Actualizar
-		UPDATE productos
-		SET nombre       = p_nombre,
-			descripcion  = p_descripcion,
-			marca        = p_marca,
-			precio       = p_precio,
-			stock        = p_stock,
-			proveedor_id = p_proveedor_id,
-			foto         = p_foto,
-			activo       = p_activo
-		WHERE id = p_id;
+        IF p_categoria_id IS NULL OR NOT EXISTS (SELECT 1 FROM categorias WHERE id = p_categoria_id) THEN
+            SET p_mensaje = 'ERROR: Categoría no válida';
+            LEAVE validacion;
+        END IF;
 
-		SET p_mensaje = 'Producto actualizado correctamente';
-	END validacion;
+        UPDATE productos
+        SET nombre       = p_nombre,
+            descripcion  = p_descripcion,
+            marca        = p_marca,
+            precio       = p_precio,
+            stock        = p_stock,
+            proveedor_id = p_proveedor_id,
+            foto         = p_foto,
+            categoria_id = p_categoria_id,
+            activo       = p_activo
+        WHERE id = p_id;
+
+        SET p_mensaje = 'Producto actualizado correctamente';
+    END validacion;
 END $$
 DELIMITER ;
 

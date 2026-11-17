@@ -35,6 +35,9 @@ public class ProductoRequestDTO {
     @NotNull(message = "El proveedor es obligatorio")
     private Long proveedorId;
 
+    @NotNull(message = "La categoría es obligatoria")
+    private Integer categoriaId;
+        
     private String foto;
 
     private Boolean activo;

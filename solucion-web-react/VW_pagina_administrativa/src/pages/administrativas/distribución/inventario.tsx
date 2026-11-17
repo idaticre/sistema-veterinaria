@@ -8,9 +8,18 @@ import Swal from "sweetalert2";
 
 
 
+const CATEGORIAS = [
+    { id: 1, nombre: "Alimento" },
+    { id: 2, nombre: "Juguetes" },
+    { id: 3, nombre: "Ropa y accesorios" },
+    { id: 4, nombre: "Medicinas" },
+    { id: 5, nombre: "Aseo e higiene" },
+    { id: 6, nombre: "Transporte y camas" },
+];
+
 const PRODUCTO_VACIO = {
     nombre: "", descripcion: "", marca: "", precio: 0,
-    stock: 0, proveedorId: 0, foto: "", activo: true,
+    stock: 0, proveedorId: 0, categoriaId: 0, foto: "", activo: true,
 };
 
 type ModoModal = "crear" | "editar" | "ver";
@@ -91,14 +100,15 @@ function Inventario() {
         setForm(prev => ({
             ...prev,
             [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked
-                : (name === "precio" || name === "stock" || name === "proveedorId") ? Number(value) : value,
+                : (name === "precio" || name === "stock" || name === "proveedorId" || name === "categoriaId") ? Number(value) : value,
         }));
     };
 
     const abrirCrear = () => { setForm(PRODUCTO_VACIO); setIdEdicion(null); setModoModal("crear"); setMostrarModal(true); };
     const abrirEditar = (p: Productos) => {
         setForm({ nombre: p.nombre, descripcion: p.descripcion ?? "", marca: p.marca ?? "",
-          precio: p.precio, stock: p.stock, proveedorId: p.proveedorId, foto: p.foto ?? "", activo: p.activo });
+        precio: p.precio, stock: p.stock, proveedorId: p.proveedorId,
+        categoriaId: p.categoriaId ?? 0, foto: p.foto ?? "", activo: p.activo });
         setIdEdicion(p.id); setModoModal("editar"); setMostrarModal(true);
     };
     const abrirVer = (p: Productos) => { abrirEditar(p); setModoModal("ver"); };
@@ -108,6 +118,7 @@ function Inventario() {
         if (!form.nombre.trim()) { Swal.fire({ title: "El nombre es obligatorio", icon: "warning" }); return false; }
         if (form.precio < 0)     { Swal.fire({ title: "El precio no puede ser negativo", icon: "warning" }); return false; }
         if (form.stock < 0)      { Swal.fire({ title: "El stock no puede ser negativo", icon: "warning" }); return false; }
+        if (form.categoriaId === 0) { Swal.fire({ title: "Seleccione una categoría", icon: "warning" }); return false; }
         if (modoModal === "crear" && form.proveedorId === 0) { Swal.fire({ title: "Seleccione un proveedor", icon: "warning" }); return false; }
         return true;
     };
@@ -187,6 +198,7 @@ function Inventario() {
                                         {p.codigo && <span className="tarjeta-codigo">{p.codigo}</span>}
                                         <h3 className="tarjeta-nombre-producto">{p.nombre}</h3>
                                         {p.marca && <p className="tarjeta-marca">{p.marca}</p>}
+                                        <span className="tarjeta-categoria">{p.nombreCategoria ?? "Sin categoría"}</span>
                                         {p.descripcion && <p className="tarjeta-descripcion">{p.descripcion}</p>}
                                         <p className="tarjeta-proveedor">Proveedor: <span>{p.nombreProveedor ?? "—"}</span></p>
                                     </div>
@@ -231,24 +243,33 @@ function Inventario() {
                         <div className="form-grid">
                             <div className="form-grupo form-grupo--full">
                                 <label>Nombre</label>
-                                <input name="nombre" value={form.nombre} onChange={handleChange} disabled={soloLectura} placeholder="Nombre del producto" />
+                                <input name="nombre" value={form.nombre} onChange={handleChange } disabled={soloLectura} placeholder="Nombre del producto" />
                             </div>
                             <div className="form-grupo">
                                 <label>Marca</label>
-                                <input name="marca" value={form.marca} onChange={handleChange} disabled={soloLectura} placeholder="Marca" />
+                                <input name="marca" value={form.marca} onChange={handleChange } disabled={soloLectura} placeholder="Marca" />
                             </div>
                             <div className="form-grupo">
                                 <label>Precio (S/)</label>
-                                <input name="precio" type="number" min="0" step="0.01" value={form.precio} onChange={handleChange} disabled={soloLectura} />
+                                <input name="precio" type="number" min="0" step="0.01" value={form.precio} onChange={handleChange } disabled={soloLectura} />
                             </div>
                             <div className="form-grupo">
                                 <label>Stock</label>
-                                <input name="stock" type="number" min="0" value={form.stock} onChange={handleChange} disabled={soloLectura} />
+                                <input name="stock" type="number" min="0" value={form.stock} onChange={handleChange } disabled={soloLectura} />
+                            </div>
+                            <div className="form-grupo">
+                                <label>Categoría</label>
+                                <select name="categoriaId" value={form.categoriaId || ""} onChange={handleChange} disabled={soloLectura}>
+                                    <option value="">— Seleccione una categoría —</option>
+                                    {CATEGORIAS.map(c => (
+                                        <option key={c.id} value={c.id}>{c.nombre}</option>
+                                    ))}
+                                </select>
                             </div>
                             {modoModal === "crear" && (
                                 <div className="form-grupo">
                                     <label>Proveedor</label>
-                                    <select name="proveedorId" value={form.proveedorId || ""} onChange={handleChange} disabled={soloLectura}>
+                                    <select name="proveedorId" value={form.proveedorId || ""} onChange={handleChange } disabled={soloLectura}>
                                         <option value="">— Seleccione un proveedor —</option>
                                         {proveedores.filter(p => p.activo).map(p => (
                                             <option key={p.id} value={p.id}>{p.nombre}</option>
@@ -258,12 +279,12 @@ function Inventario() {
                             )}
                             <div className="form-grupo form-grupo--full">
                                 <label>Descripción</label>
-                                <textarea name="descripcion" value={form.descripcion} onChange={handleChange} disabled={soloLectura} placeholder="Descripción del producto" rows={3} />
+                                <textarea name="descripcion" value={form.descripcion} onChange={handleChange } disabled={soloLectura} placeholder="Descripción del producto" rows={3} />
                             </div>
                             {!soloLectura && (
                                 <div className="form-grupo form-grupo--full">
                                     <label>Foto (URL)</label>
-                                    <input name="foto" value={form.foto} onChange={handleChange} placeholder="https://ejemplo.com/imagen.jpg" />
+                                    <input name="foto" value={form.foto} onChange={handleChange } placeholder="https://ejemplo.com/imagen.jpg" />
                                 </div>
                             )}
                             {soloLectura && form.foto && (
@@ -275,7 +296,7 @@ function Inventario() {
                             {modoModal !== "crear" && (
                                 <div className="form-grupo form-grupo--checkbox">
                                     <label>
-                                        <input name="activo" type="checkbox" checked={form.activo} onChange={handleChange} disabled={soloLectura} />
+                                        <input name="activo" type="checkbox" checked={form.activo} onChange={handleChange } disabled={soloLectura} />
                                         Activo
                                     </label>
                                 </div>

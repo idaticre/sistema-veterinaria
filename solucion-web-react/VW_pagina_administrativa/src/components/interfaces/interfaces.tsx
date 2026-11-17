@@ -526,6 +526,8 @@ export interface Productos {
   stock: number,
   proveedorId: number,
   nombreProveedor?: string,
+  categoriaId?: number | null,
+  nombreCategoria?: string | null,
   foto?: string,
   activo: boolean
 }

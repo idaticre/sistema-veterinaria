@@ -22,6 +22,8 @@ public class ProductoResponseDTO {
     private Integer stock;
     private Long proveedorId;
     private String nombreProveedor;
+    private Integer categoriaId;
+    private String nombreCategoria;
     private String foto;
     private Boolean activo;
     private String mensaje;

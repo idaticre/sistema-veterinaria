@@ -48,7 +48,12 @@ public class ProductoEntity implements Serializable {
     @JoinColumn(name = "proveedor_id", nullable = false)
     @JsonIgnore
     private ProveedorEntity proveedor;
-
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")
+    @JsonIgnore
+    private CategoriaEntity categoria;
+        
     @Column(name = "foto", length = 512)
     private String foto;
 

@@ -96,6 +96,7 @@ public class ProductoServiceImpl implements ProductoService {
         sp.registerStoredProcedureParameter("p_stock",        Integer.class,    ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_proveedor_id", Long.class,       ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_foto",         String.class,     ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_categoria_id", Integer.class,    ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_id",           Long.class,       ParameterMode.OUT);
         sp.registerStoredProcedureParameter("p_codigo",       String.class,     ParameterMode.OUT);
         sp.registerStoredProcedureParameter("p_mensaje",      String.class,     ParameterMode.OUT);
@@ -107,7 +108,7 @@ public class ProductoServiceImpl implements ProductoService {
         sp.setParameter("p_stock",        request.getStock());
         sp.setParameter("p_proveedor_id", request.getProveedorId());
         sp.setParameter("p_foto",         request.getFoto());
-
+        sp.setParameter("p_categoria_id", request.getCategoriaId());
         sp.execute();
 
         String mensaje = (String) sp.getOutputParameterValue("p_mensaje");
@@ -136,6 +137,7 @@ public class ProductoServiceImpl implements ProductoService {
                 .precio(request.getPrecio())
                 .stock(request.getStock())
                 .proveedorId(request.getProveedorId())
+                .categoriaId(request.getCategoriaId())
                 .foto(request.getFoto())
                 .activo(true)
                 .mensaje(mensaje)
@@ -170,7 +172,7 @@ public class ProductoServiceImpl implements ProductoService {
 
         em.createNativeQuery(
         "CALL sp_productos_actualizar(:p_id, :p_nombre, :p_descripcion, :p_marca, " +
-        ":p_precio, :p_stock, :p_proveedor_id, :p_foto, :p_activo, @p_mensaje)")
+        ":p_precio, :p_stock, :p_proveedor_id, :p_foto, :p_categoria_id, :p_activo, @p_mensaje)")
         .setParameter("p_id",           id)
         .setParameter("p_nombre",       request.getNombre())
         .setParameter("p_descripcion",  request.getDescripcion())
@@ -179,7 +181,8 @@ public class ProductoServiceImpl implements ProductoService {
         .setParameter("p_stock",        request.getStock())
         .setParameter("p_proveedor_id", request.getProveedorId())
         .setParameter("p_foto",         request.getFoto())
-        .setParameter("p_activo",       nuevoActivo)
+        .setParameter("p_categoria_id", request.getCategoriaId())
+        .setParameter("p_activo",       request.getActivo() != null ? request.getActivo() : true)
         .executeUpdate();
 
         String mensaje = (String) em.createNativeQuery("SELECT @p_mensaje").getSingleResult();
@@ -189,7 +192,7 @@ public class ProductoServiceImpl implements ProductoService {
         }
 
         // ---- Auditoría: solo lo que realmente cambió ----
-        if (antes != null) {
+        if (antes != null) {    
             List<String> cambios = new ArrayList<>();
 
             if (distinto(nombreAnt, request.getNombre()))
@@ -229,6 +232,7 @@ public class ProductoServiceImpl implements ProductoService {
                 .precio(request.getPrecio())
                 .stock(request.getStock())
                 .proveedorId(request.getProveedorId())
+                .categoriaId(request.getCategoriaId())
                 .foto(request.getFoto())
                 .activo(request.getActivo())
                 .mensaje(mensaje)
@@ -273,9 +277,9 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     // ----------------------------------------------------------------
-    // Mapea el Object[] de los SPs SELECT a ProductoResponseDTO
     // Orden: id, codigo, nombre, descripcion, marca, precio, stock,
-    //        proveedor_id, codigo_proveedor, nombre_proveedor, foto, activo
+    //        proveedor_id, codigo_proveedor, nombre_proveedor, foto, activo,
+    //        categoria_id, nombre_categoria
     // ----------------------------------------------------------------
     @SuppressWarnings("unchecked")
     private List<ProductoResponseDTO> mapResultList(List<Object[]> rows) {
@@ -291,6 +295,8 @@ public class ProductoServiceImpl implements ProductoService {
                 .nombreProveedor((String) row[9])
                 .foto((String) row[10])
                 .activo(toBoolean(row[11]))
+                .categoriaId(row[12] != null ? ((Number) row[12]).intValue() : null)
+                .nombreCategoria((String) row[13])
                 .build()
         ).toList();
     }

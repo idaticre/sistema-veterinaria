@@ -1661,6 +1661,19 @@ CREATE TABLE horarios(
     INDEX idx_dia (dia_id)
 );
 
+CREATE TABLE IF NOT EXISTS categorias (
+    id     INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(64) NOT NULL UNIQUE
+);
+
+INSERT INTO categorias (id, nombre) VALUES
+(1, 'ALIMENTO'),
+(2, 'JUGUETES'),
+(3, 'ROPA Y ACCESORIOS'),
+(4, 'MEDICINAS'),
+(5, 'ASEO E HIGIENE'),
+(6, 'TRANSPORTE Y CAMAS');
+
 CREATE TABLE IF NOT EXISTS productos (
     id           BIGINT         NOT NULL AUTO_INCREMENT,
     codigo       VARCHAR(32)    UNIQUE,
@@ -1670,11 +1683,13 @@ CREATE TABLE IF NOT EXISTS productos (
     precio       DECIMAL(10, 2) NOT NULL,
     stock        INT            NOT NULL DEFAULT 0,
     proveedor_id BIGINT         NOT NULL,
+    categoria_id INT            NULL,
     foto         VARCHAR(512),
     activo       BOOLEAN        NOT NULL DEFAULT TRUE,
 
     CONSTRAINT pk_productos          PRIMARY KEY (id),
     CONSTRAINT fk_producto_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores(id),
+    CONSTRAINT fk_producto_categoria FOREIGN KEY (categoria_id) REFERENCES categorias(id),
 
     CONSTRAINT chk_precio_positivo   CHECK (precio >= 0),
     CONSTRAINT chk_stock_positivo    CHECK (stock  >= 0)
