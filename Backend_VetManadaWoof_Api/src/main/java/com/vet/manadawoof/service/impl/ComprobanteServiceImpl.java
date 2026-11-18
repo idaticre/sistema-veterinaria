@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vet.manadawoof.dtos.request.ComprobanteDetalleRequestDTO;
 import com.vet.manadawoof.dtos.request.ComprobanteRequestDTO;
+import com.vet.manadawoof.dtos.request.NotaCreditoRequestDTO;
 import com.vet.manadawoof.dtos.response.ComprobanteResponseDTO;
 import com.vet.manadawoof.dtos.response.ComprobanteSunatDTO;
 import com.vet.manadawoof.entity.AgendaEntity;
+import com.vet.manadawoof.entity.ComprobanteDetalleEntity;
 import com.vet.manadawoof.entity.ComprobanteEntity;
+import java.math.BigDecimal;
 import com.vet.manadawoof.mapper.ComprobanteMapper;
 import com.vet.manadawoof.mapper.ComprobanteSunatMapper;
 import com.vet.manadawoof.repository.AgendaRepository;
@@ -144,131 +147,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         // INSERTAR DETALLES
 
         for (ComprobanteDetalleRequestDTO detalle : request.getDetalles()) {
-
-            StoredProcedureQuery spDetalle = entityManager
-                    .createStoredProcedureQuery("sp_insertar_comprobante_detalle");
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_comprobante_id",
-                    Long.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_tipo_unidad_medida_id",
-                    Integer.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_item_id",
-                    Integer.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_descripcion",
-                    String.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_cantidad",
-                    java.math.BigDecimal.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_valor_unitario",
-                    java.math.BigDecimal.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_precio_unitario",
-                    java.math.BigDecimal.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_descuento",
-                    java.math.BigDecimal.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_subtotal",
-                    java.math.BigDecimal.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_tipo_igv_id",
-                    Integer.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_igv",
-                    java.math.BigDecimal.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_impuestos_bolsas",
-                    java.math.BigDecimal.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_total",
-                    java.math.BigDecimal.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_anticipio_regularizacion",
-                    Boolean.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_anticipio_documento_serie",
-                    String.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_anticipio_documento_numero",
-                    Integer.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.registerStoredProcedureParameter(
-                    "p_codigo_producto_sunat",
-                    String.class,
-                    ParameterMode.IN
-            );
-
-            spDetalle.setParameter("p_comprobante_id", idComprobante);
-            spDetalle.setParameter("p_tipo_unidad_medida_id", detalle.getTipoUnidadMedidaId());
-            spDetalle.setParameter("p_item_id", detalle.getItemId());
-            spDetalle.setParameter("p_descripcion", detalle.getDescripcion());
-            spDetalle.setParameter("p_cantidad", detalle.getCantidad());
-            spDetalle.setParameter("p_valor_unitario", detalle.getValorUnitario());
-            spDetalle.setParameter("p_precio_unitario", detalle.getPrecioUnitario());
-            spDetalle.setParameter("p_descuento", detalle.getDescuento());
-            spDetalle.setParameter("p_subtotal", detalle.getSubtotal());
-            spDetalle.setParameter("p_tipo_igv_id", detalle.getTipoIgvId());
-            spDetalle.setParameter("p_igv", detalle.getIgv());
-            spDetalle.setParameter("p_impuestos_bolsas", detalle.getImpuestosBolsas());
-            spDetalle.setParameter("p_total", detalle.getTotal());
-            spDetalle.setParameter("p_anticipio_regularizacion", detalle.getAnticipoRegularizacion());
-            spDetalle.setParameter("p_anticipio_documento_serie", detalle.getAnticipoDocumentoSerie());
-            spDetalle.setParameter("p_anticipio_documento_numero", detalle.getAnticipoDocumentoNumero());
-            spDetalle.setParameter("p_codigo_producto_sunat", detalle.getCodigoProductoSunat());
-
-            spDetalle.execute();
+            insertarDetalleComprobante(idComprobante, detalle);
         }
 
         // OBTENER ENTIDAD Y ENVIAR A SUNAT
@@ -277,8 +156,141 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                 .orElseThrow(() -> new RuntimeException("Comprobante no encontrado"));
 
         Map<String, Object> respuestaSunat = new java.util.HashMap<>(enviarASunat(comprobante));
+        // Si NUBEFACT rechazo el comprobante, se revierte (borra fila y
+        // devuelve el correlativo) para no descuadrar la numeracion
+        revertirSiRechazado(respuestaSunat, comprobante);
         respuestaSunat.put("id_comprobante", idComprobante);
         return respuestaSunat;
+    }
+
+    // INSERTA UN DETALLE de comprobante via sp_insertar_comprobante_detalle.
+    // Lo usan tanto el flujo de boleta/factura como las notas de credito.
+    private void insertarDetalleComprobante(Long idComprobante, ComprobanteDetalleRequestDTO detalle) {
+
+        StoredProcedureQuery spDetalle = entityManager
+                .createStoredProcedureQuery("sp_insertar_comprobante_detalle");
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_comprobante_id",
+                Long.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_tipo_unidad_medida_id",
+                Integer.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_item_id",
+                Integer.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_descripcion",
+                String.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_cantidad",
+                java.math.BigDecimal.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_valor_unitario",
+                java.math.BigDecimal.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_precio_unitario",
+                java.math.BigDecimal.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_descuento",
+                java.math.BigDecimal.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_subtotal",
+                java.math.BigDecimal.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_tipo_igv_id",
+                Integer.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_igv",
+                java.math.BigDecimal.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_impuestos_bolsas",
+                java.math.BigDecimal.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_total",
+                java.math.BigDecimal.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_anticipio_regularizacion",
+                Boolean.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_anticipio_documento_serie",
+                String.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_anticipio_documento_numero",
+                Integer.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.registerStoredProcedureParameter(
+                "p_codigo_producto_sunat",
+                String.class,
+                ParameterMode.IN
+        );
+
+        spDetalle.setParameter("p_comprobante_id", idComprobante);
+        spDetalle.setParameter("p_tipo_unidad_medida_id", detalle.getTipoUnidadMedidaId());
+        spDetalle.setParameter("p_item_id", detalle.getItemId());
+        spDetalle.setParameter("p_descripcion", detalle.getDescripcion());
+        spDetalle.setParameter("p_cantidad", detalle.getCantidad());
+        spDetalle.setParameter("p_valor_unitario", detalle.getValorUnitario());
+        spDetalle.setParameter("p_precio_unitario", detalle.getPrecioUnitario());
+        spDetalle.setParameter("p_descuento", detalle.getDescuento());
+        spDetalle.setParameter("p_subtotal", detalle.getSubtotal());
+        spDetalle.setParameter("p_tipo_igv_id", detalle.getTipoIgvId());
+        spDetalle.setParameter("p_igv", detalle.getIgv());
+        spDetalle.setParameter("p_impuestos_bolsas", detalle.getImpuestosBolsas());
+        spDetalle.setParameter("p_total", detalle.getTotal());
+        spDetalle.setParameter("p_anticipio_regularizacion", detalle.getAnticipoRegularizacion());
+        spDetalle.setParameter("p_anticipio_documento_serie", detalle.getAnticipoDocumentoSerie());
+        spDetalle.setParameter("p_anticipio_documento_numero", detalle.getAnticipoDocumentoNumero());
+        spDetalle.setParameter("p_codigo_producto_sunat", detalle.getCodigoProductoSunat());
+
+        spDetalle.execute();
     }
 
     /*@Override
@@ -289,6 +301,248 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                 .orElseThrow(() -> new RuntimeException("Comprobante no encontrado"));
         return enviarASunat(comprobante);
     }*/
+
+    @Override
+    @Transactional
+    public Map<String, Object> emitirNotaCredito(Long idComprobanteOrigen, NotaCreditoRequestDTO request) {
+
+        // COMPROBANTE ORIGEN (debe ser factura o boleta ya emitida)
+        ComprobanteEntity origen = comprobanteRepository
+                .findById(idComprobanteOrigen)
+                .orElseThrow(() -> new RuntimeException("Comprobante origen no encontrado"));
+
+        Integer tipoOrigen = origen.getTipoComprobante() != null
+                ? origen.getTipoComprobante().getId()
+                : null;
+
+        if (tipoOrigen == null || (tipoOrigen != 1 && tipoOrigen != 2)) {
+            throw new RuntimeException(
+                    "Solo se pueden emitir notas de credito sobre facturas o boletas");
+        }
+
+        // VALIDACIONES DEL REQUEST
+        if (request.getNcTipo() == null || request.getNcTipo() < 1 || request.getNcTipo() > 13) {
+            throw new RuntimeException("Tipo de nota de credito invalido (1-13)");
+        }
+
+        if (request.getMotivo() == null || request.getMotivo().isBlank()) {
+            throw new RuntimeException("El motivo o sustento de la nota de credito es obligatorio");
+        }
+
+        // MONTOS: por defecto los del comprobante origen.
+        // Para descuentos (tipo 4 = global, 5 = por item) se usa el monto
+        // indicado (con IGV): base = monto / 1.18, igv = monto - base
+        BigDecimal gravada = origen.getTotalGravada();
+        BigDecimal inafecta = origen.getTotalInafecta();
+        BigDecimal exonerada = origen.getTotalExonerada();
+        BigDecimal igv = origen.getTotalIGV();
+        BigDecimal total = origen.getTotal();
+
+        boolean esDescuento = request.getNcTipo() == 4 || request.getNcTipo() == 5;
+
+        if (esDescuento) {
+            if (request.getMontoDescuento() == null
+                    || request.getMontoDescuento().compareTo(BigDecimal.ZERO) <= 0
+                    || request.getMontoDescuento().compareTo(origen.getTotal()) > 0) {
+                throw new RuntimeException(
+                        "El monto de descuento debe ser mayor a 0 y menor o igual al total del comprobante");
+            }
+
+            BigDecimal monto = request.getMontoDescuento();
+            BigDecimal base = monto.divide(
+                    new BigDecimal("1.18"), 2, java.math.RoundingMode.HALF_UP);
+
+            gravada = base;
+            igv = monto.subtract(base);
+            inafecta = BigDecimal.ZERO;
+            exonerada = BigDecimal.ZERO;
+            total = monto;
+        }
+
+        // SERIE: en NUBEFACT las notas de credito comparten la serie del
+        // documento modificado (NC de factura = FFF1, NC de boleta = BBB1);
+        // la numeracion es independiente por tipo de documento
+        String serieNC = tipoOrigen == 1 ? "FFF1" : "BBB1";
+
+        // PROCEDURE CABECERA
+        StoredProcedureQuery sp = entityManager
+                .createStoredProcedureQuery("sp_insertar_nota_credito");
+
+        sp.registerStoredProcedureParameter("p_agenda_id", Long.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_comprobante_origen_id", Long.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_doc_modifica_tipo", Integer.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_doc_modifica_serie", String.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_doc_modifica_numero", Integer.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_nc_tipo", Integer.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_nc_motivo", String.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_serie", String.class, ParameterMode.IN);
+
+        sp.registerStoredProcedureParameter("p_fecha_emision", java.sql.Date.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_fecha_vencimiento", java.sql.Date.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_tipo_moneda_id", Integer.class, ParameterMode.IN);
+
+        sp.registerStoredProcedureParameter("p_total_gravada", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_inafecta", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_exonerada", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_igv", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_gratuita", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_otros_cargos", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total", java.math.BigDecimal.class, ParameterMode.IN);
+
+        sp.registerStoredProcedureParameter("p_observaciones", String.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_codigo_unico", String.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_condiciones_pago", String.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_nubecont_tipo_venta_codigo", String.class, ParameterMode.IN);
+
+        sp.registerStoredProcedureParameter("p_cliente_id", Long.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_total_anticipio", java.math.BigDecimal.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_medio_pago_id", Integer.class, ParameterMode.IN);
+
+        sp.registerStoredProcedureParameter("p_id_comprobante", Long.class, ParameterMode.OUT);
+        sp.registerStoredProcedureParameter("p_numero", Integer.class, ParameterMode.OUT);
+        sp.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
+
+        // SET PARAMS (la NC hereda agenda, moneda y cliente del origen)
+        java.time.LocalDate hoy = java.time.LocalDate.now();
+
+        sp.setParameter("p_agenda_id", origen.getAgenda().getId());
+        sp.setParameter("p_comprobante_origen_id", origen.getId());
+        sp.setParameter("p_doc_modifica_tipo", tipoOrigen);
+        sp.setParameter("p_doc_modifica_serie", origen.getSerie());
+        sp.setParameter("p_doc_modifica_numero", origen.getNumero());
+        sp.setParameter("p_nc_tipo", request.getNcTipo());
+        sp.setParameter("p_nc_motivo", request.getMotivo());
+        sp.setParameter("p_serie", serieNC);
+
+        sp.setParameter("p_fecha_emision", java.sql.Date.valueOf(hoy));
+        sp.setParameter("p_fecha_vencimiento", java.sql.Date.valueOf(hoy));
+        sp.setParameter("p_tipo_moneda_id", origen.getTipoMoneda().getId());
+
+        sp.setParameter("p_total_gravada", gravada);
+        sp.setParameter("p_total_inafecta", inafecta);
+        sp.setParameter("p_total_exonerada", exonerada);
+        sp.setParameter("p_total_igv", igv);
+        sp.setParameter("p_total_gratuita", BigDecimal.ZERO);
+        sp.setParameter("p_total_otros_cargos", BigDecimal.ZERO);
+        sp.setParameter("p_total", total);
+
+        sp.setParameter("p_observaciones", request.getMotivo());
+        sp.setParameter("p_codigo_unico", origen.getCodigoUnico());
+        sp.setParameter("p_condiciones_pago", origen.getCondicionesPago());
+        sp.setParameter("p_nubecont_tipo_venta_codigo", origen.getNubecontTipoVentaCodigo());
+
+        sp.setParameter("p_cliente_id", origen.getCliente().getId());
+        sp.setParameter("p_total_anticipio", BigDecimal.ZERO);
+        sp.setParameter("p_medio_pago_id", origen.getMedioPago() != null
+                ? origen.getMedioPago().getId() : null);
+
+        // EJECUTAR
+        sp.execute();
+
+        Long idNotaCredito = ((Number)
+                sp.getOutputParameterValue("p_id_comprobante"))
+                .longValue();
+
+        Integer numeroNC = ((Number)
+                sp.getOutputParameterValue("p_numero"))
+                .intValue();
+
+        // DETALLES: se copian los del comprobante origen; para los descuentos,
+        // un solo item con el monto descontado
+        List<ComprobanteDetalleRequestDTO> detallesNC = new java.util.ArrayList<>();
+
+        if (esDescuento) {
+            detallesNC.add(ComprobanteDetalleRequestDTO.builder()
+                    .tipoUnidadMedidaId(1) // NIU (unica unidad en el catalogo)
+                    .itemId(1)
+                    .descripcion("Descuento global: " + request.getMotivo())
+                    .cantidad(BigDecimal.ONE)
+                    .valorUnitario(gravada)
+                    .precioUnitario(total)
+                    .descuento(BigDecimal.ZERO)
+                    .subtotal(gravada)
+                    .tipoIgvId(1) // GRAVADO
+                    .igv(igv)
+                    .impuestosBolsas(BigDecimal.ZERO)
+                    .total(total)
+                    .anticipoRegularizacion(false)
+                    .build());
+        } else {
+            for (ComprobanteDetalleEntity d : origen.getDetalles()) {
+                detallesNC.add(ComprobanteDetalleRequestDTO.builder()
+                        .tipoUnidadMedidaId(d.getTipoUnidadMedida() != null
+                                ? d.getTipoUnidadMedida().getId() : null)
+                        .itemId(d.getItemId())
+                        .descripcion(d.getDescripcion())
+                        .cantidad(d.getCantidad())
+                        .valorUnitario(d.getValorUnitario())
+                        .precioUnitario(d.getPrecioUnitario())
+                        .descuento(d.getDescuento())
+                        .subtotal(d.getSubtotal())
+                        .tipoIgvId(d.getTipoIGV() != null ? d.getTipoIGV().getId() : null)
+                        .igv(d.getIgv())
+                        .impuestosBolsas(d.getImpuestosBolsas())
+                        .total(d.getTotal())
+                        .anticipoRegularizacion(false)
+                        .anticipoDocumentoSerie(d.getAnticipoDocSerie())
+                        .anticipoDocumentoNumero(d.getAnticipoDocNumero())
+                        .codigoProductoSunat(d.getCodigoProductoSunat())
+                        .build());
+            }
+        }
+
+        for (ComprobanteDetalleRequestDTO detalle : detallesNC) {
+            insertarDetalleComprobante(idNotaCredito, detalle);
+        }
+
+        // OBTENER LA NOTA Y ENVIAR A NUBEFACT (misma clasificacion de estados)
+        ComprobanteEntity notaCredito = comprobanteRepository
+                .findById(idNotaCredito)
+                .orElseThrow(() -> new RuntimeException("Nota de credito no encontrada"));
+
+        Map<String, Object> respuesta = new java.util.HashMap<>(enviarASunat(notaCredito));
+        // Si NUBEFACT rechazo la nota de credito, se revierte igual que en
+        // el flujo de boleta/factura
+        revertirSiRechazado(respuesta, notaCredito);
+        respuesta.put("id_comprobante", idNotaCredito);
+        respuesta.put("serie", serieNC);
+        respuesta.put("numero", numeroNC);
+        return respuesta;
+    }
+
+    // Si NUBEFACT rechazo el comprobante (estado RECHAZADA, o error de la API),
+    // se revierte la insercion: se borra la fila y se devuelve el correlativo,
+    // para no dejar numeros huecos en la serie. Los estados ACEPTADA y
+    // PENDIENTE se quedan guardados.
+    private void revertirSiRechazado(Map<String, Object> respuesta, ComprobanteEntity comprobante) {
+
+        boolean rechazado =
+                "RECHAZADA".equals(respuesta.get("estado"))
+                || (!respuesta.containsKey("estado") && respuesta.containsKey("error"));
+
+        if (!rechazado) return;
+
+        try {
+            StoredProcedureQuery sp = entityManager
+                    .createStoredProcedureQuery("sp_revertir_comprobante");
+            sp.registerStoredProcedureParameter("p_id_comprobante", Long.class, ParameterMode.IN);
+            sp.registerStoredProcedureParameter("p_mensaje", String.class, ParameterMode.OUT);
+            sp.setParameter("p_id_comprobante", comprobante.getId());
+            sp.execute();
+
+            log.info("Comprobante {} revertido por rechazo de NUBEFACT: {}",
+                    comprobante.getSerie() + "-" + comprobante.getNumero(),
+                    sp.getOutputParameterValue("p_mensaje"));
+
+            respuesta.put("guardado_en_bd", false);
+        } catch (Exception ex) {
+            // Si la reversion falla, el comprobante queda en BD (sin PDF);
+            // quedara visible en el listado para reintentar
+            log.error("No se pudo revertir el comprobante {}: {}",
+                    comprobante.getId(), ex.getMessage(), ex);
+            respuesta.put("guardado_en_bd", true);
+        }
+    }
 
     private Map<String, Object> enviarASunat(ComprobanteEntity comprobante) {
         ComprobanteSunatDTO sunatDTO = ComprobanteSunatMapper.toSunatDTO(comprobante);

@@ -491,7 +491,7 @@ setComprobanteEmitido(true);
                           </td>
                           <td>S/ {pendiente.toFixed(2)}</td>
                           <td>
-                            <button onClick={() => agregarDesdeCita(cita)}>
+                            <button className="btn-agregar" onClick={() => agregarDesdeCita(cita)}>
                               ➕ Agregar
                             </button>
                           </td>
@@ -530,7 +530,7 @@ setComprobanteEmitido(true);
                 onChange={(e) => setPrecio(Number(e.target.value))}
               />
 
-              <button onClick={agregarServicio}>➕ Agregar</button>
+              <button className="btn-agregar" onClick={agregarServicio}>➕ Agregar</button>
             </div>
 
            <table className="tabla-servicios">

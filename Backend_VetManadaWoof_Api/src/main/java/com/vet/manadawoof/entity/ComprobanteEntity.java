@@ -132,6 +132,26 @@ public class ComprobanteEntity implements Serializable{
     @Column(name = "pdfurl_nubefact", length = 256)
     private String pdfurlNubefact;
 
+    // NOTA DE CREDITO: referencia al comprobante que modifica
+    @Column(name = "doc_modifica_tipo")
+    private Integer docModificaTipo;
+
+    @Column(name = "doc_modifica_serie", length = 4)
+    private String docModificaSerie;
+
+    @Column(name = "doc_modifica_numero")
+    private Integer docModificaNumero;
+
+    @Column(name = "nc_tipo")
+    private Integer ncTipo;
+
+    @Column(name = "nc_motivo", length = 500)
+    private String ncMotivo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comprobante_origen_id")
+    private ComprobanteEntity comprobanteOrigen;
+
     @OneToMany(mappedBy = "comprobante", fetch = FetchType.LAZY)
     private List<ComprobanteDetalleEntity> detalles;
 }

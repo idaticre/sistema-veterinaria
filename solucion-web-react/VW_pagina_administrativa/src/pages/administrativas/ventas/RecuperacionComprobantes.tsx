@@ -13,6 +13,23 @@ interface Comprobante {
     total: number;
 }
 
+// 🔥 NOTA DE CREDITO: 13 tipos del catalogo de NUBEFACT
+const TIPOS_NC = [
+    { codigo: 1, descripcion: "Anulación de la operación" },
+    { codigo: 2, descripcion: "Anulación por error en el RUC" },
+    { codigo: 3, descripcion: "Corrección por descripción" },
+    { codigo: 4, descripcion: "Descuento global" },
+    { codigo: 5, descripcion: "Descuento por ítem" },
+    { codigo: 6, descripcion: "Devolución total" },
+    { codigo: 7, descripcion: "Devolución por ítem" },
+    { codigo: 8, descripcion: "Bonificación" },
+    { codigo: 9, descripcion: "Disminución en el valor" },
+    { codigo: 10, descripcion: "Otros conceptos" },
+    { codigo: 11, descripcion: "Ajustes de montos y/o fechas de pago" },
+    { codigo: 12, descripcion: "Ajustes por diferencias de medida" },
+    { codigo: 13, descripcion: "Ajustes por cambio de valores" }
+];
+
 const RecuperacionComprobantes = () => {
     const [minimizado, setMinimizado] = useState(false);
 
@@ -24,14 +41,29 @@ const RecuperacionComprobantes = () => {
     const [documento, setDocumento] = useState("");
     const [clienteId, setClienteId] = useState(0);
 
+    // 🔥 NOTA DE CREDITO
+    const [mostrarNC, setMostrarNC] = useState(false);
+    const [ncTipo, setNcTipo] = useState(0);
+    const [ncMotivo, setNcMotivo] = useState("");
+    const [ncMonto, setNcMonto] = useState("");
+    const [enviandoNC, setEnviandoNC] = useState(false);
+    const [ultimoBuscar, setUltimoBuscar] = useState<"tipo" | "cliente">("tipo");
+
     // 🔥 BUSCAR CLIENTE POR DOCUMENTO (igual que en Facturación)
     const buscarCliente = async (doc: string) => {
         setDocumento(doc);
 
-        // Validar longitud: Factura = RUC (11), Boleta = DNI (8)
-        const longitudEsperada = tipo === "1" ? 11 : 8;
+        // Validar longitud: Factura = RUC (11), Boleta = DNI (8).
+        // Nota de credito: puede venir de una boleta o de una factura,
+        // asi que acepta DNI (8) o RUC (11)
+        const longitudValida =
+            tipo === "1"
+                ? doc.length === 11
+                : tipo === "3"
+                    ? doc.length === 8 || doc.length === 11
+                    : doc.length === 8;
 
-        if (doc.length !== longitudEsperada) {
+        if (!longitudValida) {
             setClienteId(0);
             return;
         }
@@ -55,6 +87,8 @@ const RecuperacionComprobantes = () => {
 
     // 🔥 BUSCAR POR TIPO
     const buscarPorTipo = async () => {
+        setUltimoBuscar("tipo");
+
         try {
             setLoading(true);
 
@@ -75,6 +109,8 @@ const RecuperacionComprobantes = () => {
 
     // 🔥 BUSCAR POR CLIENTE
     const buscarPorCliente = async () => {
+        setUltimoBuscar("cliente");
+
         if (!documento.trim()) {
             return Swal.fire({
                 title: "Alerta",
@@ -125,6 +161,115 @@ const RecuperacionComprobantes = () => {
         }
     };
 
+    // 🔥 NOTA DE CREDITO: abrir el modal con valores limpios
+    const abrirModalNC = () => {
+        setNcTipo(0);
+        setNcMotivo("");
+        setNcMonto("");
+        setMostrarNC(true);
+    };
+
+    // Refresca el listado respetando la busqueda que uso el usuario
+    const refrescarListado = async () => {
+        if (ultimoBuscar === "cliente" && clienteId) {
+            await buscarPorCliente();
+        } else {
+            await buscarPorTipo();
+        }
+    };
+
+    // 🔥 EMITIR NOTA DE CREDITO contra el comprobante abierto en el modal
+    const emitirNotaCredito = async () => {
+        if (!ncTipo) {
+            return Swal.fire({
+                title: "Alerta",
+                text: "Selecciona el tipo de nota de crédito",
+                icon: "warning"
+            });
+        }
+
+        if (!ncMotivo.trim()) {
+            return Swal.fire({
+                title: "Alerta",
+                text: "El motivo o sustento es obligatorio para SUNAT",
+                icon: "warning"
+            });
+        }
+
+        const esDescuento = ncTipo === 4 || ncTipo === 5;
+        const monto = Number(ncMonto);
+
+        if (esDescuento && (!ncMonto || monto <= 0 || monto > Number(detalle.total))) {
+            return Swal.fire({
+                title: "Alerta",
+                text: `El monto a descontar debe ser mayor a 0 y menor o igual al total (S/ ${Number(detalle.total).toFixed(2)})`,
+                icon: "warning"
+            });
+        }
+
+        try {
+            setEnviandoNC(true);
+
+            const body: any = { ncTipo, motivo: ncMotivo.trim() };
+            if (esDescuento) body.montoDescuento = monto;
+
+            const response = await IST.post(
+                `/comprobantes/${detalle.id}/nota-credito`,
+                body
+            );
+            const r = response.data;
+
+            // ACEPTADA o PENDIENTE: la nota quedo emitida (con PDF)
+            if (r.estado === "ACEPTADA" || r.estado === "PENDIENTE") {
+                setMostrarNC(false);
+                setMostrarDetalle(false);
+
+                Swal.fire({
+                    title: r.estado === "ACEPTADA"
+                        ? "Nota de crédito aceptada por SUNAT"
+                        : "Nota de crédito emitida (pendiente de SUNAT)",
+                    html:
+                        `Nota <strong>${r.serie}-${r.numero}</strong> emitida correctamente.<br>` +
+                        (r.enlace_del_pdf
+                            ? `<a href="${r.enlace_del_pdf}" target="_blank" rel="noopener">🧾 Ver PDF</a>`
+                            : ""),
+                    icon: "success"
+                });
+
+                await refrescarListado();
+                return;
+            }
+
+            // RECHAZADA o error: el backend revierte la fila y devuelve el
+            // correlativo (guardado_en_bd = false lo confirma)
+            Swal.fire({
+                title: r.estado === "RECHAZADA"
+                    ? "Nota de crédito rechazada por SUNAT"
+                    : "No se pudo emitir la nota de crédito",
+                html:
+                    `${r.sunat_description || r.sunat_note || r.mensaje || "Error desconocido"}<br><br>` +
+                    (r.guardado_en_bd === false
+                        ? "<small>La nota no fue guardada y el correlativo fue devuelto (sin descuadre).</small>"
+                        : "<small>La nota quedó registrada; puedes reintentarla desde el listado.</small>"),
+                icon: "error"
+            });
+
+            if (r.guardado_en_bd === false) {
+                await refrescarListado();
+            }
+        } catch (error: any) {
+            Swal.fire({
+                title: "Error",
+                text: error?.response?.data?.message
+                    || error?.response?.data?.mensaje
+                    || "No se pudo emitir la nota de crédito",
+                icon: "error"
+            });
+        } finally {
+            setEnviandoNC(false);
+        }
+    };
+
     return (
         <>
             <Br_administrativa onMinimizeChange={setMinimizado} />
@@ -153,11 +298,14 @@ const RecuperacionComprobantes = () => {
                                 >
                                     <option value="1">Factura</option>
                                     <option value="2">Boleta</option>
+                                    <option value="3">Nota de crédito</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label>{tipo === "1" ? "RUC" : "DNI"}</label>
+                                <label>
+                                    {tipo === "1" ? "RUC" : tipo === "3" ? "DNI o RUC" : "DNI"}
+                                </label>
 
                                 <input
                                     type="text"
@@ -233,7 +381,11 @@ const RecuperacionComprobantes = () => {
                                 <div className="modal-comprobante">
                                     <div className="modal-header">
                                         <h3>
-                                            {Number(detalle.tipoComprobante) === 1 ? "Factura" : "Boleta"}{" "}
+                                            {Number(detalle.tipoComprobante) === 1
+                                                ? "Factura"
+                                                : Number(detalle.tipoComprobante) === 3
+                                                    ? "Nota de crédito"
+                                                    : "Boleta"}{" "}
                                             {detalle.serie}-{detalle.numero}
                                         </h3>
 
@@ -290,16 +442,60 @@ const RecuperacionComprobantes = () => {
                                         </p>
                                     </div>
 
+                                    {/* NOTA DE CREDITO: enlace al comprobante original */}
+                                    {Number(detalle.tipoComprobante) === 3 && (
+                                        <div className="nc-vinculo">
+                                            <p>
+                                                <strong>Modifica al comprobante:</strong>{" "}
+                                                {detalle.docModificaSerie}-{detalle.docModificaNumero}
+                                            </p>
+
+                                            {detalle.ncTipo && (
+                                                <p>
+                                                    <strong>Tipo de nota:</strong>{" "}
+                                                    {TIPOS_NC.find(
+                                                        (t) => t.codigo === Number(detalle.ncTipo)
+                                                    )?.descripcion || `Tipo ${detalle.ncTipo}`}
+                                                </p>
+                                            )}
+
+                                            {detalle.comprobanteOrigenId && (
+                                                <button
+                                                    className="btn-ver-original"
+                                                    onClick={() =>
+                                                        verComprobante(detalle.comprobanteOrigenId)
+                                                    }
+                                                >
+                                                    ↩ Ver comprobante original
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {/* VER COMPROBANTE EN NUBEFACT */}
                                     {detalle.pdfurlNubefact ? (
-                                        <button
-                                            className="btn-ver-pdf"
-                                            onClick={() =>
-                                                window.open(detalle.pdfurlNubefact, "_blank", "noopener")
-                                            }
-                                        >
-                                            🧾 Ver comprobante (PDF)
-                                        </button>
+                                        <div className="modal-acciones">
+                                            <button
+                                                className="btn-ver-pdf"
+                                                onClick={() =>
+                                                    window.open(detalle.pdfurlNubefact, "_blank", "noopener")
+                                                }
+                                            >
+                                                🧾 Ver comprobante (PDF)
+                                            </button>
+
+                                            {/* EMITIR NOTA DE CREDITO: solo boletas y
+                                                facturas ya aceptadas por SUNAT */}
+                                            {(Number(detalle.tipoComprobante) === 1 ||
+                                                Number(detalle.tipoComprobante) === 2) && (
+                                                <button
+                                                    className="btn-nota-credito"
+                                                    onClick={abrirModalNC}
+                                                >
+                                                    📄 Nota de crédito
+                                                </button>
+                                            )}
+                                        </div>
                                     ) : (
                                         <p className="pdf-no-disponible">
                                             ⚠ PDF no disponible: el comprobante aún no fue aceptado
@@ -339,6 +535,93 @@ const RecuperacionComprobantes = () => {
                                             <strong>Observaciones:</strong> {detalle.observaciones}
                                         </p>
                                     )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* MODAL NOTA DE CREDITO */}
+                        {mostrarNC && detalle && (
+                            <div className="modal-overlay">
+                                <div className="modal-nota-credito">
+                                    <div className="modal-header">
+                                        <h3>
+                                            📄 Nota de crédito sobre{" "}
+                                            {Number(detalle.tipoComprobante) === 1 ? "Factura" : "Boleta"}{" "}
+                                            {detalle.serie}-{detalle.numero}
+                                        </h3>
+
+                                        <button
+                                            className="btn-cerrar"
+                                            onClick={() => setMostrarNC(false)}
+                                        >
+                                            ✖ Cerrar
+                                        </button>
+                                    </div>
+
+                                    <p className="nc-origen">
+                                        Total del comprobante:{" "}
+                                        <strong>S/ {Number(detalle.total).toFixed(2)}</strong>
+                                    </p>
+
+                                    <div className="nc-form">
+                                        <label>Tipo de nota de crédito *</label>
+
+                                        <select
+                                            value={ncTipo}
+                                            onChange={(e) => setNcTipo(Number(e.target.value))}
+                                        >
+                                            <option value={0}>— Seleccione un tipo —</option>
+
+                                            {TIPOS_NC.map((t) => (
+                                                <option key={t.codigo} value={t.codigo}>
+                                                    {t.codigo} - {t.descripcion}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        <label>Motivo o sustento *</label>
+
+                                        <textarea
+                                            rows={3}
+                                            maxLength={500}
+                                            placeholder="Ej: Devolución total de la operación"
+                                            value={ncMotivo}
+                                            onChange={(e) => setNcMotivo(e.target.value)}
+                                        />
+
+                                        {(ncTipo === 4 || ncTipo === 5) && (
+                                            <>
+                                                <label>Monto a descontar (con IGV) *</label>
+
+                                                <input
+                                                    type="number"
+                                                    min="0.01"
+                                                    step="0.01"
+                                                    max={Number(detalle.total)}
+                                                    placeholder={`Máximo S/ ${Number(detalle.total).toFixed(2)}`}
+                                                    value={ncMonto}
+                                                    onChange={(e) => setNcMonto(e.target.value)}
+                                                />
+                                            </>
+                                        )}
+                                    </div>
+
+                                    <div className="nc-acciones">
+                                        <button
+                                            className="btn-secundario"
+                                            onClick={() => setMostrarNC(false)}
+                                        >
+                                            Cancelar
+                                        </button>
+
+                                        <button
+                                            className="btn-nota-credito"
+                                            onClick={emitirNotaCredito}
+                                            disabled={enviandoNC}
+                                        >
+                                            {enviandoNC ? "Emitiendo..." : "Emitir nota de crédito"}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}

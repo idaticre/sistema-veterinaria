@@ -140,6 +140,9 @@ public class ComprobanteSunatDTO {
     @JsonProperty("tipo_de_nota_de_debito")
     private String tipoDeNotaDeDebito;
 
+    @JsonProperty("motivo_o_sustento_de_comprobante")
+    private String motivoOSustentoDeComprobante;
+
     @JsonProperty("enviar_automaticamente_a_la_sunat")
     private boolean enviarAutomaticamenteALaSunat;
 

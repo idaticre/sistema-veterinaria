@@ -115,6 +115,33 @@ public class ComprobanteSunatMapper {
                 .nubecontTipoDeVentaCodigo(comprobante.getNubecontTipoVentaCodigo() != null ? comprobante.getNubecontTipoVentaCodigo() : "")
                 .medioDePago(comprobante.getMedioPago() != null ? comprobante.getMedioPago().getNombre() : "")
 
+                // NOTA DE CREDITO: se llenan solo si la entidad es tipo 3
+                .documentoQueSeModificaTipo(
+                        comprobante.getDocModificaTipo() != null
+                                ? String.valueOf(comprobante.getDocModificaTipo())
+                                : ""
+                )
+                .documentoQueSeModificaSerie(
+                        comprobante.getDocModificaSerie() != null
+                                ? comprobante.getDocModificaSerie()
+                                : ""
+                )
+                .documentoQueSeModificaNumero(
+                        comprobante.getDocModificaNumero() != null
+                                ? String.valueOf(comprobante.getDocModificaNumero())
+                                : ""
+                )
+                .tipoDeNotaDeCredito(
+                        comprobante.getNcTipo() != null
+                                ? String.valueOf(comprobante.getNcTipo())
+                                : ""
+                )
+                .motivoOSustentoDeComprobante(
+                        comprobante.getNcMotivo() != null
+                                ? comprobante.getNcMotivo()
+                                : ""
+                )
+
                 .items(items)
                 .build();
     }

@@ -3,6 +3,7 @@ package com.vet.manadawoof.controller;
 import com.vet.manadawoof.dtos.response.ComprobanteResponseDTO;
 import com.vet.manadawoof.service.ComprobanteService;
 import com.vet.manadawoof.dtos.request.ComprobanteRequestDTO;
+import com.vet.manadawoof.dtos.request.NotaCreditoRequestDTO;
 import com.vet.manadawoof.dtos.response.ComprobanteResponseDTO;
 import com.vet.manadawoof.service.ComprobanteService;
 import java.util.List;
@@ -28,6 +29,14 @@ public class ComprobanteController {
             @RequestBody ComprobanteRequestDTO request
     ) {
         return ResponseEntity.ok(comprobanteService.generarComprobante(request));
+    }
+
+    @PostMapping("/{id}/nota-credito")
+    public ResponseEntity<Map<String, Object>> emitirNotaCredito(
+            @PathVariable Long id,
+            @RequestBody NotaCreditoRequestDTO request
+    ) {
+        return ResponseEntity.ok(comprobanteService.emitirNotaCredito(id, request));
     }
 
     /*@PostMapping("/enviar-sunat/{id}")

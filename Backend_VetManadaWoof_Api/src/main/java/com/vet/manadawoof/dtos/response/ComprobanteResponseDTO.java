@@ -41,7 +41,14 @@ public class ComprobanteResponseDTO {
     private String observaciones;
 
     private String pdfurlNubefact;
-    
+
+    // NOTA DE CREDITO: datos para enlazar con el comprobante modificado
+    private Integer ncTipo;
+    private String ncMotivo;
+    private String docModificaSerie;
+    private Integer docModificaNumero;
+    private Long comprobanteOrigenId;
+
     //private boolean enviadoSunat;
     //private String estadoSunat;
     

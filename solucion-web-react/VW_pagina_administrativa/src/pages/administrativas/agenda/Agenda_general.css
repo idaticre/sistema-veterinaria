@@ -285,10 +285,19 @@
   overflow-y: auto;
   box-shadow: 0 15px 45px rgba(0,0,0,0.20);
 
+  position: relative;   /* 👈 ancla la X de cerrar al modal, no al overlay */
+
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 25px 35px;
 
+}
+
+/* Todo bloque del wizard ocupa el ancho completo del modal;
+   las columnas internas las manejan sus propios grids
+   (.step-grid-v2, .paso2-grid-v2, .resumen-grid) */
+.modal-content > * {
+  grid-column: 1 / -1;
 }
 .modal-close-x {
   position: absolute;
@@ -311,7 +320,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 22px;
+  margin-bottom: 0; /* el gap del modal separa */
 }
 
 .modal-header-icono {
@@ -345,7 +354,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 26px;
+  margin-bottom: 0; /* el gap del modal separa */
   padding: 0 4px;
 }
 
@@ -412,7 +421,7 @@
   border: 1px solid var(--borde-suave);
   border-radius: 14px;
   padding: 20px 22px;
-  margin-bottom: 18px;
+  margin-bottom: 0; /* el gap del modal/grid separa */
 }
 
 .seccion-header {
@@ -512,6 +521,11 @@
   grid-template-columns: 1.6fr 1fr;
   gap: 18px;
   align-items: start;
+}
+
+/* Si el servicio no requiere sala, la card de servicios abarca todo el ancho */
+.paso2-grid-v2 > .seccion-card:only-child {
+  grid-column: 1 / -1;
 }
 
 .service-input-grid {
@@ -929,6 +943,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;          /* separación mínima entre título y botón */
+  flex-wrap: wrap;    /* si no cabe, el botón baja en vez de pisar el texto */
   margin-bottom: 1.5rem;
   background: #fffaf3;
   padding: 1rem 1.5rem;
@@ -937,10 +953,17 @@
 }
 
 .citas-header h3 {
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: bold;
   color: #333;
   margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.citas-header .cita-acciones {
+  flex-shrink: 0;
+  margin-left: auto;  /* si el botón pasa a otra línea, va a la derecha */
 }
 
 .btn-agregar-linda {

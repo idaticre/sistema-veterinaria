@@ -1,12 +1,8 @@
-:root {
-  --color-titulo: #001C3D;
-  --color-subtitulo: #33475B;
-  --color-editar: #A5C9FF;
-  --color-exito: #77E07D;
-  --color-peligro: #E63946;
-  --color-fondo: #F9E4C8;
-  --color-subfondo: #ffffff;
-}
+/* ============================================
+   RECUPERACION DE COMPROBANTES — tema naranja
+   (consistente con lst_mascotas / clientes)
+   ============================================ */
+
 .contenido-normal {
     margin-left: 300px;
     transition: .3s;
@@ -18,222 +14,459 @@
 }
 
 #recuperacion-comprobantes {
-  background: var(--color-fondo);
-  min-height: 100vh;
+    background: #fdf1dc;
+    min-height: 100vh;
 }
 
 .recuperacion-container {
-  padding: 30px;
+    padding: 1.5rem 2rem;
 }
 
 .header-recuperacion {
-  margin-bottom: 25px;
-  text-align: center;
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
 .header-recuperacion h2 {
-  color: var(--color-titulo);
-  font-size: 2.5rem;
-  font-weight: bold;
+    color: #333;
+    font-size: 1.9rem;
+    font-weight: 700;
 }
 
 .recuperacion-card {
-  background: var(--color-subfondo);
-  border-radius: 18px;
-  padding: 25px;
-  box-shadow: 0 5px 15px rgba(0,0,0,.08);
+    background: #fffdf8;
+    border: 1px solid #f5ddb8;
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    box-shadow: 0 3px 12px rgba(178, 106, 0, 0.08);
 }
 
+/* ---------- FILTROS ---------- */
+
 .form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
-  gap: 20px;
-  margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 1rem;
 }
 
 .form-grid label {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--color-subtitulo);
-  font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    color: #666;
+    font-weight: 600;
+    font-size: 0.92rem;
 }
 
 .form-grid input,
 .form-grid select {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 2px solid #ddd;
-  outline: none;
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-grid input:focus,
 .form-grid select:focus {
-  border-color: var(--color-editar);
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
+.form-grid input::placeholder {
+    color: #aaa;
+}
+
+/* ---------- ACCIONES ---------- */
+
 .acciones {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 25px;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.2rem;
 }
 
 .btn-buscar {
-  background: var(--color-editar);
-  color: var(--color-titulo);
-  border: none;
-  border-radius: 10px;
-  padding: 12px 20px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: .3s;
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0 1.2rem;
+    height: 42px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: filter 0.2s ease, transform 0.1s ease;
 }
 
 .btn-buscar:hover {
-  transform: scale(1.03);
+    filter: brightness(0.92);
 }
 
+.btn-buscar:active {
+    transform: scale(0.97);
+}
+
+.btn-buscar:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* ---------- TABLA ---------- */
+
 .tabla-comprobantes {
-  width: 100%;
-  border-collapse: collapse;
-  overflow: hidden;
-  border-radius: 15px;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fdf5e4;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #eacf9f;
+    box-shadow: 0 3px 12px rgba(178, 106, 0, 0.07);
+}
+
+.tabla-comprobantes thead {
+    background-color: #fce7c8;
+    border-bottom: 2px solid #eacf9f;
 }
 
 .tabla-comprobantes th {
-  background: var(--color-titulo);
-  color: white;
-  padding: 14px;
+    color: #a35f00;
+    font-weight: 700;
+    text-align: center;
+    padding: 0.9rem;
+    font-size: 0.92rem;
+    letter-spacing: 0.3px;
 }
 
 .tabla-comprobantes td {
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
-  text-align: center;
-  color: var(--color-subtitulo);
+    padding: 0.8rem;
+    border-bottom: 1px solid #ecd9b4;
+    text-align: center;
+    color: #444;
+    font-size: 0.93rem;
 }
 
-.tabla-comprobantes tr:hover {
-  background: #f7f7f7;
+.tabla-comprobantes tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla-comprobantes tbody tr:hover {
+    background: #fdeecd;
 }
 
 .sin-datos {
-  text-align: center;
-  padding: 20px;
-  font-style: italic;
+    text-align: center;
+    padding: 1.5rem;
+    color: #999;
+    font-style: italic;
 }
+
+/* ---------- MODALES ---------- */
+
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
 }
 
 .modal-comprobante {
-  background: white;
-  width: 80%;
-  max-width: 900px;
-  max-height: 85vh;
-  overflow-y: auto;
-  border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    background: #fffdf8;
+    width: 80%;
+    max-width: 900px;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
 }
 
 .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .modal-header h3 {
-  color: var(--color-titulo);
-  margin: 0;
+    color: #333;
+    margin: 0;
+    font-size: 1.25rem;
 }
 
 .btn-cerrar {
-  background: var(--color-peligro);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 15px;
-  cursor: pointer;
-  font-weight: bold;
+    background: #e63946;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: filter 0.2s ease;
 }
 
-.info-comprobante {
-  margin-bottom: 20px;
+.btn-cerrar:hover {
+    filter: brightness(0.9);
 }
 
-.info-comprobante p {
-  margin: 6px 0;
-  color: var(--color-subtitulo);
-}
+/* ---------- DATOS DEL COMPROBANTE ---------- */
 
-/* NUEVO: grilla de datos del cliente en el modal */
 .info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 25px;
-  margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 25px;
+    margin-bottom: 1rem;
 }
 
 .info-grid p {
-  margin: 6px 0;
-  color: var(--color-subtitulo);
+    margin: 6px 0;
+    color: #555;
+    font-size: 0.95rem;
 }
 
-/* NUEVO: bloque de montos (subtotal/igv/total) */
+.info-grid strong {
+    color: #333;
+}
+
+/* ---------- MONTOS ---------- */
+
 .montos-comprobante {
-  background: #f7f7f7;
-  border-radius: 12px;
-  padding: 12px 18px;
-  margin-bottom: 20px;
+    background: #fff8ec;
+    border: 1px solid #f5ddb8;
+    border-radius: 10px;
+    padding: 0.8rem 1.1rem;
+    margin-bottom: 1rem;
 }
 
 .montos-comprobante p {
-  margin: 4px 0;
-  color: var(--color-subtitulo);
+    margin: 4px 0;
+    color: #555;
+    font-size: 0.95rem;
 }
 
 .montos-comprobante .total-final {
-  color: var(--color-titulo);
-  font-size: 1.15em;
+    color: #b26a00;
+    font-size: 1.1em;
+    font-weight: 700;
 }
 
-/* NUEVO: boton para abrir el PDF de NUBEFACT */
+/* ---------- ACCIONES DEL MODAL ---------- */
+
+.modal-acciones {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+}
+
 .btn-ver-pdf {
-  background: var(--color-editar);
-  color: var(--color-titulo);
-  border: none;
-  border-radius: 10px;
-  padding: 12px 20px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-bottom: 20px;
-  transition: .3s;
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: filter 0.2s ease, transform 0.1s ease;
 }
 
 .btn-ver-pdf:hover {
-  transform: scale(1.03);
+    filter: brightness(0.92);
+}
+
+.btn-ver-pdf:active {
+    transform: scale(0.97);
+}
+
+/* NUEVO: boton para emitir nota de credito */
+.btn-nota-credito {
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.btn-nota-credito:hover {
+    filter: brightness(0.92);
+}
+
+.btn-nota-credito:active {
+    transform: scale(0.97);
+}
+
+.btn-nota-credito:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* NUEVO: boton secundario (Cancelar, acciones neutras) */
+.btn-secundario {
+    background: #f1f2f4;
+    color: #6b7280;
+    border: 1px solid #dcdfe3;
+    border-radius: 10px;
+    padding: 11px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: filter 0.2s ease;
+}
+
+.btn-secundario:hover {
+    filter: brightness(0.96);
 }
 
 /* NUEVO: aviso cuando el PDF aun no existe */
 .pdf-no-disponible {
-  color: var(--color-peligro);
-  font-style: italic;
-  margin-bottom: 20px;
+    color: #b26a00;
+    background: #fff3e0;
+    border: 1px solid #f5ddb8;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-style: italic;
+    font-size: 0.92rem;
+    margin-bottom: 1.2rem;
+}
+
+/* NUEVO: bloque NC que enlaza al comprobante original */
+.nc-vinculo {
+    background: #fff8ec;
+    border-left: 4px solid #f59e0b;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 1.2rem;
+}
+
+.nc-vinculo p {
+    margin: 4px 0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.btn-ver-original {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-top: 6px;
+    transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.btn-ver-original:hover {
+    filter: brightness(0.92);
 }
 
 /* NUEVO: observaciones al final del modal */
 .observaciones-modal {
-  margin-top: 15px;
-  color: var(--color-subtitulo);
+    margin-top: 15px;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+/* ---------- MODAL NOTA DE CREDITO ---------- */
+
+.modal-nota-credito {
+    background: #fffdf8;
+    width: 90%;
+    max-width: 560px;
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+    animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.nc-origen {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0 0 1rem;
+    background: #fff8ec;
+    border: 1px solid #f5ddb8;
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.nc-origen strong {
+    color: #b26a00;
+}
+
+.nc-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.nc-form label {
+    color: #666;
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin: 14px 0 6px;
+}
+
+.nc-form label:first-child {
+    margin-top: 0;
+}
+
+.nc-form select,
+.nc-form textarea,
+.nc-form input {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: #fff;
+    box-sizing: border-box;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nc-form select:focus,
+.nc-form textarea:focus,
+.nc-form input:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.nc-acciones {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 1.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.nc-acciones .btn-nota-credito,
+.nc-acciones .btn-secundario {
+    min-width: 150px;
 }

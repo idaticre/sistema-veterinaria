@@ -163,6 +163,30 @@ public class ComprobanteMapper {
                         comprobante.getPdfurlNubefact()
                 )
 
+                // NOTA DE CREDITO: referencia al comprobante modificado.
+                // getId() sobre el proxy LAZY no dispara consulta extra
+                .ncTipo(
+                        comprobante.getNcTipo()
+                )
+
+                .ncMotivo(
+                        comprobante.getNcMotivo()
+                )
+
+                .docModificaSerie(
+                        comprobante.getDocModificaSerie()
+                )
+
+                .docModificaNumero(
+                        comprobante.getDocModificaNumero()
+                )
+
+                .comprobanteOrigenId(
+                        comprobante.getComprobanteOrigen() != null
+                                ? comprobante.getComprobanteOrigen().getId()
+                                : null
+                )
+
                 .detalles(
                         detalles
                 )

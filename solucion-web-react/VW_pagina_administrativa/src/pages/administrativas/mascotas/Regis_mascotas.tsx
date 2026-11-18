@@ -759,9 +759,16 @@ function Regis_mascotas() {
                                   setResultados([]);
                                 }}
                               >
-                                {cliente.nombre} — {cliente.documento}
+                                <span className="sug-nombre">{cliente.nombre}</span>
+                                <span className="sug-doc">{cliente.documento}</span>
                               </li>
                             ))}
+                          </ul>
+                        )}
+
+                        {busqueda.trim() !== "" && resultados.length === 0 && (
+                          <ul className="suggestions-list empty">
+                            <li>No se encontraron clientes</li>
                           </ul>
                         )}
                       </div>

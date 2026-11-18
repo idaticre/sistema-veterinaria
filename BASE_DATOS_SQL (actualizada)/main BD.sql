@@ -1515,6 +1515,7 @@ CREATE TABLE tipos_comprobantes(
 
 INSERT INTO tipos_comprobantes(comprobante) VALUES ('factura');
 INSERT INTO tipos_comprobantes(comprobante) VALUES ('boleta');
+INSERT INTO tipos_comprobantes(comprobante) VALUES ('nota de credito');
 
 CREATE TABLE tipos_percepciones(
 	id int primary key not null auto_increment,
@@ -1581,6 +1582,12 @@ CREATE TABLE comprobantes (
     total_anticipio DECIMAL(14,2) NOT NULL DEFAULT 0,
     medio_pago_id INT NULL DEFAULT NULL,
 	pdfurl_nubefact VARCHAR(256),
+    doc_modifica_tipo INT NULL DEFAULT NULL COMMENT 'Tipo SUNAT del doc que modifica: 1=factura, 2=boleta',
+	doc_modifica_serie VARCHAR(4) NULL DEFAULT NULL COMMENT 'Serie del comprobante origen (ej. FFF1)',
+	doc_modifica_numero INT NULL DEFAULT NULL COMMENT 'Numero del comprobante origen',
+	nc_tipo INT NULL DEFAULT NULL COMMENT 'Tipo de nota de credito (1-13) segun catalogo NUBEFACT',
+	nc_motivo VARCHAR(500) NULL DEFAULT NULL COMMENT 'Motivo o sustento de la nota de credito',
+	comprobante_origen_id BIGINT NULL DEFAULT NULL COMMENT 'FK al comprobante que modifica',
     
     CONSTRAINT fk_comprobantes_agenda FOREIGN KEY (agenda_id) REFERENCES agenda(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_comprobantes_tipo FOREIGN KEY (tipo_comprobante_id) REFERENCES tipos_comprobantes(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1589,11 +1596,13 @@ CREATE TABLE comprobantes (
     CONSTRAINT fk_comprobantes_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_comprobantes_medio_pago FOREIGN KEY (medio_pago_id) REFERENCES medios_pago(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT uq_tipo_serie_numero UNIQUE (tipo_comprobante_id, serie, numero),
+    CONSTRAINT fk_comprobantes_origen FOREIGN KEY (comprobante_origen_id) REFERENCES comprobantes(id) ON DELETE SET NULL ON UPDATE CASCADE,
 
     INDEX idx_tipo_comprobante (tipo_comprobante_id),
     INDEX idx_cliente (cliente_id),
     INDEX idx_fecha_emision (fecha_emision),
-    INDEX idx_serie_numero (serie, numero)
+    INDEX idx_serie_numero (serie, numero),
+    INDEX idx_nc_origen (comprobante_origen_id)
 );
 
 INSERT INTO monedas(moneda) VALUES ('SOLES');
@@ -1729,3 +1738,5 @@ INSERT INTO tipo_accion (nombre, descripcion) VALUES
 ('CAMBIAR_CONTRASENA', 'Cambio de contraseña del usuario'),
 ('EXPORTAR', 'Exportación de información'),
 ('IMPORTAR', 'Importación de información');
+
+select * from comprobantes;

@@ -4684,3 +4684,211 @@ BEGIN
 	END validacion;
 END $$
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_insertar_nota_credito;
+DELIMITER $$
+CREATE PROCEDURE sp_insertar_nota_credito(
+    IN p_agenda_id BIGINT,               -- agenda del comprobante origen
+    IN p_comprobante_origen_id BIGINT,   -- id del comprobante que modifica
+    IN p_doc_modifica_tipo INT,          -- 1=factura, 2=boleta
+    IN p_doc_modifica_serie VARCHAR(4),  -- serie del origen (ej. FFF1)
+    IN p_doc_modifica_numero INT,        -- numero del origen
+    IN p_nc_tipo INT,                    -- tipo de NC (1-13)
+    IN p_nc_motivo VARCHAR(500),         -- motivo o sustento
+    IN p_serie VARCHAR(4),               -- serie de la NC (FCC1 o BCC1)
+
+    IN p_fecha_emision DATE,
+    IN p_fecha_vencimiento DATE,
+    IN p_tipo_moneda_id INT,
+
+    IN p_total_gravada DECIMAL(14,2),
+    IN p_total_inafecta DECIMAL(14,2),
+    IN p_total_exonerada DECIMAL(14,2),
+    IN p_total_igv DECIMAL(14,2),
+
+    IN p_total_gratuita DECIMAL(14,2),
+    IN p_total_otros_cargos DECIMAL(14,2),
+
+    IN p_total DECIMAL(14,2),
+
+    IN p_observaciones VARCHAR(1000),
+    IN p_codigo_unico VARCHAR(20),
+    IN p_condiciones_pago VARCHAR(250),
+    IN p_nubecont_tipo_venta_codigo VARCHAR(5),
+
+    IN p_cliente_id BIGINT,
+
+    IN p_total_anticipio DECIMAL(14,2),
+    IN p_medio_pago_id INT,
+
+    OUT p_id_comprobante BIGINT,
+    OUT p_numero INT,
+    OUT p_mensaje VARCHAR(255)
+)
+BEGIN
+
+    DECLARE v_numero INT;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_numero = NULL;
+
+    SET v_numero = NULL;
+
+    -- correlativo propio de las NC: (tipo 3, serie FCC1 o BCC1)
+    SELECT ultimo_numero
+    INTO v_numero
+    FROM correlativos
+    WHERE tipo_comprobante_id = 3
+      AND serie = p_serie
+    LIMIT 1
+    FOR UPDATE;
+
+    IF v_numero IS NULL THEN
+
+        SET v_numero = 1;
+
+        INSERT INTO correlativos(
+            tipo_comprobante_id,
+            serie,
+            ultimo_numero
+        )
+        VALUES(
+            3,
+            p_serie,
+            v_numero
+        );
+
+    ELSE
+
+        SET v_numero = v_numero + 1;
+
+        UPDATE correlativos
+        SET ultimo_numero = v_numero
+        WHERE tipo_comprobante_id = 3
+          AND serie = p_serie;
+
+    END IF;
+
+    INSERT INTO comprobantes(
+        agenda_id,
+        tipo_comprobante_id,
+        serie,
+        numero,
+        fecha_emision,
+        fecha_vencimiento,
+        tipo_moneda_id,
+
+        total_gravada,
+        total_inafecta,
+        total_exonerada,
+        total_igv,
+        total_gratuita,
+        total_otros_cargos,
+        total,
+
+        observaciones,
+        codigo_unico,
+        condiciones_pago,
+        nubecont_tipo_venta_codigo,
+
+        cliente_id,
+
+        total_anticipio,
+        medio_pago_id,
+
+        doc_modifica_tipo,
+        doc_modifica_serie,
+        doc_modifica_numero,
+        nc_tipo,
+        nc_motivo,
+        comprobante_origen_id
+    )
+    VALUES(
+        p_agenda_id,
+        3,                    -- NOTA DE CREDITO
+        p_serie,
+        v_numero,
+        p_fecha_emision,
+        p_fecha_vencimiento,
+        p_tipo_moneda_id,
+
+        IFNULL(p_total_gravada, 0),
+        IFNULL(p_total_inafecta, 0),
+        IFNULL(p_total_exonerada, 0),
+        IFNULL(p_total_igv, 0),
+        IFNULL(p_total_gratuita, 0),
+        IFNULL(p_total_otros_cargos, 0),
+        p_total,
+
+        p_observaciones,
+        p_codigo_unico,
+        p_condiciones_pago,
+        p_nubecont_tipo_venta_codigo,
+
+        p_cliente_id,
+
+        IFNULL(p_total_anticipio, 0),
+        p_medio_pago_id,
+
+        p_doc_modifica_tipo,
+        p_doc_modifica_serie,
+        p_doc_modifica_numero,
+        p_nc_tipo,
+        p_nc_motivo,
+        p_comprobante_origen_id
+    );
+
+    SET p_id_comprobante = LAST_INSERT_ID();
+    SET p_numero = v_numero;
+    SET p_mensaje = 'Nota de credito registrada correctamente';
+
+END $$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_revertir_comprobante;
+DELIMITER $$
+CREATE PROCEDURE sp_revertir_comprobante(
+    IN p_id_comprobante BIGINT,
+    OUT p_mensaje VARCHAR(255)
+)
+BEGIN
+
+    DECLARE v_tipo INT;
+    DECLARE v_serie VARCHAR(4);
+    DECLARE v_numero INT;
+    DECLARE v_ultimo INT;
+
+    SELECT tipo_comprobante_id, serie, numero
+    INTO v_tipo, v_serie, v_numero
+    FROM comprobantes
+    WHERE id = p_id_comprobante
+    LIMIT 1
+    FOR UPDATE;
+
+    IF v_tipo IS NULL THEN
+
+        SET p_mensaje = 'Comprobante no encontrado (nada que revertir)';
+
+    ELSE
+
+        DELETE FROM comprobante_detalles WHERE comprobante_id = p_id_comprobante;
+        DELETE FROM comprobantes WHERE id = p_id_comprobante;
+
+        SELECT ultimo_numero INTO v_ultimo
+        FROM correlativos
+        WHERE tipo_comprobante_id = v_tipo
+          AND serie = v_serie;
+
+        IF v_numero = v_ultimo THEN
+            UPDATE correlativos
+            SET ultimo_numero = ultimo_numero - 1
+            WHERE tipo_comprobante_id = v_tipo
+              AND serie = v_serie;
+        END IF;
+
+        SET p_mensaje = 'Comprobante revertido y correlativo devuelto';
+
+    END IF;
+
+END $$
+
+DELIMITER ;
