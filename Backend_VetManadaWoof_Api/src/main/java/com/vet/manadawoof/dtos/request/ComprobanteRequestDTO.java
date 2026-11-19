@@ -61,6 +61,10 @@ public class ComprobanteRequestDTO {
 
     private Integer medioPagoId;
 
+    private Boolean pagoRecibido;
+
+    private BigDecimal montoPagado;
+
     private List<ComprobanteDetalleRequestDTO> detalles;
     
 }

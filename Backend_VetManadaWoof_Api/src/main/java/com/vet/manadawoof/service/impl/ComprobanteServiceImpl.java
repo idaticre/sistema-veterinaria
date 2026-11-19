@@ -16,6 +16,7 @@ import com.vet.manadawoof.mapper.ComprobanteSunatMapper;
 import com.vet.manadawoof.repository.AgendaRepository;
 import com.vet.manadawoof.repository.ComprobanteRepository;
 import com.vet.manadawoof.service.ComprobanteService;
+import com.vet.manadawoof.service.CajaService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
@@ -44,6 +45,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
 
     private final AgendaRepository agendaRepository;
     private final ComprobanteRepository comprobanteRepository;
+    private final CajaService cajaService;
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -150,6 +152,28 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             insertarDetalleComprobante(idComprobante, detalle);
         }
 
+        if (Boolean.TRUE.equals(request.getPagoRecibido())) {
+            if (request.getMedioPagoId() == null || request.getMontoPagado() == null
+                    || request.getMontoPagado().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Para registrar el pago, indique un monto y un medio de pago.");
+            }
+            java.math.BigDecimal maximoPendiente = request.getTotal()
+                    .subtract(request.getTotalAnticipio() == null
+                            ? java.math.BigDecimal.ZERO
+                            : request.getTotalAnticipio());
+            if (request.getMontoPagado().compareTo(maximoPendiente) > 0) {
+                throw new IllegalArgumentException("El pago ingresado supera el saldo pendiente del comprobante.");
+            }
+            cajaService.registrarIngresoDesdeComprobante(
+                    idComprobante,
+                    request.getMontoPagado(),
+                    request.getMedioPagoId(),
+                    agenda.getCliente().getId(),
+                    agenda.getId(),
+                    "Pago de comprobante #" + idComprobante
+            );
+        }
+
         // OBTENER ENTIDAD Y ENVIAR A SUNAT
         ComprobanteEntity comprobante = comprobanteRepository
                 .findById(idComprobante)
@@ -159,6 +183,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         // Si NUBEFACT rechazo el comprobante, se revierte (borra fila y
         // devuelve el correlativo) para no descuadrar la numeracion
         revertirSiRechazado(respuestaSunat, comprobante);
+        respuestaSunat.put("pago_registrado_en_caja", Boolean.TRUE.equals(request.getPagoRecibido()));
         respuestaSunat.put("id_comprobante", idComprobante);
         return respuestaSunat;
     }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Br_administrativa from "../../../components/barra_administrativa/Br_administrativa";
@@ -24,6 +24,11 @@ interface Cita {
   abonoInicial: number;
 }
 
+interface MedioPagoOption {
+  id: number;
+  nombre: string;
+}
+
 function FacturacionElectronica() {
   const [minimizado, setMinimizado] = useState(false);
   const [tipoComprobante, setTipoComprobante] = useState("BOLETA");
@@ -39,6 +44,16 @@ function FacturacionElectronica() {
   const [totalAnticipio, setTotalAnticipio] = useState(0);
   const [agendaId, setAgendaId] = useState(0);
   const [comprobanteEmitido, setComprobanteEmitido] = useState(false);
+  const [mediosPago, setMediosPago] = useState<MedioPagoOption[]>([]);
+  const [registrarPagoEnCaja, setRegistrarPagoEnCaja] = useState(false);
+  const [medioPagoId, setMedioPagoId] = useState("");
+  const [montoPagado, setMontoPagado] = useState("");
+
+  useEffect(() => {
+    IST.get("/medios-pago")
+      .then((response) => setMediosPago(response.data || []))
+      .catch(() => setMediosPago([]));
+  }, []);
 
   // 🔥 BUSCAR CLIENTE
   // 🛠 CORREGIDO: antes esto llamaba con fetch() directo a
@@ -241,6 +256,17 @@ const igv = totalGravada * 0.18;    // IGV (18%)
   const guardarComprobante = async () => {
   try {
 
+const montoPendiente = Math.max(0, total - totalAnticipio);
+const montoRecibido = Number(montoPagado || montoPendiente);
+if (registrarPagoEnCaja && !medioPagoId) {
+  Swal.fire("Seleccione el medio de pago", "Elija efectivo, Yape, Plin, transferencia u otro medio registrado.", "warning");
+  return;
+}
+if (registrarPagoEnCaja && (montoRecibido <= 0 || montoRecibido > montoPendiente)) {
+  Swal.fire("Monto de pago inválido", `El pago debe estar entre S/ 0.01 y S/ ${montoPendiente.toFixed(2)}.`, "warning");
+  return;
+}
+
 const request = {
   clienteId: clienteId,
   agendaId: agendaId, // luego cambiaremos esto por la agenda real
@@ -266,11 +292,13 @@ const request = {
 
   observaciones: "",
   codigoUnico: "",
-  condicionesPago: "",
+  condicionesPago: registrarPagoEnCaja ? "CONTADO" : "",
   nubecontTipoVentaCodigo: "",
 
   totalAnticipio: totalAnticipio,
-  medioPagoId: null,
+  medioPagoId: registrarPagoEnCaja ? Number(medioPagoId) : null,
+  pagoRecibido: registrarPagoEnCaja,
+  montoPagado: registrarPagoEnCaja ? montoRecibido : 0,
 
   detalles: servicios.map((s, index) => ({
     tipoUnidadMedidaId: 1,
@@ -317,9 +345,14 @@ const request = {
     } else {
       Swal.fire({
         title: "Comprobante rechazado por SUNAT",
-        html: `${respuestaSunat?.sunat_description || respuestaSunat?.mensaje || "Ver el log del backend"}`,
+        html: `${respuestaSunat?.sunat_description || respuestaSunat?.mensaje || "Ver el log del backend"}${respuestaSunat?.pago_registrado_en_caja ? "<br/><br/>El pago que marcaste sí quedó registrado en Caja. No lo vuelvas a marcar como recibido al reintentar." : ""}`,
         icon: "error"
       });
+      if (respuestaSunat?.pago_registrado_en_caja) {
+        setRegistrarPagoEnCaja(false);
+        setMedioPagoId("");
+        setMontoPagado("");
+      }
       return;
     }
 
@@ -340,6 +373,9 @@ setCitasCliente([]);
 setAgendaId(0);
 
 setTotalAnticipio(0);
+setRegistrarPagoEnCaja(false);
+setMedioPagoId("");
+setMontoPagado("");
 setComprobanteEmitido(true);
 
   } catch (error) {
@@ -595,6 +631,44 @@ setComprobanteEmitido(true);
               <h3>IGV (18%): S/{igv.toFixed(2)}</h3>
               <h2>Total: S/{total.toFixed(2)}</h2>
             </div>
+
+            <section className="caja-pago-comprobante">
+              <label className="caja-pago-toggle">
+                <input
+                  type="checkbox"
+                  checked={registrarPagoEnCaja}
+                  onChange={(event) => {
+                    setRegistrarPagoEnCaja(event.target.checked);
+                    setMontoPagado(Math.max(0, total - totalAnticipio).toFixed(2));
+                  }}
+                />
+                <span>El cliente pagó ahora; registrar este ingreso en Caja</span>
+              </label>
+              {registrarPagoEnCaja && (
+                <div className="caja-pago-fields">
+                  <label>
+                    Medio de pago
+                    <select value={medioPagoId} onChange={(event) => setMedioPagoId(event.target.value)} required>
+                      <option value="">Seleccione un medio</option>
+                      {mediosPago.map((medio) => <option value={medio.id} key={medio.id}>{medio.nombre}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    Monto recibido (S/)
+                    <input
+                      type="number"
+                      min="0.01"
+                      max={montoPendiente}
+                      step="0.01"
+                      value={montoPagado || montoPendiente.toFixed(2)}
+                      onChange={(event) => setMontoPagado(event.target.value)}
+                    />
+                    <small>Saldo pendiente del comprobante: S/ {montoPendiente.toFixed(2)}</small>
+                  </label>
+                </div>
+              )}
+              <p>Si el cliente aún no pagó, deja la casilla desmarcada; la factura no se sumará a Caja.</p>
+            </section>
 
             <div className="acciones">
               <button className="btn-guardar" onClick={guardarComprobante} disabled={comprobanteEmitido}>💾 Guardar comprobante</button>

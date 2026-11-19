@@ -60,6 +60,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/agenda/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
                 .requestMatchers("/api/ingresos-servicios/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA", "AUXILIAR GROMERS")
                 .requestMatchers("/api/comprobantes/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
+                .requestMatchers("/api/caja/**").hasAnyAuthority("ADMINISTRADOR GENERAL", "AUXILIAR CAJA")
 
                 // --- 3. PERMISOS EXCLUSIVOS DE ADMINISTRADOR GENERAL ---
                 .requestMatchers("/api/archivos/**").hasAuthority("ADMINISTRADOR GENERAL")

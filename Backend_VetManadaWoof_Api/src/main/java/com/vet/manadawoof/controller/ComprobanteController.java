@@ -1,7 +1,5 @@
 package com.vet.manadawoof.controller;
 
-import com.vet.manadawoof.dtos.response.ComprobanteResponseDTO;
-import com.vet.manadawoof.service.ComprobanteService;
 import com.vet.manadawoof.dtos.request.ComprobanteRequestDTO;
 import com.vet.manadawoof.dtos.request.NotaCreditoRequestDTO;
 import com.vet.manadawoof.dtos.response.ComprobanteResponseDTO;
@@ -10,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +29,12 @@ public class ComprobanteController {
             @RequestBody ComprobanteRequestDTO request
     ) {
         return ResponseEntity.ok(comprobanteService.generarComprobante(request));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> manejarErrorDePago(IllegalArgumentException error) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", error.getMessage() == null ? "Datos de pago inválidos." : error.getMessage()));
     }
 
     @PostMapping("/{id}/nota-credito")

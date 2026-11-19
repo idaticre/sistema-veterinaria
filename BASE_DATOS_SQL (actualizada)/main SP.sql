@@ -1,3 +1,5 @@
+USE vet_manada_woof;
+
 
 DROP PROCEDURE IF EXISTS gestionar_rol_usuario;
 DELIMITER $$
@@ -169,7 +171,7 @@ proc_main: BEGIN
     END IF;
 
     -- Validar sexo permitido
-    IF p_sexo NOT IN ('M','F','O', NULL) THEN
+    IF p_sexo IS NOT NULL AND p_sexo NOT IN ('M','F','O') THEN
         SET p_mensaje = 'ERROR: Sexo inválido (M, F, O).';
         ROLLBACK; LEAVE proc_main;
     END IF;
@@ -257,7 +259,7 @@ proc_main: BEGIN
     END IF;
 
     -- Validar sexo permitido
-    IF p_sexo NOT IN ('M','F','O', NULL) THEN
+    IF p_sexo IS NOT NULL AND p_sexo NOT IN ('M','F','O') THEN
         SET p_mensaje = 'ERROR: Sexo inválido (M, F, O).';
         ROLLBACK; LEAVE proc_main;
     END IF;
@@ -301,6 +303,7 @@ DELIMITER ;
 -- ========================================
 DROP PROCEDURE IF EXISTS registrar_colaborador;
 DELIMITER $$
+
 CREATE PROCEDURE registrar_colaborador (
     IN p_id_tipo_persona_juridica INT,
     IN p_nombre VARCHAR(128),
@@ -321,61 +324,120 @@ CREATE PROCEDURE registrar_colaborador (
 )
 proc_main: BEGIN
     DECLARE v_id_entidad BIGINT DEFAULT NULL;
-    DECLARE v_codigo_entidad_local VARCHAR(20);
-    DECLARE v_mensaje_entidad VARCHAR(255);
     DECLARE v_id_colaborador BIGINT DEFAULT NULL;
+    DECLARE v_error TEXT DEFAULT NULL;
 
-   -- Llamada al SP base con variables de sesión
-	CALL registrar_entidad_base(
-		p_id_tipo_persona_juridica,
-		p_nombre,
-		p_sexo,
-		p_documento,
-		p_id_tipo_documento,
-		p_correo,
-		p_telefono,
-		p_direccion,
-		p_ciudad,
-		p_distrito,
-		NULL,
-		@id_entidad,
-		@codigo_entidad,
-		@msg_entidad
-	);
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error = MESSAGE_TEXT;
+        ROLLBACK;
+        SET p_codigo_entidad = NULL;
+        SET p_codigo_colaborador = NULL;
+        SET p_mensaje = CONCAT('ERROR: ', LEFT(COALESCE(v_error, 'No se pudo registrar el colaborador.'), 220));
+    END;
 
-	-- Recuperar los valores
-	SELECT @id_entidad, @codigo_entidad, @msg_entidad
-	INTO v_id_entidad, v_codigo_entidad_local, v_mensaje_entidad;
+    SET p_codigo_entidad = NULL;
+    SET p_codigo_colaborador = NULL;
+    SET p_mensaje = NULL;
 
-	SET p_codigo_entidad = v_codigo_entidad_local;
-	SET p_mensaje = v_mensaje_entidad;
-
-	IF v_id_entidad IS NULL THEN
-		LEAVE proc_main;
-	END IF;
-
-    -- Si ya existe colaborador, devolver su código
-    IF EXISTS (SELECT 1 FROM colaboradores WHERE id_entidad = v_id_entidad) THEN
-        SELECT codigo INTO p_codigo_colaborador FROM colaboradores WHERE id_entidad = v_id_entidad LIMIT 1;
-        SET p_mensaje = CONCAT('La entidad ya está registrada como Colaborador. Código Colaborador: ', p_codigo_colaborador);
-        LEAVE proc_main;
+    IF p_nombre IS NULL OR TRIM(p_nombre) = ''
+       OR p_documento IS NULL OR TRIM(p_documento) = '' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nombre y documento son obligatorios.';
     END IF;
 
-    -- Insertar en colaboradores
-    INSERT INTO colaboradores (id_entidad, fecha_ingreso, id_usuario, foto, activo, codigo)
-    VALUES (v_id_entidad, p_fecha_ingreso, p_id_usuario, p_foto, 1, NULL);
+    IF p_ciudad IS NULL OR TRIM(p_ciudad) = ''
+       OR p_distrito IS NULL OR TRIM(p_distrito) = '' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Ciudad y distrito son obligatorios.';
+    END IF;
+
+    IF p_sexo IS NOT NULL AND p_sexo NOT IN ('M','F','O') THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Sexo inválido. Use M, F u O.';
+    END IF;
+
+    IF p_telefono IS NOT NULL
+       AND p_telefono NOT REGEXP '^[0-9+ ]{6,15}$' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Teléfono inválido.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM tipo_persona_juridica
+        WHERE id = p_id_tipo_persona_juridica AND activo = 1
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El tipo de persona jurídica no existe o está inactivo.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM tipo_documento
+        WHERE id = p_id_tipo_documento AND activo = 1
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El tipo de documento no existe o está inactivo.';
+    END IF;
+
+    IF p_id_usuario IS NOT NULL AND NOT EXISTS (
+        SELECT 1 FROM usuarios WHERE id = p_id_usuario
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El usuario asociado no existe.';
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM entidades WHERE documento = TRIM(p_documento)) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El documento ya está registrado.';
+    END IF;
+
+    IF p_correo IS NOT NULL AND TRIM(p_correo) <> ''
+       AND EXISTS (SELECT 1 FROM entidades WHERE correo = TRIM(p_correo)) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El correo ya está registrado.';
+    END IF;
+
+    START TRANSACTION;
+
+    INSERT INTO entidades (
+        id_tipo_persona_juridica, nombre, sexo, documento,
+        id_tipo_documento, telefono, correo, direccion,
+        ciudad, distrito, representante, activo
+    ) VALUES (
+        p_id_tipo_persona_juridica, TRIM(p_nombre), p_sexo, TRIM(p_documento),
+        p_id_tipo_documento, NULLIF(TRIM(p_telefono), ''),
+        NULLIF(TRIM(p_correo), ''), NULLIF(TRIM(p_direccion), ''),
+        TRIM(p_ciudad), TRIM(p_distrito), NULL, 1
+    );
+
+    SET v_id_entidad = LAST_INSERT_ID();
+    SET p_codigo_entidad = CONCAT('ENT', LPAD(v_id_entidad, 6, '0'));
+
+    UPDATE entidades
+    SET codigo = p_codigo_entidad
+    WHERE id = v_id_entidad;
+
+    INSERT INTO colaboradores (
+        id_entidad, fecha_ingreso, id_usuario, foto, activo, codigo
+    ) VALUES (
+        v_id_entidad, p_fecha_ingreso, p_id_usuario, p_foto, 1, NULL
+    );
 
     SET v_id_colaborador = LAST_INSERT_ID();
-
-    UPDATE colaboradores
-    SET codigo = CONCAT('COL', LPAD(v_id_colaborador, 6, '0'))
-    WHERE id = v_id_colaborador;
-
     SET p_codigo_colaborador = CONCAT('COL', LPAD(v_id_colaborador, 6, '0'));
 
-    
-    SET p_mensaje = CONCAT('Colaborador registrado correctamente. Código Colaborador: ', p_codigo_colaborador);
+    UPDATE colaboradores
+    SET codigo = p_codigo_colaborador
+    WHERE id = v_id_colaborador;
+
+    SET p_mensaje = CONCAT(
+        'Colaborador registrado correctamente. Código: ',
+        p_codigo_colaborador
+    );
+
+    COMMIT;
 END$$
+
 DELIMITER ;
 
 -- ========================================
@@ -4889,6 +4951,576 @@ BEGIN
 
     END IF;
 
+END $$
+
+DELIMITER ;
+
+-- ============================================================
+-- PROCEDIMIENTOS DEL MODULO CAJA DIARIA (archivo complementario)
+-- ============================================================
+
+USE vet_manada_woof;
+
+-- Abrir la caja del día. Si existe un cierre anterior,
+-- el saldo de apertura debe coincidir con el efectivo contado.
+DROP PROCEDURE IF EXISTS sp_caja_abrir_dia;
+DELIMITER $$
+
+CREATE PROCEDURE sp_caja_abrir_dia(
+    IN p_saldo_apertura DECIMAL(12,2),
+    IN p_id_usuario INT,
+    OUT p_caja_diaria_id BIGINT,
+    OUT p_mensaje VARCHAR(255)
+)
+BEGIN
+    DECLARE v_cantidad INT DEFAULT 0;
+    DECLARE v_estado VARCHAR(12);
+    DECLARE v_saldo_previo DECIMAL(12,2) DEFAULT 0.00;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET p_caja_diaria_id = NULL;
+    SET p_mensaje = NULL;
+
+    IF p_saldo_apertura IS NULL OR p_saldo_apertura < 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El saldo de apertura debe ser igual o mayor que cero.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM usuarios
+        WHERE id = p_id_usuario AND activo = 1
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El usuario no existe o está inactivo.';
+    END IF;
+
+    START TRANSACTION;
+
+    SELECT COUNT(*) INTO v_cantidad
+    FROM caja_diaria
+    WHERE fecha = CURDATE();
+
+    IF v_cantidad > 0 THEN
+        SELECT id, estado
+        INTO p_caja_diaria_id, v_estado
+        FROM caja_diaria
+        WHERE fecha = CURDATE()
+        LIMIT 1 FOR UPDATE;
+
+        IF v_estado = 'CERRADA' THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'La caja de hoy ya está cerrada.';
+        END IF;
+
+        SET p_mensaje = 'La caja de hoy ya estaba abierta.';
+        COMMIT;
+    ELSE
+        SELECT COUNT(*) INTO v_cantidad
+        FROM caja_diaria
+        WHERE fecha < CURDATE() AND estado = 'ABIERTA';
+
+        IF v_cantidad > 0 THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Primero debe cerrar una caja de un día anterior.';
+        END IF;
+
+        SELECT COUNT(*) INTO v_cantidad
+        FROM caja_cierres cc
+        INNER JOIN caja_diaria cd ON cd.id = cc.caja_diaria_id
+        WHERE cd.fecha < CURDATE();
+
+        IF v_cantidad > 0 THEN
+            SELECT cc.saldo_efectivo_contado
+            INTO v_saldo_previo
+            FROM caja_cierres cc
+            INNER JOIN caja_diaria cd ON cd.id = cc.caja_diaria_id
+            WHERE cd.fecha < CURDATE()
+            ORDER BY cd.fecha DESC
+            LIMIT 1;
+
+            IF p_saldo_apertura <> v_saldo_previo THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'La apertura debe coincidir con el efectivo contado en el cierre anterior.';
+            END IF;
+        ELSE
+            SET v_saldo_previo = p_saldo_apertura;
+        END IF;
+
+        INSERT INTO caja_diaria (
+            fecha,
+            saldo_apertura_efectivo,
+            estado,
+            id_usuario_apertura,
+            fecha_apertura
+        ) VALUES (
+            CURDATE(),
+            v_saldo_previo,
+            'ABIERTA',
+            p_id_usuario,
+            NOW()
+        );
+
+        SET p_caja_diaria_id = LAST_INSERT_ID();
+        SET p_mensaje = 'Caja diaria abierta correctamente.';
+        COMMIT;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Registrar un movimiento de caja y validar el saldo antes de un egreso.
+DROP PROCEDURE IF EXISTS sp_caja_registrar_movimiento;
+DELIMITER $$
+
+CREATE PROCEDURE sp_caja_registrar_movimiento(
+    IN p_tipo VARCHAR(16),
+    IN p_concepto VARCHAR(180),
+    IN p_monto DECIMAL(12,2),
+    IN p_medio_pago_id INT,
+    IN p_id_usuario INT,
+    IN p_id_cliente BIGINT,
+    IN p_id_producto BIGINT,
+    IN p_cantidad_producto INT,
+    IN p_id_servicio INT,
+    IN p_id_agenda BIGINT,
+    IN p_origen VARCHAR(32),
+    IN p_referencia_id BIGINT,
+    OUT p_movimiento_id BIGINT,
+    OUT p_mensaje VARCHAR(255)
+)
+BEGIN
+    DECLARE v_tipo VARCHAR(16);
+    DECLARE v_origen VARCHAR(32);
+    DECLARE v_caja_id BIGINT;
+    DECLARE v_estado VARCHAR(12);
+    DECLARE v_apertura DECIMAL(12,2) DEFAULT 0.00;
+    DECLARE v_disponible DECIMAL(12,2) DEFAULT 0.00;
+    DECLARE v_medio_nombre VARCHAR(32);
+    DECLARE v_cliente_id BIGINT;
+    DECLARE v_abono DECIMAL(10,2) DEFAULT 0.00;
+    DECLARE v_total_cita DECIMAL(10,2) DEFAULT 0.00;
+    DECLARE v_stock INT DEFAULT 0;
+    DECLARE v_cantidad INT DEFAULT 0;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET p_movimiento_id = NULL;
+    SET p_mensaje = NULL;
+    SET v_tipo = UPPER(TRIM(IFNULL(p_tipo, '')));
+    SET v_origen = UPPER(TRIM(IFNULL(p_origen, 'MANUAL')));
+
+    IF v_origen = '' THEN
+        SET v_origen = 'MANUAL';
+    END IF;
+
+    IF v_tipo NOT IN ('INGRESO', 'EGRESO', 'REPOSICION') THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Tipo de movimiento no válido.';
+    END IF;
+
+    IF p_concepto IS NULL OR TRIM(p_concepto) = '' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El concepto es obligatorio.';
+    END IF;
+
+    IF p_monto IS NULL OR p_monto <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El monto debe ser mayor que cero.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM usuarios
+        WHERE id = p_id_usuario AND activo = 1
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El usuario no existe o está inactivo.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM medios_pago WHERE id = p_medio_pago_id
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El medio de pago no existe.';
+    END IF;
+
+    IF p_id_producto IS NULL AND p_cantidad_producto IS NOT NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Seleccione un producto para indicar cantidad.';
+    END IF;
+
+    IF p_id_producto IS NOT NULL
+       AND (p_cantidad_producto IS NULL OR p_cantidad_producto <= 0) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'La cantidad del producto debe ser mayor que cero.';
+    END IF;
+
+    START TRANSACTION;
+
+    SELECT COUNT(*) INTO v_cantidad
+    FROM caja_diaria
+    WHERE fecha = CURDATE() AND estado = 'ABIERTA';
+
+    IF v_cantidad = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Primero debe abrir la caja del día.';
+    END IF;
+
+    SELECT id, estado, saldo_apertura_efectivo
+    INTO v_caja_id, v_estado, v_apertura
+    FROM caja_diaria
+    WHERE fecha = CURDATE()
+    LIMIT 1 FOR UPDATE;
+
+    SELECT nombre INTO v_medio_nombre
+    FROM medios_pago
+    WHERE id = p_medio_pago_id;
+
+    IF v_tipo = 'REPOSICION'
+       AND UPPER(TRIM(v_medio_nombre)) <> 'EFECTIVO' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'La reposición debe registrarse en efectivo.';
+    END IF;
+
+    -- Evita volver a registrar un pago automatizado ya asociado a su referencia.
+    IF p_referencia_id IS NOT NULL THEN
+        SELECT COUNT(*) INTO v_cantidad
+        FROM caja_movimientos
+        WHERE origen = v_origen AND referencia_id = p_referencia_id;
+
+        IF v_cantidad > 0 THEN
+            SELECT id INTO p_movimiento_id
+            FROM caja_movimientos
+            WHERE origen = v_origen AND referencia_id = p_referencia_id
+            LIMIT 1;
+
+            SET p_mensaje = 'El movimiento ya estaba registrado.';
+            COMMIT;
+        END IF;
+    END IF;
+
+    IF p_movimiento_id IS NULL THEN
+        IF v_tipo = 'EGRESO' THEN
+            IF UPPER(TRIM(v_medio_nombre)) = 'EFECTIVO' THEN
+                SELECT v_apertura + COALESCE(SUM(
+                    CASE
+                        WHEN tipo IN ('INGRESO', 'REPOSICION') THEN monto
+                        WHEN tipo = 'EGRESO' THEN -monto
+                        ELSE 0
+                    END
+                ), 0.00)
+                INTO v_disponible
+                FROM caja_movimientos
+                WHERE caja_diaria_id = v_caja_id
+                  AND medio_pago_id = p_medio_pago_id;
+            ELSE
+                SELECT COALESCE(SUM(
+                    CASE
+                        WHEN tipo IN ('INGRESO', 'REPOSICION') THEN monto
+                        WHEN tipo = 'EGRESO' THEN -monto
+                        ELSE 0
+                    END
+                ), 0.00)
+                INTO v_disponible
+                FROM caja_movimientos
+                WHERE medio_pago_id = p_medio_pago_id;
+            END IF;
+
+            IF p_monto > v_disponible THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'El gasto supera el saldo disponible para ese medio de pago.';
+            END IF;
+        END IF;
+
+        SET v_cliente_id = p_id_cliente;
+
+        IF p_id_agenda IS NOT NULL THEN
+            SELECT COUNT(*) INTO v_cantidad
+            FROM agenda WHERE id = p_id_agenda;
+
+            IF v_cantidad = 0 THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'La cita indicada no existe.';
+            END IF;
+
+            SELECT id_cliente, COALESCE(abono_inicial, 0), COALESCE(total_cita, 0)
+            INTO v_cliente_id, v_abono, v_total_cita
+            FROM agenda
+            WHERE id = p_id_agenda
+            LIMIT 1 FOR UPDATE;
+
+            IF p_id_cliente IS NOT NULL THEN
+                SET v_cliente_id = p_id_cliente;
+            END IF;
+
+            IF v_tipo = 'INGRESO'
+               AND v_total_cita > 0
+               AND v_abono + p_monto > v_total_cita THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'El pago supera el saldo pendiente de la cita.';
+            END IF;
+        END IF;
+
+        IF p_id_producto IS NOT NULL THEN
+            SELECT COUNT(*) INTO v_cantidad
+            FROM productos WHERE id = p_id_producto;
+
+            IF v_cantidad = 0 THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'El producto indicado no existe.';
+            END IF;
+
+            SELECT stock INTO v_stock
+            FROM productos
+            WHERE id = p_id_producto
+            LIMIT 1 FOR UPDATE;
+
+            IF v_tipo = 'INGRESO' AND p_cantidad_producto > v_stock THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'No hay suficiente stock para registrar la venta.';
+            END IF;
+
+            IF v_tipo = 'REPOSICION' THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Una reposición no puede modificar el inventario.';
+            END IF;
+        END IF;
+
+        INSERT INTO caja_movimientos (
+            caja_diaria_id, tipo, concepto, monto, medio_pago_id, id_usuario,
+            id_cliente, id_producto, cantidad_producto, id_servicio, id_agenda,
+            origen, referencia_id, fecha_hora
+        ) VALUES (
+            v_caja_id, v_tipo, TRIM(p_concepto), p_monto, p_medio_pago_id, p_id_usuario,
+            v_cliente_id, p_id_producto, p_cantidad_producto, p_id_servicio, p_id_agenda,
+            v_origen, p_referencia_id, NOW()
+        );
+
+        SET p_movimiento_id = LAST_INSERT_ID();
+
+        IF p_id_producto IS NOT NULL THEN
+            IF v_tipo = 'INGRESO' THEN
+                UPDATE productos
+                SET stock = stock - p_cantidad_producto
+                WHERE id = p_id_producto;
+            ELSEIF v_tipo = 'EGRESO' THEN
+                UPDATE productos
+                SET stock = stock + p_cantidad_producto
+                WHERE id = p_id_producto;
+            END IF;
+        END IF;
+
+        IF p_id_agenda IS NOT NULL AND v_tipo = 'INGRESO' THEN
+            UPDATE agenda
+            SET abono_inicial = COALESCE(abono_inicial, 0) + p_monto
+            WHERE id = p_id_agenda;
+        END IF;
+
+        SET p_mensaje = 'Movimiento de caja registrado correctamente.';
+        COMMIT;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Registrar arqueo y cierre. Si hay descuadre, exige observaciones.
+DROP PROCEDURE IF EXISTS sp_caja_cerrar_dia;
+DELIMITER $$
+
+CREATE PROCEDURE sp_caja_cerrar_dia(
+    IN p_saldo_efectivo_contado DECIMAL(12,2),
+    IN p_observaciones TEXT,
+    IN p_id_usuario_cierre INT,
+    OUT p_cierre_id BIGINT,
+    OUT p_diferencia DECIMAL(12,2),
+    OUT p_mensaje VARCHAR(255)
+)
+BEGIN
+    DECLARE v_caja_id BIGINT;
+    DECLARE v_estado VARCHAR(12);
+    DECLARE v_apertura DECIMAL(12,2) DEFAULT 0.00;
+    DECLARE v_efectivo_id INT;
+    DECLARE v_esperado DECIMAL(12,2) DEFAULT 0.00;
+    DECLARE v_cantidad INT DEFAULT 0;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    IF p_saldo_efectivo_contado IS NULL OR p_saldo_efectivo_contado < 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El efectivo contado debe ser igual o mayor que cero.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM usuarios
+        WHERE id = p_id_usuario_cierre AND activo = 1
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El usuario no existe o está inactivo.';
+    END IF;
+
+    SET p_cierre_id = NULL;
+    SET p_diferencia = NULL;
+    SET p_mensaje = NULL;
+
+    START TRANSACTION;
+
+    SELECT COUNT(*) INTO v_cantidad
+    FROM caja_diaria
+    WHERE fecha = CURDATE() AND estado = 'ABIERTA';
+
+    IF v_cantidad = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'No hay una caja abierta para cerrar hoy.';
+    END IF;
+
+    SELECT id, estado, saldo_apertura_efectivo
+    INTO v_caja_id, v_estado, v_apertura
+    FROM caja_diaria
+    WHERE fecha = CURDATE()
+    LIMIT 1 FOR UPDATE;
+
+    SELECT COUNT(*) INTO v_cantidad
+    FROM caja_cierres
+    WHERE caja_diaria_id = v_caja_id;
+
+    IF v_cantidad > 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'La caja ya tiene un cierre registrado.';
+    END IF;
+
+    SELECT id INTO v_efectivo_id
+    FROM medios_pago
+    WHERE UPPER(TRIM(nombre)) = 'EFECTIVO'
+    LIMIT 1;
+
+    SELECT v_apertura + COALESCE(SUM(
+        CASE
+            WHEN cm.tipo IN ('INGRESO', 'REPOSICION') THEN cm.monto
+            WHEN cm.tipo = 'EGRESO' THEN -cm.monto
+            ELSE 0
+        END
+    ), 0.00)
+    INTO v_esperado
+    FROM caja_movimientos cm
+    WHERE cm.caja_diaria_id = v_caja_id
+      AND cm.medio_pago_id = v_efectivo_id;
+
+    SET p_diferencia = p_saldo_efectivo_contado - v_esperado;
+
+    IF p_diferencia <> 0
+       AND (p_observaciones IS NULL OR TRIM(p_observaciones) = '') THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Debe explicar el motivo del descuadre antes de cerrar.';
+    END IF;
+
+    INSERT INTO caja_cierres (
+        caja_diaria_id, saldo_efectivo_esperado, saldo_efectivo_contado,
+        diferencia, observaciones, id_usuario_cierre, fecha_cierre
+    ) VALUES (
+        v_caja_id, v_esperado, p_saldo_efectivo_contado,
+        p_diferencia, p_observaciones, p_id_usuario_cierre, NOW()
+    );
+
+    SET p_cierre_id = LAST_INSERT_ID();
+
+    UPDATE caja_diaria
+    SET estado = 'CERRADA'
+    WHERE id = v_caja_id;
+
+    SET p_mensaje = 'Arqueo y cierre registrados correctamente.';
+    COMMIT;
+END $$
+
+DELIMITER ;
+
+-- Historial con filtros por fecha, medio de pago y tipo.
+DROP PROCEDURE IF EXISTS sp_caja_listar_movimientos;
+DELIMITER $$
+
+CREATE PROCEDURE sp_caja_listar_movimientos(
+    IN p_fecha_desde DATE,
+    IN p_fecha_hasta DATE,
+    IN p_medio_pago_id INT,
+    IN p_tipo VARCHAR(16)
+)
+BEGIN
+    DECLARE v_desde DATE;
+    DECLARE v_hasta DATE;
+    DECLARE v_tipo VARCHAR(16);
+
+    SET v_desde = COALESCE(p_fecha_desde, CURDATE());
+    SET v_hasta = COALESCE(p_fecha_hasta, CURDATE());
+    SET v_tipo = NULLIF(UPPER(TRIM(IFNULL(p_tipo, ''))), '');
+
+    IF v_desde > v_hasta THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'La fecha desde no puede ser posterior a la fecha hasta.';
+    END IF;
+
+    IF v_tipo IS NOT NULL
+       AND v_tipo NOT IN ('INGRESO', 'EGRESO', 'REPOSICION') THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'El filtro de tipo no es válido.';
+    END IF;
+
+    SELECT cm.id, cd.fecha AS fecha_caja, cm.fecha_hora,
+           cm.tipo, cm.concepto, cm.monto,
+           mp.id AS medio_pago_id, mp.nombre AS medio_pago,
+           u.username AS usuario, cm.id_cliente,
+           cm.id_producto, cm.cantidad_producto,
+           cm.id_servicio, cm.id_agenda, cm.origen,
+           cm.comprobante_nombre, cm.comprobante_tipo
+    FROM caja_movimientos cm
+    INNER JOIN caja_diaria cd ON cd.id = cm.caja_diaria_id
+    INNER JOIN medios_pago mp ON mp.id = cm.medio_pago_id
+    INNER JOIN usuarios u ON u.id = cm.id_usuario
+    WHERE cd.fecha BETWEEN v_desde AND v_hasta
+      AND (p_medio_pago_id IS NULL OR cm.medio_pago_id = p_medio_pago_id)
+      AND (v_tipo IS NULL OR cm.tipo = v_tipo)
+    ORDER BY cm.fecha_hora DESC, cm.id DESC;
+END $$
+
+DELIMITER ;
+
+-- Resumen diario de ingresos, reposiciones y egresos por medio de pago.
+DROP PROCEDURE IF EXISTS sp_caja_resumen_por_medio;
+DELIMITER $$
+
+CREATE PROCEDURE sp_caja_resumen_por_medio(IN p_fecha DATE)
+BEGIN
+    SELECT mp.id AS medio_pago_id,
+           mp.nombre AS medio_pago,
+           COALESCE(SUM(CASE WHEN r.tipo = 'INGRESO' THEN r.monto ELSE 0 END), 0.00) AS ingresos,
+           COALESCE(SUM(CASE WHEN r.tipo = 'REPOSICION' THEN r.monto ELSE 0 END), 0.00) AS reposiciones,
+           COALESCE(SUM(CASE WHEN r.tipo = 'EGRESO' THEN r.monto ELSE 0 END), 0.00) AS egresos,
+           COALESCE(SUM(
+               CASE
+                   WHEN r.tipo IN ('INGRESO', 'REPOSICION') THEN r.monto
+                   WHEN r.tipo = 'EGRESO' THEN -r.monto
+                   ELSE 0
+               END
+           ), 0.00) AS neto
+    FROM medios_pago mp
+    LEFT JOIN (
+        SELECT cm.medio_pago_id, cm.tipo, cm.monto
+        FROM caja_movimientos cm
+        INNER JOIN caja_diaria cd ON cd.id = cm.caja_diaria_id
+        WHERE cd.fecha = COALESCE(p_fecha, CURDATE())
+    ) r ON r.medio_pago_id = mp.id
+    GROUP BY mp.id, mp.nombre
+    ORDER BY mp.nombre;
 END $$
 
 DELIMITER ;

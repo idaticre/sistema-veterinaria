@@ -51,6 +51,7 @@ import RecuperacionComprobantes from './pages/administrativas/ventas/Recuperacio
 import Auditoria from './pages/administrativas/administracion/Auditoria/Auditoria';
 import not_found from './pages/administrativas/administracion/No-encontrado/not_found';
 import Not_found from './pages/administrativas/administracion/No-encontrado/not_found';
+import CajaDiaria from './pages/administrativas/ventas/CajaDiaria';
 
 function App() {
 
@@ -163,6 +164,9 @@ function App() {
           <Route>
             <Route path='/administracion/ventas/facturacion' element={<FacturacionElectronica />}/>
             <Route path='/administracion/ventas/recuperacion_comprobantes' element={<RecuperacionComprobantes />}/>
+          </Route>
+          <Route element={<RutaProtegidaPorRol roles={["ADMINISTRADOR GENERAL", "AUXILIAR CAJA"]} />}>
+            <Route path='/administracion/ventas/caja' element={<CajaDiaria />}/>
           </Route>
 
           {/* Reportes e informes */}

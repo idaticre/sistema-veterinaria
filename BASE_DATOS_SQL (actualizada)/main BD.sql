@@ -1,3 +1,7 @@
+-- BASE DE DATOS VET MANADA WOOF
+-- Script de instalación completa para una base NUEVA.
+-- ATENCIÓN: las primeras instrucciones eliminan la base existente y sus datos.
+
 DROP DATABASE IF EXISTS vet_manada_woof;
 CREATE DATABASE vet_manada_woof;
 USE vet_manada_woof;
@@ -1740,3 +1744,101 @@ INSERT INTO tipo_accion (nombre, descripcion) VALUES
 ('IMPORTAR', 'Importación de información');
 
 select * from comprobantes;
+
+-- ============================================================
+-- BLOQUE ADICIONAL: CAJA DIARIA
+-- Agregado al esquema principal. No elimina ni recrea tablas.
+-- Requiere que las tablas usuarios, medios_pago, clientes,
+-- productos, servicios y agenda ya estén creadas.
+-- ============================================================
+
+USE vet_manada_woof;
+
+CREATE TABLE IF NOT EXISTS caja_diaria (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    fecha DATE NOT NULL,
+    saldo_apertura_efectivo DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    estado VARCHAR(12) NOT NULL DEFAULT 'ABIERTA',
+    id_usuario_apertura INT NOT NULL,
+    fecha_apertura DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uq_caja_diaria_fecha UNIQUE (fecha),
+    CONSTRAINT chk_caja_diaria_estado CHECK (estado IN ('ABIERTA', 'CERRADA')),
+    CONSTRAINT chk_caja_apertura_no_negativa CHECK (saldo_apertura_efectivo >= 0),
+    CONSTRAINT fk_caja_diaria_usuario_apertura FOREIGN KEY (id_usuario_apertura)
+        REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS caja_movimientos (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    caja_diaria_id BIGINT NOT NULL,
+    tipo VARCHAR(16) NOT NULL,
+    concepto VARCHAR(180) NOT NULL,
+    monto DECIMAL(12,2) NOT NULL,
+    medio_pago_id INT NOT NULL,
+    id_usuario INT NOT NULL,
+    id_cliente BIGINT NULL,
+    cliente_referencia VARCHAR(160) NULL,
+    id_producto BIGINT NULL,
+    cantidad_producto INT NULL,
+    id_servicio INT NULL,
+    servicio_referencia VARCHAR(160) NULL,
+    id_agenda BIGINT NULL,
+    origen VARCHAR(32) NOT NULL DEFAULT 'MANUAL',
+    referencia_id BIGINT NULL,
+    comprobante_nombre VARCHAR(255) NULL,
+    comprobante_tipo VARCHAR(120) NULL,
+    fecha_hora DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT chk_caja_mov_tipo CHECK (tipo IN ('INGRESO', 'EGRESO', 'REPOSICION')),
+    CONSTRAINT chk_caja_mov_monto CHECK (monto > 0),
+    CONSTRAINT chk_caja_mov_cantidad CHECK (cantidad_producto IS NULL OR cantidad_producto > 0),
+    CONSTRAINT uq_caja_mov_origen_referencia UNIQUE (origen, referencia_id),
+    CONSTRAINT fk_caja_mov_diaria FOREIGN KEY (caja_diaria_id)
+        REFERENCES caja_diaria(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_caja_mov_medio_pago FOREIGN KEY (medio_pago_id)
+        REFERENCES medios_pago(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_caja_mov_usuario FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_caja_mov_cliente FOREIGN KEY (id_cliente)
+        REFERENCES clientes(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_caja_mov_producto FOREIGN KEY (id_producto)
+        REFERENCES productos(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_caja_mov_servicio FOREIGN KEY (id_servicio)
+        REFERENCES servicios(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_caja_mov_agenda FOREIGN KEY (id_agenda)
+        REFERENCES agenda(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_caja_mov_fecha (fecha_hora),
+    INDEX idx_caja_mov_caja_fecha (caja_diaria_id, fecha_hora),
+    INDEX idx_caja_mov_medio_fecha (medio_pago_id, fecha_hora),
+    INDEX idx_caja_mov_usuario_fecha (id_usuario, fecha_hora)
+);
+
+CREATE TABLE IF NOT EXISTS caja_comprobantes (
+    movimiento_id BIGINT NOT NULL,
+    archivo MEDIUMBLOB NOT NULL,
+    PRIMARY KEY (movimiento_id),
+    CONSTRAINT fk_caja_comprobante_movimiento FOREIGN KEY (movimiento_id)
+        REFERENCES caja_movimientos(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS caja_cierres (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    caja_diaria_id BIGINT NOT NULL,
+    saldo_efectivo_esperado DECIMAL(12,2) NOT NULL,
+    saldo_efectivo_contado DECIMAL(12,2) NOT NULL,
+    diferencia DECIMAL(12,2) NOT NULL,
+    observaciones TEXT NULL,
+    id_usuario_cierre INT NOT NULL,
+    fecha_cierre DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uq_caja_cierre_diaria UNIQUE (caja_diaria_id),
+    CONSTRAINT fk_caja_cierre_diaria FOREIGN KEY (caja_diaria_id)
+        REFERENCES caja_diaria(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_caja_cierre_usuario FOREIGN KEY (id_usuario_cierre)
+        REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    INDEX idx_caja_cierre_fecha (fecha_cierre)
+);
+
+-- Verificación de las cuatro tablas creadas.
+SHOW TABLES LIKE 'caja_%';
